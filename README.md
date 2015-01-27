@@ -14,7 +14,7 @@ http://download.qt.io/official_releases/qt/5.4/5.4.0/
 http://pan.baidu.com/s/1nt3d0jZ     
 
 ### 
-5.4.0版本开发环境，安装和配置教程上面百度网盘链接里面有，
+采用Qt 5.4.0版本开发环境，安装和配置教程上面百度网盘链接里面有，
 书籍里面以后也会讲。
 
 ###

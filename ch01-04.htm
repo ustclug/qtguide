@@ -20,9 +20,221 @@
 
   </head>
 <div class="os1">1.4 Qt在Linux下安装</div>
-  
+<p>
+Qt在Linux系统里的安装要稍微复杂一些，因为Linux发行版众多，所以安装过程有些差异。
+由于Linux系统都可以自行安装 GNU 工具集（对于Windows系统里的MinGW），
+所以Qt在Linux系统里的安装包没有自带g++等编译生成工具以及OpenGL开发库，
+需要根据不同的Linux发行版提前装好GNU 工具集和OpenGL开发库。Qt官方网站有介绍在Linux下安装的页面：<br />
+<a href="http://doc.qt.io/qt-5/linux.html" target="new">
+http://doc.qt.io/qt-5/linux.html
+</a><br />
+下面就依样画葫芦，介绍安装Qt开发环境的过程。
+</p>
 
+<div class="os2">1.4.1 安装前准备工作</div>
+<p>
+对于Linux系统，Qt官方的安装包总是假定C++编译器compiler、调试器debugger、生成器make以及其他开发工具
+由该操作系统自己提供，另外构建Qt图形界面程序还需要OpenGL 库文件（扩展名为 .a）和头文件（扩展名为 .h），
+OpenGL的开发库也是需要操作系统自己提供。所以在安装Qt官方run文件之前，必须先安装好Linux系统自己软件源里面
+的GNU开发工具集和OpenGL开发库。下面针对三类系统安装相应的GNU开发工具集和OpenGL开发库，
+请注意安装软件都需要root权限，并且要联网安装。
+</p>
+<p>（1）Debian/Ubuntu/Deepin (apt-get)，执行命令：<br />
+<div class="clroot">
+sudo apt-get install build-essential libgl1-mesa-dev
+</div>
+</p>
 
+<p>（2）Fedora/RHEL/CentOS (yum)，执行命令：<br />
+<div class="clroot">
+sudo yum groupinstall "C Development Tools and Libraries"  <br />
+sudo yum install mesa-libGL-devel
+</div>
+</p>
+
+<p>（3）openSUSE (zypper)，执行命令：<br />
+<div class="clroot">
+sudo zypper install -t pattern devel_basis
+</div>
+</p>
+<p>
+根据不同的操作系统执行相应的命令，完成安装后就可以继续下面的安装了。
+</p>
+<p><b>
+读者请注意一个操作系统版本的问题：因为Linux社区发行版非常活跃，版本更新快（尤其是Ubuntu），经常是半年到一年更新一次，
+所以上述命令通常只能在比较新的Linux版本上才能执行成功，旧的Linux版本很可能是Linux发行版官方都不支持了，
+因而会导致上面命令执行失败。一般对于活跃的Linux社区，其单个系统版本的生存期是一年到两年左右，安装Qt开发环境之前最好更新到2014年之后发布的Linux版本。
+</b></p>
+
+<div class="os2">1.4.2 安装Qt开发环境</div>
+<p>
+Qt安装包下载方式之前说过了，32位Linux安装包为 qt-opensource-linux-x86-5.4.0.run，
+64位Linux安装包为 qt-opensource-linux-x64-5.4.0.run。下载的run文件不一定具有可执行权限，
+可以执行如下命令开启执行权限（以64位安装包为例）：<br />
+<div class="cl">chmod  +x  /文件夹路径/qt-opensource-linux-x64-5.4.0.run</div><br />
+将“文件夹路径”替换为自己系统里该run文件路径即可。然后可以直接单击运行该run文件，开始安装。
+注意以下是以普通用户权限安装的，安装位置是 /home/用户名/Qt5.4.0/ ，
+如果希望安装到其他的 如 /opt/ 目录，是需要root权限的。<br /><br />
+
+下面示范简单的普通用户安装方式，需要用户家目录 /home 所在磁盘分区至少剩余 2 GB 空间，用于安装Qt开发环境。
+所示范的是64位安装包，使用的操作系统是 openSUSE Linux 13.2 （64 位），操作系统本地化语言是简体中文。
+直接单击运行qt-opensource-linux-x64-5.4.0.run文件，等待run文件自动解压，然后出现如下安装界面：<br />
+<center><img src="images/installlin/lin01.png" /></center><br />
+点击“下一步”。进入指定“安装文件夹”界面：<br />
+<center><img src="images/installlin/lin02.png" /></center><br />
+默认就会安装到用户主文件夹的Qt5.4.0文件夹里
+（上图suse132是当前用户名，/home/suse132/是其主文件夹），不需要修改，
+直接点击“下一步”，进入“选择组件”界面：<br />
+<center><img src="images/installlin/lin03.png" /></center><br />
+默认情况是不装Qt源代码的，点击下方的“全选”，选中所有组件就会全部安装。
+点击“下一步”，进入“许可协议”界面：<br />
+<center><img src="images/installlin/lin04.png" /></center><br />
+选择“I have read and agree to the terms contained in the license agreements.”这一栏，
+同意许可协议，然后点击“下一步”，进入“已做好安装准备”界面：<br />
+<center><img src="images/installlin/lin05.png" /></center><br />
+如果想查看各个组件详情，可以点击“显示详细信息”。
+点击“安装”，就会开始正式的安装过程，时间比较长，请耐心等待。
+安装完成时会显示 100% ：<br />
+<center><img src="images/installlin/lin06.png" /></center><br />
+点击“下一步”，进入“正在完成 Qt 5.4.0 向导”界面：<br />
+<center><img src="images/installlin/lin07.png" /></center><br />
+点击“完成”，会自动打开集成开发环境 Qt Creator。<br /><br />
+
+如果将Linux下安装和Windows下安装对比一下，可以发现Linux下没有关于“开始菜单快捷方式”的设置。
+那么下次上哪里找 Qt Creator 呢？<br />
+Qt 开发环境安装时会创建一个 Qt Creator 快捷方式文件，然后会呈现在 Linux 的开始菜单里面，
+打开“开始菜单”-->“应用程序”-->“开发”-->“集成环境”-->“The IDE of choice for Qt development.”，
+可以看到 Qt 的图标，如下图所示：<br />
+<center><img src="images/installlin/lin08.png" /></center><br />
+以后点击该工具就可以进行Qt开发了。该图标对应的快捷方式文件位于：用户主文件夹/.local/share/applications/，
+（.local是隐藏文件夹，默认看不到，KDE 文件管理器里按快捷键 Ctrl + . ，即 Ctrl 和点号，对于 GNOME 文件管理器里按快捷键 Ctrl + H，就可以切换是否显示隐藏文件）
+快捷方式文件名是 DigiaQt-qtcreator-community.desktop ，如下图所示：<br />
+<center><img src="images/installlin/lin09.png" /></center><br />
+为方便使用 Qt Creator，可以右击复制该文件，然后粘贴到桌面文件夹或者主文件夹里使用，
+点击该快捷方式文件就会打开 Qt Creator 工具。
+</p>
+
+<p>
+<b>*中文输入法问题*</b><br />
+按照上面安装方式，如果操作系统里的正好是 Fcitx 中文输入法，会出现新安装的 Qt Creator 里不能进行中文输入的问题。解决方法参考：<br />
+<a href="http://blog.csdn.net/crazyboy2009/article/details/38537099" target="new">
+http://blog.csdn.net/crazyboy2009/article/details/38537099
+</a>
+<br>
+该帖子是解决 Ubuntu 里面问题的。对于 openSUSE Linux，安装软件包 fcitx-qt5 ，
+然后复制 .so 文件：<br />
+/usr/lib64/qt5/plugins/platforminputcontexts/libfcitxplatforminputcontextplugin.so <br />
+（64位系统是/usr/lib64/... ，32位系统是/usr/lib/...）， <br />
+粘贴一份到目录：<br />
+    Qt安装目录/Tools/QtCreator/bin/plugins/platforminputcontexts/<br />
+再粘贴一份到目录：<br />
+    Qt安装目录/5.4/gcc_64/plugins/platforminputcontexts/<br />
+
+</p>
+
+<div class="os2">1.4.3 Qt开发环境脚本</div>
+<p>
+如果使用集成开发环境 Qt Creator 开发程序，是不需要关心环境变量之类的设置的，
+该工具自己会去寻找编译器g++、调试器gdb、生成器make以及系统里的开发库，
+所以建议新手使用 Qt Creator ，这样比较无恼。
+</p>
+
+<p>
+当然，也有不怕一万，就怕万一的。万一需要在命令行里编译 Qt 程序怎么办？
+一般 Linux 系统里的编译生成工具和开发库都是不需要配置的，都是放在固定的目录里，
+比如64位库文件位于 /usr/lib64/ 。这里讲一些特殊情况，
+比如 Linux 系统目录里面有一份 Qt 4.8.6 的开发库，
+而我们又在用户目录里面装了新的 Qt 5.4.0 ，这时候打开操作系统命令行，执行命令：<br />
+<div class="cl">
+qmake -v
+</div><br />
+这时候显示的是系统路径里的Qt 4.8.6 版本：<br />
+<center><img src="images/installlin/bash01.png" /></center><br />
+如果我们进入新装的 Qt 5.4.0 里面所带的 bin 目录，执行命令：<br />
+<div class="cl">
+cd  ~/Qt5.4.0/5.4/gcc_64/bin/   <br />
+./qmake -v
+</div><br />
+./ 就是指定当前目录里的qmake程序，这里是属于 Qt 5.4.0 的，所以显示为：<br />
+<center><img src="images/installlin/bash02.png" /></center><br />
+
+问题就来了，如果是使用系统自带的 Qt 4.8.6，那么打开默认命令行就可以编译了，不需要配置。
+如果要用我们自己安装的 Qt 5.4.0 ，那该如何配置自己定制的命令行来编译程序呢？
+</p>
+
+<p>
+当然是自己编个脚本来配置了。我们在用户主文件夹新建一个文件 qt5env.sh ，
+用编辑器打开编辑内容，如果是 KDE 桌面环境，该文件内容设置为：<br />
+<div class="code">
+export QTDIR=~/Qt5.4.0/5.4/gcc_64/  <br />
+export PATH=~/Qt5.4.0/5.4/gcc_64/bin/:$PATH  <br />
+cd ~  <br />
+konsole  <br />
+</div>
+如果是 GNOME 桌面环境，该文件内容设置为：<br />
+<div class="code">
+export QTDIR=~/Qt5.4.0/5.4/gcc_64/  <br />
+export PATH=~/Qt5.4.0/5.4/gcc_64/bin/:$PATH  <br />
+cd ~  <br />
+gnome-terminal  <br />
+</div>
+两种桌面环境的命令行工具名字不一样，KDE 桌面里用 konsole 启动命令行，
+GNOME 桌面里用 gnome-terminal 启动命令行。上面 qt5env.sh 文件里内容比较简单，
+就是设置环境变量 QTDIR 指示 Qt 库的位置，然后添加 Qt 库的 bin 目录到 PATH 变量里。
+由于我们把 QTDIR/bin/  目录放在了旧的 $PATH 变量的前面，所以进入该命令行后，
+会优先使用我们自己安装的 5.4.0 版本 Qt 库。<br />
+默认情况下该文件不具有可执行权限，需要执行下面命令使其生效：<br />
+<div class="cl">
+chmod  +x  ~/qt5env.sh
+</div><br />
+以后就可以单击该脚本启动我们自己定制的命令行了。可以在我们定制的命令行里面
+尝试逐条运行以下命令看看效果：<br />
+<div class="cl">
+qmake -v  <br />
+assistant  <br />
+designer  <br />
+linguist  <br />
+</div>
+</p>
+
+<p>
+还有一个需要注意的问题，上面安装和配置都是同一个用户，比如 suse132，
+如果同一主机上其他用户想用该版本 Qt 库，
+需要将 QTDIR 和 PATH 两行里面的波浪线 ~ 替换为安装该 Qt 库的用户主文件夹，比如 /home/suse132 ，
+使用绝对路径方式指明 Qt 库的路径（第三行的 cd ~  不用变）。
+</p>
+
+<div class="os2">1.4.4 其他安装方式</div>
+<p>
+上面介绍的是安装Qt官方发布的开发环境，还有其他的安装方式。
+Linux一般都是自带Qt动态库的，目前使用Qt4系列版本的居多。
+Qt5还是比较新的，基于Qt5的KDE5桌面正在开发过程中，
+KDE5可能不太稳定，目前还没有作为默认Linux桌面使用。
+对于不同的Linux发行版，其原生使用的安装包不一样，有rpm系列的，
+也有deb系列的，还有其他格式安装包的。因为Qt是开源软件，
+大家都可以按照GPL开源协议自己编译发布Qt运行库和开发环境，
+所以Linux发行版社区通常会自行编译Qt库和开发工具的源代码，
+生成Qt运行库和开发工具的原生安装包（rpm、deb等），
+这样用户就可以使用该Linux发行版自家打包的Qt开发环境了。
+</p>
+
+<p>
+安装Linux发行版自家打包的Qt开发环境一般都很简单，联网之后，一两句命令就可以搞定，而且rpm或deb等安装包会自动配置好开发环境，不需要其他操作，即装即用。
+比如在openSUSE Linux里面只需要以root用户执行如下命令：<br />
+<div class="clroot">zypper in qt-creator libqt5-qtbase-devel libqt5-qtdoc  libqt5-linguist libqt5-qtbase-common-devel libqt5-qtdeclarative-tools libqt5-qtimageformats libqt5-qtmultimedia-examples libqt5-qtquickcontrols  libqt5-qttools </div><br />
+等待联网安装完成后就可以在“开始菜单”-->“应用程序”-->“开发”-->“集成环境”里面找到Qt Creator，点击运行就可以了。
+需要注意的是不同Linux发行版在不同时期打包的Qt版本是不一样的，会不断升级，
+所以和上面Qt官方的5.4.0版本会有些差异，最好看看相应的发行说明。
+</p>
+
+<p>
+最后补充一个在Mac OS X系统里安装Qt开发环境的链接：<br />
+<a href="http://doc.qt.io/qt-5/osx.html" target="new">
+http://doc.qt.io/qt-5/osx.html
+</a>
+</p>
+
+<br />
 <br />
 <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
 	<tbody>

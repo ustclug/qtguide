@@ -20,9 +20,212 @@
 
   </head>
 <div class="os1">1.5 认识开发工具</div>
-  
+<p>
+前面提到了几个关于开发工具的名词，之前没解释，是留到本节，专门介绍开发常用到的 GNU 工具集、MinGW、 CMake 和 Qt 工具集，这些工具虽然不需要完全学会，但是基本的概念和用途必须清楚。
+另外本节结尾介绍几个开发程序时常见的名词概念。
+</p>
+
+<div class="os2">1.5.1 GNU 工具集</div>
+<p>在上个世纪八十年代，当时计算机都都是奢侈品，操作系统里最著名的是 Unix 家族，
+当时还没有 Windows、Linux之类的，当时 Unix 都是商业软件，里面的应用软件也是商业软件，
+全是封闭的环境。系统程序员 Richard M. Stallman (RMS) 在此环境下创立了与众不同的
+GNU 项目 (GNU's Not Unix) ，
+ 以及推进自由软件发展的
+Free Software Foundation (FSF) 自由软件基金会。
+GNU 项目为了创建自由的类 Unix 系统，也因此开发出来很多开源的系统工具，其中非常著名的就是 GCC
+（GNU Compiler Collection，GNU编译器套件）。
+在 GNU 工具集里面，开发时常见到的几个罗列如下：<br />
+
+<table class="tabel">
+<tbody>
+  <tr>
+      <td style="width: 95px;"><b>gcc</b></td>
+      <td>
+      GNU C 语言编译器。
+      </td>
+  </tr>
+  <tr class="d1">
+      <td style="width: 95px;"><b>g++</b></td>
+      <td>
+      GNU C++ 语言编译器。
+      </td>
+  </tr>
+    <tr>
+      <td style="width: 95px;"><b>ld</b></td>
+      <td>
+      GNU 链接器，将目标文件和库文件链接起来，创建可执行程序。
+      </td>
+  </tr>
+  <tr class="d1">
+      <td style="width: 95px;"><b>ar</b></td>
+      <td>
+      生成静态库 .a ，可以编辑和管理静态库。
+      </td>
+  </tr>
+  <tr>
+      <td style="width: 95px;"><b>libtool</b></td>
+      <td>
+      链接库工具，生成动态链接库 .so 或者静态链接库 .a 。
+      </td>
+  </tr>
+  <tr class="d1">
+      <td style="width: 95px;"><b>make</b></td>
+      <td>
+      生成器，可以根据 makefile 文件自动编译链接生成可执行程序或库文件。
+      </td>
+  </tr>
+  <tr>
+      <td style="width: 95px;"><b>gdb</b></td>
+      <td>
+      调试器，用于调试可执行程序。
+      </td>
+  </tr>
+  <tr class="d1">
+      <td style="width: 95px;"><b>ldd</b></td>
+      <td>
+      查看可执行文件依赖的动态链接库。
+      </td>
+  </tr>
+</tbody>
+</table>
+<br />
+
+GNU 项目主页： <a href="http://www.gnu.org/" target="new">http://www.gnu.org/</a> <br />
+FSF 基金会主页： <a href="http://www.fsf.org" target="new">http://www.fsf.org</a>
+
+</p>
+
+<div class="os2">1.5.2 MinGW</div>
+<p>
+原本 GNU 工具只在 Linux/Unix 系统里才有，随着 Windows 系统的广泛使用，
+为了在 Windows 系统里可以使用 GNU 工具，诞生了 MinGW（Minimalist GNU for Windows）
+项目，利用 MinGW 就可以生成 Windows 里面的 exe 程序和 dll 链接库。
+需要注意的是，MinGW 里的工具名称与 Linux/Unix 系统里的有些区别，MinGW 里面工具带有扩展名 .exe，
+Linux/Unix 系统里工具都是没有扩展名的。
+MinGW 里面的生成器文件名为 mingw32-make.exe，并且没有 libtool 和 ldd 。
+libtool 和 ldd 主要是在 Linux/Unix 系统里使用，Windows 里面是不用 .so 文件的。
+Windows 里面动态库扩展名为 .dll，MinGW 通过 dlltool 来生成 Windows 系统原生的 .dll 动态库。
+如果要查看 Windows 里可执行文件的依赖库，需要使用微软自家的 Dependency Walker 工具。
+</p>
+<p>
+MinGW 原本是用于生成 32 位程序的，随着 64 位系统流行起来，
+从 MinGW 分离出来了 MinGW-w64 项目，该项目同时支持生成 64 位和 32 位程序。
+Qt 的 MinGW 版本库就是使用 MinGW-w64 项目里面的工具集生成的。
+前面 1.3 节安装的 MinGW 4.9.1 也就是 MinGW-w64 项目里发布的工具集。
+</p>
+
+<p>
+MinGW 项目主页：<a href="http://www.mingw.org/" target="new">
+http://www.mingw.org/</a>
+<br />
+MinGW-w64 项目主页：<a href="http://sourceforge.net/projects/mingw-w64/" target="new">
+http://sourceforge.net/projects/mingw-w64/</a>
+</p>
+
+<div class="os2">1.5.3 CMake</div>
+<p>
+CMake（Cross platform Make）是一个开源的跨平台自动化构建工具，
+可以跨平台地生成各式各样的 makefile 或者 project 文件，
+支持利用各种编译工具生成可执行程序或链接库。CMake 自己不编译程序，
+它相当于用自己的构建脚本 CMakeLists.txt，叫各种编译工具集去生成可执行程序或链接库。
+一般用于编译程序的 makefile 文件比较复杂，自己去编写比较麻烦，
+而利用 CMake ，就可以编写相对简单的 CMakeLists.txt ，由 CMake 根据 CMakeLists.txt 自动生成 makefile，然后就可以用 make 生成可执行程序或链接库。
+</p>
+
+<p>
+本教程里面是使用 Qt 官方的 qmake 工具生成 makefile 文件，没有用 CMake。
+这里之所以提 CMake，是因为整个 KDE 桌面环境的茫茫多程序都是用 CMake 脚本构建的，
+另外跨平台的程序/库如 Boost C++ Libraries、OpenCV、LLVM、Clang 等也都是用 CMake 脚本构建的。
+以后如果接触到这些东西，是需要了解 CMake 的。
+</p>
+
+<p>
+CMake 项目主页：<a href="http://www.cmake.org/" target="new">
+http://www.cmake.org/</a><br />
+KDE 项目主页：<a href="https://www.kde.org/" target="new">
+https://www.kde.org/</a>
+</p>
+
+<div class="os2">1.5.4 Qt工具集</div>
+<p>
+Qt 官方的开发环境安装包里有自己专门的开发工具，之前用过 qmake 命令。
+qmake 是 Qt 开发最核心的工具，既可以生成 Qt 项目文件 .pro ，
+也可以自动生成项目的 Makefile 文件。这里将常用的 Qt 开发工具列表如下：<br />
 
 
+<table class="tabel">
+<tbody>
+  <tr>
+      <td style="width: 95px;"><b>qmake</b></td>
+      <td>
+      核心的项目构建工具，可以生成跨平台的 .pro 项目文件，并能依据不同操作系统和编译工具生成相应的 Makefile，用于构建可执行程序或链接库。
+      </td>
+  </tr>
+  <tr class="d1">
+      <td style="width: 95px;"><b>uic</b></td>
+      <td>
+      User Interface Compiler，用户界面编译器，Qt 使用 XML 语法格式的 .ui 文件定义用户界面，uic 根据 .ui 文件生成用于创建用户界面的 C++ 代码 ui_*****.h 。
+      </td>
+  </tr>
+    <tr>
+      <td style="width: 95px;"><b>moc</b></td>
+      <td>
+      Meta-Object Compiler，元对象编译器，moc 处理 C++ 头文件的类定义里面的 Q_OBJECT 宏，它会生成 moc_*****.cpp 源代码文件，其中包含相应类的元对象代码，元对象代码主要用于实现 Qt 信号/槽机制、运行时类型定义、动态属性系统。
+      </td>
+  </tr>
+  <tr class="d1">
+      <td style="width: 95px;"><b>rcc</b></td>
+      <td>
+      Resource Compiler，资源文件编译器，负责在项目构建过程中编译 .qrc 资源文件，将资源嵌入到最终的 Qt 程序里。
+      </td>
+  </tr>
+  <tr>
+      <td style="width: 95px;"><b>qtcreator</b></td>
+      <td>
+      集成开发环境，包含项目生成管理、代码编辑、图形界面可视化编辑、
+      编译生成、程序调试、上下文帮助、版本控制系统集成等众多功能，
+      还支持手机和嵌入式设备的程序生成部署。
+      </td>
+  </tr>
+  <tr class="d1">
+      <td style="width: 95px;"><b>assistant</b></td>
+      <td>
+      Qt 助手，帮助文档浏览查询工具，Qt 库所有模块和开发工具的帮助文档、示例代码等都可以检索到，是 Qt 开发必备神器，也可用于自学 Qt。
+      </td>
+  </tr>
+  <tr>
+      <td style="width: 95px;"><b>designer</b></td>
+      <td>
+      Qt 设计师，专门用于可视化编辑图形用户界面（所见即所得），生成 .ui 文件用于 Qt 项目。
+      </td>
+  </tr>
+  <tr class="d1">
+      <td style="width: 95px;"><b>linguist</b></td>
+      <td>
+      Qt 语言家，代码里用 tr() 宏包裹的就是可翻译的字符串，开发人员可用 lupdate 命令生成项目的待翻译字符串文件 .ts，用 linguist 翻译多国语言 .ts ，翻译完成后用 lrelease 命令生成 .qm 文件，然后就可用于多国语言界面显示。
+      </td>
+  </tr>
+  <tr>
+      <td style="width: 95px;"><b>qmlscene</b></td>
+      <td>
+       在 Qt 4.x 里是用 qmlviewer 进行 QML 程序的原型设计和测试，Qt 5 用 qmlscene 取代了旧的 qmlviewer。新的 qmlscene 另外还支持 Qt 5 中的新特性 scenegraph 。
+      </td>
+  </tr>
+</tbody>
+</table>
+
+</p>
+
+
+<div class="os2">1.5.5 常见的名词概念</div>
+
+<!--
+
+Debug，Release
+Dynamic Link ，Static Link
+C++ 11
+
+-->
 
 <br />
 <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">

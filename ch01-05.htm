@@ -52,37 +52,31 @@ GNU 项目是为了创建自由的类 Unix 系统，也因此开发出来很多�
     <tr>
       <td style="width: 95px;"><b>ld</b></td>
       <td>
-      GNU 链接器，将目标文件和库文件链接起来，创建可执行程序。
+      GNU 链接器，将目标文件和库文件链接起来，创建可执行程序和动态链接库。
       </td>
   </tr>
   <tr class="d1">
       <td style="width: 95px;"><b>ar</b></td>
       <td>
-      生成静态库 .a ，可以编辑和管理静态库。
+      生成静态库 .a ，可以编辑和管理静态链接库。
       </td>
   </tr>
   <tr>
-      <td style="width: 95px;"><b>libtool</b></td>
-      <td>
-      链接库工具，生成动态链接库 .so 或者静态链接库 .a 。
-      </td>
-  </tr>
-  <tr class="d1">
       <td style="width: 95px;"><b>make</b></td>
       <td>
       生成器，可以根据 makefile 文件自动编译链接生成可执行程序或库文件。
       </td>
   </tr>
-  <tr>
+  <tr  class="d1">
       <td style="width: 95px;"><b>gdb</b></td>
       <td>
       调试器，用于调试可执行程序。
       </td>
   </tr>
-  <tr class="d1">
+  <tr>
       <td style="width: 95px;"><b>ldd</b></td>
       <td>
-      查看可执行文件依赖的动态链接库。
+      查看可执行文件依赖的共享库（扩展名 .so，也叫动态链接库）。
       </td>
   </tr>
 </tbody>
@@ -101,10 +95,9 @@ FSF 基金会主页： <a href="http://www.fsf.org" target="new">http://www.fsf.
 项目，利用 MinGW 就可以生成 Windows 里面的 exe 程序和 dll 链接库。
 需要注意的是，MinGW 里的工具名称与 Linux/Unix 系统里的有些区别，MinGW 里面工具带有扩展名 .exe，
 Linux/Unix 系统里工具都是没有扩展名的。
-MinGW 里面的生成器文件名为 mingw32-make.exe，并且没有 libtool 和 ldd 。
-libtool 和 ldd 主要是在 Linux/Unix 系统里使用，Windows 里面是不用 .so 文件的。
-Windows 里面动态库扩展名为 .dll，MinGW 通过 dlltool 来生成 Windows 系统原生的 .dll 动态库。
+MinGW 里面的生成器文件名为 mingw32-make.exe，并且没有 ldd 工具，因为 Windows 不使用 .so 共享库文件。
 如果要查看 Windows 里可执行文件的依赖库，需要使用微软自家的 Dependency Walker 工具。
+Windows 里面动态库扩展名为 .dll，MinGW 可以通过 dlltool 来生成用于创建和使用动态链接库需要的文件，如 .def 和 .lib。
 </p>
 <p>
 MinGW 原本是用于生成 32 位程序的，随着 64 位系统流行起来，
@@ -114,11 +107,27 @@ Qt 的 MinGW 版本库就是使用 MinGW-w64 项目里面的工具集生成的�
 </p>
 
 <p>
-MinGW 项目主页：<a href="http://www.mingw.org/" target="new">
+另外提一下，由于 MinGW 本身主要就是编译链接等工具和头文件、库文件，并不包含系统管理、文件操作之类的 Shell 环境，
+这对希望用类 Unix 命令的开发者来说还是不够用的。
+所以 MinGW 官方又推出了 MSYS（Minimal SYStem），相当于是一个部署在 Windows 系统里面的小型 Unix 系统环境，
+移植了很多Unix/Linux 命令行工具和配置文件等等，是对 MinGW 的扩展。
+MSYS 对于熟悉 Unix/Linux 系统环境或者要尝试学习 Unix/Linux 系统的人都是一种便利。
+MSYS 和 MinGW 的安装升级都是通过其官方的 mingw-get 工具实现，二者是统一下载安装管理的。
+对于 MinGW-w64 项目，它对应的小型系统环境叫 MSYS2（Minimal SYStem 2），MSYS2 是 MSYS 的衍生版，不仅支持64位系统和32位系统，
+还有自己的独特的软件包管理工具，它从 Arch Linux 系统里移植了 pacman 软件管理工具，所以装了 MSYS2 之后，
+可以直接通过 pacman 来下载安装软件，而且可以自动解决依赖关系、方便系统升级等。
+装了 MSYS2 之后，不需要自己去下载 MinGW-w64，可以直接用 pacman 命令安装编译链接工具和 git 工具等。
+</p>
+
+<p>
+MinGW 项目主页（含 MSYS）：<a href="http://www.mingw.org/" target="new">
 http://www.mingw.org/</a>
 <br />
 MinGW-w64 项目主页：<a href="http://sourceforge.net/projects/mingw-w64/" target="new">
 http://sourceforge.net/projects/mingw-w64/</a>
+<br />
+MSYS2 项目主页：<a href="http://sourceforge.net/projects/msys2/" target="new">
+http://sourceforge.net/projects/msys2/</a>
 </p>
 
 <div class="os2">1.5.3 CMake</div>

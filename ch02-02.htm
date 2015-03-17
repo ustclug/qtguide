@@ -3,11 +3,9 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <title>ch02-02</title>
-    
-<link href="css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-
-<script src="thumbnailviewer.js" type="text/javascript">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -15,16 +13,462 @@
 * Visit http://www.dynamicdrive.com/ for full source code
 ***********************************************/
 
-</script>
-
-
-  </head>
-  
-  
-<div class="os1">2.2 Hello Qt!</div>
-
-
-
-
-
+</script> </head>
+  <body>
+    <div class="os1">2.2 Hello Qt</div>
+    <p> 本节就从最简单的 Qt 程序开始， 自己动手用 g++ 编译 Qt 代码，并链接生成可执行程序。 接着示范一个稍微复杂点的 Qt
+      程序编译过程，包含对 moc 工具的使用， 顺便提一下 Qt 元对象系统。 </p>
+    <div class="os2">2.2.1 Hello Qt</div>
+    <p> Qt 本身就是用 C++ 语言编写的，所以 Qt 程序的代码看起来和普通的 C++ 代码差不了多少， 这样就很容易上手，也适合自学。C++
+      的套路就编写一个类，使用的时候就定义该类的对象， 然后调用对象的函数来完成任务。使用 Qt 控件就像上一节计算矩形的对角线、面积一样简单。 最简化的
+      Qt 程序如下面 helloqt.cpp 代码所示（代码文件夹为 D:\QtProjects\ch02\helloqt\ ）： <br>
+    </p>
+    <div class="code"> <span style=" color:#000080;"><span style=" color:#008000;"></span></span><span
+        style=" color:#008000;">//helloqt.cpp</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QtWidgets/QApplication&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QtWidgets/QLabel&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">main</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">argc</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">char</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span
+style=" color:#000000;">argv</span><span style=" color:#000000;">[])</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QApplication</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">a</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">argc</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">argv</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QLabel</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">label</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QLabel</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"Hello</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">Qt!"</span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">label</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">show</span><span style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">return</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">a</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">exec</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    <p> Qt 显示一个 QLabel 标签控件窗口就是这么简单！其实任何一个图形控件都可以作为主界面显示，上面使用的是 QLabel 。 使用 Qt
+      库，当然先要包含头文件，代码里包含了 QApplication 和 QLabel 两个类的头文件，这两个头文件位于 QtWidgets 文件夹里。
+      在上面 main 函数里，第1句 </p>
+    <div class="code">
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QApplication</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">a</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">argc</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">argv</span><span style=" color:#000000;">);</span></pre>
+    </div>
+    是定义一个 Qt 应用程序对象，它的构造函数接收和 main 函数一样的参数，这是 Qt 图形界面程序的入口， 就像 main 函数是 C++
+    程序的入口一样。 第2句
+    <div class="code">
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QLabel</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">label</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QLabel</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"Hello</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">Qt!"</span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">);</span>
+</pre></div>
+    定义了一个 QLabel 标签控件对象，其构造函数里以一个字符串为输入参数，代码里使用了 tr 函数封装了字符串。所有的 Qt 类里面都有 tr
+    函数（因为 tr 函数在所有 Qt 类的顶级基类 QObject 里定义了），但它不是全局定义的，所以上面使用了 QLabel 类的 tr 函数 。tr
+    函数是代表可翻译字符串的意思，因为 Qt 不仅跨平台，也是跨国跨语种的，所以很注重多国语言的支持， 只要不是特殊情况，一般都用 tr
+    函数封装字符串，以后如果做多国语言翻译就会很方便。 QLabel 就是简单地显示一小段文本，提示用户文本信息， 是最常用的控件之一。 第3句
+    <div class="code">
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">label</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">show</span><span style=" color:#000000;">();</span></pre>
+    </div>
+    是调用标签控件对象的 show 函数，显示控件窗口。 第4句
+    <div class="code">
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">return</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">a</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">exec</span><span style=" color:#000000;">();</span></pre>
+    </div>
+    exec() 函数会进入 Qt 应用程序的事件循环函数等待用户操作，如果用户点击窗口的关闭按钮， 程序就会自动结束并返回一个值，默认是 0 。<br>
+    图形程序与命令行程序一个最大的不同就是图形程序通常不会自动关闭，而是一直等待用户操作， 所以图形程序与用户的交互性都很强。
+    一般的命令行程序跑完自己就结束了，而图形程序会等待用户点击关闭按钮（或退出菜单项）才会结束。 QApplication 的 exec()
+    函数就是用来循环等待事件的，直到出现关闭或退出信号为止。 代码是非常简单的，那如何生成可执行程序呢？接下来我们用最原始的 g++
+    命令编译生成可执行程序， 讲解其生成的过程。这里了解一下 Qt 程序的生成过程，以后如果遇到程序编译链接过程中的问题，
+    就可以对照着看看哪个步骤出了问题，进而寻找解决之法。本节最后再给出使用 qmake 生成 Qt 程序的简洁方法， 这和自己用 g++ 编译是一样的。<br>
+    <br>
+    下面示范 Windows 系统里使用 MinGW 编译 helloqt.cpp 文件，首先打开开始菜单中的 Qt 命令行，进入代码所在文件夹：<br>
+    <div class="cl">cd /d D:\QtProjects\ch02\helloqt</div>
+    然后执行如下一句命令编译并链接生成 helloqt 程序：<br>
+    <div class="cl">g++&nbsp; helloqt.cpp&nbsp;
+      -I"C:\Qt\Qt5.4.0\5.4\mingw491_32\include"&nbsp;
+      -L"C:\Qt\Qt5.4.0\5.4\mingw491_32\lib" -lQt5Core -lQt5Gui
+      -lQt5Widgets&nbsp; -o helloqt</div>
+    g++ 命令中，helloqt.cpp 是源码文件；-I"C:\Qt\Qt5.4.0\5.4\mingw491_32\include"
+    是指加入包含文件的路径，该 include 文件夹就是 Qt 库的头文件位置（如果 Qt 安装位置不是 C 盘，需要根据实际路径调整）；
+    -L"C:\Qt\Qt5.4.0\5.4\mingw491_32\lib" 则指定了链接时需要的 Qt 库文件所在位置；-lQt5Core 是指链接到
+    libQt5Core.a 库文件（运行时对应 Qt5Core.dll），这是 Qt 的核心库，所有 Qt 程序都要用到它；-lQt5Gui 是指链接到
+    libQt5Gui.a（运行时对应 Qt5Gui.dll），这是负责 Qt 程序底层绘制图形界面的库；-lQt5Widgets 是指链接到
+    libQt5Widgets.a（运行时对应 Qt5Widgets.dll），是包含几乎所有 Qt 图形控件和窗口的库；最后的 -o helloqt
+    是指生成的目标程序名字为 helloqt（默认扩展名 .exe）。<br>
+    <br>
+    上述命令涵盖了编译和链接的全过程，会直接生成 helloqt.exe。生成之后就可以在该 Qt 命令行下执行 helloqt.exe ：<br>
+    <center><img src="images/ch02/ch02-01-04.png" alt="helloqt"> </center>
+    上图里面的小窗口就是 QLabel 对象的窗口，可以尝试改变窗口大小或关闭窗口。命令行里的额外提示信息是指 原本根据字符串计算的 QLabel
+    对象比较小，不能满足弹出窗口最小尺寸（窗口标题栏比较宽），于是标签控件被拉大了，这个信息可以忽略，不影响程序运行。helloqt.exe
+    是使用动态链接的，由于 Qt 命令行环境已经配置好了依赖库路径，所以可以在 Qt 命令行里运行。但是不能直接在 Windows 资源管理器里直接双击运行
+    helloqt.exe，会提示缺少依赖的 dll 动态库，其依赖的动态库都位于 C:\Qt\Qt5.4.0\5.4\mingw491_32\bin
+    文件夹里。一般 Qt 程序在 Windows 系统里运行所依赖的动态库比较多，以后会讲 Qt 程序的静态链接发布方式，在讲 Qt
+    静态库之前大家不要纠结这些动态库的事，都在 Qt 命令行里运行程序就行了。
+    <p> </p>
+    <div class="os2">2.2.2 Hello Widget</div>
+    <p> 刚才是使用最简化的 QLabel 作为主界面显示，实际中当然不会只用这么简单的窗口。接下来介绍从 QWidget
+      类派生一个窗口作为主界面，在主界面里面显示一个 QLabel 控件。QWidget 是 Qt
+      各种窗口和控件的基类，它本身就是一个功能丰富的窗口类，可以从它继承来构造自定义的主界面。需要注意的是 QtWidgets 是 Qt
+      的一个大模块，里面有很多窗口和控件类，而 QWidget 就是这些类的基类，注意看清楚这两个英文词的拼写。</p>
+    <p>我们在 D:\QtProjects\ch02\hellowidget
+      文件夹里创建三个代码文件：hellowidget.h、hellowidget.cpp、main.cpp，按下面输入代码，首先是
+      hellowidget.h：</p>
+    <p> </p>
+    <div class="code"> <span style=" color:#008000;">//hellowidget.h</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QtWidgets/QWidget&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QtWidgets/QLabel&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">HelloWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span>QWidget</pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Q_OBJECT</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">HelloWidget</span><span
+style=" color:#000000;">(</span>QWidget<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span>parent<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" color:#800080;">HelloWidget</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//label</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>QLabel<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#800000;">m_labelInfo</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+    </div>
+    hellowidget.h 包含了两个头文件 QWidget 和 QLabel，接着定义了一个 HelloWidget 类，是从窗口通用基类
+    QWidget 继承的。类里面最特殊的就是 Q_OBJECT 宏，这个宏声明了 Qt 元对象系统必需的函数和成员变量，之后我们会用 moc
+    工具生成元对象系统的实体函数代码。接着定义了 HelloWidget 构造函数，构造函数接收一个父窗口指针作为参数，0 就是 NULL
+    指针。然后是析构函数，最后一个是 QLabel 指针，之后会在构造函数里创建 QLabel 对象。接下来看看 hellowidget.cpp：<br>
+    <div class="code"> <span style=" color:#008000;">//hellowidget.cpp</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"hellowidget.h"</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">HelloWidget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">HelloWidget</span><span style=" color:#000000;">(</span>QWidget<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span><span
+style=" color:#c0c0c0;"> </span>QWidget<span style=" color:#000000;">(</span><span
+style=" color:#000000;">parent</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>resize<span style=" color:#000000;">(</span><span
+style=" color:#000080;">300</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">200</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_labelInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span>QLabel<span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span>tr<span style=" color:#000000;">(</span><span
+style=" color:#008000;">"&lt;h1&gt;Hello</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">Widget!&lt;/h1&gt;"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">this</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_labelInfo</span><span
+style=" color:#000000;">-&gt;</span>setGeometry<span style=" color:#000000;">(</span><span
+style=" color:#000080;">10</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">10</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">200</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">40</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">HelloWidget</span><span style=" color:#000000;">::~</span><span
+style=" color:#800080;">HelloWidget</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_labelInfo</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_labelInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span>NULL<span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    这源文件里只有一个构造函数和一个析构函数。 构造函数最开始的地方用 parent 指针初始化了父类。构造函数内部第一句是重新设置本窗口的尺寸，设置为宽度
+    300 像素，高度 200 像素。<br>
+    构造函数内第二句用 new 创建了 QLabel 对象，对象构造参数里 tr 函数包装的就是要显示的信息，这里不需要像上一个例子使用
+    QLabel::tr 方式，因为窗口基类里定义好了 tr 函数，不需要指定用别的类里的 tr 函数，其实各个类里的 tr 函数功能都是一样的。字符串里面
+    &lt;h1&gt; ... &lt;/h1&gt; 是 HTML 网页标记语言的句式，代表显示标题一类型的文字，QLabel 会自动解析 HTML
+    标记，等会就可以看到效果。QLabel 构造的第二个参数是指定本窗口为 QLabel 对象的父窗口。<br>
+    构造函数内第三句是设置 QLabel 显示的矩形区域，显示的矩形区域左上角坐标是距离左边框 10 像素，距离上边缘 10
+    像素（不计窗口标题栏），标签控件的宽度是 200 像素，高度是 40 像素。<br>
+    最后的析构函数里就是删除之前 new 的标签控件对象，然后把指针设置为 NULL。<br>
+    这里看不到 Qt 元对象系统的实际函数代码，因为还没有生成，以后需要用 moc 工具生成相应代码，这个 HelloWidget 类的代码才会完整。再看看
+    main.cpp：<br>
+    <div class="code"> <span style=" color:#008000;">//main.cpp</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QtWidgets/QApplication&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"hellowidget.h"</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">main</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">argc</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">char</span><span style=" color:#000000;">*</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">argv</span><span style=" color:#000000;">[])</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>QApplication<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">a</span><span style=" color:#000000;">(</span><span style=" color:#000000;">argc</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">argv</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">HelloWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">hw</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">hw</span><span
+style=" color:#000000;">.</span>show<span style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">return</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">a</span><span style=" color:#000000;">.</span>exec<span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    main 函数还是一如既往的简单，由于使用自定义的 HelloWidget 作为主窗口类，所以是包含了 hellowidget.h 和
+    QApplication 两个头文件。main 函数里第一句定义 Qt 图形界面程序的入口对象 a，第二句是我们自定义主界面类 HelloWidget
+    的对象 hw，第三句是显示该窗口对象，show 函数是在 HelloWidget 父类里实现的，所以之前 hellowidget.cpp 没有出现
+    show 函数代码。最后一句进入图形界面事件等待循环，直至收到关闭或退出信号，再返回一个数值。类似这样的 main 函数，我们在本教程以后每个 Qt
+    程序代码里都能看到，集成开发环境可以自动生成这样的 main 函数代码。<br>
+    <p> 需要手工编写的代码就这些，接下来的任务就是如何编译生成可执行程序了。之前提到 Qt 元对象系统，Qt 是基于 C++ 开发的，而 C++
+      本身并没有元对象系统。元对象系统是 Qt 专门为 C++
+      做的扩展功能，用于支持非常强大的信号/槽机制、运行时类型定义、动态属性系统等，以后学到相关代码时再讲解。这里是初学，就不用管元对象系统代码是怎么编写的了，会用
+      moc 工具生成就可以了。下面逐步介绍编译链接本小节程序的过程。</p>
+    <p>（1）打开 Qt 命令行，进入代码所在文件夹： </p>
+    <div class="cl"> cd /d D:\QtProjects\ch02\hellowidget </div>
+    （2）使用 moc 工具生成 HelloWidget 类的元对象系统代码文件 moc_hellowidget.cpp ：<br>
+    <div class="cl"> moc hellowidget.h -o moc_hellowidget.cpp </div>
+    moc 工具会搜索头文件 hellowidget.h 里面所有的 Q_OBJECT 宏，并生成相应的元对象系统实际源代码，输出保存为
+    moc_hellowidget.cpp 文件。加上刚才手动编写的 hellowidget.cpp 和 main.cpp，我们总共要编译三个 cpp
+    源码文件。<br>
+    （3）编译三个源代码文件：<br>
+    <div class="cl">g++ -c moc_hellowidget.cpp
+      -I"C:\Qt\Qt5.4.0\5.4\mingw491_32\include" -o moc_hellowidget.o</div>
+    <div class="cl">g++ -c hellowidget.cpp
+      -I"C:\Qt\Qt5.4.0\5.4\mingw491_32\include" -o hellowidget.o</div>
+    <div class="cl">g++ -c main.cpp -I"C:\Qt\Qt5.4.0\5.4\mingw491_32\include" -o
+      main.o</div>
+    这三个文件编译命令是完全类似的，g++ 的 -c 选项是将代码只编译成目标文件 .o 而不链接，-I 选项参数是添加 Qt 库的头文件路径，-o
+    选项参数是指明输出的目标文件名字。<br>
+    （4）链接到 Qt 库，生成可执行程序：<br>
+    <div class="cl">g++ moc_hellowidget.o hellowidget.o main.o
+      -L"C:\Qt\Qt5.4.0\5.4\mingw491_32\lib" -lQt5Core -lQt5Gui -lQt5Widgets -o
+      hellowidget</div>
+    g++ 会调用链接器，将 moc_hellowidget.o、hellowidget.o、main.o 这三个目标文件与 Qt
+    库链接生成可执行程序，-L 选项参数指定了 Qt 链接库的路径，选项 -lQt5Core、-lQt5Gui、-lQt5Widgets 是指链接到 Qt
+    图形界面的三个基本库，分别对应动态库链接声明文件 libQt5Core.a、libQt5Gui.a、libQt5Widgets.a， 运行时会依赖动态库
+    Qt5Core.dll、Qt5Gui.dll、Qt5Widgets.dll。最后的 -o hellowidget 指定了生成的可执行程序名字，在
+    Windows 系统里扩展名默认为 exe。<br>
+    生成 hellowidget.exe 之后，就可以在 Qt 命令行里执行该程序，可以看到显示的效果：<br>
+    <center><img src="images/ch02/ch02-01-05.png" alt="Hello Widget!"></center>
+    上图显示的就是 HTML 标题一的字号，比上一个示例程序大了很多，自定义的主界面窗口尺寸 300*200 是不包括标题栏的，标题栏由 Qt
+    库自己处理生成，标题栏以下才是我们程序实际的放置控件的绘图区域，通常称为客户区域（Client Area）。除了 HTML 标题一的标记，Qt
+    还支持很多其他的标记，如字体、字号、颜色之类的，感兴趣的读者可以自己试一试。<br>
+    <br>
+    <div class="os2">2.2.3 使用 qmake</div>
+    <p> </p>
+    本节 Hello Qt 的例子编译命令还比较简单，而 Hello Widget 例子的编译链接命令已经开始多起来了，还得先用 moc
+    工具生成元对象系统代码。这些还都是简单代码，如果项目里文件增多，自己敲命令当然复杂了。因此 Qt 有自己专门的项目构建工具 qmake。<br>
+    qmake 工具有两种工作模式，它首先根据项目文件夹的头文件、源文件、图形界面文件、资源文件等，生成标准的 .pro 项目文件。然后使用第二种工作模式，
+    qmake 可以根据 .pro 文件自动生成 Makefile 文件，我们就只需要运行一下 make 就行了，这就让 Qt
+    程序的项目管理和构建生成变得轻松加愉快。我们以上面 Hello Widget 例子示范 qmake 的简单使用过程。在使用 qmake
+    之前，把上一小节生成的临时文件 moc_hellowidget.cpp、*.o 和 *.exe 都删了，保留手动编写的一个 .h 和两个 .cpp
+    文件就够了。<br>
+    （1）打开 Qt 命令行，进入 hellowidget 文件夹：<br>
+    <div class="cl">cd /d D:\QtProjects\ch02\hellowidget</div>
+    （2）用 qmake 生成项目文件：<br>
+    <div class="cl">qmake -project "QT+=widgets" </div>
+    qmake 的选项 -project 就是指定第一种工作模式，它会扫描当前文件夹里的各种文件，然后生成对应的 pro 文件。命令里附加的双引号字符串
+    "QT+=widgets"&nbsp; 是我们针对 Qt5 自定义的一行文本，qmake 会把它添加到 pro 文件里。qmake 默认会将
+    QtCore、QtGui 模块添加到项目文件里，但是从 Qt4 发展到 Qt5 后，将 QtWidgets 模块从 QtGui 里面分离出来了，新的
+    QtWidgets 模块不会自动添加，所以我们手动在命令里添加了 QtWidgets 模块，即在 pro 文件里添加一句 QT+=widgets
+    。执行上面命令之后，在 hellowidget 文件夹里会出现一个自动命名的 hellowidget.pro。该 pro
+    文件具体内容等会分析，我们先生成可执行程序看看。<br>
+    （3）用 qmake 生成 Makefile：<br>
+    <div class="cl">qmake</div>
+    qmake 不带任何选项就是默认工作在第二种模式，它会扫描项目文件 hellowidget.pro，自动生成 Makefile
+    文件。执行这条命令后，项目文件夹里会多出来这些内容：debug 和 release 两个文件夹，以及 Makefile、Makefile.Debug 和
+    Makefile.Release 三个文件。Makefile 是总的生成脚本文件，Makefile.Debug 用于生成可调试的目标程序，而
+    Makefile.Release 用于发布优化版的目标程序，总的脚本 Makefile 会根据不同的 make
+    命令生成相应的调试版或优化发行版程序。debug 是存储编译过程中的临时文件和可执行程序，这个是对于调试版程序。release
+    是也是类似的，但它是存储优化发行版的可执行程序。<br>
+    （4）调用 make 工具生成可执行程序：<br>
+    <div class="cl">mingw32-make</div>
+    MinGW 的生成工具是 mingw32-make，该命令执行之后，默认生成的是 release 版可执行程序，在 release 文件夹里。<br>
+    如果想手动指定生成 debug 版本目标程序，可以执行命令：<br>
+    <div class="cl">mingw32-make debug</div>
+    如果手动指定生成 release 版本目标程序，可以执行命令：<br>
+    <div class="cl">mingw32-make release</div>
+    如果希望同时生成 debug 和 release 两种版本程序，就执行：<br>
+    <div class="cl">mingw32-make all</div>
+    执行这些命令后，可以在 debug 文件夹里看到调试版的目标程序，在 release 文件夹里看到优化发行版的目标程序。<br>
+    我们在使用 qmake 构建程序的过程中，就不需要自己使用 moc 工具为 Qt 类生成元对象系统代码了，因为 qmake 自动将 moc 工具命令放在
+    Makefile 里面，在构建程序时会自动处理，帮程序员省了许多事。以后章节里还有 uic 、rcc 等工具也会自动在 Makefile 里调用，这是
+    qmake 工具的方便之处。<br>
+    （5）运行可执行程序：<br>
+    还在刚才的 Qt 命令行里，如果要执行调试版目标程序：<br>
+    <div class="cl">debug\hellowidget</div>
+    如果要执行优化发行版程序：
+    <div class="cl">release\hellowidget</div>
+    运行效果和之前小节的一样，就不截图了。对于 Linux 系统，文件路径的分隔符是 / ，并且在 Linux 里的生成工具就是 make，比
+    mingw32-make 名字简短。<br>
+    <br>
+    接下来我们看看 hellowidget.pro 文件里的内容：<br>
+    <div class="code"> <span style=" color:#008000;">######################################################################</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">#</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Automatically</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">generated</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">by</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">qmake</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">(3.0)</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">???</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">??</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">17</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">20:31:15</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">2015</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">######################################################################</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">QT</span>+=widgets</pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">TEMPLATE</span><span style=" color:#c0c0c0;"> </span>=<span
+style=" color:#c0c0c0;"> </span>app</pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">TARGET</span><span style=" color:#c0c0c0;"> </span>=<span
+style=" color:#c0c0c0;"> </span>hellowidget</pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">INCLUDEPATH</span><span style=" color:#c0c0c0;"> </span>+=<span
+style=" color:#c0c0c0;"> </span>.</pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">#</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Input</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">HEADERS</span><span style=" color:#c0c0c0;"> </span>+=<span
+style=" color:#c0c0c0;"> </span>hellowidget.h</pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">SOURCES</span><span style=" color:#c0c0c0;"> </span>+=<span
+style=" color:#c0c0c0;"> </span>hellowidget.cpp<span style=" color:#c0c0c0;"> </span>main.cpp</pre>
+    </div>
+    文件里井号打头的都是注释，可以忽略掉。文件里实际起作用的就只有六句。<br>
+    第一句：<br>
+    <div class="code">
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">QT</span>+=widgets</pre>
+    </div>
+    是我们在 qmake 命令里面指定添加的 QtWidgets 模块（即 widgets），因为隐藏包含了 QtCore（即 core）和 QtGui（即
+    gui），所以不用手动添加 core 和 gui。<br>
+    第二句：<br>
+    <div class="code">
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">TEMPLATE</span><span style=" color:#c0c0c0;"> </span>=<span
+style=" color:#c0c0c0;"> </span>app</pre>
+    </div>
+    这代表生成的目标程序类型模板，app 是可执行的应用程序，另外还可以生成静态库和动态库、插件等等。一般大部分的模板都是 app 应用程序。
+    <div class="code">
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">TARGET</span><span style=" color:#c0c0c0;"> </span>=<span
+style=" color:#c0c0c0;"> </span>hellowidget</pre>
+    </div>
+    TARGET 指定目标程序的名字，在 Windows 系统里就是 hellowidget.exe，在 Linux 系统里可执行程序不需要扩展名，直接就叫
+    hellowidget。
+    <div class="code">
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">INCLUDEPATH</span><span style=" color:#c0c0c0;"> </span>+=<span
+style=" color:#c0c0c0;"> </span>.</pre>
+    </div>
+    这句是将当前目录（.）添加到了包含路径（INCLUDEPATH）里，程序编译时除了从 Qt 库的包含路径，还会从当前目录里寻找头文件，比如
+    hellowidget.h 就在当前文件夹里。至于 Qt 库的包含路径，qmake 自己默认就会添加，不需要我们操心的。
+    <div class="code">
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">HEADERS</span><span style=" color:#c0c0c0;"> </span>+=<span
+style=" color:#c0c0c0;"> </span>hellowidget.h</pre>
+    </div>
+    HEADERS 就是指定项目里的头文件。
+    <div class="code">
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">SOURCES</span><span style=" color:#c0c0c0;"> </span>+=<span
+style=" color:#c0c0c0;"> </span>hellowidget.cpp<span style=" color:#c0c0c0;"> </span>main.cpp</pre>
+    </div>
+    SOURCES 就是指定项目里的源代码文件。以后还会学到图形界面文件和资源文件等，本节只需要头文件和源代码文件。可以看出 pro
+    文件的语法是很简洁明了的，认识点英文，猜都能猜到大致的意思是什么。<br>
+    注意文件里语句既有“=” ，也有“+=”，这两个的意义和 C++
+    语法类似：“=”是赋值，左边的变量会被指定为右边的值，并且仅仅是右边的值；“+=”是追加的意思，因为 qmake 会给一些变量默认添加 Qt
+    内置的一些值（如 Qt 库的包含路径），这些值是必需的，不能被取代，所以要用追加模式。<br>
+    <br>
+    pro 文件可以通过 qmake 生成，或者手动编写 pro 文件也行。 qmake 又可以按照 pro 文件的内容生成 Makefile，然后使用
+    make 构建目标程序。pro 文件是非常关键的项目管理和控制项目生成的文件，集成开发环境 QtCreator 就是采用 pro
+    文件管理和生成项目的，以后我们会大量接触 pro 文件的。<br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 50%;">
+            <div style="text-align: center;"> <a href="ch02-01.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 50%;">
+            <div style="text-align: center;"> <a href="ch02-03.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

@@ -3,11 +3,9 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <title>ch02-03</title>
-    
-<link href="css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-
-<script src="thumbnailviewer.js" type="text/javascript">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -15,16 +13,1112 @@
 * Visit http://www.dynamicdrive.com/ for full source code
 ***********************************************/
 
-</script>
+</script> </head>
+  <body>
+    <div class="os1">2.3 Hello Designer</div>
+    <p>上一节的 Hello Widget 例子中，主界面窗口的尺寸和标签控件显示的矩形区域等，都是用 C++ 代码编写的。
+      窗口和控件的尺寸都是预估的，控件如果多起来，那就不好估计每个控件合适的位置和大小了。 用 C++ 代码编写图形界面的问题就是不直观，因此 Qt
+      项目开发了专门的可视化图形界面编辑器—— Qt Designer， 即 Qt 设计师。通过设计师就可以很方便地创建图形界面文件 *.ui ，然后将
+      ui 文件应用到源代码里面， 做到所见即所得（What You See Is What You
+      Get，WYSIWYG），大大方便了图形界面的设计。本节就示范设计师的简单使用， 学习拖拽控件和设置控件属性，并将 ui 文件应用到 Qt
+      程序代码里。</p>
+    <div class="os2">2.3.1 Qt 设计师编辑 UI</div>
+    可以从开始菜单--&gt;Qt 5.4.0--&gt;5.4--&gt;MinGW 4.9 (32-bit)--&gt;Designer， 或者在 Qt
+    命令行直接运行命令 designer ，两种方法都可以打开设计师。 设计师默认会弹出新建窗体的对话框，如下图所示：
+    <center><img src="images/ch02/ch02-03-01.png" width="600"></center>
+    <br>
+    新建窗体对话框左边是各种窗体的类型模板，“templates/forms”常见的作为用户主界面的窗体类型，
+    头三个都是对话框窗口，分别为按钮居底部、按钮居右边和不带按钮。 第四个是“Main
+    Window”，即主窗口界面，主窗口功能最为丰富，有菜单栏、工具栏、状态栏、中央部件， 并且可以添加停靠/浮动窗口。这个比较复杂，后续章节讲解。
+    第五个是最简单的通用“Widget”界面，本节就使用这个作为主界面窗口。
+    选中“Widget”之后，再点击“创建”按钮，就会新建一个该类型的窗体，如下图所示：
+    <center><img src="images/ch02/ch02-03-02.png" width="600"></center>
+    <br>
+    设计师的上方是菜单栏和工具栏，工具栏里需要留心的是中间的四个按钮，是指图形界面的四种编辑模式，依次为：<br>
+    <ul>
+      <li>①编辑窗口部件：为窗口拖拽控件（即部件），编辑控件布局等。</li>
+      <li>②编辑信号/槽：用户在图形界面的一些动作会触发窗口或控件的信号，信号对应的处理函数就是槽函数，这种模式实现二者的关联关系。</li>
+      <li>③编辑伙伴：最常见的就是将标签控件设置为其他控件（如编辑框）的伙伴，标签控件文本就可以指明关联控件的名称/功能/用途，并且能方便地设置快捷
+        键。</li>
+      <li>④编辑 Tab 顺序：在窗口中，用户可以按 Tab 键依次选择进入各个控件，这个模式就是编辑各个控件被选择的顺序。</li>
+    </ul>
+    本节只使用第一种“编辑窗口部件”的模式，其他的以后再慢慢讲。<br>
+    设计师左边的“Widget Box”，是控件（或叫部件）工具箱， 包含了丰富的可拖拽的 Qt 控件。中间部分带有点阵标示的窗体就是我们新建的界面窗体。
+    设计师右边是三个工具箱窗口：对象查看器是记录当前窗体里面有哪些控件， 每个控件对象的名称和类名都会列出来，可以看到默认的对象是 Form，它的类名是
+    QWidget； 右边第二个是属性编辑器，用于编辑窗体或控件的属性，比如对象名称、窗口标题、窗口大小等等。
+    右边第三个工具箱比较复杂，它是选项卡式的，有“资源浏览器”、“动作编辑器”和“信号/槽编辑器”三个工具箱， 这几个以后再讲，本节暂时用不着。<br>
+    拖拽控件是最简单不过的了，这里描述拖一个标签控件到主界面。在左边“Widget Box”里面，把滑块拖到最底下，
+    或用鼠标滚轮往下滚到底，可以看到“Display Widgets”类别里的 “Label”控件，这个就是上一节的 QLabel 。
+    将鼠标指针移到“Label”，左键按下不松，再往主界面窗口里拖动，拖到大概靠主界面窗体的左上位置，
+    然后松开鼠标左键，就给主界面窗口添加了一个标签控件了。添加后，界面窗体如下图所示：
+    <center><img src="images/ch02/ch02-03-03.png" width="600"></center>
+    <br>
+    上图只截了中间的主界面窗体和右边的两个工具窗口，主界面的“TextLabel”就是选中的标签控件，
+    它周围一圈有8个可拖动的小方块，可以拉伸标签控件的大小，如果鼠标左键按到该控件上拖动就可以控制 控件显示的位置。<br>
+    在对象查看器里，这时候多出来一行“label”和“QLabel”，就是标签对象的名称和类名。<br>
+    在属性编辑器里，可以看到“label : QLabel”字样，说明这时可以设置 label 的属性。 label
+    的属性非常多，可以用鼠标滚轮滚动查看众多属性，就不一一枚举了。最关键的属性都自动被加粗显示了，有三个： <br>
+    <ui>
+      <li><b>objectName</b>：对象名称，该名称决定以后在 C++
+        代码里这个对象的指针变量名，用过这个对象名称就能调用该对象的函数。ui 文件里的对象名称全是指针变量名，因为它们全都是用 new 创建的。</li>
+      <li><b>geometry</b>：控件显示占据的几何图形，就是显示的矩形区域，该属性是通过四个子属性控制的， 点开 "+"，展开看到
+        X、Y、宽度、高度，设置这四个数值，可以控制控件显示的位置和控件的大小。</li>
+      <li><b>text</b>：显示的文本，标签控件就是专门用来显示文本的，这个是它最主要的功能。</li>
+    </ui><br>
+    标签控件对象名称就不修改了，因为就一个。我们设置 geometry 的四个子属性： X 为 10，Y 为 10，宽度为 200，高度为
+    40，如下图所示：
+    <center><img src="images/ch02/ch02-03-04.png" width="600"></center>
+    <br>
+    可以看到中间的标签控件就正确地显示为 距离左边 10 像素，距离上方 10 像素，宽度为 200 像素， 高度为 40 像素的大标签了。<br>
+    然后在属性编辑器里拖动右边滑块，找到 text 属性，点击值列的“TextLabel”， 修改为“Hello
+    Designer!”（不含双引号），主界面里的标签就显示为“Hello Designer!”了。
+    但是字比较小，我们上一节高大上的标题一类型文字怎么设置呢？<br>
+    编辑文本的时候，注意编辑框右边很小的 “...” 按钮和红色向左弯的箭头按钮， 红箭头按钮是用来清空文本编辑框的。
+    点击“...”按钮会弹出编辑丰富文本的扩展对话框，如下图所示：
+    <center><img src="images/ch02/ch02-03-05.png" width="600"></center>
+    <br>
+    “编辑文本”对话框上方可以看到“多文本”模式的可视化编辑工具栏，类似 WORD 编辑文本格式。 “编辑文本”对话框下方是两个选项卡，“多文本”和“源”，
+    “多文本”是所见即所得的丰富文本显示模式，“源”是指 HTML 格式源码。 我们点击“源”选项卡，进入 HTML 源码编辑，修改为下图所示：<br>
+    <center><img src="images/ch02/ch02-03-06.png"></center>
+    <br>
+    给文本添加 h1 标签之后点击“确定”按钮，可以看到标题一文本效果：<br>
+    <center><img src="images/ch02/ch02-03-07.png"></center>
+    <br>
+    这时看到的是带有点阵的主界面窗口，点阵是方便对齐控件和估计控件大小的，点阵分割的最小正方形就是 10*10 的。
+    如果希望看到运行时的主界面窗口显示效果，可以点击设计师的菜单“窗体”--&gt;“预览(P)...”， 或者按快捷键
+    Ctrl+R，新弹出显示的就是运行时没有点阵的正常窗体预览效果：<br>
+    <center><img src="images/ch02/ch02-03-08.png"></center>
+    <br>
+    点击右上角关闭按钮就可以关闭预览。到这我们的主界面窗口就编辑完成了。<br>
+    点击设计师菜单“文件”--&gt;“保存(S)”，或者按快捷键 Ctrl+S，将该文件保存到
+    D:\QtProjects\ch02\hellodesigner\ 文件夹里面，保存的文件名为 hello.ui 。 <br>
+    <br>
+    ui 文件其实就一个标准 XML 格式的文本文件（感兴趣的读者可以用记事本打开看看），需要通过 uic 工具将其转换为项目里可用的 ui_*.h
+    头文件， 这个头文件里才是真正可用的 C++ 代码。接下来我们开始进行转换：<br>
+    打开 Qt 命令行，进入 D:\QtProjects\ch02\hellodesigner\ 文件夹：
+    <div class="cl">cd /d D:\QtProjects\ch02\hellodesigner\</div>
+    执行 uic 命令：
+    <div class="cl">uic hello.ui -o ui_hello.h</div>
+    查看该头文件代码，内容如下：
+    <div class="code"> <span style=" color:#008000;">/********************************************************************************</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
 
+style=" color:#008000;">**</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Form</span><span
 
-  </head>
-  
-  
-<div class="os1">2.3 Hello Designer!</div>
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">generated</span><span
 
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">from</span><span style=" color:#c0c0c0;"> </span><span
 
+style=" color:#008000;">reading</span><span style=" color:#c0c0c0;"> </span><span
 
+style=" color:#008000;">UI</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">file</span><span
 
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">'hello.ui'</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
 
+style=" color:#008000;">**</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#008000;">**</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Created</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">by:</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">Qt</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">User</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Interface</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Compiler</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">version</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">5.4.0</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#008000;">**</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#008000;">**</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WARNING!</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">All</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">changes</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">made</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">in</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">this</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">file</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">will</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">be</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">lost</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">when</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">recompiling</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">UI</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">file!</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#008000;">********************************************************************************/</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;"> </span>UI_HELLO_H</pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">UI_HELLO_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">&lt;QtCore/QVariant&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">&lt;QtWidgets/QAction&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">&lt;QtWidgets/QApplication&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">&lt;QtWidgets/QButtonGroup&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">&lt;QtWidgets/QHeaderView&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">&lt;QtWidgets/QLabel&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">&lt;QtWidgets/QWidget&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#800080;">QT_BEGIN_NAMESPACE</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#800080;">Ui_Form</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span>QLabel<span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">*</span><span style=" color:#800000;">label</span><span
+
+style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">setupUi</span><span
+
+style=" color:#000000;">(</span>QWidget<span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">*</span><span style=" color:#000000;">Form</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">if</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">(</span><span style=" color:#000000;">Form</span><span
+
+style=" color:#000000;">-&gt;</span>objectName<span style=" color:#000000;">().</span>isEmpty<span
+
+style=" color:#000000;">())</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">            </span><span style=" color:#000000;">Form</span><span
+
+style=" color:#000000;">-&gt;</span>setObjectName<span style=" color:#000000;">(</span>QStringLiteral<span
+
+style=" color:#000000;">(</span><span style=" color:#008000;">"Form"</span><span
+
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">Form</span><span
+
+style=" color:#000000;">-&gt;</span>resize<span style=" color:#000000;">(</span><span
+
+style=" color:#000080;">400</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">300</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">label</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span>QLabel<span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">Form</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">label</span><span
+
+style=" color:#000000;">-&gt;</span>setObjectName<span style=" color:#000000;">(</span>QStringLiteral<span
+
+style=" color:#000000;">(</span><span style=" color:#008000;">"label"</span><span
+
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">label</span><span
+
+style=" color:#000000;">-&gt;</span>setGeometry<span style=" color:#000000;">(</span>QRect<span
+
+style=" color:#000000;">(</span><span style=" color:#000080;">10</span><span style=" color:#000000;">,</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">10</span><span style=" color:#000000;">,</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">200</span><span style=" color:#000000;">,</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">40</span><span style=" color:#000000;">));</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">retranslateUi</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">Form</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">        </span>QMetaObject<span style=" color:#000000;">::</span>connectSlotsByName<span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">Form</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">setupUi</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">retranslateUi</span><span
+
+style=" color:#000000;">(</span>QWidget<span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">*</span><span style=" color:#000000;">Form</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">Form</span><span
+
+style=" color:#000000;">-&gt;</span>setWindowTitle<span style=" color:#000000;">(</span>QApplication<span
+
+style=" color:#000000;">::</span>translate<span style=" color:#000000;">(</span><span
+
+style=" color:#008000;">"Form"</span><span style=" color:#000000;">,</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"Form"</span><span
+
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span
+
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">label</span><span
+
+style=" color:#000000;">-&gt;</span>setText<span style=" color:#000000;">(</span>QApplication<span
+
+style=" color:#000000;">::</span>translate<span style=" color:#000000;">(</span><span
+
+style=" color:#008000;">"Form"</span><span style=" color:#000000;">,</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"&lt;h1&gt;Hello</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Designer!&lt;/h1&gt;"</span><span
+
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span
+
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">retranslateUi</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">class</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Form</span><span style=" color:#000000;">:</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Ui_Form</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{};</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">}</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">namespace</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Ui</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#800080;">QT_END_NAMESPACE</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">UI_HELLO_H</span></pre>
+    </div>
+    代码开头的注释提醒开发者不要手动修改该头文件，因为 uic 工具下次自动生成 .h 文件时，会把旧的代码全清掉，然后生成新的代码内容。<br>
+    QT_BEGIN_NAMESPACE 和 QT_END_NAMESPACE 这两个宏标示中间的代码是包含在名字空间里的，就是一个提示作用，没有实际意义。<br>
+    第一个类是全局范围定义的 Ui_Form 类，里面首先定义了一个 label 指针，注意这个指针名称就是之前设计师里显示的
+    objectName。接着定义了一个 setupUi 函数，这个是最关键的生成图形界面的函数，它接收一个 QWidget 对象的指针，然后为这个
+    QWidget 对象设置窗口界面和控件。还有一个 retranslateUi
+    函数，是专门用于支持多国语言翻译的，主窗口和标签控件的字符串都在这重新翻译一下，如果有多国语言支持的翻译文件，界面的多国语言显示就通过该函数实现。<br>
+    这两个函数细节就不讲解了，以后还会遇到，而且它们都是 uic 自动生成的，不需要我们手动编写或修改，不用太担心细节，学会用这个头文件就可以了。<br>
+    接下来定义了一个叫 Ui 的名字空间，空间里定义了一个类 Form ，简单地从 Ui_Form 类继承一下，并没有添加额外的代码。使用 Ui
+    名字空间的好处就是避免名称冲突，所以正常都不会直接使用 Ui_Form 类，而是用名字空间里的 Ui::Form 类。<br>
+    <br>
+    需要注意的是 ui_hello.h 头文件里没有 Q_OBJECT 宏，它里面定义的类也没有从任何窗口或控件类继承。无论是 Ui_Form 类还是
+    Ui::Form 类，它们都不是窗口类！<br>
+    准确地说，它们通过 setupUi 函数，辅助该函数参数里的窗口对象（QWidget
+    *Form）构建图形界面，它们帮助别的窗口类对象构建图形界面，仅此而已。当然，在 setupUi 函数里新建的控件指针，如 label，是
+    Ui_Form 或Ui::Form 类里的成员变量，代码里需要通过这个类的成员变量来操控相应的控件。<br>
+    <br>
+    如果要在项目里面使用 ui 文件（其实是
+    ui_*.h），通常有三种方式：直接使用方式、多重继承使用方式和成员变量使用方式。本节讲述前两种使用方式，而下一节 QtCreator
+    自动生成的代码就是成员变量使用方式，本节就不重复了。<br>
+    <br>
+    <div class="os2">2.3.2 UI 直接使用法—— Hello Designer</div>
+    <p> 直接使用法原理是最简单的，创建一个 QWidget 类对象和 Ui::Form 类对象，调用 Ui::Form 对象的 setupUi
+      函数设置一下主窗体，然后显示就行了。我们在 D:\QtProjects\ch02\hellodesigner\ 文件夹里新建一个
+      main.cpp，然后编辑代码如下：</p>
+    <div class="code"> <span style=" color:#000080;"><span style=" color:#008000;">//main.cpp<br>
+        </span>#include</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">&lt;QtWidgets/QApplication&gt;</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">&lt;QtWidgets/QWidget&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">"ui_hello.h"</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">main</span><span
+
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">argc</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#808000;">char</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span
+
+style=" color:#000000;">argv</span><span style=" color:#000000;">[])</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span>QApplication<span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">a</span><span style=" color:#000000;">(</span><span style=" color:#000000;">argc</span><span
+
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">argv</span><span
+
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span>QWidget<span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">*</span><span style=" color:#000000;">hw</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">new</span><span
+
+style=" color:#c0c0c0;"> </span>QWidget<span style=" color:#000000;">();</span><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//main</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">GUI</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">window</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+
+style=" color:#000000;">::</span><span style=" color:#800080;">Form</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">createUi</span><span
+
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">      </span><span
+
+style=" color:#008000;">//createUi</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">is</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">not</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">a</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">real</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">window</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">createUi</span><span
+
+style=" color:#000000;">.</span><span style=" color:#000000;">setupUi</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">hw</span><span style=" color:#000000;">);</span><span
+
+style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//createUi</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">is</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">a</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">tool</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">for</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">creating</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">the</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">GUI</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">hw</span><span
+
+style=" color:#000000;">-&gt;</span>show<span style=" color:#000000;">();</span><span
+
+style=" color:#c0c0c0;">             </span><span style=" color:#008000;">//hw</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">is</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">the</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">real</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">window</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">return</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">a</span><span style=" color:#000000;">.</span>exec<span
+
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">}</span></pre>
+    </div>
+    <p>main.cpp 包含了三个头文件 QApplication、QWidget 和 前面用 uic 生成的 ui_hello.h，由于
+      ui_hello.h 不包含 Q_OBJECT 宏，是不需要用元对象编译器 moc 处理的。<br>
+      main 函数里第一行是图形界面程序入口对象，第二行创建了一个 QWidget 类对象 hw（指针），作为程序的主窗口，hw
+      自己并没有创建控件或设置窗口属性。第三行：</p>
+    <div class="code">
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Form</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">createUi</span><span
+
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">      </span><span
+
+style=" color:#008000;">//createUi</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">is</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">not</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">a</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">real</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">window</span></pre>
+    </div>
+    <p>定义了 Ui::Form 类的对象 createUi（普通变量） ，这个对象自己不是一个窗口，它可以为别的窗口对象设置图形界面。第四行：</p>
+    <div class="code">
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">createUi</span><span style=" color:#000000;">.</span><span
+
+style=" color:#000000;">setupUi</span><span style=" color:#000000;">(</span><span
+
+style=" color:#000000;">hw</span><span style=" color:#000000;">);</span><span style=" color:#c0c0c0;">   </span><span
+
+style=" color:#008000;">//createUi</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">is</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">a</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">tool</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">for</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">creating</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">the</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">GUI</span></pre>
+    </div>
+    调用了 createUi 对象的 setupUi 函数，该函数接收一个窗体对象指针，这里是 hw。setupUi 函数里面的代码会为 hw
+    创建内部的控件，设置窗体大小等等。<br>
+    剩下的两行代码是显示主界面，并进入事件处理循环，直到退出。代码解释完了，当然就开始编译了。<br>
+    首先打开 Qt 命令行，进入代码文件夹：<br>
+    <div class="cl"> cd /d D:\QtProjects\ch02\hellodesigner </div>
+    然后执行一句编译链接命令：<br>
+    <div class="cl"> g++ main.cpp -I"C:\Qt\Qt5.4.0\5.4\mingw491_32\include"
+      -L"C:\Qt\Qt5.4.0\5.4\mingw491_32\lib" -lQt5Core -lQt5Gui -lQt5Widgets -o
+      hellodesigner </div>
+    因为只有一个 main.cpp 需要编译，一句命令就够了。-I"C:\Qt\Qt5.4.0\5.4\mingw491_32\include" 指定 Qt
+    库的包含路径，-L"C:\Qt\Qt5.4.0\5.4\mingw491_32\lib" 指定链接时使用的 Qt 库路径，-lQt5Core 是指链接到
+    Qt 核心库（链接时为 libQt5Gui.a，运行时对应 Qt5Core.dll），-lQt5Gui 是指链接到 Qt 底层绘图库（链接时为
+    libQt5Gui.a，运行时对应 Qt5Gui.dll），-lQt5Widgets 是指链接到 Qt 窗口和控件库（链接时为
+    libQt5Widgets.a，运行时对应 Qt5Widgets.dll），-o hellodesigner 是指生成的目标程序名称为
+    hellodesigner（Windows 默认扩展名 .exe）。<br>
+    编译链接成功后，在命令行执行 hellodesigner.exe，即可看到程序运行效果：<br>
+    <center> <img src="images/ch02/ch02-03-09.png" width="600"> </center>
+    <br>
+    本例子的显示效果与上一节的 Hello Widget 类似，只是图形界面的构建和设置代码全部交给 createUi
+    对象了。这就是可视化编程的典型示范，创建和设置图形界面的代码就用设计师 和 uic
+    来完成，其他的后台代码自己编写。将开发者从凭空想象图形界面变成直接拖动控件，这样不仅直观，而且开发者需要动手编的代码也变少了。<br>
+    <br>
+    <span style="font-weight: bold;">将图形界面设计和后台功能代码相分离，是现代 GUI
+      程序设计的通用思路，学会一种图形界面编程方法，其他的都可以触类旁通。</span><br>
+    <br>
+    <div class="os2">2.3.3 UI 多重继承使用法—— Hello UIWidget</div>
+    <p> 上一小节的代码非常简单，除了 uic 生成的 ui_hello.h 和手动编写的 main.cpp，就没其他的代码文件了。主界面是
+      QWidget 类的对象，然后该对象比较简单，没有自己的代码。如果要丰富一下主界面的窗口类，那就需要使用从 QWidget 类继承的方式并加上
+      Ui::Form 类的代码。C++ 如果要同时使用两个类的代码，有两种方式，一种是多重继承的方式，同时用 QWidget 和 Ui::Form
+      类作为基类；还有一种是使用成员变量，将 Ui::Form 类的对象作为 QWidget 派生类的成员变量，这种也叫单一继承方式，它的基类只有
+      QWidget。本小节介绍多重继承方式，而以后的代码都用 QtCreator 自动生成的单一继承方式（Ui::Form 的对象作为成员变量）。 </p>
+    我们在 D:\QtProjects\ch02 文件夹里新建一个 hellouiwidget 文件夹，并把上面 2.3.1 小节做好的 hello.ui
+    和 ui_hello.h 复制到 hellouiwidget 文件夹里。<br>
+    然后新建三个代码文件 hellouiwidget.h、hellouiwidget.cpp 和 main.cpp ，并按照下面依次输入代码内容：<br>
+    <div class="code"><span style=" color:#000080;"><span style=" color:#008000;">//hellouiwidget.h<br>
+        </span>#include</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">&lt;QtWidgets/QWidget&gt;</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">&lt;QtWidgets/QLabel&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">"ui_hello.h"</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#800080;">HelloUIWidget</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+
+style=" color:#c0c0c0;"> </span>QWidget<span style=" color:#000000;">,</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span
+
+style=" color:#800080;">Form</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Q_OBJECT</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">HelloUIWidget</span><span
+
+style=" color:#000000;">(</span>QWidget<span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">*</span>parent<span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span
+
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" color:#800080;">HelloUIWidget</span><span
+
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#808000;">protected</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">AdjustLabel</span><span
+
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">};</span></pre>
+    </div>
+    hellouiwidget.h 包含了三个头文件 QWidget、QLabel 和 使用 uic 生成的 ui_hello.h ，里面定义了一个类
+    HelloUIWidget 。HelloUIWidget 从 QWidget、Ui::Form 两个基类继承而来，都是 public 继承方式。由于
+    基类有一个是 Qt 窗口类 QWidget，所以在类定义开始处必须加入 Q_OBJECT 宏，用于声明元对象系统。<br>
+    该类定义了两个公开类型（public）的函数，即构造函数和析构函数。<br>
+    最后一个是我们自己编写的保护类型（protected）的函数 AdjustLabel，用于调整 label
+    标签对象的显示效果。使用多重继承或成员变量的方式就容易丰富窗口类的功能，我们在 HelloUIWidget&nbsp; 里添加了 AdjustLabel
+    函数，当然还可以添加更多的函数。接下来看看类的实体代码 hellouiwidget.cpp：<br>
+    <div class="code"> <span style=" color:#008000;">//hellouiwidget.cpp</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">"hellouiwidget.h"</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#800080;">HelloUIWidget</span><span style=" color:#000000;">::</span><span
+
+style=" color:#000000;">HelloUIWidget</span><span style=" color:#000000;">(</span>QWidget<span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span><span
+
+style=" color:#c0c0c0;"> </span>QWidget<span style=" color:#000000;">(</span><span
+
+style=" color:#000000;">parent</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">setupUi</span><span
+
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span><span
+
+style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//Must</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">call</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">setupUi</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">first!</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//Then</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">do</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">other</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">things.</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">AdjustLabel</span><span
+
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#800080;">HelloUIWidget</span><span style=" color:#000000;">::~</span><span
+
+style=" color:#800080;">HelloUIWidget</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//Do</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">not</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">need</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">to</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">delete</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">labels/widgets</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">manually.</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//They</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">will</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">be</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">deleted</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">by</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">Qt</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">automatically.</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">HelloUIWidget</span><span
+
+style=" color:#000000;">::</span><span style=" color:#000000;">AdjustLabel</span><span
+
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">label</span><span
+
+style=" color:#000000;">-&gt;</span>setText<span style=" color:#000000;">(</span>tr<span
+
+style=" color:#000000;">(</span><span style=" color:#008000;">"&lt;h1&gt;Hello</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">UIWidget!&lt;/h1&gt;"</span><span
+
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">label</span><span
+
+style=" color:#000000;">-&gt;</span>setStyleSheet<span style=" color:#000000;">(</span>tr<span
+
+style=" color:#000000;">(</span><span style=" color:#008000;">"color:</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">red;</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">background-color:</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">rgb(0,</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">255,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">255)"</span><span
+
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">}</span></pre>
+    </div>
+    在 HelloUIWidget 构造函数定义处，它使用输入参数 parent 初始化了基类 QWidget，另一个基类 Ui::Form
+    因为它构造函数不需要参数，就没必要手动编写初始化代码，C++ 编译器自己会先构造好基类。HelloUIWidget 从基类 Ui::Form 继承了
+    setupUi 函数，所以可直接调用该函数为自己窗口（this）构建图形界面。在构建好图形界面的控件之后，我们再调用自己编写的 AdjustLabel
+    函数修改标签控件显示效果。<br>
+    第二个函数是 HelloUIWidget 类的析构函数，里面没有实际代码。仔细看看 2.3.1 节 ui_hello.h 代码可以发现 label
+    指针保存的对象是用 new 创建的，而这里我们没有手动 delete 它，因为在 Qt
+    主窗口关闭时，这些控件会随着主窗口全会被自动销毁，对于控件对象可以不用手动编写 delete 代码。<br>
+    第三个函数是 AdjustLabel ，这个函数里对 label 指针保存的对象进行处理，label 指针成员变量是也是从基类 Ui::Form
+    继承而来的。AdjustLabel 里面第一句代码：<br>
+    <div class="code">
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">label</span><span
+
+style=" color:#000000;">-&gt;</span>setText<span style=" color:#000000;">(</span>tr<span
+
+style=" color:#000000;">(</span><span style=" color:#008000;">"&lt;h1&gt;Hello</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">UIWidget!&lt;/h1&gt;"</span><span
+
+style=" color:#000000;">));</span><span style=" color:#000000;"></span></pre>
+    </div>
+    是更改标签控件显示的文本，更改后是 HTML 标题一类型的 “Hello UIWidget!” 字样。第二句代码：<br>
+    <div class="code">
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">label</span><span
+
+style=" color:#000000;">-&gt;</span>setStyleSheet<span style=" color:#000000;">(</span>tr<span
+
+style=" color:#000000;">(</span><span style=" color:#008000;">"color:</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">red;</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">background-color:</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">rgb(0,</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">255,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">255)"</span><span
+
+style=" color:#000000;">));</span></pre>
+    </div>
+    setStyleSheet 是在窗口和控件通用基类 QWidget
+    里面定义的函数，也就是说所有的窗口和控件都可以用这个函数。这个函数的用途就是设置窗口或控件的显示风格，StyleSheet 即样式表，类似编写网页用的
+    CSS 样式表，语法也和 CSS 差不多。setStyleSheet 函数接收一个字符串作为输入参数，然后解析里面的内容，按照正确的样式显示控件和窗口：<br>
+    <ul>
+      <li>color: red&nbsp; 意思是显示文字的前景色 color 为红色 red&nbsp; </li>
+      <li>background-color: rgb(0, 255, 255)&nbsp; 意思是填充的背景色 background-color 为青
+        色 rgb(0, 255, 255)</li>
+    </ul>
+    样式的设置类似上面两个，英文冒号前的是样式名称，中间是英文冒号，冒号后面跟着样式的值。多个样式之前用英文分号间隔。目前学 color 和
+    background-color 两个样式够用了，颜色值既可以用颜色名称，如
+    red、blue、green、black、white、yellow、cyan等，也可以设置红绿蓝三种颜色值，如 rgb(255, 255, 255)
+    就是白色，注意要用英文的标点符号。<br>
+    <br>
+    以前经常有些初学 Qt 的程序员死活找不到类似 setFontColor 、setBackgroundColor
+    之类的函数，然后就不知道怎么设置控件的文字颜色和背景色。那是因为 Qt
+    专门用了一套特别强大的样式表机制替代了设置颜色的函数。用样式表机制，就可以编写样式表文件，在程序运行时动态加载，程序运行时可以随意更换样式表，类似于我们常见的软
+    件换皮肤。样式表不仅可以用于改变颜色，还有更强大的设置控件前景图片、背景图片、边框图片、渐变色、边框颜色、设置字体字号等等效果。本节就先学简单的前景色和
+    背景色。<br>
+    <br>
+    讲完 HelloUIWidget 类的代码，还剩下 main.cpp 的代码：<br>
+    <div class="code"> <span style=" color:#008000;">//main.cpp</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">&lt;QtWidgets/QApplication&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">"hellouiwidget.h"</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">main</span><span
+
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">argc</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#808000;">char</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span
+
+style=" color:#000000;">argv</span><span style=" color:#000000;">[])</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span>QApplication<span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">a</span><span style=" color:#000000;">(</span><span style=" color:#000000;">argc</span><span
+
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">argv</span><span
+
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">HelloUIWidget</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">huiw</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">HelloUIWidget</span><span
+
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">huiw</span><span
+
+style=" color:#000000;">-&gt;</span>show<span style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">return</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">a</span><span style=" color:#000000;">.</span>exec<span
+
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">}</span></pre>
+    </div>
+    代码内容比较简单，main
+    函数里第一句创建图形程序的入口对象，第二句创建主界面窗口对象，第三句显示主界面窗口，最后一句进入事件循环直到退出为止。窗口对象会在主窗口关闭时自动销毁，所以没有
+    手动加 delete 代码。<br>
+    <br>
+    代码看完了，接下来就是编译生成目标程序了，介绍包含 ui 文件的项目完整生成过程，把 uic 一步也算在内了，因为如果编辑了 ui 文件，是需要重新调用
+    uic 工具的。<br>
+    （1）打开 Qt 命令行，进入 D:\QtProjects\ch02\hellouiwidget 文件夹：<br>
+    <div class="cl"> cd /d D:\QtProjects\ch02\hellouiwidget </div>
+    （2）用 uic 生成 ui_hello.h：<br>
+    <div class="cl"> uic hello.ui -o ui_hello.h </div>
+    （3）用 moc 生成元对象系统代码：<br>
+    <div class="cl"> moc hellouiwidget.h -o moc_hellouiwidget.cpp </div>
+    因为 ui_hello.h 头文件里面没有 Q_OBJECT 宏，所以不需要处理。只给 hellouiwidget.h 生成元对象系统代码就够了。<br>
+    （4）编译 cpp 源代码文件：<br>
+    <div class="cl"> g++ -c moc_hellouiwidget.cpp
+      -I"C:\Qt\Qt5.4.0\5.4\mingw491_32\include" -o moc_hellouiwidget.o </div>
+    <div class="cl"> g++ -c hellouiwidget.cpp
+      -I"C:\Qt\Qt5.4.0\5.4\mingw491_32\include" -o hellouiwidget.o </div>
+    <div class="cl"> g++ -c main.cpp -I"C:\Qt\Qt5.4.0\5.4\mingw491_32\include"
+      -o main.o </div>
+    g++ 的 -c 选项是只编译生成 *.o 文件，不进行链接。 -I"C:\Qt\Qt5.4.0\5.4\mingw491_32\include" 指定
+    Qt 库的头文件包含路径。<br>
+    （5）链接生成目标程序：<br>
+    <div class="cl"> g++ moc_hellouiwidget.o hellouiwidget.o main.o
+      -L"C:\Qt\Qt5.4.0\5.4\mingw491_32\lib" -lQt5Core -lQt5Gui -lQt5Widgets -o
+      hellouiwidget </div>
+    这条命令是将 moc_hellouiwidget.o、hellouiwidget.o、main.o 三个文件链接到 Qt 的库文件，然后生成目标程序
+    hellouiwidget（Windows 默认扩展名 .exe）。-L"C:\Qt\Qt5.4.0\5.4\mingw491_32\lib" 是指定
+    Qt 链接时所用库的路径， -lQt5Core -lQt5Gui -lQt5Widgets 是指链接到 Qt 的核心库、底层绘图库和窗口控件库。<br>
+    （6）在Qt命令行运行 hellouiwidget.exe ，可以看到效果： <br>
+    <center> <img src="images/ch02/ch02-03-10.png" width="600"> </center>
+    使用样式表之后，标签控件前景色文字是红色的了，背景色填充为青色了，终于看到不一样的标签控件了！<br>
+    <br>
+    <div class="os2">2.3.4 用 qmake 生成程序</div>
+    上面通过自己用 uic、moc、g++
+    命令生成目标程序，需要执行的命令是比较多的。之所以费力气讲解编译链接过程的步骤，就是希望读者多了解些知识，如果将来遇上编译或链接时的错误，就可以对号入座，看看大
+    概是哪里出的问题。如果不了解这些过程，可能在编译时少个 ui_*.h 或 moc_*.cpp 就会傻眼了。本小节介绍 Hello UIWidget
+    例子的傻瓜式生成方法，就是用 qmake 工具。在开始之前，把上一小节 hellouiwidget 文件夹里面生成的中间文件
+    ui_hello.h、moc_hellouiwidget.cpp、*.o 、*.exe 全删了，保留我们手动编辑的
+    hello.ui、hellouiwidget.h、hellouiwidget.cpp、main.cpp 四个文件就够了。<br>
+    （1）打开 Qt 命令行，进入 D:\QtProjects\ch02\hellouiwidget 文件夹：<br>
+    <div class="cl"> cd /d D:\QtProjects\ch02\hellouiwidget </div>
+    （2）使用 qmake 生成 .pro 项目文件：<br>
+    <div class="cl"> qmake -project "QT+=widgets" </div>
+    qmake 的 -project 选项就是为当前文件夹里的代码创建项目文件，本例子默认得到的是 hellouiwidget.pro ，就是文件夹名字加上
+    .pro 。"QT+=widgets" 是我们手动给 pro 文件加了一行，添加了 QtWidgets 模块（widgets），pro 文件默认就带有
+    QtCore（core）和 QtGui（gui）两个模块，不需要手动添加 core 和 gui 。<br>
+    （3）使用 qmake 生成 Makefile：<br>
+    <div class="cl"> qmake </div>
+    不带选项和参数的 qmake 默认就是为项目生成 Makefile，运行之后会在项目文件夹里生成 debug 和 release 两个文件夹，以及
+    Makefile、Makefile.Debug、Makefile.Release 三个生成脚本文件。<br>
+    （4）使用 make 工具生成目标程序：
+    <div class="cl"> mingw32-make all </div>
+    这条命令会把调试版和发行版的目标程序全都生成。<br>
+    （5）运行生成好的目标程序： <br>
+    Debug 调试版本程序：<br>
+    <div class="cl"> debug\hellouiwidget </div>
+    Release 发行版本程序：<br>
+    <div class="cl"> debug\hellouiwidget </div>
+    运行效果就不重复展示了，和上一小节的差不多。 <br>
+    可见用 qmake 生成目标程序就是傻瓜式的三板斧：<br>
+    <ul>
+      <li>先用 qmake -project 生成项目 pro 文件；</li>
+      <li>再直接用 qmake 生成 Makefile；</li>
+      <li>最后 make all 。</li>
+    </ul>
+    qmake 把许多 uic、moc、g++ 编译链接过程的命令都自动生成了，全放在 Makefile 脚本里，用起来就特别省事。qmake
+    创建的各种自动生成命令要比我们自己之前编的命令更为科学合理，感兴趣的读者可以记录一下 mingw32-make
+    命令执行时命令行里出现的各种生成命令，这些命令都类似于以后的 QtCreator 集成开发环境里面生成程序用的命令。<br>
+    因为本节引入了 ui 文件，我们来看看本节 pro 文件与前面 2.2.3 节的有些什么变化：<br>
+    <div class="code"> <span style=" color:#008000;">######################################################################</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#008000;">#</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Automatically</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">generated</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">by</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">qmake</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">(3.0)</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">???</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">??</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">20</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">23:08:09</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">2015</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#008000;">######################################################################</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#800080;">QT</span>+=widgets</pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#800080;">TEMPLATE</span><span style=" color:#c0c0c0;"> </span>=<span
+
+style=" color:#c0c0c0;"> </span>app</pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#800080;">TARGET</span><span style=" color:#c0c0c0;"> </span>=<span
+
+style=" color:#c0c0c0;"> </span>hellouiwidget</pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#800080;">INCLUDEPATH</span><span style=" color:#c0c0c0;"> </span>+=<span
+
+style=" color:#c0c0c0;"> </span>.</pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#008000;">#</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Input</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#800080;">HEADERS</span><span style=" color:#c0c0c0;"> </span>+=<span
+
+style=" color:#c0c0c0;"> </span>hellouiwidget.h</pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#800080;">FORMS</span><span style=" color:#c0c0c0;"> </span>+=<span
+
+style=" color:#c0c0c0;"> </span>hello.ui</pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#800080;">SOURCES</span><span style=" color:#c0c0c0;"> </span>+=<span
+
+style=" color:#c0c0c0;"> </span>hellouiwidget.cpp<span style=" color:#c0c0c0;"> </span>main.cpp</pre>
+    </div>
+    前面 2.2.3 节 Hello Widget 例子没有 hello.ui 文件，本节 Hello UIWidget 多的 hello.ui 在 pro
+    文件里就是对应倒数第二行：<br>
+    <div class="code">
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#800080;">FORMS</span><span style=" color:#c0c0c0;"> </span>+=<span
+
+style=" color:#c0c0c0;"> </span>hello.ui</pre>
+    </div>
+    这句意思就是添加一个构建窗体的 hello.ui 文件，qmake 生成的 Makefile 脚本会自动将 hello.ui 转换成
+    ui_hello.h，也会自动为 hellouiwidget.h 生成 moc_hellouiwidget.cpp ，为开发人员省了很多事。本节的
+    pro 文件的其他内容和 2.2.3 节的类似。<br>
+    <br>
+    最后用一张图展示本节 Hello UIWidget 例子的生成过程，不论是自己一句句敲命令还是用 qmake 生成，大致的过程都是如下图所示：<br>
+    <center><img src="images/ch02/ch02-03-11.png" width="600">
+    </center>
+    <br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 50%;">
+            <div style="text-align: center;"> <a href="ch02-02.htm"><img class="pic"
+
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 50%;">
+            <div style="text-align: center;"> <a href="ch02-04.htm"><img class="pic"
+
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

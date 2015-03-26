@@ -42,8 +42,7 @@
     <p> 根据不同的操作系统执行相应的命令，完成安装后就可以继续下面的安装了。 </p>
     <p><b> 读者请注意一个操作系统版本的问题：因为Linux社区发行版非常活跃，版本更新快（尤其是Ubuntu），经常是半年到一年更新一次，
         所以上述命令通常只能在比较新的Linux版本上才能执行成功，旧的Linux版本很可能是Linux发行版官方都不支持了，
-        因而会导致上面命令执行失败。一般对于活跃的Linux社区，其单个系统版本的生存期是一年到两年左右，安装Qt开发环境之前最好更新到2014年之后发
-        布的Linux版本。 </b></p>
+        因而会导致上面命令执行失败。一般对于活跃的Linux社区，其单个系统版本的生存期是一年到两年左右，安装Qt开发环境之前最好更新到2014年之后发布的Linux版本。 </b></p>
     <div class="os2">1.4.2 安装Qt开发环境</div>
     <p> Qt安装包下载方式之前说过了，32位Linux安装包为 qt-opensource-linux-x86-5.4.0.run，
       64位Linux安装包为 qt-opensource-linux-x64-5.4.0.run。下载的run文件不一定具有可执行权限，
@@ -51,7 +50,7 @@
     </p>
     <div class="cl">chmod +x /文件夹路径/qt-opensource-linux-x64-5.4.0.run</div>
     <br>
-    将“文件夹路径”替换为自己系统里该run文件路径即可。然后可以直接单击运行该run文件，开始安装。 注意以下是以普通用户权限安装的，安装位置是
+    将“文件夹路径”替换为自己系统里该run文件路径即可。然后可以直接点击运行该run文件，开始安装。 注意以下是以普通用户权限安装的，安装位置是
     /home/用户名/Qt5.4.0/ ， 如果希望安装到其他的 如 /opt/ 目录，是需要root权限的。<br>
     <br>
     下面示范简单的普通用户安装方式，需要用户家目录 /home 所在磁盘分区至少剩余 2 GB 空间，用于安装Qt开发环境。
@@ -164,22 +163,22 @@
       gnome-terminal <br>
     </div>
     两种桌面环境的命令行工具名字不一样，KDE 桌面里用 konsole 启动命令行， GNOME 桌面里用 gnome-terminal 启动命令行。上面
-    qt5env.sh 文件里内容比较简单， 就是设置环境变量 QTDIR 指示 Qt 库的位置，然后添加 Qt 库的 bin 目录到 PATH 变量里。
-    由于我们把 QTDIR/bin 目录放在了旧的 $PATH 变量的前面，所以进入该命令行后， 会优先使用我们自己安装的 5.4.0 版本 Qt
-    库工具集。LD_LIBRARY_PATH 变量是类似地设置，LD_LIBRARY_PATH 是指定动态链接库的路径，也是优先使用我们安装的 Qt
-    5.4.0 版本动态链接库。<br>
+    qt5env.sh 文件里内容比较简单， 就是设置环境变量 QTDIR 指示 Qt 库的位置，然后添加 Qt 库的 bin 目录到 PATH
+    变量里，并且添加 Qt 库的 lib 目录到 LD_LIBRARY_PATH 变量里。 由于我们把 QTDIR/bin 目录放在了旧的 $PATH
+    变量的前面，所以进入该命令行后， 会优先使用我们自己安装的 5.4.0 版本 Qt 库工具集。LD_LIBRARY_PATH
+    变量是类似地设置，LD_LIBRARY_PATH 是指定动态链接库的路径，也是优先使用我们安装的 Qt 5.4.0 版本动态链接库。<br>
     默认情况下该文件不具有可执行权限，需要执行下面命令使其生效：<br>
     <div class="cl"> chmod +x ~/qt5env.sh </div>
     <br>
-    以后就可以点击该脚本启动我们自己定制的命令行了。可以在我们定制的命令行里面 尝试逐条运行以下命令看看效果：<br>
+    以后就可以点击该脚本启动我们自己定制的命令行了。可以在我们定制的命令行里面尝试逐条运行以下命令看看效果：<br>
     <div class="cl"> qmake -v <br>
       assistant <br>
       designer <br>
       linguist <br>
     </div>
     <p> 还有一个需要注意的问题，上面安装和配置都是同一个用户，比如 suse132， 如果同一主机上其他用户想用该版本 Qt 库， 需要将 QTDIR
-      和 PATH 两行里面的波浪线 ~ 替换为安装该 Qt 库的用户主文件夹，比如 /home/suse132 ， 使用绝对路径方式指明 Qt
-      库的路径（除了 cd ~ 一行不用变）。 </p>
+      、PATH、LD_LIBRARY_PATH 三行里面的波浪线 ~ 替换为安装该 Qt 库的用户主文件夹，比如 /home/suse132 ，
+      使用绝对路径方式指明 Qt 库的路径（ cd ~ 不用变）。 </p>
     <div class="os2">1.4.5 其他安装方式</div>
     <p> 上面介绍的是安装Qt官方发布的开发环境，还有其他的安装方式。 Linux一般都是自带Qt动态库的，目前使用Qt4系列版本的居多。
       Qt5还是比较新的，基于Qt5的KDE5桌面正在开发过程中， KDE5可能不太稳定，目前还没有作为默认Linux桌面使用。
@@ -208,15 +207,18 @@
       <tbody>
         <tr>
           <td style="width: 40%;">
-            <div style="text-align: center;"><a href="ch01-03.htm"><img class="pic"
+            <div style="text-align: center;"><a href="ch01-03.htm"><img class="pic"
+
                   style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
           </td>
           <td style="width: 20%;">
-            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+
                   style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
           </td>
           <td style="width: 40%;">
-            <div style="text-align: center;"><a href="ch01-05.htm"><img class="pic"
+            <div style="text-align: center;"><a href="ch01-05.htm"><img class="pic"
+
                   style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
           </td>
         </tr>

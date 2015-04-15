@@ -3,11 +3,9 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <title>ch02-05</title>
-    
-<link href="css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-
-<script src="thumbnailviewer.js" type="text/javascript">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -15,40 +13,526 @@
 * Visit http://www.dynamicdrive.com/ for full source code
 ***********************************************/
 
-</script>
-
-
-  </head>
-  
-  
-<div class="os1">2.5 Qt 程序调试</div>
-
-
-
-
-
+</script> </head>
+  <body>
+    <div class="os1">2.5 Qt程序调试</div>
+    <br>
+    上一节是用集成开发环境新建了一个简单的项目，本节先简单介绍打开已有项目的过程，然后切入正题，手动加几个小 bug ，分别尝试编译时、链接时以及运行时简单
+    bug 的解决方式，主要是学习一下 QtCreator
+    的调试模式，因为编写软件过程中有大量时间其实都是在调试问题（Debug），调试程序是编程中最基础的技能。<br>
+    <br>
+    <div class="os2">2.5.1 打开已有的项目</div>
+    <br>
+    首先我们自己造一个已有的项目，进入 D:\QtProjects\ch02 目录，复制 hellocreator
+    文件夹，然后直接复制，得到新的复件文件夹，修改新的复件文件夹名称为 testbug ，进入新的 D:\QtProjects\ch02\testbug
+    目录里，看到会有 6 个文件，比上一节项目管理视图里多出一个文件 hellocreator.pro.user，这个 .pro.user
+    文件不属于项目源代码一部分，它是 QtCreator 专属的用户定制项目设置（<span style="color: rgb(0, 0, 0); font-family: Arial, Helvetica; font-size: 14px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 20px; orphans: auto; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none;">user-specific
+      project settings</span>）文件，遵循 XML 语法格式，可以保存项目本地化的设置，如 Qt 套件、编译环境、构建目录位置等
+    QtCreator 项目模式里的设置内容，都存在该文件里。QtCreator
+    打开项目时会读取这个设置文件，比较该文件里的项目配置与当前项目位置等是否符合，符合就加载配置，不符合就会重新建立一个本地化的 .pro.user
+    文件。对不同的主机、操作系统、编译环境、Qt 库等，.pro.user 内容是不同的。所以换个主机，旧的 .pro.user 通常会失效。我们先删除
+    testbug 文件夹里的 hellocreator.pro.user ，只留下项目必备的 5 个文件。<br>
+    <br>
+    因为文件夹命名为 testbug ，现在对 pro 文件做点小变动，首先将项目文件名改为 testbug.pro ，然后用记事本之类的编辑工具打开
+    testbug.pro ，修改其中的 TARGET 一句为：<br>
+    <span style="font-weight: bold;">TARGET = testbug</span><br>
+    下面介绍打开这个新的 testbug 项目的过程。<br>
+    <br>
+    直接双击 testbug.pro 文件或者打开 QtCreator 菜单“文件”--&gt;“打开文件或项目”，打开 testbug.pro
+    项目文件，看到下面的配置项目界面：<br>
+    <center><img src="images/ch02/ch02-05-01.png" alt="openproject" width="800"></center>
+    主要就是选 Qt 套件，一般全部选中，然后点击下方的 “Configure Project”，然后 QtCreator 会自动为项目配置好
+    Qt套件等内容，并自动切换到 QtCreator 代码编辑模式。这时可以在 D:\QtProjects\ch02\testbug 文件夹里看到新的
+    testbug.pro.user ，有了新的本地化项目设置文件之后，QtCreator 就会自动加载项目配置文件，下次打开 testbug.pro
+    文件，就不会再自动弹出配置项目界面，而是直接进入编辑模式了。打开项目就介绍到这，下面我们来造几个 bug ，然后逐一解决它们，体验一下
+    QtCreator 的调试模式。<br>
+    <br>
+    <div class="os2">2.5.2 编译时错误</div>
+    <br>
+    打开 testbug 项目之后，在编辑模式打开 widget.cpp 文件，编辑内容如下：<br>
+    <div class="code"> <span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QtTest/QTest&gt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//added</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">line</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>qsleep<span style=" color:#000000;">(</span><span
+style=" color:#000080;">1000</span><span style=" color:#000000;">);</span><span
+style=" color:#c0c0c0;">       </span><span style=" color:#008000;">//added</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">line</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    上面代码就是新增了两行，包含的 &lt;QtTest/QTest&gt; 是 Qt 单元测试模块的头文件，它里面有一个睡眠函数 void
+    QTest::​qSleep(int ms)，让当前程序睡眠参数指定的 ms 毫秒。上面示范故意写错了函数名，S 大写变成了小写 s
+    。然后点击左下角的绿色三角形运行按钮，可以看到如下图所示的编译时错误：<br>
+    <center><img src="images/ch02/ch02-05-02.png" alt="compileerror1" width="800"></center>
+    下面的输出面板自动显示了编译时的错误， qsleep 没有在本文件和头文件范围内声明，在源代码编辑器 qsleep(1000)
+    这一行的行首有红色背景的感叹号，标出了这行有错误发生。我们先把睡眠函数改成正确的 qSleep，再点击左下角运行按钮，发现还有错误：<br>
+    <center><img src="images/ch02/ch02-05-03.png" alt="compileerror2" width="800"></center>
+    还是提示 qSleep 没有声明，但这回给出的错误描述不一样，在问题面板的 “note” 字样一行可以看到提示
+    “QTest::qSleep”，这次出错是因为 qSleep 函数在名字空间 QTest 里面声明的，如果要用这个函数得加名字空间前缀，或者用
+    using 语句引入名字空间。我们这里直接给出错的行加名字空间前缀，变成<br>
+    &nbsp;&nbsp;&nbsp; QTest::qSleep(1000);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    //added new line<br>
+    对于编译时错误，常见的就是写错函数名或变量名、类名，没有包含正确的头文件，没有使用正确的名字空间或类前缀等。如果是 Qt
+    自己的模块或类，直接包含相应的头文件就可以了。<br>
+    <br>
+    如果是非 Qt 库的头文件，可以在 pro 文件里添加 INCLUDEPATH 变量，比如：<br>
+    INCLUDEPATH += "C:/mylibs/extra headers"<br>
+    INCLUDEPATH += "/home/user/extra headers"<br>
+    上面第一个是 Windows 路径包含，第二个是 Linux/Unix 路径包含。添加包含路径之后，可以在项目源代码里直接包含头文件名，如<br>
+    #include &lt;extra.h&gt;<br>
+    QtCreator 编辑器支持包含的文件名补全，可自动搜索 Qt 库标准路径和额外包含路径里的头文件。接下来然后我们进入下一小节。<br>
+    <br>
+    <div class="os2">2.5.3 链接时错误</div>
+    <br>
+    按上一小节修改好代码之后，我们点击左下角的运行按钮，看到如下图所示的错误：<br>
+    <center><img src="images/ch02/ch02-05-04.png" alt="linkerror" width="800"></center>
+    这回也是撞见鬼了，就改了一行代码，还是往正确了改，怎么蹦出十几条错误？最后一条错误描述说明链接器 ld
+    返回错误了，这是链接目标文件和库文件时出了错误，无法生成最终的可执行程序。问题面板列的十几条错误，就最后倒数第二个是指向 widget.cpp
+    里的睡眠函数的，报的错误 error: undefined reference to `_imp___ZN5QTest6qSleepEi'
+    ，这是未找到真实的函数引用的意思，`_imp___ZN5QTest6qSleepEi' 是函数 QTest::qSleep
+    在编译之后的库文件里的引用名字，链接时找不到引用，通常是没有链接正确的 *.a 库声明文件（Linux 上直接链接到 *.so ）。之前提到
+    qSleep 是 Qt 单元测试模块里的函数，需要为当前项目添加对应的 Qt 模块，编译链接时 qmake
+    才会为项目添加正确的头文件目录和链接库文件。上面源代码实际没有问题，出问题的是 testbug.pro 文件。在左边项目视图打开 testbug.pro
+    文件，编辑如下：<br>
+    <div class="code"> <span style=" color:#008000;">#-------------------------------------------------</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">#</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">#</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Project</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">created</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">by</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">QtCreator</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">2015-04-08T21:34:09</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">#</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">#-------------------------------------------------</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">QT</span><span style=" color:#c0c0c0;">       </span>+=<span
+style=" color:#c0c0c0;"> </span>core<span style=" color:#c0c0c0;"> </span>gui<span
+style=" color:#c0c0c0;"> </span>testlib</pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">greaterThan(<span
+style=" color:#800080;">QT_MAJOR_VERSION</span>,<span style=" color:#c0c0c0;"> </span>4):<span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QT</span><span style=" color:#c0c0c0;"> </span>+=<span
+style=" color:#c0c0c0;"> </span>widgets</pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">TARGET</span><span style=" color:#c0c0c0;"> </span>=<span
+style=" color:#c0c0c0;"> </span>testbug</pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">TEMPLATE</span><span style=" color:#c0c0c0;"> </span>=<span
+style=" color:#c0c0c0;"> </span>app</pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">SOURCES</span><span style=" color:#c0c0c0;"> </span>+=<span
+style=" color:#c0c0c0;"> </span>main.cpp\</pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>widget.cpp</pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">HEADERS</span><span style=" color:#c0c0c0;">  </span>+=<span
+style=" color:#c0c0c0;"> </span>widget.h</pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">FORMS</span><span style=" color:#c0c0c0;">    </span>+=<span
+style=" color:#c0c0c0;"> </span>widget.ui</pre>
+    </div>
+    上面就是为项目添加了 Qt 模块 testlib ，使用单元测试模块，就应该在 pro 文件里的“QT +=”一行里添加 testlib
+    ，然后保存项目文件。QtCreator 会稍微花些时间重新解析 pro 文件，然后我们点击菜单“构建”--&gt;“重新构建项目
+    testbug”，对项目进行重新构建。一般如果修改了 pro 文件，需要手动重新构建项目，避免一些莫名其妙的构建错误（如找不到 WinMain
+    函数引用）。另外，删除构建目录如 build-testbug-Desktop_Qt_5_4_0_MinGW_32bit-Debug
+    ，然后点击构建或运行按钮，也能实现重新构建项目。如果遇到莫名其妙的构建问题，可以尝试这两种方法。<br>
+    运行正确编译链接的目标程序，主界面弹出之前会明显感觉到有 1 秒多的迟钝，这是因为我们在主界面构造函数里睡眠了 1000 毫秒，也就是 1
+    秒，显示的界面如下：<br>
+    <center><img src="images/ch02/ch02-05-05.png" alt="run" width="800"></center>
+    对于链接时错误，最常遇到的就是本小节里的 undefined reference to **** 链接错误，通常是没有链接到正确的库文件，对于 Qt
+    自己的库模块，只需要在 pro 文件里“QT += ”一行末尾加上对应的模块名字，qmake 就会在编译链接时为项目添加正确的包含路径和链接库文件。<br>
+    <br>
+    另外，对于非 Qt 模块的库文件，通常是在项目文件 pro 里添加 LIBS 变量行，一般添加规则是：<br>
+    <span style="font-weight: bold;">LIBS += 库文件路径全名<br>
+      LIBS += -L库文件路径&nbsp; -l库文件短名<br>
+    </span> 这两种写法都可行，库文件短名是指去掉打头的lib和扩展名，只留下中间的，比如 libextra.a 或 libextra.so 都写成
+    -lextra （Linux 里优先链接动态库 .so，Windows 里不用管这些）。<br>
+    示例：<br>
+    LIBS += "C:/mylibs/extra libs/extra.lib" <br>
+    LIBS += "C:/mylibs/extra libs/libextra.a" <br>
+    LIBS += "-L/home/user/extra libs"&nbsp; -lextra<br>
+    上面示范的是有空格的路径，必须加双引号才能找到正确位置，如果没空格可以省去双引号。因此不要在库的全路径里出现空格或特殊字符，那纯粹是找麻烦。示例的第一个
+    是 VC 库文件用法，第二个是 MinGW 动态链接库引用库 .a 文件或静态库 .a 文件用法，第三个是 Linux/Unix
+    里的链接库用法，MinGW 也可以采用这种写法。这些东西在以后的章节里会有些涉及，对于纯 Qt
+    程序目前不用操心的，这里只是提点一下，等到用的时候再查文档就行了。<br>
+    <br>
+    <div class="os2">2.5.4 运行时错误</div>
+    <br>
+    接着上一节，先把运行的目标程序关了，进入代码编辑模式，从左边项目视图打开 widget.cpp ，编辑代码如下：<br>
+    <div class="code"> <span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QtTest/QTest&gt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//added</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">line</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span><span style=" color:#c0c0c0;">       </span><span
+style=" color:#008000;">//added</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;(</span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*)(</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">label</span><span
+style=" color:#000000;">);</span><span style=" color:#c0c0c0;">      </span><span
+style=" color:#008000;">//show</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">the</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"wild"</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">pointer</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">label</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"Test</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">Bug"</span><span style=" color:#000000;">));</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//change</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">text</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QTest</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">qSleep</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">1000</span><span style=" color:#000000;">);</span><span
+style=" color:#c0c0c0;">       </span><span style=" color:#008000;">//added</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">line</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;(</span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*)(</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">label</span><span
+style=" color:#000000;">);</span><span style=" color:#c0c0c0;">     </span><span
+style=" color:#008000;">//show</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">normal</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">pointer</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">label</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">              </span><span
+style=" color:#008000;"> //show</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">label</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">object</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    上面代码首先是新增包含了 &lt;QDebug&gt; 头文件，QDebug 是 Qt
+    用于调试信息显示的类，包含该头文件之后，我们在构造函数里新加了四行代码，先看构造函数开头两行：<br>
+    <div class="code"> <span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">&nbsp;&nbsp;&nbsp;
+        qDebug</span><span style=" color:#000000;">()&lt;&lt;(</span><span style=" color:#808000;">void</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*)(</span><span
+        style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+        style=" color:#800000;">label</span><span style=" color:#000000;">);</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//show</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#008000;">the</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"wild"</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#008000;">pointer</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">label</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"Test</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">Bug"</span><span style=" color:#000000;">));</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//change</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">text</span></pre>
+    </div>
+    第一行是将“标签对象”指针 label 转成 void * 指针，再将 void * 打印到应用程序输出面板。qDebug() 函数是我们新增头文件
+    &lt;QDebug&gt; 里的全局函数，可以获取到默认的调试信息输出对象，这个调试信息输出对象与 C++ 的 cout 使用类似，而且更为智能。<br>
+    第二行调用了标签对象的 setText 函数，设置标签显示的文本。这里提醒一下，这句正是运行时出错的一行，后面调试时再细讲。<br>
+    再看构造函数的末尾两行：<br>
+    <div class="code"> <span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">&nbsp;&nbsp;&nbsp;
+        qDebug</span><span style=" color:#000000;">()&lt;&lt;(</span><span style=" color:#808000;">void</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*)(</span><span
+        style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+        style=" color:#800000;">label</span><span style=" color:#000000;">);</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//show</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#008000;">normal</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#008000;">pointer</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">label</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">              </span><span
+style=" color:#008000;">//show</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">label</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">object</span></pre>
+    </div>
+    倒数第二行是重新打印了一遍 void * 的标签对象指针到输出面板，为什么要转成 void * 呢？这是由于调试信息输出对象的智能解析功能，如果不是
+    void * ，qDebug 会自动获取指针指向的类对象，然后把类对象进行详细解析，再打印到输出面板。<br>
+    最后一句直接输出了 ui-&gt;label 指针，到时候我们会看到 qDebug() 除了打印指针数值，还会智能打印 label 指向对象里的内容。<br>
+    <br>
+    修改好代码之后，我们点击运行按钮，编译和链接过程都没问题，能够生成目标程序，但是在目标程序运行时，会出现下图提示：<br>
+    <center><img src="images/ch02/ch02-05-06.png" alt="runtimeerror" width="800"></center>
+    程序主界面都没显示，先弹出“应用程序错误”对话框，显示内存不能读取，这是典型的运行时错误表现。在应用程序输出面板，我们看到了构造函数第一行打印的指针数
+    值：0x3f0190。为了在运行时查看到底发生了什么，我们需要使用调试功能。<br>
+    在代码编辑器里把构造函数的头两行和末尾两行都打上断点（Breakpoint），可以在这四行行号左边空白处单击，或者按 F9 键添加断点，设置好后，我们按
+    F5 键或点击 QtCreator 左边倒数第二个调试按钮，进入调试模式：<br>
+    <center><img src="images/ch02/ch02-05-07.png" alt="debugmode" width="800"></center>
+    等待调试模式启动后，可以看到代码编辑器右边有一个局部变量和表达式显示窗口，里面可看到当前窗口对象的 this
+    指针，点开来可以看到树形结构，有该对象的父对象指针[parent]、子对象列表[children]、方法[methods]、属性[properties]、信号
+    [signals]、元对象数据[staticMetaObject]等等，[QWidget] 是基类对象，里面还可再分。现在看到 [children] 是
+    0
+    个子对象，什么都没有。这个局部变量和表达式显示窗口默认启用了智能调试插件，因此才会将内存中类对象解析得分门别类清清楚楚，而不是显示一堆裸的十六进制内存数据。<br>
+    <br>
+    调试模式下方是调试视图窗口，下面左侧默认是函数栈视图，下面右侧默认是断点列表视图。在这两个窗口上方的看起来像标题栏的东西，其实是一排控件的调试工具栏。下
+    面右侧子窗口除了可以显示断点列表视图，还有其他选项页，如 Threads 线程视图、Snapshots
+    调试快照视图，调试快照是指保存当前的调试断点、调试位置等信息，下次可以直接从这个快照地方开始调试。<br>
+    <br>
+    接下来重点看看调试工具栏：<br>
+    <center><img src="images/ch02/ch02-05-08.png" alt="debugtoolbar" width="800"></center>
+    调试视图上面的工具栏（比较像窗口标题栏）大致可分为 11
+    个功能按钮或控件。将鼠标悬停在按钮或控件上几秒，会自动显示该按钮或控件的工具提示，显示它的作用和快捷键。在进入调试模式时就能看到这些按钮控件，所以不需要挨个去记
+    忆，我们这里罗列一下它们对应的功能，方便读者查阅：<br>
+    <ul>
+      <li> ①继续 F5：继续执行程序，执行到下一断点停住。</li>
+      <li> ②停止调试：停止当前程序的调试。</li>
+      <li> ③单步跳过 F10：执行当前代码行，执行到下一行停住，如果当前代码行调用了某函数，那么自动执行完这个函数，不会进入被调函数里调试。</li>
+      <li> ④单步进入
+        F11：执行当前代码行，如果本行代码没有调用函数，执行到下一行停住；如果本行调用了某函数，则进入被调函数内部，执行到被调函数开头停住。</li>
+      <li> ⑤单步跳出 Shift+F11：把当前函数里剩下的代码行执行完，返回到调用当前函数的上一层函数里停住。</li>
+      <li> ⑥Restart the debugging session：结束本次调试，并从头开始新的调试。</li>
+      <li> ⑦切换两种调试模式：QtCreator支持逐行代码调试和逐条汇编指令调试，默认是逐行代码调试。按这个按钮可以切换到当前C++代码对应的汇编
+        指令显示界面，可以实现逐条汇编指令调试。汇编调试模式如下图所示：</li>
+    </ul>
+    <center><img src="images/ch02/ch02-05-09.png" alt="asm" width="800"></center>
+    &nbsp;&nbsp;&nbsp; 上图既显示汇编指令，也会显示对应的 C++ 代码行，可以逐条指令调试，功能非常强大。注意上面显示的
+    AT&amp;T 汇编指令集，常见于 Linux/Unix 系统 GCC 编译器和 MinGW 编译器，不是我们常见的 Intel 80x86
+    汇编指令，所以这种模式我们还是别管了。<br>
+    <ul>
+      <li>⑧掉转方向 F12：这个按钮好像一直是不可用状态，程序代码一般只能顺着执行，倒退着执行暂时没见过。</li>
+      <li> ⑨选择线程：默认情况下程序只有一个线程，没什么可切换的，如果代码里新建了多个线程，可以切换到子线程查看相关信息或调试。</li>
+      <li>⑩调试状态显示：显示当前程序调试执行到哪一行或哪个断点位置，调试过程中程序运行出现的错误信息也会显示在这。</li>
+      <li>最后一个视图按钮可以配置显示多个调试视图，点开视图按钮，可以看到视图选择菜单，除了默认的函数栈、断点、线程、调试快照，另外可以设置显示
+        模块（Modules即动态链接库）、寄存器（Registers）、源文件（Source
+        Files）、调试日志等视图，还可以选择“重置为默认布局”。</li>
+    </ul>
+    讲完调试模式的界面，下面开始实际的调试，回到原先的逐行代码调试界面，因为在 Widget
+    类构造函数里都是调用的库函数，这些函数内部不需要我们调试，所以按 F10 键，进行单步跳过调试。按一次 F10，调试执行会停在第二行：<br>
+    <center><img src="images/ch02/ch02-05-10.png" alt="debug1" width="800"></center>
+    在调试时，如果我们选中某一个变量，鼠标悬停几秒，就会自动弹出它在运行时的实时数值，上图看到 label
+    其实是个无效指针变量。因为这时已经执行了构造函数第一行代码，调试信息会显示到“应用程序输出”面板。如果没有打开“应用程序输出面板”，在有输出时，下方“应用程序输
+    出”标题会一闪一闪的，提示开发人员这时候有输出了。打开“应用程序输出”面板就可以看到输出的信息。（上图指针数值变了，这在多次调试运行时很常见，因为写教程
+    时尝试了很多遍调试截图。）<br>
+    然后我们按第二次 F5，再执行第二句代码设置“标签对象”文本：<br>
+    <center><img src="images/ch02/ch02-05-11.png" alt="debug2" width="800"></center>
+    调试会卡死在 setText 一行，无论是按 F5/F10/F11
+    等都执行不下去，因为这一行执行出错了，弹窗提示的是段错误，通常是内存地址无法访问，比如随机的野指针、数据越界等，都会造成这种错误。<br>
+    错误原因：在 ui-&gt;SetupUi 函数之前，没有构造实际的标签控件给 ui-&gt;label 指针，这时候 ui-&gt;label
+    指针数值是随机的，指向不可预料的内存位置，如果调用不存在的“标签对象”的函数就会出现内存非法访问，造成致命错误，程序就因此崩溃。<br>
+    <br>
+    <font color="red"><b> 所以在 ui-&gt;SetupUi 函数之前，不要添加任何控件对象相关的代码！操作控件的代码必须放在
+        ui-&gt;SetupUi 之后，最好就让 ui-&gt;SetupUi 函数固定在构造函数内第一行。 </b></font><br>
+    <br>
+    我们先停止当前的调试，修改 Widget 构造函数代码为：<br>
+    <div class="code"> <span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+        style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+        style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+        style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span
+        style=" color:#000000;">:</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;(</span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*)(</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">label</span><span
+style=" color:#000000;">);</span><span style=" color:#c0c0c0;">      </span><span
+style=" color:#008000;">//show</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">the</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"wild"</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">pointer</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">label</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"Test</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">Bug"</span><span style=" color:#000000;">));</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//change</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">text</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QTest</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">qSleep</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">1000</span><span style=" color:#000000;">);</span><span
+style=" color:#c0c0c0;">       </span><span style=" color:#008000;">//added</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">line</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;(</span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*)(</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">label</span><span
+style=" color:#000000;">);</span><span style=" color:#c0c0c0;">    </span><span
+style=" color:#008000;">//show</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">normal</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">pointer</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">label</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">              </span><span
+style=" color:#008000;">//show</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">label</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">object</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    主要是将 setText 一行调到 ui-&gt;SetupUi
+    后面。第一行打印野指针的代码暂时放在那，用于对比野指针数值和真实标签对象的指针数值。然后在构造函数第一行、setText行以及最后两行打断点，然后按
+    F5 启动调试模式：<br>
+    <center><img src="images/ch02/ch02-05-12.png" alt="debug3" width="800"></center>
+    按 F5 可以直接执行到下一个断点：<br>
+    <center><img src="images/ch02/ch02-05-13.png" alt="debug4" width="800"></center>
+    由于前面 ui-&gt;SetupUi 函数已经执行了，点开右边变量显示窗口里的 this 指针，可以看到 [children] 计数变成了 1
+    个项，点开 label 对象树形结构，找到 [properties]，继续点开可以看到 [text] 文本属性，显示的是原先的
+    "&lt;h1&gt;Hello Creator!&lt;/h1&gt;"
+    。注意这里是调试插件智能解析的，对于指针、数字、字符串等，调试插件会自动分类解析好并按照人性化的方式显示出来。<br>
+    再按 F5，执行到下一断点（这中间因为有睡眠函数，会等1秒左右才会执行到下一断点）：<br>
+    <center><img src="images/ch02/ch02-05-14.png" alt="debug5" width="800"></center>
+    这时打开右边变量显示窗口里的树形结构，标签对象的文本属性已经发生了变化，变成了 "Test
+    Bug"，由于该变量数值发生了变化，所以用红色字体显示新的数值。其他没变化的变量或属性的 Value 都是默认黑色字体。<br>
+    再按 F5，打印新的真实标签对象指针：<br>
+    <center><img src="images/ch02/ch02-05-15.png" alt="debug6" width="800"></center>
+    这是注意看下面的输出面板，可以明显看到野指针数值和真实对象指针的区别，二者数值不一样。<br>
+    再按 F5，看看 qDebug() 如何智能打印 label 指针指向的标签对象：<br>
+    <center><img src="images/ch02/ch02-05-16.png" alt="debug7" width="800"></center>
+    可以在应用程序输出面板同时看到野指针数值、真实对象指针数值和 qDebug()智能解析标签对象打印的信息：<br>
+    QLabel(0x137823c8, name = "label")<br>
+    QLabel 是类名，0x137823c8是指针数值，name = "label" 是指该标签对象名称为 "label" 。<br>
+    另外，由于断点全部都调试完了，所以会直接显示目标程序界面，调试模式右边的局部变量和表达式窗口也清空了，因为没什么东西需要调试了。这时候可以关闭目标程序窗
+    口，正常结束本次调试。现在得到的目标程序就是正常可执行的，已经排除运行时错误了。<br>
+    如果希望代码好看点，可以将两行“ qDebug()&lt;&lt;(void *)(ui-&gt;label); ”删除掉，留下最后的 qDebug()
+    智能输出行就够了。<br>
+    正常写程序时，记得把 ui-&gt;setupUi 函数调用放在构造函数第一行！<br>
+    <br>
+    关于运行时错误调试，最好的测试方法就是像上面一样在可能出错的位置安插打印调试信息，定位到出错的代码行，然后进行矫正，直到运行正确为止。对于段错误和运行时
+    的内存不能 "read" 错误，通常是指针滥用引起的，比如使用未明确赋值的野指针、数组越界、访问已被删除的对象地址等。 <br>
+    本节讲解到这，希望读者好好练习本节内容，因为程序开发过程中必定会用到的。下一节讲解如何使用 Qt 的帮助文档。<br>
+    <br>
     <br>
     <br>
     <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
       <tbody>
         <tr>
           <td style="width: 40%;">
-            <div style="text-align: center;"> <a href="ch02-04.htm"><img class="pic"
-
+            <div style="text-align: center;"> <a href="ch02-04.htm"><img class="pic"
                   style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
           </td>
           <td style="width: 20%;">
-            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
-
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
                   style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
           </td>
           <td style="width: 40%;">
-            <div style="text-align: center;"> <a href="ch02-06.htm"><img class="pic"
-
+            <div style="text-align: center;"> <a href="ch02-06.htm"><img class="pic"
                   style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
           </td>
         </tr>
       </tbody>
     </table>
-
+  </body>
 </html>

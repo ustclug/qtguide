@@ -87,9 +87,12 @@
     字符串有专门的封装类 std::string 来处理，标准输入输出流是 std::cin 和 std::cout 。对于 wchar_t *
     字符串，其封装类是 std::wstring，标准输入输出流是 wcin 和
     wcout。虽然规定了宽字符，但是没有明确一个宽字符是占用几个字节，Windows 系统里的宽字符是两个字节，就是 UTF-16；而
-    Unix/Linux 系统里为了更全面的国际码支持，其宽字符是四个字节，即 UTF-32 编码。这为程序的跨平台带来一定的混乱，而且 wchar_t*
-    字符串用得也比较少，MFC 用自家的 TCHAR 和 CString 类支持国际化，而 Qt 则用 QChar 和 QString
-    类，一般的图形开发库都用自家的字符串类库，很少直接用 wchar_t* 字符串。<br>
+    Unix/Linux 系统里为了更全面的国际码支持，其宽字符是四个字节，即 UTF-32 编码。这为程序的跨平台带来一定的混乱，除了 Windows
+    程序开发常用 wchar_t* 字符串表示 UTF-16 ，其他情况下 wchar_t* 都用得比较少。<br>
+    <br>
+    MFC 一般用自家的 TCHAR 和 CString 类支持国际化，当没有定义 _UNICODE 宏时，TCHAR = char，当定义了
+    _UNICODE宏 时，TCHAR = wchar_t，CString 内部也是类似的。 Qt 则用 QChar 和 QString 类（内部恒定为
+    UTF-16），一般的图形开发库都用自家的字符串类库。<br>
     <br>
     在新标准 C++11 中，对国际码的支持做了明确的规定：<br>
     <ul>
@@ -98,8 +101,7 @@
       <li>新增 char32_t * 对应 UTF-32 编码字符串（代码表示如 U"多种文字"），封装类为 std::u32string 。</li>
     </ul>
     因为 Qt 有封装好的 QString，所以不太需要这些新增的字符串格式。关于 C++11 字符串更详细的内容参考：<br>
-    <a href="http://blog.poxiao.me/p/unicode-character-encoding-conversion-in-cpp11/"
-
+    <a href="http://blog.poxiao.me/p/unicode-character-encoding-conversion-in-cpp11/"
       target="new">
       http://blog.poxiao.me/p/unicode-character-encoding-conversion-in-cpp11/</a>
     <br>
@@ -126,70 +128,43 @@
     UTF-16LE（Windows默认的Unicode）编码的源文件。用记事本打开查看它们的内容是完全一样的：<br>
     <div class="code"> <span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
       </span><span style=" color:#008000;">&lt;iostream&gt;</span>
-      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
-
-style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
-
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
 style=" color:#008000;">&lt;cstring&gt;</span></pre>
-      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
-
-style=" color:#808000;">using</span><span style=" color:#c0c0c0;"> </span><span
-
-style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span>std<span
-
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">using</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span>std<span
 style=" color:#000000;">;</span></pre>
       <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
-      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
-
-style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">main</span><span
-
-style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
-
-style=" color:#000000;">argc</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
-
-style=" color:#808000;">char</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span
-
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">main</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">argc</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">char</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span
 style=" color:#000000;">argv</span><span style=" color:#000000;">[])</span></pre>
-      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
-
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
 style=" color:#000000;">{</span></pre>
-      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
-
-style=" color:#c0c0c0;">    </span><span style=" color:#808000;">char</span><span
-
-style=" color:#c0c0c0;"> </span><span style=" color:#000000;">theStr</span><span
-
-style=" color:#000000;">[]</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span
-
-style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"1234打印汉字"</span><span
-
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">char</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">theStr</span><span
+style=" color:#000000;">[]</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"1234打印汉字"</span><span
 style=" color:#000000;">;</span></pre>
-      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
-
-style=" color:#c0c0c0;">    </span>cout<span style=" color:#000000;">&lt;&lt;</span><span
-
-style=" color:#008000;">"str</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">length:</span><span
-
-style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span style=" color:#000000;">&lt;&lt;</span>strlen<span
-
-style=" color:#000000;">(</span><span style=" color:#000000;">theStr</span><span
-
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>cout<span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#008000;">"str</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">length:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span style=" color:#000000;">&lt;&lt;</span>strlen<span
+style=" color:#000000;">(</span><span style=" color:#000000;">theStr</span><span
 style=" color:#000000;">)&lt;&lt;</span>endl<span style=" color:#000000;">;</span></pre>
-      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
-
-style=" color:#c0c0c0;">    </span>cout<span style=" color:#000000;">&lt;&lt;</span><span
-
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>cout<span style=" color:#000000;">&lt;&lt;</span><span
 style=" color:#000000;">theStr</span><span style=" color:#000000;">;</span></pre>
-      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
-
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
 style=" color:#c0c0c0;">    </span></pre>
-      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
-
-style=" color:#c0c0c0;">    </span><span style=" color:#808000;">return</span><span
-
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">return</span><span
 style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span style=" color:#000000;">;</span></pre>
-      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
-
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
 style=" color:#000000;">}<br><br></span></pre>
     </div>
     注意看文件存储的字节数：<br>
@@ -222,36 +197,49 @@ style=" color:#000000;">}<br><br></span></pre>
     cl UTF-16.cpp /EHsc<br>
     <center><img src="images/ch03/ch03-01-05.png" alt="utf-16"></center>
     可以看到 MSVC 编译器是能正常编译 UTF-16 的源文件，显示也很正常。感兴趣的读者可以用 MSVC 编译器（VS2010
-    SP1以上版本）把三个源文件都测试一遍，可以发现 MSVC 编译器生成的 exe 运行都是正常的，这是为什么呢？<br>
+    SP1以上版本）把三个源文件都测试一遍，可以发现 MSVC 编译器生成的 exe 运行都是正常显示汉字的，这是为什么呢？<br>
     <br>
     可以大致理解为：<br>
-    ①g++ 编译器不会对源文件里的字符串做转码。上面 g++ 生成的 GBK.exe 与 UTF-8.exe 二进制文件内容是有差异的。在 Windows
-    系统里源文件是 GBK ，其命令行编码也是 GBK，所以 GBK 编码的程序正常显示汉字；在 Linux 系统里源文件是 UTF-8，其命令行编码也是
-    UTF-8，所以 UTF-8 编码的程序正常显示汉字。<br>
+    ①g++ 编译器不会对源文件里的字符串做转码。上面 g++ 生成的 GBK.exe 与 UTF-8.exe 二进制文件内容是有多处差异的。在
+    Windows 系统里源文件是 GBK ，其命令行编码也是 GBK，所以 GBK 编码的程序正常显示汉字；在 Linux 系统里源文件是
+    UTF-8，其命令行编码也是 UTF-8，所以 UTF-8 编码的程序正常显示汉字。<br>
     <br>
-    ②MSVC 编译器会根据不同的源文件格式进行转码都变成 Unicode（UTF-16LE），Windows 内核其实全是 Unicode
-    编码格式在运行。用 MSVC 生成的 GBK.exe、UTF-8.exe、UTF-16.exe 三个二进制文件根本就是完全一样的。对于本地化 ANSI 多字节编码的程序，Windows 专门额外做了输入输出转码，因此在命令行显示的汉字才会正常。也就是说，ANSI 多字节编码的程序，在  Windows 系统里运行是有转码开销的，因此微软官方大力推荐用 Unicode 编码的程序。<br>
+    ②MSVC 编译器会根据不同的源文件编码格式进行转码，文件中 char * 字符串一律转成本地化的 ANSI 多字节编码， wchar_t *
+    字符串一律转成 Unicode（UTF-16LE）。用 MSVC 生成的 GBK.exe、UTF-8.exe、UTF-16.exe 三个二进制文件，除了
+    PE 文件头有几字节区别，程序主体就是完全一样的，这三个 exe 内部的字符串全是 ANSI 多字节编码的，当然都能正常显示汉字。<br>
     <br>
     从跨平台运行的角度，我们推荐 UTF-8 编码的源文件，这也是 Qt5 官方规定的源文件格式。下一节我们介绍 Qt
     程序里的字符编码函数，无论是打印到操作系统命令行还是 QtCreator 的输出显示面板，我们都可以让汉字正常显示。<br>
+    <br>
+    <div class="practice">
+      <table>
+        <tbody>
+          <tr>
+            <td><img src="images/pics/practice.png" alt="tip"></td>
+            <td> <b>练习</b> </td>
+          </tr>
+        </tbody>
+      </table>
+      ① 仔细查看本节用 g++ 编译生成的 GBK.exe、UTF-8.exe 和 MSVC 编译生成的 UTF-16.exe 打印显示的 str
+      length 数值，列出这三个数值的计算公式（与三个 cpp 文件长度计算公式对比看看）。<br>
+      ② 如果有 VS2010 SP1 以上的开发环境，在命令行编译本节三个源文件，然后可以用 VS 自带的 Microsoft Windows SDK
+      Tools 里的 WinDiff 工具对比 cl 编译器生成的 exe 文件，每次比较两个，看看二进制文件之间的差异。</div>
+    <br>
     <br>
     <br>
     <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
       <tbody>
         <tr>
           <td style="width: 40%;">
-            <div style="text-align: center;"><a href="ch03-00.htm"><img class="pic"
-
+            <div style="text-align: center;"><a href="ch03-00.htm"><img class="pic"
                   style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
           </td>
           <td style="width: 20%;">
-            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
-
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
                   style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
           </td>
           <td style="width: 40%;">
-            <div style="text-align: center;"><a href="ch03-02.htm"><img class="pic"
-
+            <div style="text-align: center;"><a href="ch03-02.htm"><img class="pic"
                   style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
           </td>
         </tr>

@@ -19,3 +19,7 @@ http://pan.baidu.com/s/1nt3d0jZ
 
 ###
 任重道远，得想想从哪开始。
+
+###
+碰巧看到网上有QML的教程，分享一下：
+https://github.com/cwc1987/QmlBook-In-Chinese

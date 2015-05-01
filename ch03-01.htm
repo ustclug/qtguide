@@ -3,11 +3,9 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <title>ch03-01</title>
-    
-<link href="css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-
-<script src="thumbnailviewer.js" type="text/javascript">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -15,40 +13,249 @@
 * Visit http://www.dynamicdrive.com/ for full source code
 ***********************************************/
 
-</script>
+</script> </head>
+  <body>
+    <div class="os1">3.1 字符编码方式</div>
+    <br>
+    本节对操作系统里的字符编码进行简单介绍，这对于程序的跨平台开发、汉字乱码问题解决等都是很重要的知识，了解这些知识就不再害怕遇到程序乱码的问题了，本节最后
+    测试不同字符编码的源文件的编译运行情况。<br>
+    <br>
+    <div class="os2">3.1.1 ANSI多字节编码</div>
+    <br>
+    在最早的时期，计算机只支持英文字符，那时都是用 ASCII（American Standard Code for Information
+    Interchange，美国标准信息交换代码）编码，一个字母或符号只需要一个字节存储。随着计算机的推广应用，越来越多的国家和地区面临本地语言文字如何在计算机里使
+    用和显示的问题。对于中文 DOS 系统和早期的中文 Windows 系统，大陆制定了国标码 GB2312，台港澳地区则使用了大五码
+    Big5。微软针对这些本地化字符编码采用的就是用 ANSI（American National Standards
+    Institute，美国国家标准学会）多字节编码方式，系统里的英文和符号就使用单字节的
+    ASCII（0x00~0x7f），而对于汉字之类的本地化字符编码，就采用 0x80~0xFF 范围内的多个字节来表示，这样既能兼容 ASCII
+    ，又能正常使用本地化语言文字。大陆的国标码发展了好几代，归结如下：<br>
+    <ul>
+      <li>GB2312：1980年发布，收录了7445个字符，包括6763个汉字和682个其它符号。汉字是双字节编码。</li>
+      <li>GBK：1995年发布，收录了21886个符号，包括21003个汉字和883个其它符号。汉字是双字节编码。简体中文 Windows
+        目前默认采用这种本地化编码。</li>
+      <li>GB18030-2000：2000年发布，收录了27533个汉字，汉字分为双字节编码部分和四字节编码部分。</li>
+      <li>GB18030-2005：2005年发布，收录了70244个汉字，汉字也分为双字节编码部分和四字节编码部分。</li>
+    </ul>
+    新的国标码标准通常是兼容旧的编码方式的，所以一般对简体中文的文本选择 GBK 或 GB18030
+    编码都是可以正常显示的。微软针对各种本地化语言的页面有自己的编号方式，GBK 对应的代码页编号是 936，GB18030 对应的代码页编号是
+    54936，Big5 对应的代码页编号是 950。<br>
+    <br>
+    关于汉字编码可以参考：<br>
+    <a href="http://www.fmddlmyy.cn/text24.html" target="new">
+      http://www.fmddlmyy.cn/text24.html</a> <br>
+    关于代码页编号可以参考：<br>
+    <a href="http://zh.wikipedia.org/wiki/%E4%BB%A3%E7%A0%81%E9%A1%B5" target="new">
+      http://zh.wikipedia.org/wiki/%E4%BB%A3%E7%A0%81%E9%A1%B5</a> <br>
+    <br>
+    <div class="os2">3.1.2 Unicode系列编码</div>
+    <br>
+    ANSI
+    多字节编码解决了各种语言文字的本地化使用问题，也有它自己的缺陷：各地制定的编码标准只对自己的语言文字有效，而不同语言文字的编码都是冲突的，因为大家都用
+    0x80~0xFF
+    范围字节表示自己的语言文字，而不考虑别的语言文字如何编码，冲突在所难免。比如简体中文（GBK）的文本放到繁体中文（Big5）的操作系统里，就被默认解析成繁体字编
+    码，两种编码是冲突的，就会显示混乱的繁体字，反过来也一样。<br>
+    因此国际组织制定了 Unicode
+    编码，也叫万国码、国际码等，这种字符编码是对全球语言统一分配编码区间，各种语言字符互相不冲突，都可以兼容使用。Unicode 编码从最初的 1.0
+    ，慢慢发展到今年发布的 8.0，包含的语言文字越来越多。<br>
+    <br>
+    Unicode 编码系统，可分为编码方式和实现方式两个层次。对于国际组织发布的 Unicode 编码标准，对应的就是编码方式，最常用的是
+    UCS-2（Universal Character Set 2），采用两字节编码一个字符。当然国际语言文字太多，两字节不够用了，就有四字节编码方式
+    UCS-4。这个仅仅是标准，而不是实现，在编码实现的过程中，有些考虑兼容旧的单字节 ASCII
+    编码，有些不考虑兼容性；有些考虑双字节中哪个字节放在前面，哪个字节放在后面的问题，即 BOM（Byte Order
+    Mark，字节顺序标记）的作用。因此诞生了多种国际码的实现方式，统称为 Unicode 转换格式（Unicode Transformation
+    Format，UTF）：<br>
+    <ul>
+      <li>UTF-8：灵活的变长编码，对于 ASCII 使用一个字节编码，其他本地化语言文字用多个字节编码，最长可以到 6
+        个字节编码一个字符。对于汉字，通常是 3 个字节表示一个汉字。这是 Unix/Linux 系统默认的字符编码。</li>
+      <li>UTF-16：兼容 UCS-2，一般都是两字节表示一个字符，对于超出两字节的国际码字符，使用一对两字节来表示。在存储时，按两个字节的排布顺
+        序，可以分为 UTF-16LE（Little Endian，小端字节序）和UTF-16BE（Big Endian，大端字节序），微软所说的
+        Unicode 默认就是 UTF-16LE。</li>
+      <li>UTF-32：同
+        UCS-4，因为用四个字节表示一个字符，所以不需要考虑扩展了。这种编码方式简单，但也特别浪费空间，所以应用很少。在存储时也分为 UTF-32BE
+        和 UTF-32LE，因为用得少，所以不用太关心这种编码格式。</li>
+    </ul>
+    关于 Unicode 编码格式参考：<br>
+    <a href="http://baike.baidu.com/view/40801.htm" target="new">
+      http://baike.baidu.com/view/40801.htm</a> <br>
+    关于 UTF 和 BOM 参考：<br>
+    <a href="http://www.unicode.org/faq/utf_bom.html" target="new">
+      http://www.unicode.org/faq/utf_bom.html</a> <br>
+    <br>
+    <div class="os2">3.1.3 C++使用的字符串</div>
+    <br>
+    在 C++ 中，以前通常使用 char 表示单字节的字符，使用 wchar_t 表示宽字符，对国际码提供一定程度的支持。 char *
+    字符串有专门的封装类 std::string 来处理，标准输入输出流是 std::cin 和 std::cout 。对于 wchar_t *
+    字符串，其封装类是 std::wstring，标准输入输出流是 wcin 和
+    wcout。虽然规定了宽字符，但是没有明确一个宽字符是占用几个字节，Windows 系统里的宽字符是两个字节，就是 UTF-16；而
+    Unix/Linux 系统里为了更全面的国际码支持，其宽字符是四个字节，即 UTF-32 编码。这为程序的跨平台带来一定的混乱，而且 wchar_t*
+    字符串用得也比较少，MFC 用自家的 TCHAR 和 CString 类支持国际化，而 Qt 则用 QChar 和 QString
+    类，一般的图形开发库都用自家的字符串类库，很少直接用 wchar_t* 字符串。<br>
+    <br>
+    在新标准 C++11 中，对国际码的支持做了明确的规定：<br>
+    <ul>
+      <li>char * 对应 UTF-8 编码字符串（代码表示如 u8"多种文字"），封装类为 std::string；</li>
+      <li>新增 char16_t * 对应 UTF-16 编码字符串（代码表示如 u"多种文字"），封装类为 std::u16string ；</li>
+      <li>新增 char32_t * 对应 UTF-32 编码字符串（代码表示如 U"多种文字"），封装类为 std::u32string 。</li>
+    </ul>
+    因为 Qt 有封装好的 QString，所以不太需要这些新增的字符串格式。关于 C++11 字符串更详细的内容参考：<br>
+    <a href="http://blog.poxiao.me/p/unicode-character-encoding-conversion-in-cpp11/"
 
+      target="new">
+      http://blog.poxiao.me/p/unicode-character-encoding-conversion-in-cpp11/</a>
+    <br>
+    <br>
+    <div class="os2">3.1.4 源文件字符编码测试</div>
+    <br>
+    在 Windows 系统里最常用的文本字符编码格式是 ANSI （简体是 GBK，繁体是 Big5）和 Unicode
+    （UTF-16LE）格式，Windows 命令行默认的输入输出格式是 ANSI 的。在 Linux 系统里统统都是 UTF-8
+    ，这个比较省心。Windows 自带的记事本，以及 Notepad2 工具、Linux 系统里的 kwrite、gedit
+    等都支持各种编码格式的文本显示。以 Windows 记事本为例，打开任意一个文本文件，选择菜单“文件”<br>
+    --&gt;“另存为”，点开“另存为”对话框最下面的“编码”：<br>
+    <center><img src="images/ch03/ch03-01-01.png" alt="textcodec"></center>
+    图上四种格式分别是：<br>
+    <ul>
+      <li>ANSI：本地化语言文字编码，简体操作系统是 GBK，繁体操作系统就是 Big5，Windows 命令行默认用的字符编码是和这个一样的。</li>
+      <li>Unicode：Windows 所说的国际码一般都指这个 UTF-16LE，文件开头带有 BOM 标记（2字节）。</li>
+      <li> Unicode big endian：即 UTF-16BE，这个很少用到，文件开头也带 BOM 标记（2字节）。</li>
+      <li>UTF-8：这是 Unix/Linux 系统里通用的国际码存储交换格式，记事本保存的文件开头会有 UTF-8 签名（3字节，类似 BOM）。</li>
+    </ul>
+    下面我们测试三个不同编码格式的 cpp 文件，查看其编译运行效果。打开本教程示例代码的网址，进入ch03/textcodec
+    子文件里面，下载三个文件：GBK.cpp、UTF-8.cpp、UTF-16.cpp，保存到<br>
+    D:\QtProjects\ch03\textcodec 文件夹里。<br>
+    如文件名所述，第一个是 ANSI+GBK 编码的源文件，第二个是 UTF-8 编码的源文件，第三个是
+    UTF-16LE（Windows默认的Unicode）编码的源文件。用记事本打开查看它们的内容是完全一样的：<br>
+    <div class="code"> <span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">&lt;iostream&gt;</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
 
-  </head>
-  
-  
-<div class="os1">3.1 字符编码方式</div>
-<br />
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
 
+style=" color:#008000;">&lt;cstring&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
 
-<div class="os2">3.1.1 ANSI多字节编码</div>
-<br />
+style=" color:#808000;">using</span><span style=" color:#c0c0c0;"> </span><span
 
-<div class="os2">3.1.2 Unicode系列编码</div>
-<br />
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span>std<span
 
-<div class="os2">3.1.3 C++使用的char和wchar_t</div>
-<br />
+style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
 
-<div class="os2">3.1.4 源文件字符编码测试</div>
-<br />
+style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">main</span><span
 
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
 
+style=" color:#000000;">argc</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
 
-<br />
-<br />
-<br />
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch03-00.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch03-02.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+style=" color:#808000;">char</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span
+
+style=" color:#000000;">argv</span><span style=" color:#000000;">[])</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">char</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">theStr</span><span
+
+style=" color:#000000;">[]</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"1234打印汉字"</span><span
+
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span>cout<span style=" color:#000000;">&lt;&lt;</span><span
+
+style=" color:#008000;">"str</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">length:</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span style=" color:#000000;">&lt;&lt;</span>strlen<span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">theStr</span><span
+
+style=" color:#000000;">)&lt;&lt;</span>endl<span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span>cout<span style=" color:#000000;">&lt;&lt;</span><span
+
+style=" color:#000000;">theStr</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">return</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">}<br><br></span></pre>
+    </div>
+    注意看文件存储的字节数：<br>
+    <ul>
+      <li>GBK.cpp 是 231 字节，231 = 2*4（汉字） + 223 (其他英文和符号)；</li>
+      <li>UTF-8.cpp 是 238 字节，238 = 3*4（汉字）+ 3（文件头签名）+ 223 (其他英文和符号)；</li>
+      <li> UTF-16.cpp 是 456 字节，456 = 2*4（汉字）+ 2（BOM）+ 223*2 （其他英文和符号）。</li>
+    </ul>
+    然后我们在 Qt 命令行尝试用 g++ 编译这些代码，并运行生成的程序，挨个测试：<br>
+    g++ GBK.cpp -o GBK<br>
+    <center><img src="images/ch03/ch03-01-02.png" alt="gbk"></center>
+    <br>
+    g++ UTF-8.cpp -o UTF-8 <br>
+    <center><img src="images/ch03/ch03-01-03.png" alt="utf-8"></center>
+    <br>
+    g++ UTF-16.cpp -o UTF-16 <br>
+    <center><img src="images/ch03/ch03-01-04.png" alt="utf-16"></center>
+    第一个 GBK 编码的程序是正常的，那是因为作者使用的 Windows 命令行默认的代码页是 936 ，命令行里的输入输出都是 GBK
+    编码的，与源文件编码格式一致，所以显示正确。<br>
+    第二个 UTF-8 正常编译，但是源文件里的 UTF-8 汉字编码与 Windows
+    命令行代码页编码格式不符合，所以显示的汉字乱码，而数字是没问题的。UTF-8 和 GBK 都是兼容 ASCII 单字节编码的。<br>
+    第三个 UTF-16 编译根本不成功，因为 UTF-16 里面一个字符用双字节表示，导致源文件有大量的数值为 0 的字节（被编译器认为是
+    null），因此编译失败了。这也是 UTF-16 不兼容 ASCII 单字节编码的弊端。<br>
+    <br>
+    如果在 Linux 系统里用 g++ 编译上面三个文件，结果是 GBK 编码程序可以编译，运行乱码；UTF-8 编码程序可以编译，运行正常；UTF-16
+    编码程序是无法通过编译的。Linux 系统里命令行默认的输入输出都是 UTF-8 编码，所以只有 UTF-8 的程序才会正常。GBK
+    的能正常编译是因为兼容 ASCII 单字节编码的缘故，无论是英文变量名还是符号，都与 UTF-8 的编码一致，只有非 ASCII 字符才会显示不正常。<br>
+    <br>
+    那么 UTF-16 的源代码谁能正常编译呢？答案就是微软出的 Visual Studio，微软自家用的 Unicode 还得靠 MSVC 编译器来编译：<br>
+    cl UTF-16.cpp /EHsc<br>
+    <center><img src="images/ch03/ch03-01-05.png" alt="utf-16"></center>
+    可以看到 MSVC 编译器是能正常编译 UTF-16 的源文件，显示也很正常。感兴趣的读者可以用 MSVC 编译器（VS2010
+    SP1以上版本）把三个源文件都测试一遍，可以发现 MSVC 编译器生成的 exe 运行都是正常的，这是为什么呢？<br>
+    <br>
+    可以大致理解为：<br>
+    ①g++ 编译器不会对源文件里的字符串做转码。上面 g++ 生成的 GBK.exe 与 UTF-8.exe 二进制文件内容是有差异的。在 Windows
+    系统里源文件是 GBK ，其命令行编码也是 GBK，所以 GBK 编码的程序正常显示汉字；在 Linux 系统里源文件是 UTF-8，其命令行编码也是
+    UTF-8，所以 UTF-8 编码的程序正常显示汉字。<br>
+    <br>
+    ②MSVC 编译器会根据不同的源文件格式进行转码都变成 Unicode（UTF-16LE），Windows 内核其实全是 Unicode
+    编码格式在运行。用 MSVC 生成的 GBK.exe、UTF-8.exe、UTF-16.exe 三个二进制文件根本就是完全一样的。对于本地化 ANSI 多字节编码的程序，Windows 专门额外做了输入输出转码，因此在命令行显示的汉字才会正常。也就是说，ANSI 多字节编码的程序，在  Windows 系统里运行是有转码开销的，因此微软官方大力推荐用 Unicode 编码的程序。<br>
+    <br>
+    从跨平台运行的角度，我们推荐 UTF-8 编码的源文件，这也是 Qt5 官方规定的源文件格式。下一节我们介绍 Qt
+    程序里的字符编码函数，无论是打印到操作系统命令行还是 QtCreator 的输出显示面板，我们都可以让汉字正常显示。<br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch03-00.htm"><img class="pic"
+
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch03-02.htm"><img class="pic"
+
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

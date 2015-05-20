@@ -3,11 +3,9 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <title>ch03-02</title>
-    
-<link href="css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-
-<script src="thumbnailviewer.js" type="text/javascript">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -15,39 +13,558 @@
 * Visit http://www.dynamicdrive.com/ for full source code
 ***********************************************/
 
-</script>
-
-
-  </head>
-  
-  
-<div class="os1">3.2 Qt程序字符编码</div>
-<br />
-
-<div class="os2">3.2.1 乱码程序示例</div>
-<br />
-加一个显示源文件编码格式
-<br /><br />
-
-<div class="os2">3.2.2 乱码纠正——不推荐的方式</div>
-<br />
-
-<div class="os2">3.2.3 乱码纠正——应该用的方式</div>
-<br />
-
-<div class="os2">3.2.4 运行时QString与多种编码格式转换</div>
-<br />
-
-<br />
-<br />
-<br />
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch03-01.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch03-03.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+</script> </head>
+  <body>
+    <div class="os1">3.2 Qt程序字符编码</div>
+    <br>
+    本节通过一个图形界面示例，将其文本显示控件的汉字乱码纠正，介绍两种方法，第一种是不修改源代码文件编码格式，通过
+    QString::fromLocal8Bit 函数在程序运行时转码；第二种是直接将源代码文件整体转换成 UTF-8
+    编码，就不需要修改具体的代码行了，第二种是最为推荐的方式。<br>
+    <br>
+    <div class="os2">3.2.1 乱码程序示例</div>
+    <br>
+    首先下载 qtmess 示例：<br>
+    <a href="https://lug.ustc.edu.cn/sites/qtguide/QtProjects/ch03/qtmess/qtmess.7z"
+      target="new">
+      https://lug.ustc.edu.cn/sites/qtguide/QtProjects/ch03/qtmess/qtmess.7z</a>
+    <br>
+    解压到比如 D:\QtProjects\ch03\qtmess 文件夹里，然后用 QtCreator 打开该项目文件 qtmess.pro ，看到项目配
+    置提示：<br>
+    <center> <img src="images/ch03/ch03-02-01.png" alt="openprj" width="800"> </center>
+    一般选中 Select all kits ，然后点击 Configure Project ，让集成开发环境 QtCreator
+    自动配置好。为了让例子尽可能简单，里面只有一个源文件 qtmess.cpp ，在项目视图打开该源代码文件，右边编辑器出现以下提示：<br>
+    <center> <img src="images/ch03/ch03-02-02.png" alt="openfile" width="800">
+    </center>
+    编辑器默认是认识 UTF-8 编码的源文件，这个 qtmess.cpp 是在简体中文 Windows 里用记事本编辑的，其汉字编码格式是
+    GBK，所以上图中文出现乱码。右上角也提示出现解码错误，不能用默认的 UTF-8 格式解码。点击“Select Encoding”按钮，打开源文件编码选
+    择对话框：<br>
+    <center> <img src="images/ch03/ch03-02-03.png" alt="recode" width="800"> </center>
+    对于简体中文，选择 GBK 打头的条目或 GB18030 打头的都可以，windows-936 和其他
+    CP936（CodePage）、MS936（Microsoft）是一个意思，大字符集 GB18030 也有其他称呼，如 ibm-1392，windows
+    代码页编号 54936。这里选择 GBK 的条目（GBK 条目有重复的，任选一个），然后点击“按编码重新载入”按钮，文件里的汉字就正常了：<br>
+    <center> <img src="images/ch03/ch03-02-04.png" alt="GBK" width="800"> </center>
+    注意 UTF-8 和 GBK 其实对英文和数字都是一样的 ASCII
+    单字节编码，所以源文件用英文和数字是肯定不乱码，主要是汉字之类的本地语言文字编码显示容易出错。Windows 系统里一般的记事本、编辑器、VC++
+    开发环境等都是默认用 GBK 汉字编码，而 Linux 和 Qt 都是默认用 UTF-8
+    国际文字编码，所以文本显示乱码一般都是这个原因，从编辑器里选择正 确的编码就可以正常显示本地语言文字了。<br>
+    选择源文件编码之后，GBK 编码文件和 UTF-8 编码文件都能正确显示，但怎么从 QtCreator 看到当前文件编码格式呢？这个是可以配置的，让
+    QtCreator 自动显示。点击菜单“工具”--&gt; “选项”，在选项对话框左边选择“文本编辑器”，右边选择“显示”，看到下图：<br>
+    <center> <img src="images/ch03/ch03-02-05.png" alt="showcodec" width="800"></center>
+    选中“Display file encoding”，然后点击“OK”按钮，就可以在编辑器右上角看到当前文件的编码格式：<br>
+    <center> <img src="images/ch03/ch03-02-06.png" alt="showencoding" width="800"></center>
+    现在右上角可以看到源文件编码“GBK”了，这其实是一个快捷按钮，打开可以弹出刚才的文件编码对话框的。关于编辑器的编码显示介绍到这，下面解释一下源文件里的
+    内容：<br>
+    <div class="code"> <span style=" color:#008000;">//qtmess.cpp</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QApplication&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QTextBrowser&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">main</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">argc</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">char</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span
+style=" color:#000000;">argv</span><span style=" color:#000000;">[])</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QApplication</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">a</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">argc</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">argv</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strText</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"1234打印汉字"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QTextBrowser</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tb</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">tb</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strText</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">tb</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setGeometry</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">40</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">40</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">400</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">300</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">tb</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">show</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">return</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">a</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">exec</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    包含了 QApplication、QTextBrowser、QDebug 三个头文件，QTextBrowser
+    是一个只读的文本显示框，一般用于大段文字的显示，并可以选择（Ctrl+A）并复制（Ctrl+C）里面的文本；而之前用的 QLabel
+    一般用于短文本显示，没有复制文本的功能，QLabel 经常配合其他控件使用，显示相关信息。在 main 函数内部：<br>
+    第一句定义了 Qt 应用程序入口；<br>
+    第二句定义了一个 strText 字符串对象，里面有数字和汉字；<br>
+    第三句定义了 QTextBrowser 对象 tb，就是本程序的图形窗口；<br>
+    第四句设置文本框的文本内容为 strText ；<br>
+    第五句设置文本框的位置（屏幕左上角坐标 40,40）和尺寸（400*300）；<br>
+    第六句是显示本程序的窗口；<br>
+    最后一句是进入应用程序的事件循环，直到退出。<br>
+    代码比较简单，接下来我们点击 QtCreator 左下角的绿色三角形运行按钮，编译运行程序，看看效果：<br>
+    <center> <img src="images/ch03/ch03-02-07.png" alt="qtmess"></center>
+    不出意外地，数字显示是正常的，汉字是乱码的，因为 Qt5 默认都是将源文件里的字符串当作 UTF-8 编码处理，GBK
+    多字节编码的汉字就会乱码。对于纠正乱码，正确的做法是后面 3.2.3 节的方式，先来看看 3.2.2 节不推荐的处理方式。<br>
+    <br>
+    <div class="os2">3.2.2 乱码纠正——不推荐的方式</div>
+    <br>
+    这一小节是采用不改变源文件编码格式，而是通过修改具体的代码行，使用 QString::​fromLocal8Bit 函数代替 tr 函数来实现转码。修改
+    qtmess.cpp 源文件内容如下：<br>
+    <div class="code"><span style=" color:#008000;">//qtmess.cpp</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QApplication&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QTextBrowser&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">main</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">argc</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">char</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span
+style=" color:#000000;">argv</span><span style=" color:#000000;">[])</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QApplication</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">a</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">argc</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">argv</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strText</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QString</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">fromLocal8Bit</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"1234打印汉字"</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QTextBrowser</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tb</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">tb</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strText</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">tb</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setGeometry</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">40</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">40</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">400</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">300</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">tb</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">show</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">return</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">a</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">exec</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    上面将原来的 QObject::tr 函数替换成了 QString::fromLocal8Bit
+    函数，因为只有一个字符串所以替换了一次，如果字符串特别多，那就非常麻烦了。而且变成 QString::fromLocal8Bit
+    函数之后，就不能通过检测 tr 函数进行国际化翻译了，所以本小节的做法是不推荐的。<br>
+    点击 QtCreator 左下角运行按钮，看看运行效果：<br>
+    <center> <img src="images/ch03/ch03-02-08.png" alt="qtmess2"></center>
+    现在汉字是正常显示的，但代价是修改了代码行，如果字符串很多，那就麻烦了，所以推荐下面 3.2.3 小节的做法。<br>
+    <br>
+    <div class="os2">3.2.3 乱码纠正——应该用的方式</div>
+    <br>
+    将 qtmess.cpp 文件内容改回成原来的，还是使用原先的 QObject::tr 封装字符串，文件代码内容同 3.2.1
+    小节的，不重复贴代码了。在 QtCreator 编辑器右上角，点击文件编码的“GBK”字样：<br>
+    <center> <img src="images/ch03/ch03-02-09.png" alt="save" width="800"></center>
+    在编码列表里找到“UTF-8”，选中该条目，然后点击右下角的“按编码保存”，QtCreator 会自动将文件内容转换成 UTF-8
+    格式存储，这样就不需要修改具体的代码行了：<br>
+    <center> <img src="images/ch03/ch03-02-10.png" alt="save2" width="800"></center>
+    现在点击左下角运行按钮，同样可以看到正常的汉字显示：<br>
+    <center> <img src="images/ch03/ch03-02-11.png" alt="UTF-8"></center>
+    本教程以后的全部文件格式都是按照 UTF-8 的编码，这也是 Qt5 默认的源文件编码格式，字符串也应该用 tr
+    函数封装，方便做国际化翻译。如果项目有面向国际化的要求，程序源代码里应该全部用英文和数字等 ASCII
+    码字符，尽量少用汉字，应当将汉字作为一个语言的翻译文件程序。本教程大多数例子都是不符合国际化标准的，因为方便大家看，作者自己也省事。读者实际的国际化项目开发中应
+    该按照全英文的来写代码，然后将英文界面翻译成多种语言文字的。<br>
+    <br>
+    <div class="os2">3.2.4 运行时QString与多种编码格式转换</div>
+    <br>
+    QString 类包含大量关于文本字符串编码转换函数，涉及之前提到的 UTF-8、UTF-16、UTF-32、本地语言编码 Local8Bit，还有标准
+    C++ 的普通字符串 StdString 和宽字符串 StdWString，对于其他编码转为 QString，采用的是 QString::from*
+    静态公有成员函数，这些静态函数返回一个转换好的 QString 对象以供使用。与之对应的是 QString 类对象的 to* 函数，QString
+    对象可以调用这些 to* 函数转出为其他编码格式的字符串。下面将 QString 类这些成对的函数列一个表，方便查阅：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 120px;" align="center"><b>转入函数</b></td>
+          <td style="width: 120px;" align="center"><b style="">转出函数</b></td>
+          <td align="center"><b> 描述 </b></td>
+        </tr>
+        <tr>
+          <td style="width: 120px;"><b>fromLocal8Bit</b></td>
+          <td style="width: 120px;"><b>toLocal8Bit</b></td>
+          <td> 与操作系统及本地化语言相关，Linux 一般是 UTF-8 字符串，Windows 一般是 ANSI 多字节编码字符串。 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 120px;"><b>fromUtf8</b></td>
+          <td style="width: 120px;"><b>toUtf8</b></td>
+          <td> 与 UTF-8 编码的字符串相互转换。 </td>
+        </tr>
+        <tr>
+          <td style="width: 120px;"><b>fromUtf16</b></td>
+          <td style="width: 120px;"><b>utf16 和<br>
+              unicode </b></td>
+          <td> 与 UTF-16（UCS2）编码的字符串互相转换，utf16 函数与 unicode 函数功能一样， 注意没有 to 前缀，因为
+            QString 运行时的内码就是 UTF-16，字符的双字节采用主机字节序。</td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 120px;"><b>fromUcs4</b></td>
+          <td style="width: 120px;"><b>toUcs4</b></td>
+          <td> 与 UTF-32（UCS4）编码的字符串互相转换，一个字符用四个字节编码，占空间多，应用较少。 </td>
+        </tr>
+        <tr>
+          <td style="width: 120px;"><b>fromStdString</b></td>
+          <td style="width: 120px;"><b>toStdString</b></td>
+          <td> 与 std::string 对象互相转换，因为 C++11 规定标准字符串 std::string 使用 UTF-8
+            编码，这对函数功能与上面 **Utf8 转码函数相同。</td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 120px;"><b>fromStdWString</b></td>
+          <td style="width: 120px;"><b>toStdWString</b></td>
+          <td> 与 std::wstring 对象相互转换，在 Linux 系统里宽字符是四字节的 UTF-32，在 Windows
+            系统里宽字符是两字节的 UTF-16。因为不同平台有歧义，不建议使用。 </td>
+        </tr>
+        <tr>
+          <td style="width: 120px;"><b>fromCFString<br>
+              fromNSString </b></td>
+          <td style="width: 120px;"><b>toCFString<br>
+              toNSString </b></td>
+          <td> 仅存在于苹果 Mac OS X 和 iOS 系统。</td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    下面展示一个 qtcodec 例子，里面主要使用 QString 对象的转出函数，然后使用 cout 或 qDebug 打印相应的输出。例子下载：<br>
+    <a href="https://lug.ustc.edu.cn/sites/qtguide/QtProjects/ch03/qtcodec/qtcodec.7z">
+      https://lug.ustc.edu.cn/sites/qtguide/QtProjects/ch03/qtcodec/qtcodec.7z </a>
+    <br>
+    下载后解压到比如 D:\QtProjects\ch03\qtcodec 文件夹，然后用 QtCreator 打开该项目，项目配置同 3.2.1 节示范。
+    然后打开 qtcodec.cpp 文件，查看里面的内容： <br>
+    <div class="code"><span style=" color:#008000;">//qtcodec.cpp</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QApplication&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QTextBrowser&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;iostream&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">using</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">std</span><span style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">Testcout</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#000000;">str</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//Locale</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">charset</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>cout<span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">str</span><span style=" color:#000000;">.</span><span style=" color:#000000;">toLocal8Bit</span><span
+style=" color:#000000;">().</span><span style=" color:#000000;">data</span><span
+style=" color:#000000;">()&lt;&lt;</span>endl<span style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//UTF-8</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>cout<span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">str</span><span style=" color:#000000;">.</span><span style=" color:#000000;">toUtf8</span><span
+style=" color:#000000;">().</span><span style=" color:#000000;">data</span><span
+style=" color:#000000;">()&lt;&lt;</span>endl<span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>cout<span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">str</span><span style=" color:#000000;">.</span><span style=" color:#000000;">toStdString</span><span
+style=" color:#000000;">()&lt;&lt;</span>endl<span style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//UTF-16,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Windows</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Unicode,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">UCS2</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>cout<span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">str</span><span style=" color:#000000;">.</span><span style=" color:#000000;">unicode</span><span
+style=" color:#000000;">()&lt;&lt;</span>endl<span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>cout<span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">str</span><span style=" color:#000000;">.</span><span style=" color:#000000;">utf16</span><span
+style=" color:#000000;">()&lt;&lt;</span>endl<span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>cout<span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">str</span><span style=" color:#000000;">.</span><span style=" color:#000000;">data</span><span
+style=" color:#000000;">()&lt;&lt;</span>endl<span style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//UTF-32,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">UCS4</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>cout<span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">str</span><span style=" color:#000000;">.</span><span style=" color:#000000;">toUcs4</span><span
+style=" color:#000000;">().</span><span style=" color:#000000;">data</span><span
+style=" color:#000000;">()&lt;&lt;</span>endl<span style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//wchar_t:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Windows</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">UTF-16;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">Linux/Unix</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">UTF-32</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>wcout<span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">str</span><span style=" color:#000000;">.</span><span style=" color:#000000;">toStdWString</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>cout<span style=" color:#000000;">&lt;&lt;</span>endl<span
+style=" color:#000000;">&lt;&lt;</span>endl<span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">TestqDebug</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#000000;">str</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//Locale</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">charset</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">str</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">toLocal8Bit</span><span
+style=" color:#000000;">().</span><span style=" color:#000000;">data</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//UTF-8</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">str</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">toUtf8</span><span
+style=" color:#000000;">().</span><span style=" color:#000000;">data</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">str</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">toStdString</span><span
+style=" color:#000000;">().</span><span style=" color:#000000;">data</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//UTF-16,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Windows</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Unicode,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">UCS2</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">str</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">unicode</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">str</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">utf16</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">str</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">data</span><span style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//UTF-32,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">UCS4</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">str</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">toUcs4</span><span
+style=" color:#000000;">().</span><span style=" color:#000000;">data</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//wchar_t:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Windows</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">UTF-16;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">Linux/Unix</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">UTF-32</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">str</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">toStdWString</span><span
+style=" color:#000000;">().</span><span style=" color:#000000;">data</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">object</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">str</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">main</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">argc</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">char</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span
+style=" color:#000000;">argv</span><span style=" color:#000000;">[])</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QApplication</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">a</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">argc</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">argv</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strText</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"1234打印汉字"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QTextBrowser</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tb</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">tb</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strText</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">tb</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setGeometry</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">40</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">40</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">400</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">300</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">tb</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">show</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//Test</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">cout</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">Testcout</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strText</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//Test</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">qDebug</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//TestqDebug(strText);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">return</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">a</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">exec</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    qtcodec.cpp 里面首先是头文件包含和名字空间使用，然后是三个函数：Testcout、TestqDebug 和 main 函数。Testcout
+    和 TestqDebug 函数里的内容参看上面表格，就不一一解释了。需要注意一条，QString 类对象可以通过 data
+    函数返回它实际的数据存储块指针，如 str.data()，在后面运行测试时可以看到该指针数值。main 函数里面内容就是根据 qtmess.cpp
+    里改的，增加了测试 函数的代码。<br>
+    注意两个测试函数不要同时启用，一次测试一个，另一个注释掉，这样查看它们运行结果更清楚，而不会混淆。<br>
+    先测试 Testcout 函数运行效果：<br>
+    <center> <img src="images/ch03/ch03-02-12.png" alt="cout" width="800"></center>
+    QtCreator 输出面板会自动捕获命令行输出，对于命令行（控制台）输出，其字体颜色是黑色的。查看上面输出可以发现，在 Windows
+    命令行里是只有第一个本地化字符串能正常显示汉字，其他的不是指针就是乱码。所以在与 Windows 命令行进行输入输出沟通时，应该使用
+    fromLocal8Bit （获取命令行输入）和 toLocal8Bit（输出到命令行）。<br>
+    顺便提一下，Windows 系统里的 API 通常有两套同名的，比如 LoadLibrary 函数，这个名字只是一个宏定义，在 VC++ 环境，对于
+    ANSI 多字节程序，它真实函数是 LoadLibraryA，对于 Unicode 程序，它真实函数是 LoadLibraryW。如果读者以后遇到需要和
+    Windows API 函数打交道时，对于输入输出有乱码的，可以类似的测试一下 QString 的转码函数，对于 ANSI 多字节程序的
+    API，一般可以用 fromLocal8Bit 和 toLocal8Bit 函数进行沟通；对于 Unicode 程序的 API，可以用
+    fromUtf16 和 utf16 进行沟通，多试试就可以了。<br>
+    对 Unix/Linux 系统就没那么多事，因为默认都是 UTF-8 的字符串。<br>
+    <br>
+    接下来，我们把 main 函数里的 Testcout 函数调用注释掉，将第二个 TestqDebug 函数启用，测试第二个函数的显示效果：<br>
+    <center> <img src="images/ch03/ch03-02-13.png" alt="qDebug" width="800"></center>
+    qDebug 可以正确显示 Utf8 、StdString 编码的字符串，当然还能智能打印 QString 对象的内容，会用双引号包起来。一般直接使用
+    qDebug()&lt;&lt;对象名;<br>
+    这种方式就可以了，qDebug()会智能打印 Qt 对象和常规的 C++ 数据类型。<br>
+    <br>
+    最后教读者一个小窍门，在Windows里的 Qt 命令行下运行第一个 Testcout 函数的测试结果：<br>
+    <center><img src="images/ch03/ch03-02-14.png" alt="cmd1"></center>
+    命令行里看不到 cout 的输出，有方法可以查看，就是通过管道命令：<br>
+    qtcodec.exe | more<br>
+    这样就能看到输出了：<br>
+    <center><img src="images/ch03/ch03-02-15.png" alt="cmd2"></center>
+    QtCreator 输出面板捕获的命令行输出与上图汉字显示是一致的，所以以后都可以直接用 QtCreator
+    输出面板来查看命令行输出，不用从命令行自己查看输出的。<br>
+    <br>
+    QString 类中关于字符编码的函数都放到本节列举并测试了，后面就不重复介绍了。下一节我们学习 QString 常见的使用方式，QString 是
+    Qt 程序的基础，可以说每个 Qt 程序都会用到的，所以本章不着急介绍图形控件编程，要先打好基础。<br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch03-01.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch03-03.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

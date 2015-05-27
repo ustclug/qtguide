@@ -3,11 +3,9 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <title>ch03-03</title>
-    
-<link href="css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-
-<script src="thumbnailviewer.js" type="text/javascript">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -15,44 +13,1703 @@
 * Visit http://www.dynamicdrive.com/ for full source code
 ***********************************************/
 
-</script>
-
-
-  </head>
-  
-  
-<div class="os1">3.3 使用 QString</div>
-<br />
-
-<div class="os2">3.3.1 QString和QChar简介</div>
-<br />
-
-<div class="os2">3.3.2 其他类型转字符串</div>
-<br />
-
-<div class="os2">3.3.3 字符串转其他类型</div>
-<br />
-
-<div class="os2">3.3.4 字符串运算符</div>
-<br />
-
-<div class="os2">3.3.5 子串查询与操作</div>
-<br />
-
-<div class="os2">3.3.6 QString示例代码</div>
-<br />
-
-<br />
-<br />
-<br />
-<br />
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch03-02.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch03-04.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+</script> </head>
+  <body>
+    <div class="os1">3.3 使用 QString</div>
+    <br>
+    本节介绍 QString 的常见使用，包含 C++ 基本类型和 QString 的互相转换、QString 涉及的运算符、QString
+    子串查询和操作、利用 QTextStream 对 QString 做输入输出操作等，最后通过一个示例集成测试函数，展示 QString
+    用法。本节内容较多，可分几次尝试代码，凡是原理性质的内容需要理解，而罗列性质的内容不用死记的，可以到用的时候查看文档。本节示例代码下载地址在最后的小节
+    3.3.6 里，可以先下载示例对照学习。<br>
+    <br>
+    <div class="os2">3.3.1 QString和QChar简介</div>
+    <br>
+    QString 是由一系列 16 bit 字符 QChar 组成的字符串，以 NULL 字符结尾（末尾的 NULL 不计入字符串长度）。QChar
+    是一个 Unicode 4.0 标准的字符，对于超过 16bit 范围的国际码字符，QString 里采用相邻的一对 QChar 来表示。QString
+    使用的其实是 UTF-16 的双字节编码，tr 函数就是将 UTF-8 变长编码的字符串转成 QString 运行时的内码。UTF-8
+    编码是属于通用的存储交换格式，但这种编码的缺点就是一个字符的长度不固定，这对字符串操作效率是有影响的，因为得先确定每个字符的长度。因此 QString
+    采用固定长度字符单元的 UTF-16 编码，这对程序运行时字符串比较、查询操作效率更高。上一节 3.2.4 表格中 utf16() 和
+    unicode() 函数都没有用 to 前缀，因为这两个函数没有做转换，它们返回的就是 QString&nbsp; 运行时的内码，同 data()
+    函数。tr 函数不仅可以用于支持国际化翻译，并且能自动将字符串的存储交换格式 UTF-8 转换成运行时的 UTF-16 内码，返回转换过后得到的
+    QString 对象。<br>
+    <br>
+    字符串之间经常有手动复制或者通过函数参数、函数返回值等复制操作，QString 为了优化内存使用效率，避免出现大量相同内容的字符串副本，QString
+    对复制过程采用隐式共享机制（implicit sharing），比如执行字符串对象 str1 = str2
+    时，如果这两个对象字符串内容都没有后续改变，那么它们会指向同一块字符串数据，而如果其中之一发生改变，字符串数据块的复制过程才会发生，这样能最大程度地节省内存，而
+    且在传 QString 类型参数或返回值时，避免了大量数据块的复制过程，优化了程序运行效率。<br>
+    <br>
+    QString 内码是 UTF-16，而标准 C++ 的字符串是 UTF-8 编码的，Qt 针对标准 C++ 字符串也提供了 QByteArray
+    类，用于操作 UTF-8 编码以及其他本地化字符串（如 GBK、Big5）、字节数组（不以 NULL 结尾的纯数据）等，QByteArray
+    类下一节讲解。<br>
+    <br>
+    <div class="os2">3.3.2 基本类型与字符串互相转换</div>
+    <br>
+    在编程时经常会出现把数值如 800 转成字符串 "800"，或者反过来把字符串转成数值等情况，本小节罗列 C++ 基本的数值类型和 Qt
+    对这些类型的别称，然后展示这些基本类型和 QString 对象的互相转换，并编写一些测试函数来示范效果。<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 180px;" align="center"><b>基本类型</b></td>
+          <td style="width: 180px;" align="center"><b>Qt别称</b></td>
+          <td style="width: 120px;" align="center"><b>转入函数</b></td>
+          <td style="width: 120px;" align="center"><b>转出函数</b></td>
+          <td align="center"><b>描述</b></td>
+        </tr>
+        <tr>
+          <td style="width: 180px;"><b>short</b></td>
+          <td style="width: 180px;"><b>qint16</b></td>
+          <td style="width: 120px;"><b>arg或setNum</b></td>
+          <td style="width: 120px;"><b>toShort</b></td>
+          <td> 2 字节长度，有符号短整型。 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 180px;"><b>unsigned short</b></td>
+          <td style="width: 180px;"><b>ushort、quint16</b></td>
+          <td style="width: 120px;"><b>arg或setNum</b></td>
+          <td style="width: 120px;"><b>toUShort</b></td>
+          <td> 2 字节长度，无符号短整型。 </td>
+        </tr>
+        <tr>
+          <td style="width: 180px;"><b>int</b></td>
+          <td style="width: 180px;"><b>qint32</b></td>
+          <td style="width: 120px;"><b>arg或setNum</b></td>
+          <td style="width: 120px;"><b>toInt</b></td>
+          <td> 4 字节长度，有符号整型。 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 180px;"><b>unsigned int</b></td>
+          <td style="width: 180px;"><b>uint、quint32</b></td>
+          <td style="width: 120px;"><b>arg或setNum</b></td>
+          <td style="width: 120px;"><b>toUInt</b></td>
+          <td> 4 字节长度，无符号整型。 </td>
+        </tr>
+        <tr>
+          <td style="width: 180px;"><b>long</b></td>
+          <td style="width: 180px;"><b>无</b></td>
+          <td style="width: 120px;"><b>arg或setNum</b></td>
+          <td style="width: 120px;"><b>toLong</b></td>
+          <td> 有符号长整型，对于 32 位编程 long 是 4 字节长度，对于 64 位编程是 8 字节长度。 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 180px;"><b>unsigned long</b></td>
+          <td style="width: 180px;"><b>ulong</b></td>
+          <td style="width: 120px;"><b>arg或setNum</b></td>
+          <td style="width: 120px;"><b>toULong</b></td>
+          <td> 无符号长整型，对于 32 位编程 unsigned long 是 4 字节长度，对于 64 位编程是 8 字节长度。 </td>
+        </tr>
+        <tr>
+          <td style="width: 180px;"><b>long long</b></td>
+          <td style="width: 180px;"><b>qlonglong、qint64</b></td>
+          <td style="width: 120px;"><b>arg或setNum</b></td>
+          <td style="width: 120px;"><b>toLongLong</b></td>
+          <td> 8 字节长度，有符号长长整型。 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 180px;"><b>unsigned long long</b></td>
+          <td style="width: 180px;"><b>qulonglong、quint64</b></td>
+          <td style="width: 120px;"><b>arg或setNum</b></td>
+          <td style="width: 120px;"><b>toULongLong</b></td>
+          <td> 8 字节长度，无符号长长整型。 </td>
+        </tr>
+        <tr>
+          <td style="width: 180px;"><b>float</b></td>
+          <td style="width: 180px;"><b>默认情况下无</b></td>
+          <td style="width: 120px;"><b>arg或setNum</b></td>
+          <td style="width: 120px;"><b>toFloat</b></td>
+          <td> 4 字节长度，单精度浮点数。 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 180px;"><b>double</b></td>
+          <td style="width: 180px;"><b>默认情况对应 qreal</b></td>
+          <td style="width: 120px;"><b>arg或setNum</b></td>
+          <td style="width: 120px;"><b>toDouble</b></td>
+          <td> 8 字节长度，双精度浮点数。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    这些基本的数值类型转为 QString 对象都是使用重载的 arg 或 setNum 函数，而 QString
+    对象转出为其他类型使用单独命名的函数。Qt 对这些类型的别称都定义在头文件 &lt;QtGlobal&gt; 里面，由于其他绝大多数 Qt
+    头文件都包含了该全局头文件，所以通常不需要自己手动去包含它的。对于上表需要说明的两点：一是 long 和 ulong
+    长度是根据操作系统和编译器确定的，32 位编程就是 32 位，64 位编程就是 64 位；二是实数 qreal 默认情况下都是对应 double
+    ，例外情况是在编译 Qt 类库本身时配置了 -qreal float 选项参数，这种例外情况极少，通常都不用管的。<br>
+    首先来介绍一下转入函数，对于整数类型，setNum 函数声明是完全类似的，以 int 为例：<br>
+    <div class="code"> QString &amp; setNum(int n, int base = 10)</div>
+    第一个参数就是需要转换的整数，第二个参数是转换之后的目标字符串进制基数，比如转成十六进制字符串、八进制字符串等，默认是转成十进制的字符串。setNum
+    函数设置好字符串内容后返回 QString 对象自身的引用。<br>
+    <br>
+    对于浮点数类型，setNum 函数声明有些区别，以 double 为例：<br>
+    <div class="code"> QString &amp; QString::​setNum(double n, char format =
+      'g', int precision = 6)</div>
+    第一个参数是需要转换的浮点数，第二个是转换之后的目标字符串格式（'e', 'E', 'f', 'g' ,
+    'G'），第三个是目标字符串显示的浮点数精度，默认是 6 。浮点数的格式是与 C 语言类似的，如下所述：<br>
+    <ul>
+      <li>'e'：科学计数法，小写 e，如 [-]9.9e[±]999。</li>
+      <li>'E'：科学计数法，大写 E，如 [-]9.9E[±]999。</li>
+      <li>'f'：定点数显示，[-]9.9。</li>
+      <li> 'g'：自动选择用科学计数法或定点数显示，哪种方式最简洁就用哪个，科学计数法的 e 小写。</li>
+      <li> 'G'：自动选择用科学计数法或定点数显示，哪种方式最简洁就用哪个，科学计数法的 E 大写。</li>
+    </ul>
+    setNum 函数示范代码：<br>
+    <div class="code"> <span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#000000;">Test_setNum</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strTest</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//to</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Hex</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">string</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">short</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">numHex</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">127</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strTest</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setNum</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">numHex</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">16</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"Hex:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">strTest</span><span style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//to</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Oct</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">string</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">numOct</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">63</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strTest</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setNum</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">numOct</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">8</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"Oct:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">strTest</span><span style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//to</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">normal</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Dec</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">string</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">long</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">numDec</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">800</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strTest</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setNum</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">numDec</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"Normal:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">strTest</span><span style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//to</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">float</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">string</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">float</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">numFixed</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">123.78999</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strTest</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setNum</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">numFixed</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">'f'</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">3</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"Fixed:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">strTest</span><span style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//to</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">scientific</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">double</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">string</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">double</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">numScientific</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">456.78999</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strTest</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setNum</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">numScientific</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">'e'</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">6</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"Scientific:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">strTest</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    这个测试函数运行结果就不贴出来了，读者自己手动去试试看。<br>
+    <br>
+    接下来重点介绍 arg 函数，这是最常用也是最具特色的。arg
+    函数无所不包，它的参数可以是数值类型、字符串类型，并且可以串联，格式化参数里还可以指定顺序、重复使用参数等等。对于数值类型，它的声明与 setNum
+    比较类似，以 int 和 double 为例：<br>
+    <div class="code"> QString arg(int a, int fieldWidth = 0, int base = 10,
+      QChar fillChar = QLatin1Char( ' ' )) const </div>
+    <div class="code">QString arg(double a, int fieldWidth = 0, char format =
+      'g', int precision = -1, QChar fillChar = QLatin1Char( ' ' )) const</div>
+    注意 arg 函数声明末尾的 const，这个函数不会改变字符串对象本身的内容，而是会返回一个全新的 QString
+    对象，所以使用这个函数时，必须用它的返回值。<br>
+    对于整数类型，它的声明多出来两个：fieldWidth 是指生成的目标字符串宽度，0 表示自动设置长度，最后的 fillChar
+    是填充字符，如果设置的域宽比较大，多余的空位就会使用这个填充字符填满。<br>
+    对于浮点数类型，多出来的 fieldWidth 也是生成的目标字符串宽度，fillChar 也是填充字符。默认的填充字符是空格，QLatin1Char
+    代表一个字节长度的拉丁字符，与 ASCII 码字符差不多。QLatin1Char 有对应的类
+    QLatin1String，因为仅支持单字节拉丁字符，不支持国际化，它应用的比较少。 <br>
+    arg 函数比 setNum 函数功能更强大，可以设置目标字符串宽度和填充字符。arg
+    函数还可以用字符串作为参数，可以将一个字符串填充到另一个里面，比如下面这个函数声明：<br>
+    <div class="code">QString arg(const QString &amp; a, int fieldWidth = 0,
+      QChar fillChar = QLatin1Char( ' ' )) const</div>
+    这个声明和数值类型声明差不多，也可以设置目标字符串宽度和填充字符。<br>
+    函数声明介绍到这，下面看看这个函数该怎么用。arg 函数的使用方式很特别，它的串联方式也很灵活，来看看示例代码：<br>
+    <div class="code"> <span style=" color:#808000;"></span><span style=" color:#808000;">void</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#000000;">Test_arg</span><span
+        style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//使用</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">strResult</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">存储</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">arg</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">返回的新对象</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strResult</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//Dec</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">long</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">numDec</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">800</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strMod</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"Normal:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%1"</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strResult</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strMod</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#000000;">numDec</span><span
+style=" color:#000000;">);</span><span style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//%1是占位符，第一个arg函数参数变量转后的字符串填充到</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%1</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">位置</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"Mod:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">strMod</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#008000;">"</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">\t</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Result:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">strResult</span><span style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//Oct</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">numOct</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">63</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strResult</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"Oct:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%1"</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#000000;">numOct</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">4</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">8</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QChar</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">'0'</span><span style=" color:#000000;">));</span><span
+style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//numOct转换后为4字符域宽，8进制，填充0</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strResult</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//Hex</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">short</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">numHex</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">127</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strPrefix</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"0x"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//占位符里可填充数值转的字符串，也可以直接填充原有的字符串</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strResult</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"Hex:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%1%2"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">strPrefix</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#000000;">numHex</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">16</span><span
+style=" color:#000000;">);</span><span style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//串联：第一个arg函数参数填充到%1，第二个arg填充到%2</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strResult</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//double</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">double</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">numReal</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">123.78999</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strResult</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"Fixed:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%1</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">\t</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Scientific:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%2"</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#000000;">numReal</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">'f'</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">numReal</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">'e'</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">3</span><span style=" color:#000000;">);</span><span
+style=" color:#000000;"></span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strResult</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//占位符可重复，也可乱序</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">one</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">1</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">two</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">2</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">three</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">3</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strResult</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"%1</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">小于</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">%2，%1</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">小于</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%3，%3</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">大于</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">%2</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">。"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">one</span><span style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">two</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#000000;">three</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strResult</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    上面都是通过 tr 函数封装了一个临时的 QString 对象，然后调用该临时对象的 arg
+    函数实现数值类型转成格式化字符串，填充到占位符里面。这个工作原理与 sprintf 等 C 语言函数类似，sprintf 函数使用 %n 、%s
+    之类的格式占位符，QString 的实现方式不一样，它使用 % 加数字的占位方式，%1 对应后面串联的第一个 arg 函数，%2 对应后面串联的第二个
+    arg 函数，以此类推。具体的 %1 或 %2 等替换后的格式，由对应的 arg 函数来决定，QString 里有非常多的重载 arg 函数，每个
+    arg 函数对应一个类型，因此 %1 既可以填充数值类型转化后的格式化字符串，也可以填充其他原有的字符串。下面逐个解释一下各个 arg 函数意义：<br>
+    <div class="code"><span style=" color:#c0c0c0;"><span style=" color:#808000;"></span></span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#808000;">&nbsp;&nbsp;&nbsp;
+        long</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">numDec</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#000080;">800</span><span
+        style=" color:#000000;">;</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strMod</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"Normal:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%1"</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strResult</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strMod</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#000000;">numDec</span><span
+style=" color:#000000;">);</span><span style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//%1是占位符，第一个arg函数参数变量转后的字符串填充到</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%1</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">位置</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"Mod:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">strMod</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#008000;">"</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">\t</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Result:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">strResult</span><span style=" color:#000000;">;</span></pre>
+      <span style=" color:#000000;"></span><span style=" color:#c0c0c0;"></span></div>
+    这是最简单的形式，tr函数生成的 strMod 对象里面只有一个占位符 %1 ,arg 函数会将整数 numDec 转成十进制数字符串，然后根据
+    strMod 构造一个新的字符串对象，并将十进制数字符串填充到占位符 %1 位置。原本的 strMod 不会改变，arg
+    函数会返回全新的字符串对象，然后复制给了 strResult。qDebug 打印的结果就是：<br>
+    <span style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">Mod:
+      "Normal: %1"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Result:
+      "Normal: 800"</span><br>
+    <div class="code"><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">&nbsp;&nbsp;&nbsp;
+        int</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">numOct</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#000080;">63</span><span
+        style=" color:#000000;">;</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strResult</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"Oct:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%1"</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#000000;">numOct</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">4</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">8</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QChar</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">'0'</span><span style=" color:#000000;">));</span><span
+style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//numOct转换后为4字符域宽，8进制，填充0</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strResult</span><span
+style=" color:#000000;">;</span></pre>
+    </div>
+    这里 arg 函数是将普通数字 63 用八进制数来显示，要转换的数值是 numOct，设置 numOct 转换后的子串至少 4
+    字符宽度，用八进制显示，空位用字符 '0' 填充。qDebug 打印的结果就是：<br>
+    <span style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">"Oct:
+      0077"</span><br>
+    <div class="code"><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">&nbsp;&nbsp;&nbsp;
+        short</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">numHex</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#000080;">127</span><span
+        style=" color:#000000;">;</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strPrefix</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"0x"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//占位符里可填充数值转的字符串，也可以直接填充原有的字符串</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strResult</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"Hex:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%1%2"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">strPrefix</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#000000;">numHex</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">16</span><span
+style=" color:#000000;">);</span><span style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//串联：第一个arg函数参数填充到%1，第二个arg填充到%2</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strResult</span><span
+style=" color:#000000;">;</span></pre>
+    </div>
+    这里使用了串联的两个 arg 函数，第一个 arg 函数是填充原有字符串 strPrefix 到 %1 位置，第二个 arg 函数填充 numHex
+    转换后的十六进制字符串到 %2 位置。第二个 arg 函数参数里的 0 是指不限制域宽，转换后的十六进制字符串该多长就多长，参数 16
+    是十六进制的意思。占位符本身是没有格式信息的，填充的具体内容由后面串联的 arg
+    函数决定，想填充原有字符串就填充原有的字符串，想填充转换后的数字字符串，那就填充数字字符串，非常方便。qDebug 打印的结果为：<br>
+    <span style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">"Hex:
+      0x7f"</span><br>
+    <div class="code"><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">&nbsp;&nbsp;&nbsp;
+        double</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">numReal</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#000080;">123.78999</span><span
+        style=" color:#000000;">;</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strResult</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"Fixed:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%1</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">\t</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Scientific:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%2"</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#000000;">numReal</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">'f'</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">numReal</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">'e'</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">3</span><span style=" color:#000000;">);</span><span
+style=" color:#000000;"></span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strResult</span><span
+style=" color:#000000;">;</span></pre>
+    </div>
+    这里展示的是浮点数转成字符串，第一个 arg 函数将 numReal 以定点数形式（'f'）转成字符串，0 代表不限制宽度，并填充到 %1 位置，没有设
+    置显示精度（默认为 6 位）。第二个 arg 函数将 numReal 以科学计数法形式（'e'）转成字符串，0 代表不限制宽度，3 代表显示精度为 3
+    位。qDebug 打印的结果为：<br>
+    <span style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">"Fixed:
+      123.789990 &nbsp; &nbsp;&nbsp; Scientific: 1.238e+02"</span><br>
+    <div class="code"><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">&nbsp;&nbsp;&nbsp;
+        int</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">one</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#000080;">1</span><span
+        style=" color:#000000;">;</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">two</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">2</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">three</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">3</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strResult</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"%1</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">小于</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">%2，%1</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">小于</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%3，%3</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">大于</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">%2</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">。"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">one</span><span style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">two</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#000000;">three</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strResult</span><span
+style=" color:#000000;">;</span></pre>
+    </div>
+    最后一段示例比较有意思，如果是 C 语言的 sprintf 要填充 6 个整型数，那必须用 6 个 %n ，不管有没有重复的。这里仅仅用了
+    %1、%2、%3，后面对应三个 arg 函数，每个 arg
+    函数都将参数里的变量转成数字字符串，并填充到正确的位置，而且可以重复填充。占位符的顺序也可以是乱的，规律就是第一个 arg 函数填充所有的 %1
+    ，第二个 arg 函数填充所有的 %2 ，第三个 arg 函数填充所有的 %3 ，以此类推。因此 qDebug 打印的结果就是：<br>
+    <span style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">"1 小于
+      2，1 小于 3，3 大于 2 。"</span><br>
+    <br>
+    这正是我们希望看到的结果，可见 arg 函数的灵活性是传统 C 语言 sprintf 等无法比拟的，而且也更安全。学会 arg
+    函数用法，可应对各种复杂的格式化字符串转换。<br>
+    <br>
+    接下来简单看看 QString 的转出函数，可以将数字字符串转成各种类型的数值变量。对于整数类型，它们的函数声明都是类似的，以 int 为例：<br>
+    <div class="code">int QString::​toInt(bool * ok = 0, int base = 10) const</div>
+    ​toInt 函数第一个参数 ok 接收一个 bool 变量的指针，用于反馈转换过程是否成功，第二个参数 base 是字符串对象里数字的进制基数，默认的
+    10 代表十进制，也可以设置二进制、八进制和十六进制等等。如果将 base 设置为 0，那么 toInt 函数将自动识别字符串对象里面的进制标识，对于
+    "0" 打头的自动按八进制转换，对于 "0x" 打头的自动按十六进制转换，其他情况都按十进制转换。<br>
+    如果转换出错，ok 指向的变量会设置为 false，返回值为 0 。<br>
+    <br>
+    对于浮点数字符串的转换，函数声明有些差异：<br>
+    <div class="code">double QString::​toDouble(bool * ok = 0) const</div>
+    这个不能指定进制基数，都是十进制的，支持定点数字符串和浮点数字符串转成数值。参数 ok 接收一个 bool 变量的指针，用于反馈转换过程是否成功。<br>
+    如果转换失败，ok 指向的变量会设置为 false，返回值为 0。<br>
+    下面示范 QString 对象的转出函数：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#000000;">Test_toValue</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">bool</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">bok</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">false</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//dec</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strDec</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"800"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nDec</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strDec</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">toInt</span><span
+style=" color:#000000;">(&amp;</span><span style=" color:#000000;">bok</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">10</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">nDec</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#008000;">"\t"</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">bok</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">       </span><span
+style=" color:#008000;">//成功</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//Hex</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strHex</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"FFFF"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">nDec</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strHex</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">toInt</span><span style=" color:#000000;">(&amp;</span><span
+style=" color:#000000;">bok</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">10</span><span style=" color:#000000;">);</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#008000;">//基数错误，转换失败</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">nDec</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#008000;">"\t"</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">bok</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">short</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nHexShort</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strHex</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">toShort</span><span style=" color:#000000;">(&amp;</span><span
+style=" color:#000000;">bok</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">16</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">nHexShort</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#008000;">"\t"</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">bok</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//FFFF正整数太大，超出范围，转换失败，没有负号</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">-</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">的都算正数。</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">ushort</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nHexUShort</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strHex</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">toUShort</span><span style=" color:#000000;">(&amp;</span><span
+style=" color:#000000;">bok</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">16</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">nHexUShort</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#008000;">"\t"</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">bok</span><span
+style=" color:#000000;">;</span><span style=" color:#008000;">//成功</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//自动转换</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strOct</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"0077"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nOct</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strOct</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">toInt</span><span
+style=" color:#000000;">(&amp;</span><span style=" color:#000000;">bok</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">nOct</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#008000;">"\t"</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">bok</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//字符</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">0</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">打头自动按八进制转</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strHexWithPre</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"0xFFFF"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nHexWithPre</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strHexWithPre</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">toInt</span><span style=" color:#000000;">(&amp;</span><span
+style=" color:#000000;">bok</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">nHexWithPre</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#008000;">"\t"</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">bok</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//字符</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">0x</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">打头自动按十六进制转</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nDecAuto</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strDec</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">toInt</span><span style=" color:#000000;">(&amp;</span><span
+style=" color:#000000;">bok</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span><span style=" color:#c0c0c0;">   </span><span
+style=" color:#008000;">//"800"</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">，自动按十进制</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">nDecAuto</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#008000;">"\t"</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">bok</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//浮点数转换</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strFixed</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"123.78999"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">double</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">dblFixed</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strFixed</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">toDouble</span><span style=" color:#000000;">(&amp;</span><span
+style=" color:#000000;">bok</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span>fixed<span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">dblFixed</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#008000;">"\t"</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">bok</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//科学计数法</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strScientific</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"1.238e-5"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">double</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">dblScientific</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strScientific</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">toDouble</span><span style=" color:#000000;">(&amp;</span><span
+style=" color:#000000;">bok</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span>scientific<span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">dblScientific</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#008000;">"\t"</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">bok</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    上面代码的运行结果这里不贴出来了，读者自己动手去试试。对于两个浮点数打印的行，里面带有流操作子，类似标准 C++ 控制台输出对象 cout
+    的操作子，fixed 是指按定点数显示，scientific 是指按科学计数法显示。<br>
+    <br>
+    <div class="os2">3.3.3 字符串运算符</div>
+    <br>
+    QString 重载了多个对字符串有清晰意义的运算符，之前见过赋值运算符，可以将一个 QString 对象赋值给另一个 QString
+    对象。还有其他的比 较运算符和中括号运算符，先将其罗列如下：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 120px;" align="center"><b> operator </b></td>
+          <td align="center"><b> 描述 </b></td>
+        </tr>
+        <tr>
+          <td style="width: 120px;"><b> = </b></td>
+          <td> 赋值运算符，遵循隐式共享规则，在赋值的两个对象有变化时才真正复制数据块。 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 120px;"><b> += </b></td>
+          <td> 追加。将运算符左边和右边字符串拼接后，赋值给左边对象。 </td>
+        </tr>
+        <tr>
+          <td style="width: 120px;"><b> &lt; </b></td>
+          <td> 小于号。左边字符串字典序比右边的靠前时，表达式为真。 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 120px;"><b> &lt;= </b></td>
+          <td> 小于等于。左边字符串字典序比右边的靠前或相同时，表达式为真。 </td>
+        </tr>
+        <tr>
+          <td style="width: 120px;"><b> == </b></td>
+          <td> 等于。二者字典序是一致的时候为真。 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 120px;"><b> != </b></td>
+          <td> 不等于。二者字典序不一样的时候为真。 </td>
+        </tr>
+        <tr>
+          <td style="width: 120px;"><b> &gt; </b></td>
+          <td> 大于。左边字符串字典序比右边的靠后时，表达式为真。 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 120px;"><b> &gt;= </b> </td>
+          <td> 大于等于。左边字符串字典序比右边的靠后或相同时，表达式为真。 </td>
+        </tr>
+        <tr>
+          <td style="width: 120px;"><b> [] </b></td>
+          <td> 类似数组取数的中括号，从指定位置取出 QChar 字符，另外还可以修改指定位置的 QChar 字符。 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 120px;"><b> + </b> </td>
+          <td> 拼接。这是个友元函数，将两个字符串拼接后返回全新的字符串对象。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    上面运算符的意义是一目了然的，主要解释一下赋值运算符 = 的隐式共享（Implicit
+    Sharing），在执行赋值时，真正的字符串数据拷贝没有发生，这是为了优化运行效率，避免大量数据的拷贝。隐式共享实现方式就是对数据块做引用计数，多一个对象赋值或
+    参数、返回值拷贝时，引用次数加 1，这个赋值过程只需要设置一下数据指针和增加引用计数，不会真的拷贝大量数据，这种拷贝称为浅拷贝（shallow
+    copy）。<br>
+    在赋值的一个字符串发生变化，要做写入修改时，这个要发生变化的字符串会重新分配一块内存，将旧的数据拷贝到新的内存空间，并对其做相应的写入修改，这个过程叫深
+    拷贝（deep copy），也可称为 copy-on-write（写时拷贝）。深拷贝会将旧的数据块引用计数减
+    1，然后将变化的字符串数据指向新空间，新空间引用计数加 1。<br>
+    如果发生字符串超出生命期销毁或清空，那么对应的数据引用计数减 1，当引用计数减到 0 时，数据块空间才会真的被释放。<br>
+    Qt 对象能够赋值或传参数、返回值的，一般都是采用隐式共享机制，所以 Qt
+    的参数和返回值传递运行效率是很高的。这也将信号和槽机制传递参数的效率大大提升了。面向对象的高级编程语言一般都支持类似的功能，比如 Java 和
+    Python 的垃圾回收机制，也是类似的。<br>
+    <br>
+    下面通过简单示例展示运算符的使用：<br>
+    <div class="code">
+      <style type="text/css">
+p, li { white-space: pre-wrap; }
+</style> <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">Test_operator</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">=</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strE1</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strE2</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strE3</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strE1</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"abcd"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strE2</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strE1</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strE3</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strE2</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//打印数据指针</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strE1</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">data_ptr</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"\t"</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">strE2</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">data_ptr</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"\t"</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">strE3</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">data_ptr</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//改变字符串，追加</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strE2</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">append</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QObject</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"1234"</span><span style=" color:#000000;">)</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//再次打印数据指针，谁修改了数据，谁的数据指针就变</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strE1</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">data_ptr</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"\t"</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">strE2</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">data_ptr</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"\t"</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">strE3</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">data_ptr</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">和</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">append</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">函数类似</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strE3</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"1234"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strE2</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#008000;">"\t"</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">strE3</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//比较</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">1</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">vs</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">2</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"strE1</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">&lt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">strE2:</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"</span><span style=" color:#000000;">&lt;&lt;(</span><span
+style=" color:#000000;">strE1</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">&lt;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strE2</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"strE1</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">&lt;=</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">strE2:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span style=" color:#000000;">&lt;&lt;(</span><span
+style=" color:#000000;">strE1</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">&lt;=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strE2</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"strE1</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">==</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">strE2:</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"</span><span style=" color:#000000;">&lt;&lt;(</span><span
+style=" color:#000000;">strE1</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">==</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strE2</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"strE1</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">!=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">strE2:</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"</span><span style=" color:#000000;">&lt;&lt;(</span><span
+style=" color:#000000;">strE1</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">!=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strE2</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//2</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">vs</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">3</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"strE2</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">&gt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">strE3"</span><span style=" color:#000000;">&lt;&lt;(</span><span
+style=" color:#000000;">strE2</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">&gt;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strE3</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"strE2</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">&gt;=</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">strE3"</span><span
+style=" color:#000000;">&lt;&lt;(</span><span style=" color:#000000;">strE2</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&gt;=</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strE3</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"strE2</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">==</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">strE3"</span><span style=" color:#000000;">&lt;&lt;(</span><span
+style=" color:#000000;">strE2</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">==</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strE3</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//类似数组取数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strE1</span><span
+style=" color:#000000;">[</span><span style=" color:#000080;">0</span><span style=" color:#000000;">];</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strE1</span><span
+style=" color:#000000;">[</span><span style=" color:#000080;">0</span><span style=" color:#000000;">]</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QChar</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">'?'</span><span style=" color:#000000;">);</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#008000;">//修改</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strE1</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//拼接</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strPlus</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strPlus</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strE1</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">+</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strE2</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strE3</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strPlus</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    我们来看看开头赋值运算符一段代码的运行结果，其他的比较简单就不贴了：<br>
+    <br>
+    <span style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">0x13725b98&nbsp;&nbsp;&nbsp;&nbsp;
+      0x13725b98&nbsp;&nbsp;&nbsp;&nbsp; 0x13725b98</span><br>
+    <span style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">0x13725b98&nbsp;&nbsp;&nbsp;&nbsp;
+      0x13741958 &nbsp; &nbsp; 0x13725b98<br>
+      <br>
+    </span> 可以看到三个字符串对象都没有修改时，它们的数据指针是一样的，这就是浅拷贝的过程。在 strE2 发生改变时，strE2
+    会重新分配一块内存空间，并将旧的数据拷贝到新空间然后做对应的追加字符串操作，修改之后，strE2 的数据指针变了，由于 strE1 和 strE3
+    这时没变化，它们数据指针还是一样的。在有写操作的时候，才会发生深拷贝，发生变化的字符串对象就会完全独立。后续的比较操作、中括号操作、拼接操作等代码读者可以自己去
+    试试，看看结果如何。<br>
+    <br>
+    <div class="os2">3.3.4 子串查询与操作</div>
+    <br>
+    在面对文本处理时经常会遇到子串查询和操作，QString 类拥有大量这方面的函数，并且重载的也比较多，详细的函数可以通过查阅帮助文档获知，索引栏输入
+    QString 就能找到该类说明。下面简略讲解一些比较实用的函数（一般每个函数名只列一个声明，还有其他同名重载的请查帮助文档），这些函数不用死记硬背的，
+    等到需要用的时候查一下文档就行了。<br>
+    <div class="code">QString &amp;&nbsp;&nbsp;&nbsp; append(const QString &amp;
+      str)</div>
+    append 追加子串到字符串尾部。<br>
+    <div class="code">QString &amp;&nbsp;&nbsp; &nbsp;prepend(const QString
+      &amp; str)</div>
+    prepend 将子串加到字符串头部。<br>
+    <div class="code">bool&nbsp;&nbsp; &nbsp;startsWith(const QString &amp; s,
+      Qt::CaseSensitivity cs = Qt::CaseSensitive) const</div>
+    startsWith 判断字符串（如 "abcd"）是否以某个子串（如 s 是 "ab"）打头，cs 指判断时大小写是否敏感 ，返回 bool。<br>
+    <div class="code">bool&nbsp;&nbsp; &nbsp;endsWith(const QString &amp; s,
+      Qt::CaseSensitivity cs = Qt::CaseSensitive) const</div>
+    endsWith 判断字符串（如 "abcd"）是否以某个子串（如 s 是 "cd"）结尾，cs 指判断时大小写是否敏感，返回 bool。<br>
+    <div class="code">bool&nbsp;&nbsp;&nbsp; contains(const QString &amp; str,
+      Qt::CaseSensitivity cs = Qt::CaseSensitive) const</div>
+    contains 判断字符串对象里是否包含子串 str ，参数 cs 指判断时大小写是否敏感，后面函数的 cs 都是一个意思，不重复说了。<br>
+    <div class="code">int&nbsp;&nbsp; &nbsp;count(const QString &amp; str,
+      Qt::CaseSensitivity cs = Qt::CaseSensitive) const</div>
+    count 对字符串对象里子串 str 出现的次数做统计，返回出现次数，如果没出现就返回 0。<br>
+    <div class="code">int&nbsp;&nbsp; &nbsp;indexOf(const QString &amp; str, int
+      from = 0, Qt::CaseSensitivity cs = Qt::CaseSensitive) const</div>
+    indexOf 从 from 指定的序号开始查询子串 str，返回查到的第一个 str 子串起始位置序号。查不到就返回 -1 。<br>
+    <div class="code">int&nbsp;&nbsp; &nbsp;lastIndexOf(const QString &amp; str,
+      int from = -1, Qt::CaseSensitivity cs = Qt::CaseSensitive) const</div>
+    lastIndexOf 默认从字符串尾部开始向前查询，设置 from 之后，从 from 开始的位置向前查询子串 str，返回最先匹配的 str
+    子串起始位置序号（搜索区间 0 ~ from ，子串起始序号最接近 from）。查不到就返回 -1 。<br>
+    <div class="code">QString &amp;&nbsp;&nbsp; &nbsp;insert(int position, const
+      QString &amp; str)</div>
+    insert 是将子串 str 插入到 position 序号位置，子串 str 插入后的起始序号就是 position 。<br>
+    <div class="code">QString &amp;&nbsp;&nbsp; &nbsp;remove(int position, int
+      n)</div>
+    remove 从 position 开始的位置移除掉 n 个字符，如果 n 比 position 位置开始的子串长度大，后面的就会被全部移除。<br>
+    <div class="code">QString &amp;&nbsp;&nbsp; &nbsp;remove(const QString &amp;
+      str, Qt::CaseSensitivity cs = Qt::CaseSensitive)</div>
+    这个重载的 remove 函数将匹配的所有子串 str 都从字符串里面移除掉，拿来消除空格之类的字符比较好使。<br>
+    <div class="code">QString &amp;&nbsp;&nbsp; &nbsp;replace(int position, int
+      n, const QString &amp; after)</div>
+    replace 将从 position 序号开始的 n 个字符的子串替换成 after 字符串。<br>
+    <div class="code">QString &amp;&nbsp;&nbsp; &nbsp;replace(const QString
+      &amp; before, const QString &amp; after, Qt::CaseSensitivity cs =
+      Qt::CaseSensitive)</div>
+    这个重载的 replace 将字符串里出现的所有子串 before 全部替换为新的 after。
+    <div class="code">QStringList&nbsp;&nbsp; &nbsp;split(QChar sep,
+      SplitBehavior behavior = KeepEmptyParts, Qt::CaseSensitivity cs =
+      Qt::CaseSensitive) const</div>
+    <div class="code">QStringList&nbsp;&nbsp; &nbsp;split(const QString &amp;
+      sep, SplitBehavior behavior = KeepEmptyParts, Qt::CaseSensitivity cs =
+      Qt::CaseSensitive) const</div>
+    split 用字符或子串 sep 切分当前字符串内容，然后将切分的所有子串以 QStringList
+    列表形式返回，可以从返回的列表提取各个子串。behavior 是分隔模式，是否保留空白字符区域等。<br>
+    <div class="code">QString&nbsp;&nbsp; &nbsp;section(QChar sep, int start,
+      int end = -1, SectionFlags flags = SectionDefault) const</div>
+    <div class="code">QString&nbsp;&nbsp; &nbsp;section(const QString &amp; sep,
+      int start, int end = -1, SectionFlags flags = SectionDefault) const</div>
+    section 函数首先将字符串按照字符或子串 sep 分成段落，类似 split 划分，但 section 只返回第 start 段到第 end
+    段之间的内容。如果没指定 end 就一直包含到最后。flags 参数影响划分行为，如大小写敏感、是否忽略空白区域等。<br>
+    <div class="code">QString&nbsp;&nbsp; &nbsp;left(int n) const</div>
+    left 返回字符串左边 n 个字符构成的子串。 <br>
+    <div class="code">QString&nbsp;&nbsp; &nbsp;right(int n) const</div>
+    right 返回字符串右边 n 个字符构成的子串。&nbsp;
+    <div class="code">QString&nbsp;&nbsp; &nbsp;mid(int position, int n = -1)
+      const</div>
+    mid 返回从 position 位置开始的 n 个字符构成的子串。不设置 n 的话就包含到末尾。<br>
+    <div class="code">QString &amp;&nbsp;&nbsp; &nbsp;fill(QChar ch, int size =
+      -1)</div>
+    &nbsp; fill 用字符 ch 填充当前字符串，如果不指定 size ，就把所有的字符都填成 ch 字符。如果指定正数
+    size，字符串长度被重置为 size 大小，里面依然全是 ch 字符。<br>
+    <div class="code">QString&nbsp;&nbsp; &nbsp;repeated(int times) const</div>
+    将当前字符串重复拼接 times 次数，返回新的重复串。<br>
+    <div class="code">QString&nbsp;&nbsp; &nbsp;trimmed() const</div>
+    trimmed 剔除字符串头部和尾部的空白字符，包括 '\t', '\n', '\v', '\f', '\r', ' '&nbsp; 。
+    字符串中间的空白不处理。<br>
+    <div class="code">QString&nbsp;&nbsp; &nbsp;simplified() const</div>
+    simplified 剔除字符串里出现的所有空白字符，包括 '\t', '\n', '\v', '\f', '\r', ' '&nbsp; 。
+    两端和中间的都剔除。<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;truncate(int position)</div>
+    truncate 是从 position 序号开始截断字符串，只保留 0 ~ position-1 位置的字符串，position 位置被设为
+    NULL，后面的全移除。<br>
+    <br>
+    关于子串处理的函数就罗列上面这些，等到用的时候再查文档就行了。下面示范一个测试函数，挑几个函数出来用用，看看效果如何。<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#000000;">Test_substring</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strOne</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"abcd"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strThree</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strOne</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">repeated</span><span style=" color:#000000;">(</span><span
+style=" color:#000080;">3</span><span style=" color:#000000;">);</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//abcd</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">重复三次</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strThree</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">();</span><span style=" color:#c0c0c0;">   </span><span
+style=" color:#008000;">//是否为空</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strThree</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">length</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"\t"</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">strThree</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">size</span><span style=" color:#000000;">();</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//都是长度</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strThree</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//子串查询</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strThree</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">contains</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strOne</span><span
+style=" color:#000000;">);</span><span style=" color:#c0c0c0;">    </span><span
+style=" color:#008000;">//是否包含</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strThree</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">count</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strOne</span><span
+style=" color:#000000;">);</span><span style=" color:#c0c0c0;">       </span><span
+style=" color:#008000;">//包含几个</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strThree</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">startsWith</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strOne</span><span
+style=" color:#000000;">);</span><span style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//打头的子串</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strThree</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">indexOf</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strOne</span><span
+style=" color:#000000;">);</span><span style=" color:#c0c0c0;">     </span><span
+style=" color:#008000;">//左边开始的子串位置</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strThree</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">lastIndexOf</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strOne</span><span
+style=" color:#000000;">);</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//右边开始的子串位置</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//剔除两端的空白</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strComplexFileName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"</span><span
+style=" color:#c0c0c0;">   </span><span style=" color:#008000;">/home/user/somefile.txt</span><span
+style=" color:#c0c0c0;">  </span><span style=" color:#008000;">\t\t</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strFileName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strComplexFileName</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">trimmed</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strFileName</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strFileName</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">endsWith</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QObject</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">".txt"</span><span style=" color:#000000;">)</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">))</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"This</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">is</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">a</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">.txt</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">file"</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//分隔子串</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QStringList</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">subsList</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strFileName</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">split</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QChar</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">'/'</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">for</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">i</span><span style=" color:#000000;">=</span><span style=" color:#000080;">0</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#000000;">subsList</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">length</span><span
+style=" color:#000000;">();</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span
+style=" color:#000000;">++)</span><span style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//打印各个子串</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">i</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#008000;">"\t"</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">subsList</span><span
+style=" color:#000000;">[</span><span style=" color:#000000;">i</span><span style=" color:#000000;">];</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取段落</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">subsections</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strFileName</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">section</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QChar</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">'/'</span><span style=" color:#000000;">),</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">2</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">3</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">subsections</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    测试函数前半截的代码意义是比较简单的，就不多说了，看看后面文件名部分的输出结果，strComplexFileName 剔除两端的空白区域之后，得到
+    strFileName：<br>
+    <span style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">"/home/user/somefile.txt"</span><br>
+    <br>
+    这个新的 strFileName 以 ".txt" 结尾，所以判断为文本文件：<br>
+    <span style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">This is
+      a .txt file</span><br>
+    <br>
+    然后以字符 '/' 分隔文件名为子串：<br>
+    <span style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">0&nbsp;&nbsp;&nbsp;&nbsp;
+      ""</span><br>
+    <span style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">1&nbsp;&nbsp;&nbsp;&nbsp;
+      "home"</span><br>
+    <span style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;"><span style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">2&nbsp;&nbsp;&nbsp;&nbsp;
+        "user"</span></span><br>
+    <span style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">3&nbsp;&nbsp;&nbsp;&nbsp;
+      "somefile.txt"</span><br>
+    <br>
+    注意文件名被拆成了四个子串，而不是三个，第一个 '/' 左边没有东西，也会被切分为一个独立的子串 "" ，就是空串。<br>
+    切分后的子串保存在 QStringList 里面，这就像存储多个 QString 对象的数组，可以直接用 [] 操作各个子串。<br>
+    <br>
+    最后的取段落函数，它分隔段落的方法和 split 函数类似的，取出序号从 2 到 3 的段落内容，这些段落内部之间的分隔符是保留的，段落函数返回的是一个
+    QString 对象，而不是列表：<br>
+    <span style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">"user/somefile.txt"</span><br>
+    <br>
+    QString 还有其他的如字母大小写转换函数，toUpper() 函数是转成全大写，toLower() 函数是全部转成小写。clear()
+    函数是清空字符串，这些函数作用一目了然，就不多作介绍了。<br>
+    <br>
+    <div class="os2">3.3.5 QTextStream配合字符串使用</div>
+    <br>
+    对于熟悉 C++ 里面 iostream 控制台输入输出流、fstream 文件数据流和 sstream 内存数据流的程序员，如何在 Qt
+    里面使用类似的流操作呢？之前示范过 qDebug() 有流操作子 fixed 和
+    scientific，这是调试输出流。对于控制台输入输出流、文件流、内存流，Qt 统一用强大的 QTextStream 来支持，本小节简单介绍利用
+    QTextStream 对 QString 做内存流的输入输出处理，以后的“文件和数据流”章节还会更多地介绍 QTextStream 。<br>
+    QTextStream 配合 QString 使用的过程非常简单，QTextStream 构造函数接受 QString 对象的指针，并且支持类似
+    cout 流的操作子，我们直接来看示例代码：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#000000;">Test_QTextStream</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//内存输出流</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strOut</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QTextStream</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">streamOut</span><span
+style=" color:#000000;">(&amp;</span><span style=" color:#000000;">strOut</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//打印多种进制数字</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">streamOut</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000080;">800</span><span
+style=" color:#000000;">&lt;&lt;</span>endl<span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">streamOut</span><span
+style=" color:#000000;">&lt;&lt;</span>hex<span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000080;">127</span><span style=" color:#000000;">&lt;&lt;</span>endl<span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">streamOut</span><span
+style=" color:#000000;">&lt;&lt;</span>oct<span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000080;">63</span><span style=" color:#000000;">&lt;&lt;</span>endl<span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//还原为十进制</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">streamOut</span><span
+style=" color:#000000;">&lt;&lt;</span>dec<span style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置域宽和填充字符</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">streamOut</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">qSetFieldWidth</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">8</span><span style=" color:#000000;">)&lt;&lt;</span><span
+style=" color:#000000;">qSetPadChar</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">'0'</span><span style=" color:#000000;">)&lt;&lt;</span><span
+style=" color:#000080;">800</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//还原默认域宽和填充</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">streamOut</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">qSetFieldWidth</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">0</span><span style=" color:#000000;">)&lt;&lt;</span><span
+style=" color:#000000;">qSetPadChar</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">'</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">'</span><span
+style=" color:#000000;">)&lt;&lt;</span>endl<span style=" color:#000000;">;<br><br></span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置精度</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">streamOut</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">qSetRealNumberPrecision</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">3</span><span style=" color:#000000;">)&lt;&lt;</span>fixed<span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000080;">123.789999</span><span
+style=" color:#000000;">&lt;&lt;</span>endl<span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">streamOut</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">qSetRealNumberPrecision</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">6</span><span style=" color:#000000;">)&lt;&lt;</span>scientific<span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000080;">123.789999</span><span
+style=" color:#000000;">&lt;&lt;</span>endl<span style=" color:#000000;">;<br><br></span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//打印字符串和数字混搭</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">streamOut</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#800080;">QObject</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"7*7</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">==</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span style=" color:#000000;">)&lt;&lt;</span><span
+style=" color:#000080;">7</span><span style=" color:#000000;">*</span><span style=" color:#000080;">7</span><span
+style=" color:#000000;">&lt;&lt;</span>endl<span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//显示现在的字符串对象</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strOut</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//内存输入流</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strIn</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"800</span><span
+style=" color:#c0c0c0;">  </span><span style=" color:#008000;">abcd</span><span
+style=" color:#c0c0c0;">  </span><span style=" color:#008000;">123.789999"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QTextStream</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">streamIn</span><span
+style=" color:#000000;">(&amp;</span><span style=" color:#000000;">strIn</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">numDec</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strSub</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">double</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">dblReal</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0.0</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//输入到变量里</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">streamIn</span><span
+style=" color:#000000;">&gt;&gt;</span><span style=" color:#000000;">numDec</span><span
+style=" color:#000000;">&gt;&gt;</span><span style=" color:#000000;">strSub</span><span
+style=" color:#000000;">&gt;&gt;</span><span style=" color:#000000;">dblReal</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//显示</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">numDec</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strSub</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span>fixed<span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">dblReal</span><span style=" color:#000000;">;</span><span
+style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//定点数显示</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    第一块代码是打印多种进制的数值，流操作子和 cout 是一样的，hex 是十六进制，oct 是八进制，dec
+    是十进制。需要注意的是用完各种进制之后，要记得把流的进制还原为 dec
+    十进制，否则之前设置的进制会一直持续生效，直到被重新设置为止。这部分显示的结果（双引号是字符串对象 strOut 起始标志）：<br>
+    <span style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">"800</span>
+    <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+        style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">7f</span></p>
+    <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+        style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">77</span></p>
+    <br>
+    第二块代码是设置显示域宽 qSetFieldWidth 、填充字符
+    qSetPadChar，用完之后要还原，否则域宽和填充字符会持续生效。这部分显示结果为：<br>
+    <span style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">00000800</span><br>
+    <br>
+    第三块是设置精度 qSetRealNumberPrecision 并打印浮点数到字符串对象 strOut 里面，定点数操作子为 fixed，科学计数法操
+    作子为 scientific，这部分结果显示为：<br>
+    <span style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">123.790</span>
+    <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+        style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">1.237900e+02</span></p>
+    <br>
+    第四块是打印字符串和数值混搭，都输出到字符串对象 strOut ，然后将 strOut 显示到调试输出面板里（双引号是字符串对象结尾）：<br>
+    <span style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">7*7 ==
+      49</span>
+    <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+        style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">"</span></p>
+    <br>
+    该测试函数最后是将字符串 "800&nbsp; abcd&nbsp; 123.789999" 作为输入源，然后把数据输入到整型 numDec、字符串对象
+    strSub 和浮点数 dblReal 里，得到的结果显示为：<br>
+    <span style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">800</span><br>
+    <span style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">"abcd"</span><br>
+    <span style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">123.789999</span><br>
+    <br>
+    将字符串对象作为输入源使用也很方便，灵活运用 QTextStream 对于字符串操作也是很有益处的。<br>
+    对于输出流，除了三个 q 打头的操作子 qSetFieldWidth 、qSetPadChar、qSetRealNumberPrecision
+    ，其他的操作子名字和 cout 的操作子名字是基本一样的。<br>
+    <br>
+    <div class="os2">3.3.6 QString示例代码</div>
+    <br>
+    QString 示例代码就是上面 6 个测试函数的合集，然后融入到一个简单 Qt 程序里。6 个测试函数分别为
+    Test_setNum()、Test_arg()、Test_toValue()、Test_operator()、Test_substring()、
+    Test_QTextStream()，这些代码不重复贴了，上面都有，测试这些函数时，每次只启用一个，其他的注释掉，慢慢试，不用全记住的，可以分几次学。示例代码下
+    载： <br>
+    <a href="https://lug.ustc.edu.cn/sites/qtguide/QtProjects/ch03/testqstring/testqstring.7z">
+      https://lug.ustc.edu.cn/sites/qtguide/QtProjects/ch03/testqstring/testqstring.7z
+      </a> <br> 照旧把代码解压到如 D:\QtProjects\ch03\testqstring 文件夹里。下面主要把包含头文件和 main
+    函数贴出来：<br>
+    <div class="code"><span style=" color:#008000;">//testqstring.cpp</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QApplication&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QTextBrowser&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QTextStream&gt;<br><br></span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">Test_setNum</span><span
+style=" color:#000000;">()<br>{<br>...<br>}<br><br></span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">Test_arg</span><span
+style=" color:#000000;">()<br>{<br>...<br>}<br></span><br><span style=" color:#000000;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">Test_toValue</span><span
+style=" color:#000000;">()<br>{<br>...<br>}<br><br></span></span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">Test_operator</span><span
+style=" color:#000000;">()<br>{<br>...<br>}<br></span><br><span style=" color:#000000;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">Test_substring</span><span
+style=" color:#000000;">()</span><br>{<br>...<br>}<br></span><br><span style=" color:#000000;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">Test_QTextStream</span><span
+style=" color:#000000;">()</span><br>{<br>...<br>}<br><br></span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">main</span><span style=" color:#000000;">(</span><span
+style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">argc</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">char</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">argv</span><span
+style=" color:#000000;">[])</span>
+<span style=" color:#000000;">{</span>
+<span style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QApplication</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">a</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">argc</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">argv</span><span style=" color:#000000;">);</span>
+<span style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strText</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QObject</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"测试字符串类</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">QString"</span><span
+style=" color:#000000;">);</span>
+<span style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QTextBrowser</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tb</span><span style=" color:#000000;">;</span>
+<span style=" color:#c0c0c0;">    </span><span style=" color:#000000;">tb</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strText</span><span
+style=" color:#000000;">);</span>
+<span style=" color:#c0c0c0;">    </span><span style=" color:#000000;">tb</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setGeometry</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">40</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">40</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">400</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">300</span><span style=" color:#000000;">);</span>
+<span style=" color:#c0c0c0;">    </span><span style=" color:#000000;">tb</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">show</span><span style=" color:#000000;">();</span>
+<br>
+<span style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//setNum</span>
+<span style=" color:#c0c0c0;">    </span><span style=" color:#000000;">Test_setNum</span><span
+style=" color:#000000;">();</span>
+<br>
+<span style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//arg</span>
+<span style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//Test_arg();</span>
+<br>
+<span style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//toValue</span>
+<span style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//Test_toValue();</span>
+<br>
+<span style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//operator</span>
+<span style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//Test_operator();</span>
+<br>
+<span style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//substring</span>
+<span style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//Test_substring();</span>
+<br>
+<span style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//QTextStream</span>
+<span style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//Test_QTextStream();</span>
+<br>
+<span style=" color:#c0c0c0;">    </span><span style=" color:#808000;">return</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">a</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">exec</span><span style=" color:#000000;">();</span>
+<span style=" color:#000000;">}</span></pre>
+    </div>
+    这个 main 代码和上一节的类似，主界面是文本显示框，测试函数的结果打印到 QtCreator 输出面板，将 6 个函数逐个测试一下，并注意观察输出面
+    板的信息，加深一下对本节知识的印象。<br>
+    <br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch03-02.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch03-04.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

@@ -3,11 +3,9 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <title>ch04-01</title>
-    
-<link href="css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-
-<script src="thumbnailviewer.js" type="text/javascript">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -15,50 +13,681 @@
 * Visit http://www.dynamicdrive.com/ for full source code
 ***********************************************/
 
-</script>
-
-
-  </head>
-  
-  
-<div class="os1"> 4.1 元对象系统 </div>
-<br />
-元对象系统，按钮弹窗示例。
-<br /><br />
-
-<div class="os2"> 4.1.1 元对象系统简介 </div>
-<br />
-简介
-<br /><br />
-
-<div class="os2"> 4.1.2 按钮弹窗示例 </div>
-<br />
-按钮弹窗示例，手动关联
-<br /><br />
-
-
-<div class="os2"> 4.1.3 按钮弹窗自动关联示例 </div>
-<br />
-按钮弹窗示例，自动关联
-<br /><br />
-
-<div class="os2"> 4.1.4 关联函数的语法格式 </div>
-<br />
-Qt4 旧式语法，Qt5 新式语法，必须关联到实例对象，而不是类与类关联！
-<br /><br />
-
-<br />
-<br />
-<br />
-<br />
-
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch04-00.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch04-02.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+</script> </head>
+  <body>
+    <div class="os1"> 4.1 元对象系统 </div>
+    <br>
+    Qt
+    程序里元对象系统无处不在，元对象系统最主要的一个功能就是实现信号和槽，窗体和控件对象之间的沟通一般都使用信号和槽，这是非常核心的东西，在学习了这些基础知识以后，
+    就可以根据 Qt 帮助文档自学成才。本节先简要介绍 Qt 元对象系统、信号和槽机制，基本是从 Qt
+    文档翻译过来的，然后通过按钮弹窗示例学习一下信号和槽的简单使用。 <br>
+    <br>
+    <div class="os2"> 4.1.1 元对象系统简介 </div>
+    <br>
+    在 Qt 助手的索引里面输入“The Meta-Object System”，就可以看到元对象系统的英文文档。现在将其主要的内容描述如下：<br>
+    Qt 元对象系统系统了对象之间通信机制——信号和槽，并提供了运行时类型信息和动态属性系统。元对象系统是 Qt 类库独有的功能，是 Qt 对标准 C++
+    的扩展，并且元对象系统本身也是由纯 C++ 语言写成的，所以学好 C++ 是必须的。<br>
+    使用元对象系统的前提是需要三件事情：<br>
+    <ul>
+      <li>①直接或间接地以 QObject 为基类，这样才能利用元对象系统的功能，Qt 的窗体和控件最顶层的基类都是 QObject。</li>
+      <li>②将 Q_OBJECT 放在类声明的私有段落，以启用元对象特性，如动态属性、信号和槽等。之前遇到的例子 Q_OBJECT
+        都是在类声明里的第一行，没有加 private 字样，因为类声明默认就是私有的。</li>
+      <li>③元对象编译器（Meta-Object Compiler，moc）为每个 QObject 的子类提供必要的代码以实现元对象特性。</li>
+    </ul>
+    moc 工具读取 C++ 源码，找到一个或多个包含 Q_OBJECT 宏的类声明，然后生成额外的代码文件，如 moc_widget.cpp
+    ，里面包含实现元对象系统的代码。生成的源码文件可以包含在类原有的源文件里，如在 widget.cpp 里包含：<br>
+    #include "moc_widget.cpp"<br>
+    这种包含方式看起来比较别扭，Linux 上的开发工具 KDevelop 自动生成的代码是这么用的。<br>
+    第二种方式是编译链接时揉到一起，QtCreator 生成的代码就是通过编译链接时，把 moc_widget.o
+    与其他目标文件链接到一起，这种方式不用改源代码，相对而言比较顺眼。<br>
+    <br>
+    除了提供信号和槽机制用于对象之间的通信（这是主要任务），元对象系统还提供了更多的特性：<br>
+    <ul>
+      <li>QObject::metaObject() 函数返回当前类对象关联的元对象（meta-object）。</li>
+      <li>QMetaObject::className() 函数返回当前对象的类名称字符串，而不需要 C++
+        编译器原生的运行时类型信息（run-time type information，RTTI）支持。</li>
+      <li>QObject::inherits() 函数判断当前对象是否从某个基类派生，判断某个基类是否位于从 QObject 到对象当前类的继承树上。</li>
+      <li>QObject::tr() 和 QObject::trUtf8() 函数负责翻译国际化字符串，因为 Qt5 规定源文件字符编码是
+        UTF-8，所以这两个函数现在功能是一样的。</li>
+      <li>QObject::setProperty() 和 QObject::property() 函数用于动态设置和获取属性，都通过属性名称字符串来
+        操作。</li>
+      <li>QMetaObject::newInstance() 构建一个当前类的新实例对象。</li>
+    </ul>
+    元对象系统还提供了 qobject_cast() 函数，可以对基于 QObject 的类对象进行转换，qobject_cast() 函数功能类似标准
+    C++ 的 dynamic_cast()。当然 qobject_cast() 的优势在于不需要编译器支持
+    RTTI，而且跨动态链接库之间的转换也是可行的。简单地说，原本是派生类的对象指针，就可以转为基类对象指针来用（转换得到可用值），其他情况都会得到
+    NULL 指针。比如：<br>
+    MyWidget 是 QWidget 的派生类，并且类声明带有 Q_OBJECT 宏，新建一个对象：<br>
+    QObject *obj = new MyWidget;<br>
+    虽然 obj 是一个 QObject *，但它本质是一个 MyWidget 对象指针，可以转成基类指针：<br>
+    QWidget *widget = qobject_cast&lt;QWidget *&gt;(obj);<br>
+    <br>
+    但是如果将 MyWidget 对象指针转成其他无关的类对象指针，就会失败：<br>
+    &nbsp;QLabel *label = qobject_cast&lt;QLabel *&gt;(obj);<br>
+    label的数值就是 NULL。<br>
+    <br>
+    关于元对象系统介绍就是这些，实现元对象系统的内幕代码在最后一节讲解，本章主要是学会怎么用信号和槽机制。<br>
+    <br>
+    <div class="os2"> 4.1.2 信号和槽 </div>
+    <br>
+    下面举叫外卖的例子来说明什么是信号和槽，比如：<br>
+    <ul>
+      <li>
+        ①比如到午饭时间了，某宅男饿了——由不饿到饿，是一个状态的变化，肚子饿了就相当于是一个信号。谁都会饿的，每个人都可以发这类信号。注意信号只是一个空想，没
+        东西吃是填不饱肚子的。饿了怎么办，准备叫外卖。</li>
+      <li>
+        ②街上餐馆很多，都希望多做点生意，送外卖也是常事——做好饭送外卖就是槽函数。这个送外卖功能，餐馆一般都是有的，但谁来买送给谁，这个暂时定不了。如果餐馆饭
+        做得好，但没人吃那也是不行的。</li>
+      <li> ③食客饿了（信号），餐馆有送饭服务（槽函数），二者怎么沟通呢？通常我们都是打电话，Qt
+        把这个过程叫信号和槽的关联（connect）。虽然我们每次叫外卖都要拨一长串号码，但 Qt
+        关联比我们打电话方便，它只需要将信号关联具体某家餐馆外卖服务一次，以后都是自动拨号的。Qt
+        对象的信号和槽关联好之后，源头只需要发个信号，叫一声“我饿了”，connect 函数会自动拨号，餐馆立刻就送餐过来。</li>
+    </ul>
+    信号和槽函数在进行关联的时候，二者的参数需要一致，不能我叫西红柿鸡蛋的盖浇饭，餐馆给送兰州拉面，那是不行的。多个对象的信号和槽函数在参数匹配的情况下，它
+    们之间的关联可以是一对一，一对多（某吃货可以同时叫多个餐馆的饭），多对一（多个人可以同时订某家餐馆的饭），所以关联是比较自由的。本节只看简单的一对一关
+    联，4.2 节再看复杂的。<br>
+    <br>
+    <div class="os2"> 4.1.3 按钮弹窗示例 </div>
+    <br>
+    本小节示例效果是这样的：按一下窗体里的按钮，发个信号“我饿了”，然后自动弹出个消息框，显示“叮咚！外卖已送达”。下面我们打开
+    QtCreator，新建一个 Qt Widgets Application 项目，按步骤填：<br>
+    ①项目名称设置为 hungry，创建路径如 D:\QtProjects\ch04，点击“下一步”；<br>
+    ②Kit Selection 里面选中 Select all kits，点击“下一步”；<br>
+    ③基类选择 QWidget，然后其他名字就用自动填的，点击“下一步”；<br>
+    ④项目管理界面不修改，直接点“完成”。<br>
+    然后看到 QtCreator 编辑模式里的 hungry 项目，我们打开 widget.ui，在 QtCreator 设计模式，拖一个“Push
+    Button”到窗体中间位置，并修改该 pushButton 对象的 text 属性为：我饿了。看到类似如下图所示：<br>
+    <center><img src="images/ch04/ch04-01-01.png" alt="ui design" width="800"></center>
+    编辑好后按 Ctrl+S 保存，然后关闭 widget.ui 。窗体里的控件对象 pushButton 对象自己带有 clicked
+    信号，当我们用鼠标点击按钮时，clicked
+    信号自动触发，所以不需要我们定义新的信号。使用按钮自己的信号就够用了，现在信号就已经有了，我们完成了叫外卖的第 一步。<br>
+    <br>
+    回到代码编辑模式，打开头文件 widget.h ，向其中添加槽函数声明，下面把该头文件内容完整贴出来：<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>WIDGET_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">WIDGET_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//添加这一段代码</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span><span
+style=" color:#c0c0c0;">       </span><span style=" color:#008000;">//槽函数声明标志</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">FoodIsComing</span><span
+style=" color:#000000;">();</span><span style=" color:#c0c0c0;">    </span><span
+style=" color:#008000;">//槽函数</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre>
+    </div>
+    Qt 的关键字 slots 就是槽函数声明段落的标志，槽函数声明段落可以是 private、protected 或者 public
+    类型的，这些访问权限和继承权限与普通成员函数是一样的，上面示范的是公有槽函数。除了声明段落标志不一样，槽函数与普通成员函数其他情况都是一样的，也可以作为普通成员
+    函数来调用，当然也必须有函数定义的实体代码，头文件里仅仅是声明。我们打开 widget.cpp 文件，添加头文件包含 和 槽函数定义代码：<br>
+    <div class="code"> <span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QMessageBox&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//槽函数定义代码，与普通成员函数类似</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">FoodIsComing</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">information</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"送餐"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"叮咚！外卖已送达"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    在槽函数定义代码部分，FoodIsComing 函数与普通成员函数没区别，只有在头文件才能看到它是不是在槽函数声明段落。新包含的头文件
+    &lt;QMessageBox&gt; 是声明了用于弹消息框的类。QMessageBox 类可以按照常规定义对象方式使用，如：<br>
+    <div class="code"> QMessageBox msgBox;<br>
+      msgBox.setWindowTitle("Take out")<br>
+      msgBox.setText("Food is coming.");<br>
+      msgBox.exec(); </div>
+    setWindowTitle 函数是设置消息框标题，setText 是设置要显示的消息。exec
+    函数是指模态显示，消息框会弹出并显示在最上层，如果不关闭该消息框，就不会回到正常界面。<br>
+    常规方式需要上面四句代码，而这类消息框内容格式相对单调，是可以做成预定义的消息框供程序员直接调用的。QMessageBox
+    类提供了静态公有函数，里面预定义好了现成的消息框，只需把参数传给它，就会自动弹窗。我们 FoodIsComing 函数里使用的就是静态函数
+    QMessageBox::information ，它的声明如下：<br>
+    <div class="code">StandardButton QMessageBox::​information(QWidget * parent,
+      const QString &amp; title, const QString &amp; text, StandardButtons
+      buttons = Ok, StandardButton defaultButton = NoButton)</div>
+    StandardButton 是 Qt 预定义的按钮类型枚举，比如 QMessageBox::Ok、QMessageBox::Cancel
+    等等，可以为消息框添加这些按钮，并且返回按钮枚举值。我们这里只用了头三个参数：父窗口指针、消息框标题、消息框内容。后面的 buttons
+    参数可以为消息框添加额外按钮，defaultButton
+    是指默认按钮，我们暂时用不着，先不管这些。返回值就是按钮类型的枚举值，可以获知用户是点击哪个按钮使消息框关闭的。<br>
+    <br>
+    FoodIsComing 槽函数的声明和定义都按照上面写好之后，我们就完成了叫外卖的第二步。<br>
+    <br>
+    下面第三步是将 pushButton 的信号 clicked （即“我饿了”）与 主窗口的槽函数 FoodIsComing
+    关联起来，实现自动拨号叫外卖。Qt 通过 QObject::​connect 函数完成信号和槽函数的关联，因为主窗口最顶层的基类是
+    QObject，所以我们下面代码不需要加 QObject:: 前缀。我们向 widget.cpp 文件构造函数里新增一句关联函数代码，完整的
+    widget.cpp 代码如下：<br>
+    <div class="code"> <span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QMessageBox&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//添加关联代码，必须放在</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">setupUi</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">函数之后</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">connect</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">pushButton</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SIGNAL</span><span
+style=" color:#000000;">(</span>clicked<span style=" color:#000000;">()),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SLOT</span><span style=" color:#000000;">(</span>FoodIsComing<span
+style=" color:#000000;">()));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//槽函数定义代码，与普通成员函数类似</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">FoodIsComing</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">information</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"送餐"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"叮咚！外卖已送达"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    connect 函数第一个参数是发信号的源头对象指针，按钮对象的指针就是 ui-&gt;pushButton，ui
+    是为窗体构建界面的辅助类对象指针，我们在窗体设计界面拖的控件对象都存在这个 ui 指向的对象里。ui-&gt;pushButton
+    就指向我们之前拖的按钮对象。因为通过设计模式拖的控件全部是以指针类型访问的，所以以后说到窗体里的控件，一般都是说它的指针名字。<br>
+    第二个参数用 SIGNAL 宏包裹，里面是按钮对象的信号 clicked() ，信号的声明和成员函数类似，但必须放在 signals
+    声明段落。上面没看到 signals 声明段落是因为 QPushButton 类的对象自带这个信号，不需要我们来定义。<br>
+    第三个参数是接收对象的指针，也就是服务提供方，是槽函数所在对象的指针，我们上面用的 this 指针就是主窗体自己。<br>
+    第四个参数是接收对象里的槽函数，并用 SLOT 宏封装起来。<br>
+    <br>
+    connect
+    函数意义是非常清晰的，将源头和源头的信号，关联到接收端和接收端的槽函数。注意源头和接收端必须是存在的实体对象指针，不能是野指针。connect
+    函数必须放在 ui-&gt;setupUi 之后，否则控件指针是未定义的野指针，那种关联必然失败，会导致程序崩溃。<br>
+    <br>
+    编写 connect 函数代码的时候，对于第二个参数，我们敲好 “SIGNAL(” 字样的时候，编辑器会自动提示源头对象有哪些信号，这很方便：<br>
+    <center><img src="images/ch04/ch04-01-02.png" alt="SIGNAL" width="800"></center>
+    也可以通过 Qt 帮助文档查询 QPushButton 的资料。<br>
+    对于第四个槽函数宏，也是类似的提示效果：<br>
+    <center><img src="images/ch04/ch04-01-03.png" alt="SLOT" width="800"></center>
+    FoodIsComing 槽函数就是我们自己写的，也在自动提示列表之内，其他的槽函数可以查 QWidget 类的帮助文档。编写 connect
+    函数的时候，需要注意括号嵌套的层数，因为括号比较多，如果末尾少了右括号，要注意补。<br>
+    <br>
+    写好 connect 函数代码之后，叫外卖的第三步就完成了。我们点击 QtCreator 左下角运行按钮，查看运行效果，并点击窗体的按钮测试一下：<br>
+    <center><img src="images/ch04/ch04-01-04.png" alt="click"></center>
+    点击一下“我饿了”按钮，消息框自动就弹出来。整个流程就是按钮发一个 clicked 信号，connect 将该信号关联了主窗体的FoodIsComing
+    槽函数，这个槽函数实现弹窗。信号和槽机制往简单了说就是上面三板斧。信号本身是个空想，它自己不干活的，真正干活的是槽函数，槽函数完整功能并提供服务，信号和
+    槽通过 connect 关联，只需要关联一次，以后都会自动工作。<br>
+    <br>
+    <div class="os2"> 4.1.4 按钮弹窗自动关联示例 </div>
+    <br>
+    这里的自动关联是指不需要手动编写 connect
+    函数，通过自动命名槽函数的方式来编写代码。自动关联的要求是槽函数根据源头的对象名（指针）和其信号名称来命名，元对象系统可以实现剩下的自动 connect
+    功能。这对窗体设计是一种便利，如果我们窗体里拖了 10 个按钮，手动编写 connect 函数的话，就需要编 10 个 connect
+    函数调用，比较麻烦的。通过自动关联方式，这些 connect
+    函数代码全可以省了。我们只需要关注如何实现槽函数的功能即可。下面我们新建一个自动关联的项目，我们重新打开
+    QtCreator，点击菜单“文件”--&gt; “新建文件或项目”，建立一个 Qt Widgets Application，按步骤：<br>
+    ①项目名称填写 autoconn，创建路径 D:\QtProjects\ch04，点击“下一步”；<br>
+    ②Kit Selection 界面选中 Select all kits，点击“下一步”；<br>
+    ③类信息界面，基类选择 QWidget，其他的用自动命名的，点击“下一步”；<br>
+    ④项目管理界面不修改，点击“完成”。<br>
+    在编辑模式，项目视图里打开界面文件 widget.ui ，进入图形界面设计模式，类似地拖一个按钮放到窗体中间，这次我们修改按钮的两个属性，将按钮对象的
+    objectName 设置为 hungryButton，将 text 属性设置为：我饿了。如图所示：<br>
+    <center><img src="images/ch04/ch04-01-05.png" alt="hungryButton" width="800"></center>
+    objectName 就是对象名称属性，设置为 hungryButton 之后，实际代码里对应的就是 ui-&gt;hungryButton 按钮指针。<br>
+    <br>
+    编辑好属性之后，我们开始使用自动关联槽函数的方法，右击 hungryButton 按钮，点击右键菜单里的“转到槽 ...”，<br>
+    <center><img src="images/ch04/ch04-01-06.png" alt="to slots" width="800"></center>
+    会出现根据信号来定义槽函数的界面：<br>
+    <center><img src="images/ch04/ch04-01-07.png" alt="slots list" width="800"></center>
+    信号列表里面，第一列是信号的名称，第二列是该对象所属的类或基类名称，QPushButton 不仅有自己的信号，还拥有它的基类
+    QAbstractButton、再上层基类 QWidget、顶层基类 QObject 等定义的信号。（注意信号可以有各种参数，但不能有返回值，也就是说必
+    须返回 void 类型。）<br>
+    选择第一个 clicked() 信号，然后点击 OK 。<br>
+    <br>
+    这样就自动添加了槽函数的声明和它的定义代码底板，QtCreator 会自动跳转到 widget.cpp 的 void
+    Widget::on_hungryButton_clicked() 函数定义处：<br>
+    <center><img src="images/ch04/ch04-01-08.png" alt="autoslot" width="800"></center>
+    QtCreator
+    会自动添加槽函数，并且跳转到槽函数定义位置，方便程序员编辑。由于是自动关联的，这个槽函数名称也是自动生成的，这时候不要修改这个函数的名
+    称，也不要改按钮的对象名称，这样才能保证自动关联有效。<br>
+    然后就可以在该槽函数里面添加我们需要的代码，修改之后，widget.cpp 完整内容如下：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QMessageBox&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_hungryButton_clicked</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">information</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"送餐"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"叮咚！外卖已送达"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    Widget 构造函数里没有 connect 函数调用，因为不需要了，就是这么简单。<br>
+    <br>
+    widget.h 里面有 on_hungryButton_clicked 函数的声明，也是 QtCreator 自动添加的，不需要修改，这里只是把
+    widget.h 代码贴出来给大家看看：<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>WIDGET_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">WIDGET_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_hungryButton_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre>
+    </div>
+    QtCreator 自动添加的槽函数声明是 private slots，这个私有槽函数也是可以正常运行的，主要是访问权限和继承权限与 public
+    类型不一样，其他的功能是相同的。<br>
+    <br>
+    有 QtCreator 自动生成的槽函数，有了自动关联，我们实际只遍了两行代码，就是开头的 #include
+    &lt;QMessageBox&gt;和槽函数里的一句弹消息框。自动关联的方式大大简化了我们需要做的工作。现在我们只需要点击 QtCreator
+    左下角的运行按钮就够了：<br>
+    <center><img src="images/ch04/ch04-01-09.png" alt="autoconn" width="800"></center>
+    <br>
+    这里有一个疑问，没有手动关联的 connect 函数，信号和槽它们怎么工作的呢？<br>
+    诀窍有两条，第一个是槽函数命名非常严格，必须按照如下规则来写：<br>
+    <div class="code">void on_&lt;object name&gt;_&lt;signal name&gt;(&lt;signal
+      parameters&gt;);</div>
+    必须以 on_&nbsp; 打头，接下来是对象名，对应例子的 hungryButton，再接一个下划线，最后是信号名和信号可能的参数。<br>
+    上面示例的槽函数自动命名就是：<br>
+    <div class="code">void on_hungryButton_clicked();</div>
+    按照规则命名是第一步。<br>
+    <br>
+    第二步是由 uic 和 moc 等工具自动完成的，在
+    D:\QtProjects\ch04\build-autoconn-Desktop_Qt_5_4_0_MinGW_32bit-Debug
+    文件夹里可以找到 ui_widget.h，最关键的就是 setupUi 函数末尾一句：<br>
+    <div class="code"><span style=" color:#c0c0c0;">&nbsp;&nbsp;&nbsp; </span><span
+        style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span>setupUi<span
+        style=" color:#000000;">(</span>QWidget<span style=" color:#c0c0c0;"> </span><span
+        style=" color:#000000;">*</span>Widget<span style=" color:#000000;">)</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">if</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">(</span>Widget<span
+style=" color:#000000;">-&gt;</span>objectName<span style=" color:#000000;">().</span>isEmpty<span
+style=" color:#000000;">())</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span>Widget<span style=" color:#000000;">-&gt;</span>setObjectName<span
+style=" color:#000000;">(</span>QStringLiteral<span style=" color:#000000;">(</span><span
+style=" color:#008000;">"Widget"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>Widget<span style=" color:#000000;">-&gt;</span>resize<span
+style=" color:#000000;">(</span><span style=" color:#000080;">400</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">300</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>hungryButton<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">new</span><span
+style=" color:#c0c0c0;"> </span>QPushButton<span style=" color:#000000;">(</span>Widget<span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>hungryButton<span style=" color:#000000;">-&gt;</span>setObjectName<span
+style=" color:#000000;">(</span>QStringLiteral<span style=" color:#000000;">(</span><span
+style=" color:#008000;">"hungryButton"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>hungryButton<span style=" color:#000000;">-&gt;</span>setGeometry<span
+style=" color:#000000;">(</span>QRect<span style=" color:#000000;">(</span><span
+style=" color:#000080;">160</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">100</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">75</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">23</span><span style=" color:#000000;">));</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>retranslateUi<span style=" color:#000000;">(</span>Widget<span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>QMetaObject<span style=" color:#000000;">::</span>connectSlotsByName<span
+style=" color:#000000;">(</span>Widget<span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">setupUi</span></pre>
+    </div>
+    connectSlotsByName 就是完成自动关联的函数，这是元对象系统包含的功能，根据对象名、信号名与 on_&lt;object
+    name&gt;_&lt;signal name&gt;(&lt;signal parameters&gt;)
+    槽函数进行自动匹配关联，可以给程序员提供便利，省了许多 connect 函数调用的代码。后面 4.5
+    节还会再详细讲这些代码，本节学会用自动关联大法就够了。<br>
+    <br>
+    <div class="os2"> 4.1.5 关联函数的语法格式 </div>
+    <br>
+    虽然 Qt 有比较好用的自动关联大法，但自动关联不是万能的，尤其是涉及到多个窗体的时候，比如 A 窗体私有按钮控件与 B
+    窗体私有消息框函数，这个因为权限限制，不是想自动关联就可以自动关联的。自动关联一般用于一个窗体之内的控件关联，其他很多情况都是需要手动编写
+    connect 函数的，所以学习 connect 函数的语法句式是必须的。<br>
+    <br>
+    上面展示的 connect 关联是传统语法句式，如本节第一个例子：<br>
+    <div class="code"> connect(ui-&gt;pushButton, SIGNAL(clicked()), this,
+      SLOT(FoodIsComing())); </div>
+    头两个参数是源头对象和信号，后两个参数接收对象和槽函数，这个其实是 Qt4 和之前版本一直存在的句式，在 Qt5
+    中也是好使的，这种句式可读性很好，信号和槽的标识也很清晰。这种关联方式其实是旧式语法，它的函数声明为：<br>
+    <div class="code">QMetaObject::Connection QObject::​connect(const QObject *
+      sender, const char * signal, const QObject * receiver, const char *
+      method, Qt::ConnectionType type = Qt::AutoConnection)</div>
+    connect 函数返回类型是 QMetaObject::Connection ，可以用于运行时判断关联是否正确，或者用于解除关联。<br>
+    注意到 connect 函数参数里的 signal 和 method（槽函数）都是 char * 字符串类型，所以旧式语法的 connect
+    函数是根据信号和槽函数的字符串名称来关联的，不具备编译时类型检查，大家都是字符串，参数类型在编译时都不知道。关联出错只有在运行时才会体现。<br>
+    最后的关联类型参数一般我们都使用默认值
+    Qt::AutoConnection，这在多线程编程的时候才会有讲究。对于单线程的，关联一般用直连类型（Qt::DirectConnection），信号一触发，
+    对应槽函数立即就被调用执行；对于多线程程序，跨线程的关联一般用入队关联（Qt::QueuedConnection），信号触发后，跨线程的槽函数被加入事件
+    处理队列里面执行，避免干扰接收线程里的执行流程。Qt::AutoConnection
+    会自动根据源头对象和接收对象所属的线程来处理，默认都用这种类型的关联，对于多线程程序这种关联也是安全的。<br>
+    <br>
+    Qt5 为了能够尽早检查关联类型和参数的匹配情况，引入了新的函数指针关联语法，这样在程序编译时就能发现关联正确与否。新式语法格式如下：<br>
+    <div class="code"> QMetaObject::Connection QObject::​connect(const QObject *
+      sender, PointerToMemberFunction signal, const QObject * receiver,
+      PointerToMemberFunction method, Qt::ConnectionType type =
+      Qt::AutoConnection) </div>
+    与旧语法句式区别就在于 signal 和 method （槽函数），新句式用的是 PointerToMemberFunction
+    ，这个类型名称是不存在的，只是在文档里面显示，方便程序员看的，实际使用的是模板函数。具体模板函数定义比较复杂，比较关键的就是两个函数参数类型需要一致，或者信号声
+    明时的参数更多更广。因为信号本身是不干活的，它多点参数无所谓，但必须保证槽函数运行时需要的参数是一定有的。<br>
+    <br>
+    新的语法句式应用到第一个例子就是如下面这样：<br>
+    <div class="code"><span style=" color:#000000;">connect</span><span style=" color:#000000;">(</span><span
+        style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+        style=" color:#800000;">pushButton</span><span style=" color:#000000;">,</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+        style=" color:#800080;">QPushButton</span><span style=" color:#000000;">::</span>clicked<span
+        style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+        style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+        style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span>FoodIsComing<span
+        style=" color:#000000;">);</span></div>
+    这里第二个位置是一个函数指针形式，第四个位置也是一个函数指针形式，信号里声明的参数和槽函数声明是一致的，所以关联是匹配的。<br>
+    <br>
+    最后提醒一下，不管使用旧句式，还是新句式，关联的源头和接收端一定是实际存在的对象，ui-&gt;pushButton
+    这个按钮对象成功创建之后，上面的关联才能正常执行。虽然新句式可以用&nbsp; &amp;QPushButton::clicked
+    这个函数指针形式，但注意第一个和第三个参数是实际的对象，这是把源头对象关联到接收端对象，而不是把类关联到类！如果没有定义对象实体，关联函数就没意义。<br>
+    <br>
+    <div class="practice">
+      <table>
+        <tbody>
+          <tr>
+            <td><img src="images/pics/practice.png" alt="tip"></td>
+            <td> <b>练习</b> </td>
+          </tr>
+        </tbody>
+      </table>
+      ① 将第一个示例中的 connect 函数修改为：<br>
+      connect(ui-&gt;pushButton, SIGNAL(clicked456()), this,
+      SLOT(FoodIsComing())); <br>
+      编译运行例子看看效果，运行时注意看输出面板里打印的信息。 <br>
+      ② 将第一个示例中的旧式关联替换成新式关联：<br>
+      connect(ui-&gt;pushButton, &amp;QPushButton::clicked, this,
+      &amp;Widget::FoodIsComing); <br>
+      编译运行例子查看效果。<br>
+      ③ 将新式语法句子里的 clicked 修改成 clicked456，看看还能否编译成功。<br>
+    </div>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch04-00.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch04-02.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

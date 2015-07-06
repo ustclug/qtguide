@@ -3,11 +3,9 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <title>ch04-05</title>
-    
-<link href="css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-
-<script src="thumbnailviewer.js" type="text/javascript">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -15,49 +13,967 @@
 * Visit http://www.dynamicdrive.com/ for full source code
 ***********************************************/
 
-</script>
-
-
-  </head>
-  
-  
-<div class="os1"> 4.5 扩展阅读：ui_*.h和moc_*.cpp代码 </div>
-<br />
-扩展阅读：ui_*.h和moc_*.cpp代码
-<br /><br />
-
-<div class="os2"> 4.5.1 元对象系统综合示例 </div>
-<br />
-信号、槽、属性都有。
-<br /><br />
-
-<div class="os2"> 4.5.2 ui_*.h代码 </div>
-<br />
-ui_*.h代码
-<br /><br />
-
-<div class="os2"> 4.5.3 moc_*.cpp代码 </div>
-<br />
-moc_*.cpp代码
-<br /><br />
-
-<div class="os2"> 4.5.4 自动关联原理 </div>
-<br />
-void QMetaObject::​connectSlotsByName(QObject * object)
-<br /><br />
-
-<br />
-<br />
-<br />
-<br />
-
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch04-04.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch05-00.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+</script> </head>
+  <body>
+    <div class="os1"> 4.5 扩展阅读：ui_*.h和moc_*.cpp代码 </div>
+    <br>
+    本节首先介绍 Qt 元对象类 QMetaObject（主要从 Qt 帮助文档翻译来的），然后根据之前 4.4.2 普通属性示例的修改版，来讲解 Qt
+    工具集自动生成的 ui_*.h 和 moc_*.cpp 里面的代码，深入了解信号和槽机制的内部原理，并且加入了一些 Qt
+    核心类的源代码、流程框图来理解从信号触发到槽函数调用的过程。这一节内容很多，建议分两三次来学习。<br>
+    <br>
+    本节是讲解 Qt5 元对象系统内部机理的，之前国外大神写过 Qt4 内幕和逆向“Qt Internals &amp;
+    Reversing”，推荐读者阅读该文章，并且本节很多内容也是从这篇文章学来的，链接如下： <br>
+    <a href="link">link</a><br>
+    <br>
+    <div class="os2"> 4.5.1 QMetaObject类 </div>
+    <br>
+    QMetaObject 是实现元对象系统的关键类，包含 Qt 对象的元信息，可以在 Qt 帮助文档检索关于它的资料。每个 QObject 派生类都有一个
+    QMetaObject 实例，保存该派生类的元信息，可以通过 QObject::metaObject() 获取元对象。QMetaObject
+    提供了这些公有函数：<br>
+    <ul>
+      <li>className() 返回类的名称字符串。</li>
+      <li>superClass() 返回基类的元对象。</li>
+      <li>method() 和 methodCount() 提供类的元方法的信息（元方法包括信号、槽和其他 invokable 成员函数 ）。</li>
+      <li>enumerator() 和 enumeratorCount() 提供类里定义的枚举类型信息。</li>
+      <li> propertyCount() 和 property() 提供类的属性信息。</li>
+      <li>constructor() 和 constructorCount() 提供类的元构造函数信息。</li>
+    </ul>
+    另外还有多个索引函数，能根据字符串名称检索元构造函数、元方法、枚举类型、属性等，函数名为： indexOfConstructor(),
+    indexOfMethod(), indexOfEnumerator() 和 indexOfProperty()
+    。上一节讲过类的附加信息等函数，也是元对象类提供的。<br>
+    <br>
+    下面首先解释一下元方法，信号和槽函数之前都是见到了，而 invokable 成员函数是指使用 Q_INVOKABLE 前缀声明的类成员函数，如：<br>
+    <div class="code"> class Window : public QWidget<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp; Q_OBJECT<br>
+      <br>
+      public:<br>
+      &nbsp;&nbsp;&nbsp; Window();<br>
+      &nbsp;&nbsp;&nbsp; void normalMethod();<br>
+      &nbsp;&nbsp;&nbsp; Q_INVOKABLE void invokableMethod();<br>
+      }; </div>
+    Q_INVOKABLE 前缀声明的函数和信号、槽等名称，都会由 moc 工具处理成字符串，保存到类的静态数据里面，后面会讲到。这些元方法都可以通过
+    QMetaObject::invokeMethod() 来调用，才称之为 invokable 。<br>
+    因为各个类的元方法的声明都不一样，如何通过统一的接口在运行时调用元方法呢？这就是QMetaObject::invokeMethod()
+    函数干的活，它根据元方法的名称字符串和参数列表来统一调用元方法。该静态函数有多个重载，下面给出它的第一个声明，其他的重载是差不多的：<br>
+    <div class="code">bool QMetaObject::​invokeMethod(QObject * obj, const char
+      * member, Qt::ConnectionType type, <br>
+      QGenericReturnArgument ret, <br>
+      QGenericArgument val0 = QGenericArgument( 0 ), <br>
+      QGenericArgument val1 = QGenericArgument(), <br>
+      QGenericArgument val2 = QGenericArgument(), <br>
+      QGenericArgument val3 = QGenericArgument(), <br>
+      QGenericArgument val4 = QGenericArgument(), <br>
+      QGenericArgument val5 = QGenericArgument(), <br>
+      QGenericArgument val6 = QGenericArgument(), <br>
+      QGenericArgument val7 = QGenericArgument(), <br>
+      QGenericArgument val8 = QGenericArgument(), <br>
+      QGenericArgument val9 = QGenericArgument())</div>
+    因为是静态函数，所以它第一个参数手动传了需要调用元方法的对象指针；第二个参数是元方法函数的名称字符串；第三个是关联类型，就是信号和槽函数关联时用的类型；
+    第四个参数是元方法的返回值；接下来是编号从 0 到 9 的 10 个元方法参数。QGenericArgument 是 Qt
+    内部使用的辅助类，专门用于元方法返回值和参数的传递，它有两个公有函数，name() 获取参数类型字符串，data() 获取 void *
+    保存的参数数值，另外不能直接调用它的构造函数，而应该用&nbsp; Q_ARG() 宏：<br>
+    <div class="code">QGenericArgument Q_ARG( Type, const Type &amp; value)</div>
+    <br>
+    其次，enumerator() 和 enumeratorCount() 针对的是类里使用 Q_ENUMS
+    声明枚举类型，因为有些元方法会使用枚举类型，枚举类型的名称与数值是不一样的，比如属性系统通过名称字符串寻找对应的元方法时，也需要枚举类型的字符串形式。
+    Q_ENUMS() 宏就是把枚举类型的字符串形式也保存到类的静态数据里面，枚举类型声明示例：<br>
+    <div class="code">class MyClass : public QObject<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp; Q_OBJECT<br>
+      &nbsp;&nbsp;&nbsp; Q_PROPERTY(Priority priority READ priority WRITE
+      setPriority NOTIFY priorityChanged)<br>
+      &nbsp;&nbsp;&nbsp; Q_ENUMS(Priority)<br>
+      <br>
+      public:<br>
+      &nbsp;&nbsp;&nbsp; MyClass(QObject *parent = 0);<br>
+      &nbsp;&nbsp;&nbsp; ~MyClass();<br>
+      <br>
+      &nbsp;&nbsp;&nbsp; enum Priority { High, Low, VeryHigh, VeryLow };<br>
+      <br>
+      &nbsp;&nbsp;&nbsp; void setPriority(Priority priority)<br>
+      &nbsp;&nbsp;&nbsp; {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; m_priority = priority;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; emit priorityChanged(priority);<br>
+      &nbsp;&nbsp;&nbsp; }<br>
+      &nbsp;&nbsp;&nbsp; Priority priority() const<br>
+      &nbsp;&nbsp;&nbsp; { return m_priority; }<br>
+      <br>
+      signals:<br>
+      &nbsp;&nbsp;&nbsp; void priorityChanged(Priority);<br>
+      <br>
+      private:<br>
+      &nbsp;&nbsp;&nbsp; Priority m_priority;<br>
+      };</div>
+    与 Q_ENUMS() 宏类似的，还有 Q_FLAGS() 宏，标志位 flags 与普通枚举类型有区别，就是类里 Q_FLAGS()
+    宏声明的标志位可以做 与、或、非 等二进制运算，关于标志位声明可以查找 Qt 帮助文档，这里不贴代码了。<br>
+    <br>
+    属性相关的内容上一节讲过，不重复了。constructor() 和 constructorCount()
+    不是指一般的构造函数，而是类的元构造函数，也是通过 Q_INVOKABLE 声明的构造函数。元构造函数可以通过
+    QMetaObject::​newInstance()
+    函数在运行时调用，它根据元构造函数的字符串名称、参数等构造一个新的类实例对象，并返回该对象。QMetaObject::​newInstance()
+    函数声明与 QMetaObject::invokeMethod() 函数声明差不多，只是 QMetaObject::​newInstance()
+    用于新建对象，而 QMetaObject::invokeMethod() 函数用于调用元方法。<br>
+    <br>
+    QMetaObject 类基本是是围绕名称字符串展开的，moc
+    工具将类名、元方法名称、枚举类型名称、元构造函数名称等字符串保存为类的静态数据，然后在运行时可以通过名称字符串定位到真实的函数指针，然后来调用元方法。上一节属性
+    系统里的 property()、setProperty() 和本小节的
+    QMetaObject::invokeMethod()、QMetaObject::​newInstance()
+    都是通过字符串来查找对应的函数并执行调用的。<br>
+    <br>
+    <div class="os2"> 4.5.2 元对象系统综合示例 </div>
+    <br>
+    本节的示例 npcomplete 是 4.4.2 普通属性示例 normalpros 的完整版，外加一点小改动。<br>
+    在 D:\QtProjects\ch04 目录，我们复制上一节 normalpros 示例的文件夹，并就地粘帖，新文件夹改名为
+    npcomplete。然后进入 npcomplete 文件夹，把 pro 文件改名为 npcomplete.pro，然后用记事本编辑
+    npcomplete.pro，把 TARGET 一行改成下面这样：<br>
+    <div class="code"> TARGET = npcomplete</div>
+    编辑后保存，这样就造出一个新项目 npcomplete.pro 。npcomplete 目录里的旧用户文件 normalpros.pro.user
+    可以删了，其他文件都保留。<br>
+    <br>
+    我们打开 D:\QtProjects\ch04\npcomplete\npcomplete.pro 项目，然后来修改代码。首先为 ShowChanges
+    类添加接收窗口类对象信号的槽函数，并在 main 函数里进行了关联，下面把修改后的 ShowChanges 类和 main
+    函数代码贴出来，showchanges.h：<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>SHOWCHANGES_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">SHOWCHANGES_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QObject&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">ShowChanges</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QObject</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">ShowChanges</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QObject</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">ShowChanges</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">signals</span><span style=" color:#000000;">:</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//槽函数，接收</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">value</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">变化信号</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">RecvValue</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">double</span><span
+style=" color:#c0c0c0;"> </span>v<span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//槽函数，接收</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">nickName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">变化信号</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">RecvNickName</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#000000;">&amp;</span><span style=" color:#c0c0c0;"> </span>strNewName<span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//槽函数，接收</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">count</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">变化信号</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">RecvCount</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span>nNewCount<span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">SHOWCHANGES_H</span></pre>
+    </div>
+    showchanges.cpp：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"showchanges.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">ShowChanges</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">ShowChanges</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QObject</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QObject</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">ShowChanges</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">ShowChanges</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//接收并打印</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">value</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">变化后的新值</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">ShowChanges</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">RecvValue</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">double</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">v</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"RecvValue:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span style=" color:#000000;">&lt;&lt;</span>fixed<span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">v</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//接收并打印</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">nickName</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">变化后的新值</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">ShowChanges</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">RecvNickName</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#000000;">strNewName</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"RecvNickName:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">strNewName</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//接收并打印</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">count</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">变化后的新值</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">ShowChanges</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">RecvCount</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">nNewCount</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"RecvCount:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">nNewCount</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    main.cpp：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QApplication&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"showchanges.h"</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">main</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">argc</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">char</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span
+style=" color:#000000;">argv</span><span style=" color:#000000;">[])</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QApplication</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">a</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">argc</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">argv</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">w</span><span style=" color:#000000;">;</span><span
+style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//源头对象</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//接收端对象</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">ShowChanges</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">s</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//关联</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QObject</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">connect</span><span
+style=" color:#000000;">(&amp;</span><span style=" color:#000000;">w</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SIGNAL</span><span
+style=" color:#000000;">(</span>valueChanged<span style=" color:#000000;">(</span><span
+style=" color:#808000;">double</span><span style=" color:#000000;">)),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#000000;">s</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">SLOT</span><span style=" color:#000000;">(</span>RecvValue<span
+style=" color:#000000;">(</span><span style=" color:#808000;">double</span><span
+style=" color:#000000;">)));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QObject</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">connect</span><span
+style=" color:#000000;">(&amp;</span><span style=" color:#000000;">w</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SIGNAL</span><span
+style=" color:#000000;">(</span>nickNameChanged<span style=" color:#000000;">(</span><span
+style=" color:#800080;">QString</span><span style=" color:#000000;">)),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#000000;">s</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">SLOT</span><span style=" color:#000000;">(</span>RecvNickName<span
+style=" color:#000000;">(</span><span style=" color:#800080;">QString</span><span
+style=" color:#000000;">)));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QObject</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">connect</span><span
+style=" color:#000000;">(&amp;</span><span style=" color:#000000;">w</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SIGNAL</span><span
+style=" color:#000000;">(</span>countChanged<span style=" color:#000000;">(</span><span
+style=" color:#808000;">int</span><span style=" color:#000000;">)),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#000000;">s</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">SLOT</span><span style=" color:#000000;">(</span>RecvCount<span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#000000;">)));</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//属性读写</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//通过写函数、读函数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">w</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">setNickName</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"Wid"</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">w</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">nickName</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">w</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">setCount</span><span style=" color:#000000;">(</span><span
+style=" color:#000080;">100</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">w</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">count</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//通过</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">setProperty()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">函数</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">和</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">property()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">函数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">w</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">setProperty</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"value"</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">2.3456</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span>fixed<span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">w</span><span style=" color:#000000;">.</span><span style=" color:#000000;">property</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"value"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">toDouble</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//显示窗体</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">w</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">show</span><span style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">return</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">a</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">exec</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    widget.h 和 widget.cpp 代码和 4.4.2 节一样的，就不贴了。因为上一节例子没有修改 ui
+    文件，里面是空的，下面为窗体加点料，方便后面阅读 ui_widget.h 的代码。在 QtCreator 里打开 widget.ui
+    文件，进入界面设计模式，首先拖一个标签控件和单行编辑控件：<br>
+    <center><img src="images/ch04/ch04-05-01.png" alt="ui" width="800"></center>
+    在 2.3 Hello Designer 一节里面介绍过设计师的四种编辑模式：编辑窗口部件、编辑信号/槽、编辑伙伴、编辑 Tab
+    顺序。默认情况下设计师工作在编辑窗口部件模式，下面我们来试试其他三种模式。<br>
+    在设计模式的窗体上面，有一排快捷按钮，第一个小按钮是普通的编辑部件的模式，前面章节用的都是部件编辑模式。我们点击第二个小按钮（图标里有一个指向右下角的箭
+    头），就会进入信号和槽的编辑模式，如下图所示：
+    <center><img src="images/ch04/ch04-05-02.png" alt="signals-slots" width="800"></center>
+    进入信号和槽的编辑模式之后，鼠标移动到控件，控件就会以红框高亮显示，然后就可以将源头控件的信号关联到接收端控件的槽函数，关联操作的过程就相当于在画图板上
+    画直线：鼠标指向源头控件，左键按下不松，鼠标滑动画线到接收控件，然后松开，就弹出配置连接（connect）的对话框：<br>
+    <center><img src="images/ch04/ch04-05-03.png" alt="signals-slots2" width="800"></center>
+    进行画线操作之后，自动弹出从源头 lineEdit 到接收端 label 的配置连接对话框，左边列表选择
+    textEdited(QString)，右边选择 setText(QString)，然后点击下方的 OK 按钮。<br>
+    在上图配置连接对话框里，左下角的复选框指是否显示从基类 QWidget 继承的信号和槽。<br>
+    <br>
+    点击 OK 按钮之后，看到类似下图所示的信号和槽连接关系（这里连接和关联是一个意思）：<br>
+    <center><img src="images/ch04/ch04-05-04.png" alt="signals-slots3" width="800"></center>
+    这时候会显示 lineEdit 的 textEdited(QString) 信号已经连接到 label 的 setText(QString)
+    槽函数里。从信号和槽编辑模式实现的这个功能就是 4.2.1
+    节文本同步例子的功能。对于窗体里面控件之间简单的信号和槽关联，都可以按照上面方法实现关联（即连接）。这是信号和槽编辑模式的示范，窗体上面第三个按钮是伙伴编辑模
+    式，图标看起来有一个橙色的橡皮檫。<br>
+    <br>
+    点击上面第三个伙伴编辑模式，这个模式通常是将一个标签设置为其他控件的伙伴，用于提示其他控件的功能，并可以为其他控件设置快捷按钮。快捷键设置我们以后再学，
+    这里仅仅将标签控件设置为单行编辑控件的伙伴，方法也是用鼠标画线，伙伴编辑模式通常都是从标签控件出发，画到其他控件：<br>
+    <center><img src="images/ch04/ch04-05-05.png" alt="buddy" width="800"></center>
+    伙伴关系比较简单，就是一根线，从标签控件连到其他控件，完事。下一章还会专门讲通过标签控件为编辑控件设置快捷键，这里先不管。<br>
+    <br>
+    Tab
+    顺序一般用于多个输入控件切换输入焦点，上面只有一个单行编辑控件，不太够。我们点击顶上面第一个编辑部件的按钮，回到部件编辑模式，向窗体再拖两个单行编辑控件：<br>
+    <center><img src="images/ch04/ch04-05-06.png" alt="tab1" width="800"></center>
+    有三个输入控件之后，我们点击顶上面第四个编辑 Tab 顺序的按钮，进入 Tab 顺序编辑的模式：<br>
+    <center><img src="images/ch04/ch04-05-07.png" alt="tab2" width="800"></center>
+    只有能接收输入的控件才有 Tab 焦点，按钮类也有 Tab 键顺序的。Tab 键顺序，就是窗体里面有多个输入控件，可以按键盘上的 Tab
+    键依次切换各个控件，输入焦点默认在编号为 1 的控件里，按一次 Tab 键进入 2 号控件，再到 3 号控件，如果到了最后一个控件那就循环回到 1
+    号。Tab 键切换顺序，就是在 Tab 编辑模式里鼠标依次点击控件的顺序，先点击上面的控件，它就是1 号，再点击中间的控件，中间的就是 2 号，最后点击
+    下面的就是 3 号，以此类推。编辑好之后保存界面文件，我们对这个 ui 文件的编辑就完成了。<br>
+    <br>
+    上面将设计师四种编辑模式都使用了一遍，是为了后面小节里面 ui_widget.h
+    里面代码的完整性，四种编辑模式都是在该文件里生成对应的代码。下面就来看看 ui_widget.h 里的代码。<br>
+    <br>
+    <div class="os2"> 4.5.3 ui_*.h 代码 </div>
+    <br>
+    按照之前的编辑，保存文件，然后点击 QtCreator 菜单“构建”--&gt;“重新构建项目
+    npcomplete”（例子运行效果不截图了，大家自己运行看看），构建过程会产生我们本节需要学习的几个文件，例子源代码保存在
+    D:\QtProjects\ch04\npcomplete，构建文件夹为：<br>
+    D:\QtProjects\ch04\build-npcomplete-Desktop_Qt_5_4_0_MinGW_32bit-Debug<br>
+    我们进入构建文件夹，可以看到 ui_widget.h。我们打开这个文件，可以查看里面的内容：<br>
+    <div class="code"><span style=" color:#008000;">/********************************************************************************</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">**</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Form</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">generated</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">from</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">reading</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">UI</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">file</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">'widget.ui'</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">**</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">**</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Created</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">by:</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">Qt</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">User</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Interface</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Compiler</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">version</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">5.4.0</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">**</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">**</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WARNING!</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">All</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">changes</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">made</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">in</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">this</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">file</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">will</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">be</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">lost</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">when</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">recompiling</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">UI</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">file!</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">********************************************************************************/</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;"> </span>UI_WIDGET_H</pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span>UI_WIDGET_H</pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QtCore/QVariant&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QtWidgets/QAction&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QtWidgets/QApplication&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QtWidgets/QButtonGroup&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QtWidgets/QHeaderView&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QtWidgets/QLabel&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QtWidgets/QLineEdit&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QtWidgets/QWidget&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">QT_BEGIN_NAMESPACE</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span>Ui_Widget</pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>QLabel<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span>label<span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>QLineEdit<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span>lineEdit<span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>QLineEdit<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span>lineEdit_2<span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>QLineEdit<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span>lineEdit_3<span style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span>setupUi<span style=" color:#000000;">(</span>QWidget<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>Widget<span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">if</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">(</span>Widget<span
+style=" color:#000000;">-&gt;</span>objectName<span style=" color:#000000;">().</span>isEmpty<span
+style=" color:#000000;">())</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span>Widget<span style=" color:#000000;">-&gt;</span>setObjectName<span
+style=" color:#000000;">(</span>QStringLiteral<span style=" color:#000000;">(</span><span
+style=" color:#008000;">"Widget"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>Widget<span style=" color:#000000;">-&gt;</span>resize<span
+style=" color:#000000;">(</span><span style=" color:#000080;">400</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">300</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>label<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">new</span><span
+style=" color:#c0c0c0;"> </span>QLabel<span style=" color:#000000;">(</span>Widget<span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>label<span style=" color:#000000;">-&gt;</span>setObjectName<span
+style=" color:#000000;">(</span>QStringLiteral<span style=" color:#000000;">(</span><span
+style=" color:#008000;">"label"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>label<span style=" color:#000000;">-&gt;</span>setGeometry<span
+style=" color:#000000;">(</span>QRect<span style=" color:#000000;">(</span><span
+style=" color:#000080;">80</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">100</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">201</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">16</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>lineEdit<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">new</span><span
+style=" color:#c0c0c0;"> </span>QLineEdit<span style=" color:#000000;">(</span>Widget<span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>lineEdit<span style=" color:#000000;">-&gt;</span>setObjectName<span
+style=" color:#000000;">(</span>QStringLiteral<span style=" color:#000000;">(</span><span
+style=" color:#008000;">"lineEdit"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>lineEdit<span style=" color:#000000;">-&gt;</span>setGeometry<span
+style=" color:#000000;">(</span>QRect<span style=" color:#000000;">(</span><span
+style=" color:#000080;">80</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">50</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">201</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">20</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>lineEdit_2<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">new</span><span
+style=" color:#c0c0c0;"> </span>QLineEdit<span style=" color:#000000;">(</span>Widget<span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>lineEdit_2<span style=" color:#000000;">-&gt;</span>setObjectName<span
+style=" color:#000000;">(</span>QStringLiteral<span style=" color:#000000;">(</span><span
+style=" color:#008000;">"lineEdit_2"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>lineEdit_2<span style=" color:#000000;">-&gt;</span>setGeometry<span
+style=" color:#000000;">(</span>QRect<span style=" color:#000000;">(</span><span
+style=" color:#000080;">80</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">150</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">113</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">20</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>lineEdit_3<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">new</span><span
+style=" color:#c0c0c0;"> </span>QLineEdit<span style=" color:#000000;">(</span>Widget<span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>lineEdit_3<span style=" color:#000000;">-&gt;</span>setObjectName<span
+style=" color:#000000;">(</span>QStringLiteral<span style=" color:#000000;">(</span><span
+style=" color:#008000;">"lineEdit_3"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>lineEdit_3<span style=" color:#000000;">-&gt;</span>setGeometry<span
+style=" color:#000000;">(</span>QRect<span style=" color:#000000;">(</span><span
+style=" color:#000080;">80</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">210</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">113</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">20</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QT_NO_SHORTCUT</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>label<span style=" color:#000000;">-&gt;</span>setBuddy<span
+style=" color:#000000;">(</span>lineEdit<span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">QT_NO_SHORTCUT</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>QWidget<span style=" color:#000000;">::</span>setTabOrder<span
+style=" color:#000000;">(</span>lineEdit<span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span>lineEdit_2<span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>QWidget<span style=" color:#000000;">::</span>setTabOrder<span
+style=" color:#000000;">(</span>lineEdit_2<span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span>lineEdit_3<span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>retranslateUi<span style=" color:#000000;">(</span>Widget<span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>QObject<span style=" color:#000000;">::</span>connect<span
+style=" color:#000000;">(</span>lineEdit<span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SIGNAL</span><span
+style=" color:#000000;">(</span>textEdited<span style=" color:#000000;">(</span>QString<span
+style=" color:#000000;">)),</span><span style=" color:#c0c0c0;"> </span>label<span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SLOT</span><span
+style=" color:#000000;">(</span>setText<span style=" color:#000000;">(</span>QString<span
+style=" color:#000000;">)));</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>QMetaObject<span style=" color:#000000;">::</span>connectSlotsByName<span
+style=" color:#000000;">(</span>Widget<span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">setupUi</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span>retranslateUi<span style=" color:#000000;">(</span>QWidget<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>Widget<span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>Widget<span style=" color:#000000;">-&gt;</span>setWindowTitle<span
+style=" color:#000000;">(</span>QApplication<span style=" color:#000000;">::</span>translate<span
+style=" color:#000000;">(</span><span style=" color:#008000;">"Widget"</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"Widget"</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>label<span style=" color:#000000;">-&gt;</span>setText<span
+style=" color:#000000;">(</span>QApplication<span style=" color:#000000;">::</span>translate<span
+style=" color:#000000;">(</span><span style=" color:#008000;">"Widget"</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"TextLabel"</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">retranslateUi</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span>Ui<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">class</span><span
+style=" color:#c0c0c0;"> </span>Widget<span style=" color:#000000;">:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span>Ui_Widget<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">{};</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">namespace</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Ui</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">QT_END_NAMESPACE</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">UI_WIDGET_H</span></pre>
+    </div>
+    文件开头的注视是说明不要修改这个文件，因为修改了也没用，下次 uic 工具会自动生成这个文件，之前的修改就被覆盖了。<br>
+    UI_WIDGET_H 宏是保证这个头文件只被包含一次。<br>
+    接下来是包含 Qt 库里的几个必要的头文件 QVariant、QAction、...... QLabel、QLineEdit、QWidget等。<br>
+    开头的 QT_BEGIN_NAMESPACE 和结尾的 QT_END_NAMESPACE 两个宏，其实是空宏，什么都没有，对编译器来说这两个宏没代码，放
+    在那就是提醒程序员看看的，实际没意义。<br>
+    <br>
+    ui_widget.h 主要内容就是全局类 Ui_Widget 的代码，这个类用于构建窗体界面。我们向窗体里拖了一个标签和三个单行编辑控件，
+    Ui_Widget 类里看到它们的成员指针 label、lineEdit、lineEdit_2 和 lineEdit_3。<br>
+    Ui_Widget 有两个函数，setupUi 函数之前多次接触到，就是用于构建界面的函数，下面分块解读它的代码：
+    <div class="code"><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">&nbsp;&nbsp;&nbsp;
+        void</span><span style=" color:#c0c0c0;"> </span>setupUi<span style=" color:#000000;">(</span>QWidget<span
+        style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>Widget<span
+        style=" color:#000000;">)</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">if</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">(</span>Widget<span
+style=" color:#000000;">-&gt;</span>objectName<span style=" color:#000000;">().</span>isEmpty<span
+style=" color:#000000;">())</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span>Widget<span style=" color:#000000;">-&gt;</span>setObjectName<span
+style=" color:#000000;">(</span>QStringLiteral<span style=" color:#000000;">(</span><span
+style=" color:#008000;">"Widget"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>Widget<span style=" color:#000000;">-&gt;</span>resize<span
+style=" color:#000000;">(</span><span style=" color:#000080;">400</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">300</span><span style=" color:#000000;">);</span></pre>
+    </div>
+    首先判断窗体 Widget 内部的对象名是否为空，如果为空就设置对象名为 "Widget"，然后重置窗体的大小为 400*300 像素。<br>
+    <div class="code"><span style=" color:#c0c0c0;"> </span>&nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;&nbsp; label<span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#808000;">new</span><span
+        style=" color:#c0c0c0;"> </span>QLabel<span style=" color:#000000;">(</span>Widget<span
+        style=" color:#000000;">);</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>label<span style=" color:#000000;">-&gt;</span>setObjectName<span
+style=" color:#000000;">(</span>QStringLiteral<span style=" color:#000000;">(</span><span
+style=" color:#008000;">"label"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>label<span style=" color:#000000;">-&gt;</span>setGeometry<span
+style=" color:#000000;">(</span>QRect<span style=" color:#000000;">(</span><span
+style=" color:#000080;">80</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">100</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">201</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">16</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>lineEdit<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">new</span><span
+style=" color:#c0c0c0;"> </span>QLineEdit<span style=" color:#000000;">(</span>Widget<span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>lineEdit<span style=" color:#000000;">-&gt;</span>setObjectName<span
+style=" color:#000000;">(</span>QStringLiteral<span style=" color:#000000;">(</span><span
+style=" color:#008000;">"lineEdit"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>lineEdit<span style=" color:#000000;">-&gt;</span>setGeometry<span
+style=" color:#000000;">(</span>QRect<span style=" color:#000000;">(</span><span
+style=" color:#000080;">80</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">50</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">201</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">20</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>lineEdit_2<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">new</span><span
+style=" color:#c0c0c0;"> </span>QLineEdit<span style=" color:#000000;">(</span>Widget<span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>lineEdit_2<span style=" color:#000000;">-&gt;</span>setObjectName<span
+style=" color:#000000;">(</span>QStringLiteral<span style=" color:#000000;">(</span><span
+style=" color:#008000;">"lineEdit_2"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>lineEdit_2<span style=" color:#000000;">-&gt;</span>setGeometry<span
+style=" color:#000000;">(</span>QRect<span style=" color:#000000;">(</span><span
+style=" color:#000080;">80</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">150</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">113</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">20</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>lineEdit_3<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">new</span><span
+style=" color:#c0c0c0;"> </span>QLineEdit<span style=" color:#000000;">(</span>Widget<span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>lineEdit_3<span style=" color:#000000;">-&gt;</span>setObjectName<span
+style=" color:#000000;">(</span>QStringLiteral<span style=" color:#000000;">(</span><span
+style=" color:#008000;">"lineEdit_3"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>lineEdit_3<span style=" color:#000000;">-&gt;</span>setGeometry<span
+style=" color:#000000;">(</span>QRect<span style=" color:#000000;">(</span><span
+style=" color:#000080;">80</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">210</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">113</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">20</span><span style=" color:#000000;">));</span></pre>
+    </div>
+    这里新建了一个标签控件和三个单行编辑控件，并设置它们的对象名称 setObjectName 和显示矩形位置 setGeometry。<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">QT_NO_SHORTCUT</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>label<span style=" color:#000000;">-&gt;</span>setBuddy<span
+style=" color:#000000;">(</span>lineEdit<span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">QT_NO_SHORTCUT</span></pre>
+    </div>
+    如果没有定义不能使用快捷键的宏 QT_NO_SHORTCUT，那么设置伙伴关系，label 控件与 lineEdit 是伙伴关系。<br>
+    <div class="code"><span style=" color:#c0c0c0;"> </span>&nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;&nbsp; QWidget<span style=" color:#000000;">::</span>setTabOrder<span
+        style=" color:#000000;">(</span>lineEdit<span style=" color:#000000;">,</span><span
+        style=" color:#c0c0c0;"> </span>lineEdit_2<span style=" color:#000000;">);</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>QWidget<span style=" color:#000000;">::</span>setTabOrder<span
+style=" color:#000000;">(</span>lineEdit_2<span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span>lineEdit_3<span style=" color:#000000;">);</span></pre>
+    </div>
+    setTabOrder 就是设置 Tab 键顺序的函数，该函数接收两个参数，都是控件指针。以第一个 setTabOrder
+    为例，这个函数的意义是如果输入焦点在 lineEdit 里面，这时按一次 Tab 键，输入焦点就会切换到 lineEdit_2 。Tab
+    键顺序的设置相当于是单向链表，从第一个切换到第二个，再从第二个切换到第三个，以此类推。<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; retranslateUi<span style=" color:#000000;">(</span>Widget<span
+        style=" color:#000000;">);</span></div>
+    重新翻译界面，如果做了多国语言翻译，这个函数可以将界面翻译成其他语言显示。<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; QObject<span style=" color:#000000;">::</span>connect<span
+        style=" color:#000000;">(</span>lineEdit<span style=" color:#000000;">,</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SIGNAL</span><span
+        style=" color:#000000;">(</span>textEdited<span style=" color:#000000;">(</span>QString<span
+        style=" color:#000000;">)),</span><span style=" color:#c0c0c0;"> </span>label<span
+        style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+        style=" color:#808000;">SLOT</span><span style=" color:#000000;">(</span>setText<span
+        style=" color:#000000;">(</span>QString<span style=" color:#000000;">)));</span></div>
+    我们在信号和槽编辑模式里关联的信号和槽，在这里由 uic 工具自动生成了 connect 函数调用，与我们 4.2.1 节手动写的 connect
+    函数差不多。<br>
+    <div class="code"><span style=" color:#c0c0c0;"> </span>&nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;&nbsp; QMetaObject<span style=" color:#000000;">::</span>connectSlotsByName<span
+        style=" color:#000000;">(</span>Widget<span style=" color:#000000;">);</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">setupUi</span></pre>
+      <span style=" color:#000000;"></span></div>
+    connectSlotsByName 是根据信号和槽函数名称等实现自动关联的关键函数，后面小节专门讲这个函数。<br>
+    <br>
+    Ui_Widget 类第二个函数就是 retranslateUi 函数，主要是用来做翻译的：<br>
+    <div class="code"><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">&nbsp;&nbsp;&nbsp;
+        void</span><span style=" color:#c0c0c0;"> </span>retranslateUi<span style=" color:#000000;">(</span>QWidget<span
+        style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>Widget<span
+        style=" color:#000000;">)</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>Widget<span style=" color:#000000;">-&gt;</span>setWindowTitle<span
+style=" color:#000000;">(</span>QApplication<span style=" color:#000000;">::</span>translate<span
+style=" color:#000000;">(</span><span style=" color:#008000;">"Widget"</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"Widget"</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>label<span style=" color:#000000;">-&gt;</span>setText<span
+style=" color:#000000;">(</span>QApplication<span style=" color:#000000;">::</span>translate<span
+style=" color:#000000;">(</span><span style=" color:#008000;">"Widget"</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"TextLabel"</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">retranslateUi</span></pre>
+    </div>
+    这个函数将界面上能看到的字符串，如窗口标题 "Widget"、标签文本 "TextLabel" 做一下翻译。我们这里都没用到翻译，所以先不管它们。<br>
+    <br>
+    ui_widget.h 最后是一个名字空间的声明，名字空间最主要的用途是防止重名，便于管理较大的项目：<br>
+    <div class="code"><span style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;">
+      </span>Ui<span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">class</span><span
+style=" color:#c0c0c0;"> </span>Widget<span style=" color:#000000;">:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span>Ui_Widget<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">{};</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">namespace</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Ui</span></pre>
+    </div>
+    类 Ui::Widget 就是从全局类 Ui_Widget 做一下继承，其实啥都没干。在 widget.h 头文件的类声明里，会定义私有成员
+    Ui::Widget *ui 作为构建界面的对象。<br>
+    <br>
+    ui_widget.h 文件里的代码是比较清晰明了的，无论是通过 Qt 设计师做 UI，然后生成 ui_widget.h
+    代码，还是我们手动编写构建界面的代码，比如手动 new 一堆控件，设置显示矩形 setGeometry 等，手动编写的代码与 uic 工具根据 ui
+    文件生成的代码是等价的，我们如果手动编写上面的代码，不用 ui 文件，效果也是一样的。自己手动编写代码主要是不直观，程序不运行就看不到界面长什么样。而
+    Qt 设计师大大方便了图形程序的设计过程，对窗体的编辑，就是所见即所得（What You See Is What You
+    Get，WYSIWYG）。大家可以使用 Qt 设计师简化程序的编写过程，但是不能过度依赖 Qt 设计师，要学习 ui_widget.h
+    里面的代码写法，以后无论是自己编写代码还是阅读网上例子都有好处。<br>
+    <br>
+    <div class="os2"> 4.5.4 moc原理之一：头文件声明 </div>
+    <br>
+    Q_OBJECT <br>
+    <br>
+    <div class="os2"> 4.5.5 moc原理之二：信号是什么 </div>
+    <br>
+    activate <br>
+    <br>
+    <div class="os2"> 4.5.6 moc原理之三：类的静态数据 </div>
+    <br>
+    qt_meta_stringdata_Widget <br>
+    <br>
+    <div class="os2"> 4.5.7 moc原理之四：虚函数 </div>
+    <br>
+    qt_metacall <br>
+    <br>
+    <div class="os2"> 4.5.8 moc原理之五：connect </div>
+    <br>
+    connect <br>
+    <br>
+    <div class="os2"> 4.5.9 moc原理之六：自动关联 </div>
+    <br>
+    void QMetaObject::​connectSlotsByName(QObject * object) <br>
+    <br>
+    <div class="os2"> 4.5.10 moc原理之七：从信号到槽 </div>
+    <br>
+    activate --&gt; qt_metacall <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch04-04.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch05-00.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

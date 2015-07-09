@@ -15,18 +15,25 @@
 
 </script> </head>
   <body>
-    <div class="os1"> 4.5 扩展阅读：ui_*.h和moc_*.cpp代码 </div>
+    <div class="os1"> 4.5 扩展阅读：ui_*.h </div>
     <br>
-    本节首先介绍 Qt 元对象类 QMetaObject（主要从 Qt 帮助文档翻译来的），然后根据之前 4.4.2 普通属性示例的修改版，来讲解 Qt
-    工具集自动生成的 ui_*.h 和 moc_*.cpp 里面的代码，深入了解信号和槽机制的内部原理，并且加入了一些 Qt
-    核心类的源代码、流程框图来理解从信号触发到槽函数调用的过程。这一节内容很多，建议分两三次来学习。<br>
+    本节和下一节都是讲同一个元对象系统综合示例，因为内容很多，所以作为两节来讲解。本节首先介绍 Qt 元对象类 QMetaObject（主要从 Qt
+    帮助文档翻译来的），然后根据之前 4.4.2 普通属性示例的修改版，来讲解 Qt 工具集自动生成的 ui_*.h 代码，学习 uic 工具根据 ui
+    文件所生成的代码，以后如果需要手动编写构建图形界面的代码，原理也是类似的，可以举一反三。下一节专门讲解 moc_*.cpp
+    里面的代码，深入了解信号和槽机制的内部原理，并且加入了一些 Qt 核心类的源代码、流程框图来理解从信号触发到槽函数调用的过程。<br>
     <br>
-    本节是讲解 Qt5 元对象系统内部机理的，之前国外大神写过 Qt4 内幕和逆向“Qt Internals &amp;
+    本章 4.5 和 4.6 两节都是讲解 Qt5 元对象系统内部机理的，之前国外大神写过 Qt4 内幕和逆向“Qt Internals &amp;
     Reversing”，推荐读者阅读该文章，并且本节很多内容也是从这篇文章学来的，链接如下： <br>
     <a href="http://www.codeproject.com/Articles/31330/Qt-Internals-Reversing" target="new">http://www.codeproject.com/Articles/31330/Qt-Internals-Reversing</a><br>
-    或者打开这个网址：<br>
-    <a href="http://www.ntcore.com/files/qtrev.htm" target="new">
-      http://www.ntcore.com/files/qtrev.htm</a> <br>
+    或者打开这个网址：<a href="http://www.ntcore.com/files/qtrev.htm" target="new">http://www.ntcore.com/files/qtrev.htm</a>
+    <br>
+    <br>
+    国内也有类似的中文文章，推荐这两篇：<br>
+    Qt一些细节内幕：<a href="http://blog.csdn.net/liangkaiming/article/details/5799752"
+      target="new"> http://blog.csdn.net/liangkaiming/article/details/5799752 </a><br>
+    解析Qt的信号-槽机制是如何工作的：<a href="http://blog.csdn.net/newthinker_wei/article/details/22701695"
+      target="new"> http://blog.csdn.net/newthinker_wei/article/details/22701695
+    </a> <br>
     <br>
     <div class="os2"> 4.5.1 QMetaObject类 </div>
     <br>
@@ -119,7 +126,7 @@
     用于新建对象，而 QMetaObject::invokeMethod() 函数用于调用元方法。<br>
     <br>
     QMetaObject 类基本是是围绕名称字符串展开的，moc
-    工具将类名、元方法名称、枚举类型名称、元构造函数名称等字符串保存为类的静态数据，然后在运行时可以通过名称字符串定位到真实的函数指针，然后来调用元方法。上一节属性
+    工具将类名、元方法名称、枚举类型名称、元构造函数名称等字符串保存为类的静态数据，然后在运行时可以通过名称字符串定位到真实的函数，然后来调用元方法。上一节属性
     系统里的 property()、setProperty() 和本小节的
     QMetaObject::invokeMethod()、QMetaObject::​newInstance()
     都是通过字符串来查找对应的函数并执行调用的。<br>
@@ -928,35 +935,8 @@ style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Ui</span></pre>
     Get，WYSIWYG）。大家可以使用 Qt 设计师简化程序的编写过程，但是不能过度依赖 Qt 设计师，要学习 ui_widget.h
     里面的代码写法，以后无论是自己编写代码还是阅读网上例子都有好处。<br>
     <br>
-    <div class="os2"> 4.5.4 moc原理之一：头文件声明 </div>
-    <br>
-    Q_OBJECT <br>
-    <br>
-    <div class="os2"> 4.5.5 moc原理之二：信号是什么 </div>
-    <br>
-    activate <br>
-    <br>
-    <div class="os2"> 4.5.6 moc原理之三：类的静态数据 </div>
-    <br>
-    qt_meta_stringdata_Widget <br>
-    <br>
-    <div class="os2"> 4.5.7 moc原理之四：虚函数 </div>
-    <br>
-    qt_metacall <br>
-    <br>
-    <div class="os2"> 4.5.8 moc原理之五：connect </div>
-    <br>
-    connect <br>
-    <br>
-    <div class="os2"> 4.5.9 moc原理之六：自动关联 </div>
-    <br>
-    void QMetaObject::​connectSlotsByName(QObject * object) <br>
-    <br>
-    <div class="os2"> 4.5.10 moc原理之七：从信号到槽 </div>
-    <br>
-    activate --&gt; qt_metacall <br>
-    <br>
-    <br>
+    关于 UI 部分的代码就讲解到这，下一节介绍元对象系统的重要知识，除了 moc 工具根据头文件自动生成的 moc_*.cpp 代码，还从 Qt
+    核心源码找了一些相关的函数，详细了解一下信号和槽机制的原理。<br>
     <br>
     <br>
     <br>
@@ -972,7 +952,7 @@ style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Ui</span></pre>
                   style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
           </td>
           <td style="width: 40%;">
-            <div style="text-align: center;"><a href="ch05-00.htm"><img class="pic"
+            <div style="text-align: center;"><a href="ch04-06.htm"><img class="pic"
                   style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
           </td>
         </tr>

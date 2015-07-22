@@ -3,11 +3,9 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <title>ch05-02</title>
-    
-<link href="css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-
-<script src="thumbnailviewer.js" type="text/javascript">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -15,26 +13,1173 @@
 * Visit http://www.dynamicdrive.com/ for full source code
 ***********************************************/
 
-</script>
-
-
-  </head>
-  
-  
-<div class="os1">5.2 单行编辑控件 </div>
-<br />
-单行编辑控件
-<br />
-<br />
-<br />
-
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch05-01.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch05-03.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+</script> </head>
+  <body>
+    <div class="os1">5.2 单行编辑控件 </div>
+    <br>
+    在图形界面程序中，有很多的输入控件，其中以文本编辑控件最为常用，可以接收用户输入的各种文本，比如登录界面常见的用户名、密码，网络连接使用的 IP 和
+    端口等等，本节先大致介绍一下 Qt
+    里面的文本编辑和浏览控件，然后详细讲解单行编辑控件的用途，通过三个例子示范单行编辑控件的使用。对于多行丰富内容的文本编辑控件，留在下一节讲解。<br>
+    <br>
+    <div class="os2">5.2.1 文本编辑控件概述</div>
+    <br>
+    从 Qt 设计师界面可以看到常用的 Qt 文本编辑和浏览控件，包括四个：<br>
+    <center><img src="images/ch05/ch05-02-01.png" alt="edit"></center>
+    其中单行编辑控件 QLineEdit 和 普通文本编辑控件 QPlainTextEdit 都是针对最普通的 C++
+    字符串编辑和显示，默认都是白底黑字，没有彩色字体。QLineEdit 按照名字，就是只接受单行普通文本输入，QPlainTextEdit
+    可以接收多行普通文本输入。<br>
+    丰富文本编辑控件 QTextEdit 是升级版的编辑控件，支持 HTML 网页的丰富文本编辑，当然也可以利用它编辑普通文本。丰富文本浏览控件
+    QTextBrowser 是 QTextEdit 的只读版本，并能打开网页链接。<br>
+    本节主要介绍 QLineEdit，下一节主要介绍 QTextEdit 和 QTextBrowser，学习这些内容之后，使用 QPlainTextEdit
+    就没什么技术难度了，查看 Qt 助手文档可以轻松学会，所以不专门讲解 QPlainTextEdit 了。<br>
+    <br>
+    <div class="os2">5.2.2 QLineEdit 类</div>
+    <br>
+    在 Qt 助手索引里输入类名，就可以找到相应的帮助文档。QLineEdit
+    就如名字一样，接收一行文本输入，编辑器一般都有对文本的复制、粘贴、剪切、撤销、重做等功能，单行编辑控件原生自带这些功能，右击单行编辑控件或者使用
+    Ctrl+C、Ctrl+V、Ctrl+X 等快捷键都可以使用这些默认功能。<br>
+    首先看看 QLineEdit 构造函数：<br>
+    <div class="code">QLineEdit(QWidget * parent = 0)</div>
+    <div class="code">QLineEdit(const QString &amp; contents, QWidget * parent =
+      0)</div>
+    parent 是父窗口指针，第二个构造函数的 contents 是初始化显示的文本。<br>
+    单行编辑控件最重要的属性就是 text，获取或者修改文本是单行编辑控件最重要的功能。<br>
+    获取文本的函数：<br>
+    <div class="code">QString text() const</div>
+    设置文本的函数：<br>
+    <div class="code">void setText(const QString &amp;)</div>
+    默认情况下，单行编辑控件的文本长度限制为 32767，获取单行编辑控件的文本长度限定的函数为：<br>
+    <div class="code">int maxLength() const</div>
+    如果希望修改文本长度限定，可以通过函数：<br>
+    <div class="code">void setMaxLength(int)</div>
+    <br>
+    无论是用户从图形界面编辑文本，还是程序内部用代码修改文本，都会触发如下信号：<br>
+    <div class="code">void textChanged(const QString &amp; text)</div>
+    关联这个信号，就可以实时跟踪文本的所有变化。<br>
+    我们之前 4.2.1 节例子用过单行编辑控件和标签控件，使它们的文本同步显示，我们关联的是另一个信号：<br>
+    <div class="code">void textEdited(const QString &amp; text)</div>
+    这个信号只根据用户在图形界面的编辑行为触发，如果程序代码里通过函数 setText() ，那么只会触发之前的 textChanged()
+    信号，不会触发文本编辑信号 textEdited()。所以如果希望追踪文本的所有变化，需要关联 textChanged()
+    信号，如果只希望跟踪用户在图形界面的编辑更改，那就关联 textEdited() 信号。<br>
+    当用户从图形界面编辑文本的行为结束时，比如在单行编辑控件里按了回车键或者该控件失去输入焦点（用户转到其他控件操作），单行编辑控件会发出编辑完成信号：<br>
+    <div class="code">void editingFinished()</div>
+    另外，单行编辑控件既可以用上面 text() 函数获取全部的文本，也可以选取用户高亮选中的部分文本，通过函数：<br>
+    <div class="code">QString selectedText() const</div>
+    因为单行编辑控件文本相对简单，本来文本就不多，所以获取高亮的部分文本情况也比较少。<br>
+    刚才提到单行编辑控件可以进行复制、粘贴、剪切、撤销、重做等操作，每个操作都有对应的槽函数实现，不过通过代码直接调用这些槽函数情况比较少，就不会一一列举
+    了，可以通过 Qt 助手查找相应文档。基本情况就介绍这么多，下面通过例子示范单行编辑控件的使用。<br>
+    <br>
+    <div class="os2">5.2.3 登录框示例</div>
+    <br>
+    登录框主要就是接收用户输入的用户名和密码，在用户点击“登录”按钮之后，将用户名和密码的 Hash 值与软件配置文件或数据库里的值进行比较，然后决定是否允
+    许登录。<br>
+    密码框通常是以一排 * 显示的，单行编辑控件可以通过设置属性 echoMode 来显示星号密码。属性 echoMode 是 EchoMode 枚举类型，
+    主要有四种显示模式：<br>
+    ① QLineEdit::Normal，普通模式，用户输入什么显示什么，这是默认的显示模式。<br>
+    ② QLineEdit::NoEcho，不显示任何东西，这是 Unix/Linux 常用的密码显示模式，用户敲密码时不显示任何文本，这样能隐藏密码的长
+    度，不被人从屏幕偷窥。<br>
+    ③ QLineEdit::Password，每一个密码字符都用星号显示，这是 Windows 常用的密码显示模式。<br>
+    ④
+    QLineEdit::PasswordEchoOnEdit，当输入一个密码字符时，短暂显示该字符，然后迅速将该字符显示为星号，方便提示用户当前输入了什么字符，类
+    似 Android 解锁密码的输入方式。<br>
+    通过单行编辑控件的函数：<br>
+    <div class="code">void setEchoMode(EchoMode) </div>
+    可以设置密码显示模式，一般用 QLineEdit::Password 就可以了。<br>
+    <br>
+    顺便说一下关于密码如何保存的问题，现在互联网上各种黑客、广告商盛行，所以密码是绝对不能明文存储的，一般都是将密码文本做 Hash 转换，存储 Hash
+    散列值作为密码比较的依据，这样避免用户明文密码泄漏。用户如果需要修改密码，那么直接换个 Hash 值就行了。<br>
+    Qt 自带有计算密码学 Hash 值的类 QCryptographicHash，支持多种多样的散列 Hash
+    算法，这个类有一个静态函数可以快速计算各种算法的散列值：<br>
+    <div class="code">QByteArray QCryptographicHash::​hash(const QByteArray
+      &amp; data, Algorithm method)</div>
+    参数 data 就是输入的明文密码，method 是密码学 Hash 算法枚举，返回值就是求得的 Hash 值，用 QByteArray
+    存储返回值。Qt 支持所有主流的 Hash 算法，算法枚举很多，具体可以查 QCryptographicHash 类的文档，例子中我们使用
+    QCryptographicHash::Sha3_256&nbsp; 算法，下面开始本小节的例子。<br>
+    <br>
+    打开 QtCreator，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>
+    ①项目名称 login，创建路径 D:\QtProjects\ch05，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    建好项目之后，打开窗体 widget.ui 文件，进入设计模式，按照下图拖入控件：<br>
+    <center><img src="images/ch05/ch05-02-02.png" alt="ui" width="800"></center>
+    界面里有两个标签控件、两个单行编辑控件、两个按压按钮。标签控件的文本如图上显示的：“用户名”、“密码”，标签高度调整为
+    20，这样与单行编辑控件的高度一样，方便与单行编辑控件对齐。<br>
+    两个单行编辑控件，上面的 objectName 设为 lineEditUser，下面的 objectName 设为
+    lineEditPassword，并尽量与两个标签控件对齐。<br>
+    对于下面两个按钮，左边的文本为“登录”，objectName 设为 pushButtonLogin，右边按钮文本为“退出”，objectName 设为
+    pushButtonExit。调整控件的位置，尽量看起来对齐。<br>
+    <br>
+    例子的效果就是点击“登录”按钮时，获取用户名，计算密码的 Hash 值并弹窗显示出来。点击“退出”按钮时，窗口自动关闭。<br>
+    在图形界面右击两个按钮，在右键菜单选择“转到槽...”，然后为按钮的 clicked() 信号添加槽函数：<br>
+    <center><img src="images/ch05/ch05-02-03.png" alt="slot"></center>
+    为两个按钮添加好槽函数之后，保存界面文件，然后回到代码编辑模式，打开头文件 widget.h，添加成员变量：<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>WIDGET_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">WIDGET_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonLogin_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonExit_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//用户名字符串</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_strUser</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//不能明文保存密码，存储密码</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">hash</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">值</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QByteArray</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_passwordHash</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre>
+    </div>
+    两个槽函数是刚才从图形界面添加的，这里新增了两个成员变量 m_strUser 保存用户名，m_passwordHash 保存密码的 Hash
+    值。头文件内容就这些，下面来编辑 widget.cpp ，首先添加头文件包含和构造函数里的代码：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QMessageBox&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QCryptographicHash&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置密码框的显示模式</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditPassword</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setEchoMode</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QLineEdit</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Password</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    头文件 &lt;QCryptographicHash&gt; 就是专门计算 Hash 值的类。在构造函数里，使用 lineEditPassword 的
+    setEchoMode() 函数，参数为 QLineEdit::Password ，这样就能轻松将该单行编辑控件变成真正的密码框了。<br>
+    <br>
+    接下来是“登录”按钮的槽函数编写：<br>
+    <div class="code"><span style=" color:#008000;">//登录按钮</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonLogin_clicked</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//判断用户名密码是否为空</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditUser</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">text</span><span
+style=" color:#000000;">().</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#000000;">||</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditPassword</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">().</span><span
+style=" color:#000000;">isEmpty</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">warning</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"警告信息"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"用户名或密码为空，不能登录。"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//用户名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_strUser</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditUser</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//计算密码</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Hash</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_passwordHash</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QCryptographicHash</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">hash</span><span style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditPassword</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">().</span><span
+style=" color:#000000;">toUtf8</span><span style=" color:#000000;">(),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                                               </span><span
+style=" color:#800080;">QCryptographicHash</span><span style=" color:#000000;">::</span><span
+style=" color:#800080;">Sha3_256</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//构造消息</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//添加用户名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strMsg</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"用户名："</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_strUser</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"\r\n"</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"密码</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Hash："</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//把每个</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Hash</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">字节转成一对十六进制字符显示</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">256</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">bit</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">对应</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">32</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">字节，变成</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">64</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">个十六进制字符打印</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strMsg</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">m_passwordHash</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">toHex</span><span style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//打印消息</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strMsg</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//弹窗显示，注意：实际应用中会将用户名和密码</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Hash</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">与数据库或配置文件里的做比较，而不是弹窗</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">information</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"用户信息"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strMsg</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    在 on_pushButtonLogin_clicked()
+    槽函数开始的地方，先对用户名和密码的字符串进行判断，如果字符串是空的，说明没有输入用户名和密码，那就直接提示警告信息，而不做其他操作。
+    QMessageBox::warning() 静态函数与 QMessageBox::information() 静态函数其实是差不多的，只是一个用于显示
+    警告信息，另一个用于显示普通信息。<br>
+    <br>
+    如果两个字符串都不是空的，那么继续后续代码，用单行编辑控件的 text() 函数提取用户名保存到 m_strUser 变量里面。<br>
+    因为不能直接存储密码字符串，所以将密码字符串用 QCryptographicHash::hash() 计算 Hash 值存到
+    m_passwordHash 里面。 QCryptographicHash::hash() 第一个参数是 QByteArray 类型，所以需要将
+    QString 对象转换成 UTF-8 编码的 QByteArray 对象，利用 toUtf8() 函数即可，第二个参数是 Hash
+    算法类型，这里用的是 QCryptographicHash::Sha3_256 。该函数会将 QByteArray 对象数据全部计算，得到固定 256
+    bit （32 字节）的 Hash 值，这个 Hash 是二进制数据流，包含大量不可打印字符。<br>
+    <br>
+    接下来我们构造要显示的消息 strMsg ，第一行是 "用户名：" 和用户名字符串，第二行是 "密码 Hash：" 和 Hash
+    值的十六进制字符串，因为 Hash 值是二进制数据，包含不可打印字符，因此使用 QByteArray 类的 toHex()
+    函数将每个字节转换成两个十六进制数的字符，比如字节数值 0x7f ，就转成 "7f" 两个字符，然后将这个十六进制字符串添加到 strMsg 。<br>
+    <br>
+    最后是用 qDebug() 打印 strMsg ，并弹窗显示 strMsg 。实际应用中并不会弹窗显示用户名和密码 Hash，一般是将用户名与密码
+    Hash 值与数据库中存储的或配置文件中保存的值进行比较，这里因为还没涉及到数据库和配置文件，所以用弹窗作为示范。<br>
+    <br>
+    剩下第二个“退出”按钮的槽函数内容比较简单，如下所示：<br>
+    <div class="code"><span style=" color:#008000;">//退出按钮</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonExit_clicked</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">this</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">close</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    调用窗体的 close() 函数，关闭窗体，因为程序只有一个窗体，关闭之后程序自动退出。<br>
+    例子代码就这么多，程序运行效果如下图所示：<br>
+    <center><img src="images/ch05/ch05-02-04.png" alt="run" width="800"></center>
+    当用户名和密码都是 user 时，就会显示图上的 Hash 值的字符串，strMsg 只有两行文本，而
+    QMessageBox::information() 显示的却是三行，那是因为 Hash 值的字符串实在太宽了，所以消息框自动把 Hash
+    值的字符串放到第三行显示了。<br>
+    如果用户名密码有一个为空，那么点击“登录”按钮会出现警告消息框：<br>
+    <center><img src="images/ch05/ch05-02-05.png" alt="warning"></center>
+    警告消息框里面的图标与普通信息消息框不一样，其他的功能都是差不多的。另外还有提示严重错误的消息框，函数为
+    QMessageBox::​critical() ，就是图标不一样，其他的功能和普通消息框差不多。<br>
+    <br>
+    <div class="os2">5.2.4 数据验证器和伙伴快捷键</div>
+    <br>
+    在用户输入时，可能用到一个功能就是数据验证，限制用户输入非法的取值。比如限定 IPv4 的取值为 0.0.0.0 到 255.255.255.255
+    ，端口取值范围 0 到 65535，而网卡 MAC 地址限定为 48 bit 数值对应的十六进制字符串，比如 AA:BB:CC:DD:EE:FF 。<br>
+    Qt 针对单行编辑控件，提供三种方式来使用数据验证器：<br>
+    （1）单行编辑控件自带的输入模板 inputMask：<br>
+    通过函数设置输入模板，这个输入模板字符串是 QLineEdit 自定义的，应用范围比较局限，功能也相对简单，设置函数为：<br>
+    <div class="code">void setInputMask(const QString &amp; inputMask)</div>
+    具体的 inputMask 字符串格式可以查询 QLineEdit 的文档，我们举 MAC 地址的例子，"H"
+    表示所有的十六进制字符，包括大小写的十六进制字符，而且 "H" 占位的字符不能省略。小写的 "h" 也代表所有十六进制字符，但 "h"
+    占位是可以省略的字符.<br>
+    对于 MAC 地址，输入模板为 "HH:HH:HH:HH:HH:HH" 。<br>
+    <br>
+    （2）整型数值和浮点数值验证器<br>
+    针对整数数值，可以用 QIntValidator 类作为验证器，该类常用构造函数为：<br>
+    <div class="code">QIntValidator(int minimum, int maximum, QObject * parent =
+      0)</div>
+    parent 是父对象指针，minimum 是整数下限，maximum
+    是整数上限，允许的数值是包含两个边界值的，边界之外的数值都不允许输入。QIntValidator 类还有一个 用于修改上下限的函数：<br>
+    <div class="code">void QIntValidator::​setRange(int bottom, int top)</div>
+    bottom 是下限数值，top 是上限数值。<br>
+    一般用 new 新建一个整数验证器之后，就可以把验证器设置给单行编辑控件：<br>
+    <div class="code">void QLineEdit::​setValidator(const QValidator * v)</div>
+    <br>
+    针对浮点数校验，由 QDoubleValidator 类实现，它常用的构造函数为：<br>
+    <div class="code">QDoubleValidator(double bottom, double top, int decimals,
+      QObject * parent = 0)</div>
+    bottom 是双精度浮点数下限，top 是上限，decimals 是指小数点后的数字位数限定（精度），parent 是父对象指针。修改 浮点数验证器上
+    下限和精 度的函数为：<br>
+    <div class="code">virtual void setRange(double minimum, double maximum, int
+      decimals = 0)</div>
+    minimum 是下限，maximum 是上限，decimals 是小数点后精度位数。<br>
+    新建浮点数验证器之后，也是通过 QLineEdit::​setValidator() 函数设置给单行编辑控件。<br>
+    设置好单行编辑控件的数据验证器之后，在用户输入数据时，单行编辑控件自动按照验证器要求，只允许用户输入合法的数据，自动限制不合法的输入。<br>
+    <br>
+    （3）正则表达式验证器<br>
+    正则表达式是最为强大的数据验证和数据筛选武器，正则表达式作为大杀器，几乎无所不能。关于正则表达式的内容有专门的书籍介绍，这里没法介绍这个大杀器。各种编程
+    语言一般都有支持正则表达式的类库，Qt 提供 QRegExp 类支持正则表达式，正则表达式的验证器类为
+    QRegExpValidator。一般是先通过字符串构建一个正则表达式：<br>
+    <div class="code">QRegExp(const QString &amp; pattern, Qt::CaseSensitivity
+      cs = Qt::CaseSensitive, PatternSyntax syntax = RegExp)</div>
+    pattern 是正则表达式字符串，cs 指是否大小写敏感，默认是敏感的，syntax 是语法格式，用默认的 RegExp，这是类似 Perl
+    语言风格的正则表达式。一般可以搜索 IPv4 格式的 Perl 或其他语言的正则表达式，拿过来用即可。<br>
+    然后根据 QRegExp 构建一个正则表达式验证器：<br>
+    <div class="code">QRegExpValidator(const QRegExp &amp; rx, QObject * parent
+      = 0)</div>
+    最后将 QRegExpValidator 对象通过函数 QLineEdit::​setValidator() 函数设置给单行编辑控件就行了。<br>
+    网上查找关于 IPv4 格式的正则表达式为：<br>
+    <div class="code">"^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}"<br>
+      "(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"</div>
+    上面正则表达式原本是一行，实在太长，拆为两行来写了。C++ 可以自动拼接字符串，因此可以按上面两行来写。<br>
+    说实话，这个挺复杂，IPv6 的更复杂，我们这小节的例子还是用 IPv4 的吧。介绍这个 IPv4 正则表达式的网页链接如下：<br>
+    <a href="https://www.safaribooksonline.com/library/view/regular-expressions-cookbook/9780596802837/ch07s16.html"
+      target="new">
+      https://www.safaribooksonline.com/library/view/regular-expressions-cookbook/9780596802837/ch07s16.html
+      </a><br> <br>
+    介绍完三类数据验证器，下面本小节的例子就是围绕 MAC、IP、Port 输入来展开的，顺便给三个单行编辑控件设置伙伴快捷键。<br>
+    重新打开 QtCreator ，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>
+    ①项目名称 netparas，创建路径 D:\QtProjects\ch05，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    建好项目之后，打开窗体 widget.ui 文件，进入设计模式，按照下图拖入控件：<br>
+    <center><img src="images/ch05/ch05-02-06.png" alt="ui" width="800"></center>
+    第一行的标签文本为 "&amp;MAC" ，单行编辑控件 objectName 为 lineEditMAC；<br>
+    第二行的标签文本为 "&amp;IP" ，单行编辑控件 objectName 为 lineEditIP；<br>
+    第三行的标签文本为 "&amp;Port" ，单行编辑控件 objectName 为 lineEditPort。<br>
+    将标签控件高度都设置为 20，这样与单行编辑控件一样高，就可以按上图调整位置，对齐所有控件了。这个例子就不弹窗了，我们跟踪三个单行编辑控件的
+    textChanged() 信号来打印实时的用户输入。<br>
+    <br>
+    标签控件里的 "&amp;" 用于设置伙伴快捷键，因为单行编辑控件没法显示自己的快捷键，所以需要通过伙伴标签控件来设置快捷键。"&amp;MAC"
+    意味着伙伴快捷键为&nbsp; Alt+M ，"&amp;IP" 快捷键就是 Alt+I ，"&amp;Port" 快捷键是 Alt+P
+    。当然，快捷键能实现的前提是设置伙伴，我们点击设计模式上面的带有橙色小块的图标，进入伙伴编辑模式：<br>
+    <center><img src="images/ch05/ch05-02-07.png" alt="buddy" width="800"></center>
+    在伙伴编辑模式，编辑伙伴关系类似在画图板画线的操作，从标签控件画线到右边的单行编辑控件即可。将三行的标签都设置为对应的单行编辑控件伙伴。设置为伙伴之后，
+    标签控件就不再显示 "&amp;" ，而是将 "&amp;" 右边第一个字母添加下划线显示，这样伙伴快捷键就设置成功了。<br>
+    <br>
+    然后我们点击窗体上方第一个“普通部件编辑模式”图标，回到普通的部件编辑模式，右击每个单行编辑控件，选择右键菜单“转到槽...”，然后为每个单行编辑控件添
+    加接收 textChanged(QString) 信号的槽函数：<br>
+    <center><img src="images/ch05/ch05-02-08.png" alt="slot"></center>
+    添加三个单行编辑控件的槽函数之后，保存界面文件。回到代码编辑模式，这时候 widget.h
+    头文件已被自动修改，这个头文件不用手动编辑的，下面只是把它的代码贴出来：<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>WIDGET_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">WIDGET_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_lineEditMAC_textChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span>arg1<span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_lineEditIP_textChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span>arg1<span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_lineEditPort_textChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span>arg1<span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre>
+    </div>
+    下面我们编辑 widget.cpp 文件的内容，添加例子的功能代码，首先是包含头文件，编辑构造函数：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QIntValidator&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QRegExp&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QRegExpValidator&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">MAC</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">输入模板</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditMAC</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setInputMask</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"HH:HH:HH:HH:HH:HH"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//定义</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">IPv4</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">正则表达式</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QRegExp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">re</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">               </span><span style=" color:#008000;">"(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//新建正则表达式验证器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QRegExpValidator</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">reVali</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QRegExpValidator</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">re</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置给</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">lineEditIP</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditIP</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setValidator</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">reVali</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//新建整数验证器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QIntValidator</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">intVali</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QIntValidator</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">0</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">65535</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置给</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">lineEditPort</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditPort</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setValidator</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">intVali</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    &lt;QIntValidator&gt; 是整数验证器的头文件，&lt;QRegExp&gt; 和 &lt;QRegExpValidator&gt;
+    是正则表达式验证器用到的头文件。<br>
+    在构造函数里，我们先用 MAC 地址单行编辑控件的 setInputMask 函数，将输入模板设置为 "HH:HH:HH:HH:HH:HH"
+    ，这样单行编辑控件就会自动根据这个模板来判断输入数据是否合法，并且会自动为用户填充冒号字符，不需要用户自己敲冒号字符了。<br>
+    <br>
+    然后定义了 IPv4 正则表达式 re，只用了一个参数，就是正则表达式的字符串形式，其他参数用默认的。<br>
+    有了正则表达式 re，然后根据 re 新建一个 reVali 验证器。<br>
+    再将正则表达式验证器设置给 ui-&gt;lineEditIP 就行了。setValidator() 函数会自动将验证器的父对象设置为该单行编辑控件，在
+    单行编辑控件销毁时，该验证器也是随之销毁，所以不用手动 delete。<br>
+    <br>
+    在构造函数末尾，端口编辑控件使用整数验证器，这个比较简单，新建一个整数验证器 intVali ，然后把验证器设置给
+    ui-&gt;lineEditPort 就搞定了。<br>
+    <br>
+    接下来是三个槽函数的代码，功能都比较简单：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_lineEditMAC_textChanged</span><span style=" color:#000000;">(</span><span
+        style=" color:#808000;">const</span><span style=" color:#c0c0c0;"> </span><span
+        style=" color:#800080;">QString</span><span style=" color:#c0c0c0;"> </span><span
+        style=" color:#000000;">&amp;</span><span style=" color:#000000;">arg1</span><span
+        style=" color:#000000;">)</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"MAC:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">arg1</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_lineEditIP_textChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#000000;">arg1</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"IP:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">arg1</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_lineEditPort_textChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#000000;">arg1</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"Port:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">arg1</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    槽函数就是打印当前实时的文本字符串 arg1，对于不同编辑控件，加了相应的前缀用于区分。<br>
+    <br>
+    这个例子代码就这么多，下面生成并运行例子看看效果：<br>
+    <center><img src="images/ch05/ch05-02-09.png" alt="run" width="800"></center>
+    程序运行时，伙伴快捷键自动生效：<br>
+    按 Alt+M ，自动切换到 MAC 地址编辑控件；<br>
+    按 Alt+I ，自动切换到 IP 地址编辑控件；<br>
+    按 Alt+P ，自动切换到端口编辑控件。<br>
+    示范的例子标签文本都是英文的，如果是中文文本，以端口为例，可以设置为 "端口(&amp;P)" ，这样快捷键也是 Alt+P。<br>
+    三个单行编辑控件的验证器功能大家自行测试，看看非法数据能否输入。<br>
+    （正常情况下，非法数据是无法输入的，也不会触发 textChanged 信号。）<br>
+    <br>
+    <div class="os2">5.2.5 单词补全</div>
+    <br>
+    在进行文本编辑时，编辑器常用的一个功能就是单词补全，比如 Linux 系统命令行里面输入命令或文件名头几个字符，然后按 Tab
+    键就会实现命令或文件名的补 全。单行编辑控件也有类似功能，通过设置单词补全器 QCompleter 实现。<br>
+    QCompleter 常用构造函数为：<br>
+    <div class="code">QCompleter(QAbstractItemModel * model, QObject * parent =
+      0)</div>
+    <div class="code">QCompleter(const QStringList &amp; list, QObject * parent
+      = 0)</div>
+    parent 是父对象指针，第一个构造函数的 model
+    是指数据条目的模型，这个在后续章节才会学习。第二个构造函数是本小节使用的，根据一个字符串列表来生成单词补全器。<br>
+    单词补全器可以设置单词是否大小写敏感，默认是敏感的，区分大小写：<br>
+    <div class="code">void setCaseSensitivity(Qt::CaseSensitivity
+      caseSensitivity)</div>
+    Qt::CaseSensitivity 枚举类型有两个枚举常量，Qt::CaseInsensitive
+    是大小写不敏感，Qt::CaseSensitive 是敏感。<br>
+    <br>
+    在用户输入单词头几个字符时，单行编辑控件可以根据单词补全器匹配相似的单词并显示出来，补全匹配的单词显示模式（CompletionMode）有三种：<br>
+    ① QCompleter::PopupCompletion，是指正常的弹出单词列表显示。<br>
+    ② QCompleter::InlineCompletion，不弹出列表，将最接近的一个单词显示到编辑框里，补全的后半截字符用选中的高亮显示。<br>
+    ③ QCompleter::UnfilteredPopupCompletion，如名字一样，把单词补全器里所有可能的单词都列出来，不做匹配筛选。<br>
+    默认情况下都是第一个 QCompleter::PopupCompletion，显示匹配筛选后的简短列表。可以通过如下函数改变补全单词的显示模式：<br>
+    <div class="code">void setCompletionMode(CompletionMode mode) </div>
+    <br>
+    弹出的单词补全列表默认不排序的，如果希望字符串列表是有序的，可以提前调用 QStringList 排序函数：<br>
+    <div class="code">void QStringList::​sort(Qt::CaseSensitivity cs =
+      Qt::CaseSensitive)</div>
+    参数 cs 指定排序时大小写是否敏感。<br>
+    <br>
+    关于单词补全器的内容先介绍这么多，以后用到模型的时候再讲关于模型的部分。生成单词补全器之后，就可以通过如下函数把补全器设置给单行编辑控件：<br>
+    <div class="code">void QLineEdit::​setCompleter(QCompleter * c)</div>
+    如果 c 是存在的补全器，那么 c 就会设置给单行编辑控件；如果 c 是 NULL，那么将会取消单行编辑控件之前的补全器，就没有单词补全了。<br>
+    <br>
+    下面开始单词补全的例子，重新打开 QtCreator，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>
+    ①项目名称 completer，创建路径 D:\QtProjects\ch05，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    建好项目之后，打开窗体 widget.ui 文件，进入设计模式，按照下图拖入控件：<br>
+    <center><img src="images/ch05/ch05-02-10.png" alt="ui" width="800"></center>
+    也是三个标签控件和三个单行编辑控件，标签控件的大小设置为宽度 80，高度 20，这样能足够显示文本，并利于对齐。<br>
+    第一行的标签文本为 "&amp;DayOfWeek"，单行编辑控件的 objectName 为 lineEditDayOfWeek。<br>
+    第二行的标签文本为 "&amp;Year"，单行编辑控件的 objectName 为 lineEditYear。<br>
+    第三行的标签文本为 "何夕(&amp;H)"，单行编辑控件的 objectName 为 lineEditHeXi。<br>
+    调整控件位置，尽量让行、列都对齐。<br>
+    <br>
+    标签文本的 "&amp;" 都是用于设置伙伴快捷键的，可以按上面小节一样的操作，设置伙伴关系：<br>
+    <center><img src="images/ch05/ch05-02-11.png" alt="buddy" width="800"></center>
+    伙伴设置好之后，"&amp;" 就变成快捷键字母的下划线，比如第三行单行编辑控件的快捷键就是 Alt+H 。<br>
+    然后回到普通部件编辑模式，为三个单行编辑控件添加接收 textChanged(QString) 信号的槽函数：<br>
+    <center><img src="images/ch05/ch05-02-12.png" alt="slot"></center>
+    三个槽函数都添加好之后，保存界面文件，回到代码编辑模式。头文件 widget.h 不需要手动修改的，按照自动生成的就可以了，下面只是把代码贴出来：<br>
+    <div class="code"><span style=" color:#000080;">#define</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#000080;">WIDGET_H</span>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_lineEditDayOfWeek_textChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span>arg1<span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_lineEditYear_textChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span>arg1<span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_lineEditHeXi_textChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span>arg1<span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre>
+    </div>
+    我们打开 widget.cpp 文件，添加需要的功能代码，首先是头文件包含和构造函数（代码里的字符串没用 tr
+    函数包裹，是因为都不做翻译，就用固定的字符串）：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QCompleter&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//星期单词列表</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QStringList</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">listDayOfWeek</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">listDayOfWeek</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#008000;">"Monday"</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#008000;">"Tuesday"</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#008000;">"Wednesday"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#008000;">"Thursday"</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#008000;">"Friday"</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#008000;">"Saturday"</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#008000;">"Sunday"</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//构建补全器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QCompleter</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">cpDayOfWeek</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QCompleter</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">listDayOfWeek</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//大小写不敏感</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">cpDayOfWeek</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setCaseSensitivity</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">Qt</span><span style=" color:#000000;">::</span><span
+style=" color:#800080;">CaseInsensitive</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置给</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">lineEditDayOfWeek</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditDayOfWeek</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setCompleter</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">cpDayOfWeek</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//年份列表</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QStringList</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">listYear</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">listYear</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#008000;">"2016"</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#008000;">"2015"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#008000;">"2008"</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#008000;">"2006"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#008000;">"1999"</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#008000;">"1991"</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//重新排序，默认是大小写敏感排序，对数字字符没影响</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">listYear</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">sort</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//构建补全器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QCompleter</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">cpYear</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QCompleter</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">listYear</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置给</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">lineEditYear</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditYear</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setCompleter</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">cpYear</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//何夕名字列表</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QStringList</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">listHeXi</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">listHeXi</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#008000;">"何百夕"</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#008000;">"何千夕"</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#008000;">"何万夕"</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#008000;">"何亿夕"</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//中文没有大小写敏感，也不要排序</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//构建补全器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QCompleter</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">cpHexi</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QCompleter</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">listHeXi</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置给</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">lineEditHeXi</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditHeXi</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setCompleter</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">cpHexi</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    &lt;QCompleter&gt; 是单词补全器的头文件。然后构造函数里针对三个单行编辑器有三段代码。<br>
+    首选是星期的单行编辑控件，定义字符串列表 listDayOfWeek，因为 QStringList 类重载了 &lt;&lt; 运算符，所以能利用
+    &lt;&lt; 运算符将多个字符串添加到列表里面。listDayOfWeek 列表就是星期一到星期日的英文字符串。<br>
+    然后根据 listDayOfWeek 构建单词补全器 cpDayOfWeek ，并设置为大小写不敏感，这样用户输入小写的星期单词时也能提示相应的字符串。<br>
+    接着将 cpDayOfWeek 设置给 ui-&gt;lineEditDayOfWeek。<br>
+    单行编辑控件的 setCompleter() 函数会自动把补全器的父对象设置为该编辑控件，在编辑控件销毁时，子对象 cpDayOfWeek
+    会随之销毁，所以不用手动 delete。<br>
+    <br>
+    第二个单行编辑控件是关于年份的，定义 listYear 字符串列表之后，为它添加了 6 个年份字符串，<br>
+    然后调用 listYear 的排序函数，将散乱的年份按照字母序进行排列，默认是大小写敏感排序。<br>
+    listYear 排序好之后，根据 listYear 构建单词补全器 cpYear ，然后把补全器设置给 ui-&gt;lineEditYear 即可。<br>
+    <br>
+    第三个单行编辑控件是接收汉字输入的，何夕是人名，先定义人名列表 listHeXi，<br>
+    将 4 个人名填充到 listHeXi 里面。中文与英文不一样，没有大小写敏感，英文排序对中文也没多大意义。<br>
+    直接根据 listHeXi 构建补全器 cpHexi ，然后把补全器设置给 ui-&gt;lineEditHeXi，这样构造函数代码就完整了。<br>
+    <br>
+    widget.cpp 文件接下来是三个槽函数的内容，我们编写打印调试输出的代码即可：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_lineEditDayOfWeek_textChanged</span><span style=" color:#000000;">(</span><span
+        style=" color:#808000;">const</span><span style=" color:#c0c0c0;"> </span><span
+        style=" color:#800080;">QString</span><span style=" color:#c0c0c0;"> </span><span
+        style=" color:#000000;">&amp;</span><span style=" color:#000000;">arg1</span><span
+        style=" color:#000000;">)</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"DayOfWeek:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">arg1</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_lineEditYear_textChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#000000;">arg1</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"Year:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#000000;">arg1</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_lineEditHeXi_textChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#000000;">arg1</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"何夕："</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">arg1</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+    </div>
+    这三个槽函数会跟踪三个编辑控件的内容变化，打印实时的字符串。<br>
+    <br>
+    例子代码就这些，下面生成运行例子，看看效果：<br>
+    <center><img src="images/ch05/ch05-02-13.png" alt="run" width="800"></center>
+    从图上可以看到除了英文和数字字符，中文字符也是可以补全的，所以 QCompleter
+    是相当好使的。等以后学到模型章节，还会介绍更多关于补全器的内容，本节内容就到这。<br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch05-01.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch05-03.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

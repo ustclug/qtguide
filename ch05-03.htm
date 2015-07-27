@@ -3,11 +3,9 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <title>ch05-03</title>
-    
-<link href="css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-
-<script src="thumbnailviewer.js" type="text/javascript">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -15,40 +13,1874 @@
 * Visit http://www.dynamicdrive.com/ for full source code
 ***********************************************/
 
-</script>
-
-
-  </head>
-  
-  
-<div class="os1">5.3 丰富文本编辑控件 </div>
-<br />
-丰富文本编辑控件 
-<br />
-<div class="os2">5.3.1 QTextEdit 类</div>
-<br />
-<br />
-<div class="os2">5.3.2 简易文本编辑器示例</div>
-<br />
-<br />
-<div class="os2">5.3.3 QTextBrowser 类</div>
-<br />
-<br />
-<div class="os2">5.3.4 简易 HTML 查看器示例</div>
-<br />
-打开本地网页，网站链接用系统浏览器。
-本地放置两个 html 和两张图片。
-<br />
-
-
-
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch05-02.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch05-04.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+</script> </head>
+  <body>
+    <div class="os1">5.3 丰富文本编辑控件 </div>
+    <br>
+    对于多行普通文本编辑，Qt 提供 QPlainTextEdit 类，对于更为复杂的丰富文本编辑，Qt 提供了 QTextEdit 类，QTextEdit
+    有一个便于浏览丰富文本的派生类 QTextBrowser，相当于是 QTextEdit
+    只读版本，并另外做了一些打开网页链接的扩展功能。QPlainTextEdit 与 QTextEdit
+    采用的技术是差不多的，只是对普通文本编辑做了优化。本节重点介绍丰富文本编辑控件 QTextEdit
+    ，学习编写一个简易的文本编辑器，然后介绍QTextBrowser 控件的扩展功能，根据 QTextBrowser 做一个简易的 HTML 查看器。<br>
+    &nbsp; <br>
+    <div class="os2">5.3.1 QTextEdit 类</div>
+    <br>
+    通过 Qt 助手可以直接索引查看到 QTextEdit 类的说明，这里讲一下帮助文档里面的内容。QTextEdit
+    是一个高级的所见即所得（WYSIWYG）浏览器/编辑器，支持丰富文本格式，类似 HTML 风格的标记。它被优化用于编辑大型文档和快速相应用户的输入。<br>
+    <br>
+    QTextEdit 基于段落和字符工作，段落是格式化的字符串，一般以换行符作为段落分隔标志，比如 C++ 字符串的 "\r\n" ，HTML 语言的
+    "&lt;br&gt;" 。QTextEdit
+    显示段落内部的文本时，会自动根据控件宽度，将段落内的长文本根据单词间隔进行自动换行（word-wrapped），类似 Windows
+    记事本里的自动换行功 能。<br>
+    <br>
+    QTextEdit 内部使用 QTextDocument 类管理文档，一篇文档可以有 0
+    个或多个段落组成，文本的对齐模式由其所属的段落对齐模式确定。对于段落内的文本字符，又可以有自己的字符格式，比如加粗、倾斜、字体、文字颜色、文字背景色等等。段落仅
+    仅是对文档组成部分的分隔和形容，并没有对应的 Qt
+    类。实际上编辑器内使用文本光标表示当前编辑位置，通常根据光标指示位置来编辑文本，文本光标是有具体的类，即 QTextCursor。<br>
+    <br>
+    需要注意的是，QTextEdit 不仅仅是一个编辑控件，更大程度上它是一个比较完备而又复杂的视图 + 文档体系，如下图所示：<br>
+    <center><img src="images/ch05/ch05-03-01.png" alt="textedit"></center>
+    基于 QTextEdit 可以开发出一个功能完备的丰富文本编辑程序，上图就是Qt 库自带编辑器主窗口程序例子，位于
+    C:\Qt\Qt5.4.0\Examples\Qt-5.4\widgets\richtext\textedit，感兴趣的读者可以提前去看看，以后还会专门讲这个复
+    杂例子，本节主要介绍简单的功能。<br>
+    <br>
+    QTextEdit 可以显示图片、列表和表格，如果文档太大，QTextEdit 自带滚动条，可以显示很多页的文档。QTextEdit
+    既可以编辑普通文本（plain text），也可以编辑丰富文本（rich text）。QTextEdit 支持的丰富文本格式是 HTML 4
+    标记语言的一个子集，在 Qt 助手里索引 Supported HTML Subset，可以查看具体支持哪些标记。<br>
+    <br>
+    因为 QTextEdit 和 QTextBrowser 都是仅支持 HTML 4 标记语言的子集，对于网页显示功能是不完备的，如果需要真正的网页浏览器功
+    能，那么建议使用更为强大的 Qt WebKit，在 Qt 助手索引里输入 Qt WebKit Widgets ，可以查看相应的文档。<br>
+    <br>
+    QTextEdit 同时具有两大功能，既可以作为显示控件使用，也可以作为丰富文本编辑器使用。QTextEdit
+    这两种用途是同时具备的，不需要什么设置，下面介绍仅仅是从函数功能分类来讲，在作为显示用途时，编辑器方面的函数管用，作为编辑器用途时，显示用的函数也是管用
+    的。<br>
+    <br>
+    作为显示控件时，可以使用三个函数设置需要显示的文本：<br>
+    <div class="code">void setHtml(const QString &amp; text) </div>
+    <div class="code">void setPlainText(const QString &amp; text)</div>
+    <div class="code">void setText(const QString &amp; text)</div>
+    setHtml() 函数用于设置显示丰富的 HTML 网页文本，setPlainText() 函数用于设置显示普通的无格式文本。setText()
+    函数是通用的槽函数，它自动根据 text 内容猜测文本是不是 HTML 标记语言的，如果是 HTML
+    文本就显示丰富文本，如果不是那就当作普通无格式的文本显示。<br>
+    <br>
+    段落内的文本默认是根据控件宽度自动换行的，这样就不会用到水平的滚动条。对于长文本，如果不希望自动换行，那么可用 setLineWrapMode()
+    函数改变自动换行的特性，枚举常量 QTextEdit::NoWrap
+    就是不自动换行。如果是不自动换行，那么长的文本会导致水平滚动条显现，可以通过拖动水平滚动条查看长文本。另外，QTextEdit 自带查找函数
+    find() ，可以查找并高亮显示相应的文本。<br>
+    <br>
+    QTextEdit 作为编辑器使用时，常规的复制、粘贴、剪切、撤销、重做等功能毫无疑问都是默认支持的，不要编写额外代码，QTextEdit
+    自己就有这些完备的功能，右击它就能看到对应的编辑菜单。对于光标指示的当前文本字符，可以通过函数设置丰富的文本格式，下面列一个简表：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 200px;" align="center"><b>槽函数</b></td>
+          <td style="width: 474px;" align="center"> 描述 </td>
+        </tr>
+        <tr>
+          <td><b>setFontItalic(bool)</b></td>
+          <td> 设置斜体字。 </td>
+        </tr>
+        <tr class="d1">
+          <td><b>setFontWeight(int)</b></td>
+          <td> 设置粗体字。 </td>
+        </tr>
+        <tr>
+          <td><b>setFontUnderline(bool)</b></td>
+          <td> 设置文字下划线。 </td>
+        </tr>
+        <tr class="d1">
+          <td><b>setFontFamily(QString)</b></td>
+          <td> 设置字体家族，如 "宋体"、"黑体"、"文泉驿黑体"。 </td>
+        </tr>
+        <tr>
+          <td><b>setFontPointSize(qreal)</b></td>
+          <td> 设置字号大小，如 9，12，16，48 等 。 </td>
+        </tr>
+        <tr class="d1">
+          <td><b>setTextColor(QColor)</b></td>
+          <td> 设置文字颜色。 </td>
+        </tr>
+        <tr>
+          <td><b>setTextBackgroundColor(QColor)</b></td>
+          <td> 设置文字背景色 。 </td>
+        </tr>
+        <tr class="d1">
+          <td><b>setCurrentFont(QFont)</b></td>
+          <td> 设置综合字体格式，QFont 类封装了上面所有格式。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    需要注意的是 setFontFamily(QString) 设置的才是如 "宋体"、"黑体"、"文泉驿黑体" 等字体家族，而
+    setCurrentFont(QFont) 是设置所有的综合字体，QFont 涵盖文字字符的所有格式，之前的斜体、粗体、字体家族、字体颜色等等，全包含在
+    QFont 内部。如果只希望设置某一方面的字体特性，可以用前面散装的快捷函数如
+    setFontItalic(bool)、setFontWeight(bool) 等，如果希望设置文本所有的综合字体格式，那么用最后的
+    setCurrentFont(QFont)。<br>
+    上面设置字体格式的函数全是槽函数，因此可以直接与其他控件的状态信号关联，比如列举字体家族的控件 QFontComboBox 的信号 <br>
+    <div class="code">void QFontComboBox::currentIndexChanged(const QString
+      &amp; text)</div>
+    可以直接关联到 setFontFamily(QString) 槽函数。<br>
+    <br>
+    除了文本字符本身的格式，段落对齐是采用另外的槽函数：<br>
+    <div class="code">void QTextEdit::​setAlignment(Qt::Alignment a)</div>
+    <br>
+    上面的字体设置函数影响的就是文本光标指示的单词或高亮选中的文本。光标和高亮选中的文本通过 QTextCursor
+    类管理，针对选中的文本，可以获取该文本片段的字体格式，也可以进行复制、粘贴、剪切、删除等操作。获取当前的光标对象使用函数：<br>
+    <div class="code">QTextCursor QTextEdit::​textCursor() const</div>
+    因为文档里不同文字有各种各样的格式，当光标指向某个单词或选中文本片段时，会触发当前字符格式变化的信号：<br>
+    <div class="code">void QTextEdit::​currentCharFormatChanged(const
+      QTextCharFormat &amp; f)</div>
+    QTextCharFormat 与 QFont 不是继承关系，QTextCharFormat 内部包含有 QFont
+    成员变量，QTextCharFormat 与 QFont 有类似的各种字体格式函数，但 QTextCharFormat
+    更为强大，包含的更多的细节设置，比如文字在垂直方向的对齐。从 ​currentCharFormatChanged()
+    信号的参数里，可以提取当前选中的文本片段的各种字体格式，从而实时感知文档内部不同文本片段的丰富格式。与这个信号对应的设置函数是：<br>
+    <div class="code">void QTextEdit::​setCurrentCharFormat(const
+      QTextCharFormat &amp; format)</div>
+    但是 ​setCurrentCharFormat
+    不是槽函数，仅仅是公有成员函数。设置字体格式一般用之前列表里的多个快捷函数来设置。用户编辑文本时，新增加的文本也是根据
+    currentCharFormat 自动设置的。<br>
+    <br>
+    当 QTextEdit 内文本内容发生变化时，不论是用户手动增删还是快捷函数改变字体，都会触发文本变化信号：<br>
+    <div class="code">void QTextEdit::​textChanged()</div>
+    这个信号没有带文本参数，需要用其他公有函数获取文本，获取完整的丰富文本的函数为：<br>
+    <div class="code">QString QTextEdit::toHtml() const</div>
+    获取无格式的普通文本的函数为：<br>
+    <div class="code">QString QTextEdit::toPlainText() const</div>
+    <br>
+    关于 QTextEdit 类的介绍暂时讲这么多，以后主窗口程序章节会专门讲 Qt
+    自带的丰富文本编辑器例子，到时候介绍更多的内容。接下来示范一个简化版的文本编辑器例子，可能丑陋了点，主要学习一下感知文本格式的变化和通过按钮修改选中文本的格式。<br>
+    <br>
+    <div class="os2">5.3.2 简易文本编辑器示例</div>
+    <br>
+    因为暂时还没学到用图标，我们这节先用文字按钮来表示字体格式。我们在按钮一节讲过单选按钮和复选框有选中状态和非选中状态等，普通的按压按钮也是可以有两种状态
+    的，通过基类 QAbstractButton 函数可以设置按压按钮的两种状态（Qt 设计师界面选中按钮，在右下角属性编辑器选中 checkable
+    属性也可以）：<br>
+    <div class="code">void setCheckable(bool)</div>
+    <br>
+    二态按压按钮按下去之后不会自动弹起，按下去的状态就是 true，处于弹起状态就是 false。<br>
+    二态按压按钮的当前状态也可以通过 isChecked() 函数获取，或者在关联信号时，选择如下两个信号之一：<br>
+    <div class="code">void ​QAbstractButton::clicked(bool)</div>
+    <div class="code">void QAbstractButton::toggled(bool)</div>
+    信号 clicked(bool) 只在图形界面用户点击按钮时才触发，如果通过程序代码调用函数
+    setDown()、setChecked()、toggle() 改变按钮状态，不会触发 clicked(bool) 信号。<br>
+    而第二个信号 toggled(bool) 无论是用户点击改变，还是程序调用函数来改变，都会触发 toggled(bool) 信号。<br>
+    <br>
+    对于文本字体格式的粗体、斜体、下划线等，也是 bool
+    类型的两种状态，例子中就用二态按压按钮来表示。文本格式的按钮有两种用途，一是根据文档内光标移动，智能感知不同文本片段的格式变化，即接收
+    QTextEdit::​currentCharFormatChanged<em></em>(QTextCharFormat)
+    信号；二是选中一段文本，点击格式按钮会修改选中文本的格式，即接收 QAbstractButton::clicked(bool)
+    信号。介绍完基本的知识，下面开始这个简易编辑器例子学习。<br>
+    <br>
+    打开 QtCreator，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>
+    ①项目名称 simpleeditor，创建路径 D:\QtProjects\ch05，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    建好项目之后，打开窗体 widget.ui 文件，进入设计模式，把窗体大小设为 410*300，就是拉宽 10 像素，按照下图拖入控件：<br>
+    <center><img src="images/ch05/ch05-03-02.png" alt="ui" width="800"></center>
+    上图第一行是 5 个按压按钮，默认大小 75*23，按钮文本就如图上所示的设置， 5 个按钮的 objectName 依次为：<br>
+    pushButtonBold、pushButtonItalic、pushButtonUnderline、pushButtonColor、
+    pushButtonBGColor。<br>
+    <br>
+    第二行控件依次是 1 个标签，文本 "字号"；1 个单行编辑控件，objectName 为 lineEditFontSize；<br>
+    1个标签，文本 "字体"；1 个 Font Combo Box，objectName 为 fontComboBox，这个控件会自动枚举系统里的字体家族。<br>
+    第二行的控件高度统一为 22，方便对齐，控件长度可以用默认的，或者手动调整一下。<br>
+    <br>
+    第三行，就是占面积最大的 QTextEdit ，丰富文本编辑控件，objectName 为默认的 textEdit。<br>
+    注意调整各个控件的位置，看起来和上图类似对齐的就行了。<br>
+    <br>
+    先说一下界面的用途，第一行的 5 个按钮加上第二行的 单行编辑控件、字体枚举组合框，共 7 个，对应上面小节表格中前 7 个快捷函数，表格中最后一个综合
+    字体函数例子没用上。<br>
+    "粗体"、"斜体"、"下划线" 3 个用于二态按钮显示，等会会在代码里面设置为二态按钮。<br>
+    "前景色" 和 "背景色" 按钮会弹出颜色选取对话框，用户选择颜色后，会影响丰富文本编辑控件里选中的文本片段颜色。<br>
+    字号编辑控件和字体家族枚举组合框也是类似的，影响丰富文本编辑控件里选中的字体大小和家族。<br>
+    <br>
+    界面就是图上的那些，下面要为界面实现功能代码。我们要从 QtCreator 设计模式为各个控件的添加槽函数。<br>
+    ① 为 "粗体"、"斜体"、"下划线" 3 个二态按钮都添加 clicked(bool) 信号对应的槽函数：<br>
+    <center><img src="images/ch05/ch05-03-03.png" alt="slot1" width="600"></center>
+    ② 为 "前景色"、"背景色" 两个普通按钮添加普通的 clicked() 信号对应的槽函数：<br>
+    <center><img src="images/ch05/ch05-03-04.png" alt="slot2" width="600"></center>
+    ③ 为字号单行编辑控件添加完成编辑的信号 editingFinished() 对应的槽函数：<br>
+    <center><img src="images/ch05/ch05-03-05.png" alt="slot3" width="600"></center>
+    editingFinished() 信号会在单行编辑控件失去输入焦点，或者用户在单行编辑控件里按回车键时触发。<br>
+    另外，字体枚举组合框不需要我们添加槽函数，等会在代码里直接调用 connect 函数。<br>
+    ④ 为丰富文本编辑控件添加感应文字格式变化的信号 ​currentCharFormatChanged(QTextCharFormat) 对应的槽函数：<br>
+    <center><img src="images/ch05/ch05-03-06.png" alt="slot4" width="600"></center>
+    ⑤ 再为丰富文本编辑控件添加文本内容发生变化的时信号 textChanged() 对应的槽函数：<br>
+    <center><img src="images/ch05/ch05-03-07.png" alt="slot5" width="600"></center>
+    添加好上述控件信号对应的槽函数之后，保存界面文件，然后进入 QtCreator 代码编辑模式，编写需要的功能代码。<br>
+    我们打开头文件 widget.h ，为头文件添加一行包含：<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>WIDGET_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">WIDGET_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QTextCharFormat&gt;</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#008000;">//文本格式类</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonBold_clicked</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">bool</span><span style=" color:#c0c0c0;"> </span>checked<span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonItalic_clicked</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">bool</span><span style=" color:#c0c0c0;"> </span>checked<span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonUnderline_clicked</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">bool</span><span style=" color:#c0c0c0;"> </span>checked<span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonColor_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonBGColor_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_lineEditFontSize_editingFinished</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_textEdit_currentCharFormatChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QTextCharFormat</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span>format<span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_textEdit_textChanged</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre>
+    </div>
+    &lt;QTextCharFormat&gt; 是实时感知到的文本片段格式，on_textEdit_currentCharFormatChanged
+    槽函数用到它，因此需要提前包含该头文件。<br>
+    widget.h 其他代码都是自动生成的，不需要更改。<br>
+    <br>
+    接下来编辑源文件 widget.cpp ，添加例子需要的功能代码，首先是头文件包含和构造函数里的代码：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QIntValidator&gt;</span><span style=" color:#c0c0c0;">    </span><span
+style=" color:#008000;">//整数验证器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QFont&gt;</span><span style=" color:#c0c0c0;">            </span><span
+style=" color:#008000;">//综合字体格式</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QColorDialog&gt;</span><span style=" color:#c0c0c0;">     </span><span
+style=" color:#008000;">//用于选取前景色和背景色</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QBrush&gt;</span><span style=" color:#c0c0c0;">           </span><span
+style=" color:#008000;">//颜色画刷</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置二态按钮</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonBold</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setCheckable</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">true</span><span style=" color:#000000;">);</span><span
+style=" color:#c0c0c0;">     </span><span style=" color:#008000;">//粗体</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonItalic</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setCheckable</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">true</span><span style=" color:#000000;">);</span><span
+style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//斜体</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonUnderline</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setCheckable</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">true</span><span style=" color:#000000;">);</span><span
+style=" color:#008000;">//下划线</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//字号原本是浮点数，这里简化为整数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//字体点阵大小，这里设置下限</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">0，上限</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">72</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//0</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">不是没有字号，是不确定字号多大</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QIntValidator</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">vali</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QIntValidator</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">0</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">72</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditFontSize</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setValidator</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">vali</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//默认显示字号</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">9</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">pt</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditFontSize</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">""</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">setNum</span><span style=" color:#000000;">(</span><span
+style=" color:#000080;">9</span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//字体家族设置，直接关联组合框的信号到编辑框槽函数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">connect</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">fontComboBox</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SIGNAL</span><span
+style=" color:#000000;">(</span>currentIndexChanged<span style=" color:#000000;">(</span><span
+style=" color:#800080;">QString</span><span style=" color:#000000;">)),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textEdit</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SLOT</span><span
+style=" color:#000000;">(</span>setFontFamily<span style=" color:#000000;">(</span><span
+style=" color:#800080;">QString</span><span style=" color:#000000;">)));</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//丰富文本编辑框初始内容</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textEdit</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setHtml</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"&lt;b&gt;粗体字的行&lt;br&gt;&lt;/b&gt;"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                          </span><span style=" color:#008000;">"&lt;i&gt;斜体字的行&lt;br&gt;&lt;/i&gt;"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                          </span><span style=" color:#008000;">"&lt;u&gt;下划线的行&lt;br&gt;&lt;/u&gt;"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                          </span><span style=" color:#008000;">"&lt;font</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">style=\"color:red;\"&gt;文本前景色&lt;br&gt;&lt;/font&gt;"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                          </span><span style=" color:#008000;">"&lt;font</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">style=\"background:yellow;\"&gt;文字背景色&lt;br&gt;&lt;/font&gt;"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                          </span><span style=" color:#008000;">"&lt;font</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">style=\"font-size:18pt;\"&gt;字号大小变化的行&lt;br&gt;&lt;/font&gt;"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                          </span><span style=" color:#008000;">"&lt;font</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">style=\"font-family:黑体;\"&gt;字体家族变化的行&lt;br&gt;&lt;/font&gt;"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                          </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//html</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">字号有</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">pt(PointSize)</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">和</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">px(PixelSize)</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">两种形式，例子代码适用于</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">pt</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//通常</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">1</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">英寸</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">==</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">72pt(点)</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">==</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">96px</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">(像素)，网页中最常用到的：9pt</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">==</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">12px</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    &lt;QIntValidator&gt; 包含整数验证器类，用于限定字号的范围。<br>
+    &lt;QFont&gt; 包含综合字体格式类，用于感知或设置文本格式。<br>
+    &lt;QColorDialog&gt; 包含颜色设置对话框，提供给用户选取文字前景色或者背景色。<br>
+    &lt;QBrush&gt; 包含画刷类，在进行颜色感知时，需要通过前景色画刷和背景色画刷来感知。<br>
+    <br>
+    在构造函数里，首先是 3 个二态按钮的设置，通过调用 setCheckable(true) ，将普通按压按钮变成我们需要的二态按钮。<br>
+    <br>
+    接下来是字号设置单行编辑控件的代码，新建的整数验证器 vali ，限定字号从 0 到 72 。这里的 0
+    号大小的字，是指不知道字体大小的情况，不是没有字。然后将单行编辑控件初始显示的数字字符设置为 9。<br>
+    <br>
+    接下来是关于字体枚举组合框 ui-&gt;fontComboBox 的信号关联，字体枚举组合框的
+    currentIndexChanged(QString) 信号会在字体家族变化时发出，参数就是字体家族的名字字符串。这个信号直接由丰富文本编辑控件的
+    setFontFamily(QString) 槽函数接收。字体组合框的用途就是枚举系统里的字体供用户挑选，选中的文本变化就发送
+    currentIndexChanged(QString) 信号。字体组合框基类是普通组合框
+    QComboBox，这个下一节还会再讲普通组合框。本节学会构造函数里的 connect 就够了。<br>
+    <br>
+    构造函数最后部分是通过丰富文本编辑控件的 setHtml() 设置初始显示的丰富文本。这段 HTML 文本总共 7 行：<br>
+    第 1 行粗体字，第 2 行是斜体字，第 3 行是文字下划线，第 4 行是红色文字，<br>
+    第 5 行是黄色背景的文字，第 6 行是 18 号点阵大小的文字，第 7 行是黑体的文字。<br>
+    HTML 字符串里的反斜杠 \ 是 C++ 字符串里的转义字符，用于输入其后紧随的双引号 " ，<br>
+    例子中实际的 HTML 代码没有反斜杠，只有双引号。<br>
+    <br>
+    这里解释一下关于 HTML 字号大小的两种形式，一种是以 pt 为单位（点，PointSize），另一种以 px 为单位（像素，PixelSize）。<br>
+    pt 和 px 意义不同，pt 点阵是屏幕尺寸划分的度量单元，而像素是屏幕的物理发光单元，一般情况下对应公式为：<br>
+    <div class="code">1 英寸 == 72pt(点) == 96px (像素)</div>
+    按照这个公式，9 pt 对应 12 px。<br>
+    1 英寸等于 72 pt 这个公式是恒成立的，而屏幕像素的对应关系是可以变的。<br>
+    1 英寸 96 像素是一般的桌面操作系统里对应关系，这个是可以修改的，通过网页搜索“DPI设置” 就可以查到修改方法。<br>
+    例子里面的字号大小都是指 pt。<br>
+    <br>
+    构造函数代码介绍完了，下面来看看 3 个二态按钮的槽函数代码：<br>
+    <div class="code"><span style=" color:#008000;">//粗体</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonBold_clicked</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">bool</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">checked</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">checked</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textEdit</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setFontWeight</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QFont</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Bold</span><span
+style=" color:#000000;">);</span><span style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//粗体</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">else</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textEdit</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setFontWeight</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QFont</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Normal</span><span
+style=" color:#000000;">);</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//普通</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//斜体</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonItalic_clicked</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">bool</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">checked</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textEdit</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setFontItalic</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">checked</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//下划线</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonUnderline_clicked</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">bool</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">checked</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textEdit</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setFontUnderline</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">checked</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    QTextEdit 类的快捷函数里面，没有直接根据 bool参数设置 Bold 粗体的函数，而是通过 int 参数的 setFontWeight()
+    函数。<br>
+    所以需要根据 checked 参数判断应该是设置粗体 QFont::Bold 还是普通字体 QFont::Normal。<br>
+    关于字体笔画权重 FontWeight，还有其他枚举常量，只是不常用，一般只用到例子里的两个枚举常量。<br>
+    斜体设置和下划线设置的槽函数就很简单了，直接调用丰富文本编辑控件的槽函数即可。<br>
+    这些设置函数会自动对丰富文本编辑控件里选中的文本生效，而不要通过 QTextEdit 内部的文档或光标来操作，<br>
+    那是因为我们的例子比较简单，只用到了 QTextEdit 封装好的快捷函数。<br>
+    <br>
+    接下来编写设置文字前景色和背景色的槽函数：<br>
+    <div class="code"><span style=" color:#008000;">//文字前景色设置</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonColor_clicked</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QColor</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">clr</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QColorDialog</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">getColor</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">Qt</span><span style=" color:#000000;">::</span><span
+style=" color:#800080;">black</span><span style=" color:#000000;">);</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//默认是黑色文字</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">clr</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">isValid</span><span style=" color:#000000;">())</span><span
+style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//如果用户选了颜色</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textEdit</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setTextColor</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">clr</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//同步设置该按钮的前景色</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strSS</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"color:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%1"</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#000000;">clr</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">name</span><span style=" color:#000000;">());</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonColor</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setStyleSheet</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strSS</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//文字背景色设置</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonBGColor_clicked</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QColor</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">bgclr</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QColorDialog</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">getColor</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">Qt</span><span style=" color:#000000;">::</span><span style=" color:#800080;">white</span><span
+style=" color:#000000;">);</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//用白色背景</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">bgclr</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isValid</span><span
+style=" color:#000000;">())</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//如果用户选了颜色</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textEdit</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setTextBackgroundColor</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">bgclr</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//同步设置该按钮的背景色</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strSSBG</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"background:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%1"</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#000000;">bgclr</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">name</span><span style=" color:#000000;">());</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonBGColor</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setStyleSheet</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strSSBG</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    这两个函数代码结构是一样的，只是设置前景色和背景色的函数、以及按钮的 Qt Style Sheet 代码稍微有区别。我们以设置文字前景色的函数为例讲解。<br>
+    QColorDialog 是专门用于获取颜色的对话框，可以通过定义对话框实例的方式使用，或者用静态函数：<br>
+    <div class="code">QColor getColor(const QColor &amp; initial = Qt::white,
+      QWidget * parent = 0, const QString &amp; title = QString(),
+      ColorDialogOptions options = 0)</div>
+    这个静态函数自动弹出颜色对话框，提供给用户取色，然后返回一个 QColor
+    对象。如果用户选取了颜色（用户点击确定按钮），那么返回对象是可用的，否则返回的颜色对象处于不可用状态（用户点击取消按钮）。可以用颜色对象的函数
+    isValid()&nbsp; 获知返回值的状态。<br>
+    QColorDialog 的静态函数 getColor 有多个参数，第一个 initial 是颜色对话框里取色的初始值，第二个是父窗口指针，<br>
+    第三格式颜色对话框的标题字符串，第四个是颜色对话框的选项。一般可以不填参数或者只填初始颜色值，其他的可以不管。<br>
+    <br>
+    例子中 on_pushButtonColor_clicked() 函数获取颜色 clr 之后，先通过 clr.isValid()
+    函数判断，如果用户选择了可用的颜色，那就执行相关代码，如果没有可用颜色，那就啥都不干。<br>
+    <br>
+    对于有可用颜色的情况，先设置 QTextEdit 对象的文字颜色，通过 setTextColor() 函数即可。<br>
+    另外，对界面的 "前景色" 按钮做了颜色同步，就是设置该按钮的样式表字符串 setStyleSheet() 。<br>
+    QColor 类有获取颜色名的函数 name() ，可以很方便地取得颜色的 HTML/CSS 名称，比如 "#00FF00"，这个颜色名称对 Qt
+    Style Sheet 也是一样的。因此可以很方便地构造前景色的 QSS 字符串 tr("color: %1").arg(clr.name()) 。这里
+    tr() 函数不是拿来做翻译，就是封装为 QString 而已。<br>
+    <br>
+    对于设置背景色的槽函数，代码结构是类似的，只不过通过 setTextBackgroundColor() 函数设置丰富文本的背景色，<br>
+    而按钮的背景色 QSS 是 tr("background: %1").arg(bgclr.name()) 。<br>
+    <br>
+    接下来是关于字号大小设置的槽函数：<br>
+    <div class="code"><span style=" color:#008000;">//字号修改好了，设置选中文本的字号</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_lineEditFontSize_editingFinished</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nFontSize</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditFontSize</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">().</span><span
+style=" color:#000000;">toInt</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置字号</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textEdit</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setFontPointSize</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nFontSize</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    我们将编辑框里的字符串转换为 int 数值，然后设置丰富文本编辑控件的点阵大小即可。因为关联的 editingFinished()
+    信号，在图形界面修改字号时，按一下回车键或者输入焦点离开单行编辑控件时才会触发编辑完成的信号。<br>
+    <br>
+    对于枚举字体家族的组合框，我们没有额外添加对应的槽函数，而是在构造函数里直接调用了 connect 函数，省了许多事。<br>
+    <br>
+    以上的函数都是对丰富文本编辑控件里选中内容进行格式编辑修改的槽函数，并没有实时感知功能。下面来看看丰富文本编辑控件的文本字符格式感知信号对应的槽函数：<br>
+    <div class="code"><span style=" color:#008000;">//根据光标位置或选中文本感知字体格式</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_textEdit_currentCharFormatChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QTextCharFormat</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#000000;">format</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//粗体检测</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">format</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">fontWeight</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">==</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QFont</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Bold</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonBold</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setChecked</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">true</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">else</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonBold</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setChecked</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">false</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//斜体检测</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonItalic</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setChecked</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">format</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">fontItalic</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//下划线检测</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonUnderline</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setChecked</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">format</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">fontUnderline</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//文字前景色画刷，不一定有</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QBrush</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">brushText</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">format</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">foreground</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">brushText</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Qt</span><span style=" color:#000000;">::</span><span style=" color:#800080;">NoBrush</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span><span style=" color:#008000;">//有前景色画刷</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QColor</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">clrText</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">brushText</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">color</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strSS</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"color:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%1"</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">clrText</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">name</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonColor</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setStyleSheet</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strSS</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">else</span><span
+style=" color:#008000;">//没有前景色画刷</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">Qt::NoBrush</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonColor</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setStyleSheet</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">""</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//文字背景画刷，不一定有</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QBrush</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">brushBG</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">format</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">background</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">brushBG</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Qt</span><span style=" color:#000000;">::</span><span style=" color:#800080;">NoBrush</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span><span style=" color:#008000;">//有背景色画刷</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QColor</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">clrBG</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">brushBG</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">color</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strSSBG</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"background:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%1"</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#000000;">clrBG</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">name</span><span style=" color:#000000;">());</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonBGColor</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setStyleSheet</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strSSBG</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">else</span><span
+style=" color:#008000;">//没背景画刷</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">Qt::NoBrush</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonBGColor</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setStyleSheet</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">""</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//对于字号和字体家族检测，一定要用</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">QFont</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">的函数，不要用</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">QTextCharFormat</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">的函数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//QTextCharFormat</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">的字号和字体家族函数不准，经常为</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">0</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">或空串</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QFont</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">curFont</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">format</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">font</span><span style=" color:#000000;">();</span><span
+style=" color:#c0c0c0;">      </span><span style=" color:#008000;">//获取</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">QFont</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">成员</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nFontSize</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">curFont</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">pointSize</span><span style=" color:#000000;">();</span><span
+style=" color:#008000;">//字号检测</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//如果是</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">px</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">形式，</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">QFont::​pointSize()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">函数返回</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">-1</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">-</span><span
+style=" color:#000080;">1</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">==</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nFontSize</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//如果</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">pt</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">是</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">-1，是</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">px</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">格式</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//如果是</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">px</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">，换算成</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">pt</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">nFontSize</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#000000;">)(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">curFont</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">pixelSize</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">9.0</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">/</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">12.0</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditFontSize</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">""</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">setNum</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">nFontSize</span><span style=" color:#000000;">)</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//字体家族检测</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strFontFamily</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">curFont</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">family</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">fontComboBox</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setCurrentText</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strFontFamily</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    之前设置文本格式是六个槽函数和一句 connect 调用，而根据光标位置或选中文本感知字体格式，只用了这一个函数，所以这个函数代码会复杂一些。我们对这个
+    函数拆成三小块来讲解，首先是函数头和二态按钮的：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_textEdit_currentCharFormatChanged</span><span
+        style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QTextCharFormat</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+        style=" color:#000000;">format</span><span style=" color:#000000;">)</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//粗体检测</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">format</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">fontWeight</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">==</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QFont</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Bold</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonBold</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setChecked</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">true</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">else</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonBold</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setChecked</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">false</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//斜体检测</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonItalic</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setChecked</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">format</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">fontItalic</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//下划线检测</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonUnderline</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setChecked</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">format</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">fontUnderline</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+    </div>
+    函数参数里的 format 就是光标当前指向的位置或选中的文本片段的格式信息。<br>
+    通过 format.fontWeight() 来判断字体格式是否为粗体 QFont::Bold，如果是粗体就同步设置 "粗体" 按钮的状态为
+    true，否则为 false。<br>
+    通过 format.fontItalic() 来判断斜体状态，同步设置 "斜体" 按钮的状态。<br>
+    通过 format.fontUnderline() 来判断是否有下划线，同步设置 "下划线" 按钮的状态。<br>
+    <br>
+    然后是关于获取文字前景色和背景色的代码段：<br>
+    <div class="code"><span style=" color:#c0c0c0;">&nbsp;&nbsp;&nbsp; </span><span
+        style=" color:#008000;">//文字前景色画刷，不一定有</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QBrush</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">brushText</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">format</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">foreground</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">brushText</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Qt</span><span style=" color:#000000;">::</span><span style=" color:#800080;">NoBrush</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span><span style=" color:#008000;">//有前景色画刷</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QColor</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">clrText</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">brushText</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">color</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strSS</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"color:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%1"</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">clrText</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">name</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonColor</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setStyleSheet</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strSS</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">else</span><span
+style=" color:#008000;">//没有前景色画刷</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">Qt::NoBrush</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonColor</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setStyleSheet</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">""</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//文字背景画刷，不一定有</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QBrush</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">brushBG</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">format</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">background</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">brushBG</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Qt</span><span style=" color:#000000;">::</span><span style=" color:#800080;">NoBrush</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span><span style=" color:#008000;">//有背景色画刷</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QColor</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">clrBG</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">brushBG</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">color</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strSSBG</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"background:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%1"</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#000000;">clrBG</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">name</span><span style=" color:#000000;">());</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonBGColor</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setStyleSheet</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strSSBG</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">else</span><span
+style=" color:#008000;">//没背景画刷</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">Qt::NoBrush</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonBGColor</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setStyleSheet</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">""</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+    </div>
+    format 对象里面没有直接获取颜色的函数，先获取画刷，然后根据画刷来判断前景色或背景色。<br>
+    获取前景色画刷函数为
+    format.foreground()，前景色画刷一般用于描绘文字和线条。因为文本有可能是无格式的普通文本，对于这些无格式普通文本，前景色画刷和背景色画刷其实都
+    是没有的，用的是默认的黑色字，没有背景色。因此需要判断画刷是否为 Qt::NoBrush。<br>
+    如果不是 Qt::NoBrush，那么获取前景色的颜色，然后同步设置按钮的 QSS。<br>
+    如果画刷是 Qt::NoBrush，那么把按钮的 QSS 设置为空串。<br>
+    获取背景色画刷函数为 format.background()，同步按钮颜色的代码与前景色是类似的。<br>
+    <br>
+    感知函数第三块代码是字号大小检测和字体家族检测的代码：<br>
+    <div class="code"><span style=" color:#c0c0c0;">&nbsp;&nbsp;&nbsp; </span><span
+        style=" color:#008000;">//对于字号和字体家族检测，一定要用</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">QFont</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">的函数，不要用</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">QTextCharFormat</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">的函数</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//QTextCharFormat</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">的字号和字体家族函数不准，经常为</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">0</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">或空串</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QFont</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">curFont</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">format</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">font</span><span style=" color:#000000;">();</span><span
+style=" color:#c0c0c0;">      </span><span style=" color:#008000;">//获取</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">QFont</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">成员</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nFontSize</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">curFont</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">pointSize</span><span style=" color:#000000;">();</span><span
+style=" color:#008000;">//字号检测</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//如果是</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">px</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">形式，</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">QFont::​pointSize()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">函数返回</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">-1</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">-</span><span
+style=" color:#000080;">1</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">==</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nFontSize</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//如果</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">pt</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">是</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">-1，是</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">px</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">格式</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//如果是</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">px</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">，换算成</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">pt</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">nFontSize</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#000000;">)(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">curFont</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">pixelSize</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">9.0</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">/</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">12.0</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditFontSize</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">""</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">setNum</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">nFontSize</span><span style=" color:#000000;">)</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//字体家族检测</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strFontFamily</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">curFont</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">family</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">fontComboBox</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setCurrentText</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strFontFamily</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    虽然 QTextCharFormat 类有关于字号和字体家族的获取函数 fontPointSize() 和
+    fontFamily()，但是不太好使，比如无格式的普通文本，这两个函数一个返回
+    0，另一个返回空串。如果要获知真实的字体大小和字号，应该先获取当前综合字体对象 format.font()。通过 QFont 函数来获知字号大小和字体家
+    族。<br>
+    <br>
+    获取当前综合字体 curFont 之后，可以用 curFont.pointSize() 获取字号正确的 pt 大小。<br>
+    QFont::pointSize() 有一个例外情况是，如果 HTML 字号用像素 px 表示，那么会返回 -1。因此需要判断一下返回值。<br>
+    如果返回值是 -1，那么把 px 数值做个简单转换，变成 pt 的数值。<br>
+    然后设置字号单行编辑控件的数字字符串。<br>
+    <br>
+    字体家族的检测就简单一些了，直接获取字体家族字符串 curFont.family()，设置给字体组合框就行了。<br>
+    关于文本字符格式感知的代码就上面的部分。因为例子故意设计得比较简单，只用了 QTextEdit 的快捷函数，<br>
+    所以并没有直接触及内部的 QTextDocument 和 QTextCursor，一切都是交给 QTextEdit 自己实现的。<br>
+    <br>
+    widget.cpp 最后一个槽函数是用于打印的丰富编辑控件内容的：<br>
+    <div class="code"><span style=" color:#008000;">//打印</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_textEdit_textChanged</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textEdit</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">toHtml</span><span
+style=" color:#000000;">()&lt;&lt;</span>endl<span style=" color:#000000;">;</span><span
+style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//打印丰富文本</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//qDebug()&lt;&lt;ui-&gt;textEdit-&gt;toPlainText();</span><span
+style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//打印普通无格式文本</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    当丰富文本编辑控件内容改变时，就是调用这个槽函数打印，可以打印 html 或者普通文本。默认是打印丰富的 html 文本。<br>
+    我们在构造函数里初始化的 html 是最简化的，QTextEdit 会将简化的 html 重新解析并转换成比较标准的有头有尾的 html 风格文档，<br>
+    会与我们在构造函数里的代码有区别，感兴趣的读者可以自己对比看看。<br>
+    <br>
+    例子代码讲解完了，下面看看运行效果，图中是感知文字前景色的：<br>
+    <center><img src="images/ch05/ch05-03-08.png" alt="run" width="800"></center>
+    丰富文本编辑控件里七行的文本格式是单一的，读者也可以编辑文本内容和格式试试看，修改格式要先选中丰富文本编辑框里的再点击上面两排控件。字号大小修改后后，要
+    在单行编辑控件里按回车键或者离开单行编辑控件才会触发信号。<br>
+    <br>
+    <div class="os2">5.3.3 QTextBrowser 类</div>
+    <br>
+    QTextBrowser 是 QTextEdit 的只读版本，它继承了 QTextEdit 全部的特性，支持的 HTML
+    标记语言子集也是一样的。当然，QTextBrowser 还有更多增强功能，用于打开浏览 HTML 内部的超链接。QTextBrowser 本身就是
+    HTML 文件浏览器，虽然支持的只是 HTML 子集。<br>
+    QTextBrowser 显示的内容可以用基类的 setHtml() 、setPlainText()
+    等函数，另外　QTextBrowser　还有自己专属的打开文件链接函数：<br>
+    <div class="code">virtual void setSource(const QUrl &amp; name) </div>
+    这是一个槽函数，它参数类似 QUrl("file:///D:/QtProjects/ch05/simplebrowser/opensuse.htm")
+    文件链接，自动打开并解析 HTML 文件内容，然后显示到控件界面。当源文件链接 Source 发生变化时，会触发信号：<br>
+    <div class="code">void sourceChanged(const QUrl &amp; src) </div>
+    参数 src 是新的链接地址，通过这个信号可以跟踪浏览的源文件链接变化。<br>
+    <br>
+    相比基类 QTextEdit ，QTextBrowser 增强了关于 HTML 超链接浏览方面的功能。关于打开文档超链接，QTextBrowser
+    有两个新的属性，bool 类型 openLinks 属性是针对本地文件链接，访问函数为：<br>
+    <div class="code">bool openLinks() const</div>
+    <div class="code">void setOpenLinks(bool open)</div>
+    openLinks 属性默认为 true，用户点击时，自动打开本地的文档链接。<br>
+    第二个是 bool 类型 openExternalLinks 属性，是针对 HTTP/HTTPS
+    等形式的外部链接，可以启动系统的网页浏览器打开外部链接（因为 QTextBrowser 自己没有网络功能，访问不了外部网站）。访问这个属性的函数为：<br>
+    <div class="code">bool openExternalLinks() const</div>
+    <div class="code">void setOpenExternalLinks(bool open)</div>
+    不过这个属性默认是 false，默认不打开外部链接，需要通过 setOpenExternalLinks(true) ，然后用户点击外部链接时，才会启动网
+    页浏览器打开外部链接。<br>
+    <br>
+    针对本地 HTML 文档浏览，QTextBrowser 实现了与网页浏览器非常类似的功能，比如下面四个槽函数：<br>
+    <div class="code">virtual void backward() //后退</div>
+    <div class="code">virtual void forward()&nbsp; //前进</div>
+    <div class="code">virtual void home()&nbsp;&nbsp;&nbsp;&nbsp; //回到最初的主页</div>
+    <div class="code">virtual void reload()&nbsp;&nbsp; //重新加载，就是刷新</div>
+    QTextBrowser 能记住打开文档的历史记录，与常见的网页浏览器是类似的，因此有前进、后退等功能。<br>
+    <br>
+    QTextBrowser 针对 HTML 文件浏览有多个信号，具体的请查看 Qt 助手里 QTextBrowser 类的帮助文档，这里列几个常用的信号：<br>
+    <div class="code">void backwardAvailable(bool available)</div>
+    <div class="code">void forwardAvailable(bool available)</div>
+    第一个信号是反映 "后退" 操作的可用性变化，比如用户连续点击多个文件链接，可以后退到之前文件，就会触发这个信号。第二个信号是反映 "前进"
+    操作的可用性变化，与 "后退" 操作是类似的，当用户后提到旧文件，就可以前进到以前打开的新文件。<br>
+    如果用户一直后退，退到无文件可退，那么 backwardAvailable() 信号参数值就为 false，表示无法后提，其他情况都为
+    true。forwardAvailable() 工作原理是相反的，无文件可前进是 false，有文件前进是 true。<br>
+    <br>
+    针对用户点击文档里面的超链接和将鼠标悬浮在超链接上的情况，也有对应的信号：<br>
+    <div class="code">void anchorClicked(const QUrl &amp; link)</div>
+    <div class="code">void highlighted(const QUrl &amp; link)</div>
+    <div class="code">void highlighted(const QString &amp; link)</div>
+    anchorClicked() 是在用户点击超链接时触发，因为 QTextBrowser
+    自己会自动处理本地文档链接，也能调用系统里的网页浏览器打开外部链接，所以这个信号一般不需要自己处理。如果希望改变 QTextBrowser
+    打开链接的特性，才会用到这个信号。highlighted()
+    信号是指用户选中超链接，鼠标悬浮在超链接上面，但是没有点击，这个信号可以用于提醒用户超链接文本背后的详细地址是什么，两个 highlighted()
+    信号参数稍有区别，一个是 QUrl 表示超链接，另一个是链接的字符串。关于 QTextBrowser 先介绍这么多，下面看看简易 HTML
+    文件查看器的例子。<br>
+    <br>
+    <div class="os2">5.3.4 简易 HTML 查看器示例</div>
+    <br>
+    本小节的例子是实现能打开本地的 HTML 类型文件，文件内容由 QTextBrowser 负责解析并浏览，然后外加一个只读的
+    QPlainTextEdit，同步显示 QTextBrowser 内部解析得到的 HTML 源码。<br>
+    QTextBrowser::setSource() 函数需要一个 HTML 文件的 QUrl 链接作为参数，这里学一个新的对话框，就是
+    QFileDialog，这个对话框与颜色对话框 QColorDialog 类似，可以通过定义实例使用，也可以通过静态函数使用。例子使用的是获取文件
+    URL 的静态函数：<br>
+    <div class="code">QUrl getOpenFileUrl(QWidget * parent = 0, const QString
+      &amp; caption = QString(), const QUrl &amp; dir = QUrl(), const QString
+      &amp; filter = QString(), QString * selectedFilter = 0, Options options =
+      0, const QStringList &amp; supportedSchemes = QStringList())</div>
+    调用这个函数，会弹出打开文件对话框，用户选择一个文件，点击确定后会返回一个实际文件对应的 QUrl 对象，如果用户取消了对话框，返回值的 QUrl
+    内容为空。<br>
+    该函数参数比较多：<br>
+    parent 是父窗口指针；<br>
+    caption 是该对话框的标题字符串；<br>
+    dir 是初始化进入的文件目录链接地址；<br>
+    filter 是文件名筛选格式串；<br>
+    selectedFilter 针对如果 filter 内部有多个筛选格式，设置选中的那个筛选格式。<br>
+    options 和 supportedSchemes 可以不用管，几乎用不到。<br>
+    <br>
+    参数里比较重要的是 filter （注意该字符串里的标点符号都是英文的），因为目录里的文件可能非常多，需要根据扩展名来筛选我们需要的文件类
+    型，filter 常见形式举例如下：<br>
+    <div class="code">"Images (*.png *.xpm *.jpg)"</div>
+    Images 是文件类型名称，这个可以自定义，用于提示而已。英文括号里面的才是重点：*.png 代表扩展名为 png 的所有文件，*.xpm
+    代表扩展名为 xpm&nbsp; 的所有文件，*.jpg 代表扩展名为 jpg 的所有文件，多个扩展名之间用空格分开。<br>
+    上面示范的字符串尽管有三个扩展名，但是只有一对英文括号，它仅仅算一个筛选器。<br>
+    带有多个筛选器的字符串示例如下：<br>
+    <div class="code">"Images (*.png *.xpm *.jpg);;Text files (*.txt);;XML files
+      (*.xml)"</div>
+    含有多个筛选器的字符串是几个筛选器字符串的拼接，各个筛选器之间用两个英文分号隔开。如果希望看到所有文件，不筛选，那么可以不设置 filter ，或者把
+    filter 设置为 "All files (*)" 。<br>
+    <br>
+    下面开始这个例子学习，重新打开 QtCreator，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>
+    ①项目名称 simplebrowser，创建路径 D:\QtProjects\ch05，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    建好项目之后，打开窗体 widget.ui 文件，进入设计模式，把窗体大小设置为 630*350，按下图然后向其中拖入控件：<br>
+    <center><img src="images/ch05/ch05-03-09.png" alt="ui" width="800"></center>
+    图上第一行，左边是 QTextBrowser 控件，大小 301*301，objectName 为 textBrowser；右边是
+    QPlainTextEdit 控件，大小也是 301*301，objectName 为 plainTextEdit。<br>
+    下面一行是三个普通按钮，按钮的文本分别为 "后退" 、"前进"、 "打开HTML"，三个按钮对应的 objectName 依次为
+    pushButtonBackward、pushButtonForeward、pushButtonOpen。并根据图上分布，调整控件位置，让控件尽量对齐。<br>
+    <br>
+    界面的控件就如上面显示的，下面在界面设计模式添加我们需要的槽函数，首先为右下角的 "打开HTML" 按钮添加 clicked()
+    信号对应的槽函数，用于打开文件：<br>
+    <center><img src="images/ch05/ch05-03-10.png" alt="slot1"></center>
+    然后为左边的浏览框 textBrowser 添加三个信号
+    backwardAvailable(bool)、forwardAvailable(bool)、textChanged()对应的槽函数，可以分三次逐个来添加：<br>
+    <center><img src="images/ch05/ch05-03-11.png" alt="slot2"></center>
+    添加这些信号的槽函数之后，保存界面文件，回到代码编辑模式。这时候头文件 widget.h 里面代码都是自动生成好的，不需要修改，这里只是把代码贴出来，方
+    便读者对照看看：<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>WIDGET_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">WIDGET_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonOpen_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_textBrowser_backwardAvailable</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">bool</span><span style=" color:#c0c0c0;"> </span>arg1<span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_textBrowser_forwardAvailable</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">bool</span><span style=" color:#c0c0c0;"> </span>arg1<span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_textBrowser_textChanged</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre>
+    </div>
+    接下来开始编辑源文件 widget.cpp ，添加实际的功能代码，首先是头文件包含和构造函数的内容：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QFileDialog&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QUrl&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">QPlainTextEdit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">只读模式</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">plainTextEdit</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setReadOnly</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">true</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">QTextBrowser</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">能自动用系统浏览器打开外站链接</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textBrowser</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setOpenExternalLinks</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">true</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//将</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"后退"、"前进"按钮设置为不可用状态</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonBackward</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setEnabled</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">false</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonForeward</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setEnabled</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">false</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//关联</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"后退"</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">按钮的信号到对应槽函数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">connect</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">pushButtonBackward</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SIGNAL</span><span
+style=" color:#000000;">(</span>clicked<span style=" color:#000000;">()),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textBrowser</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SLOT</span><span
+style=" color:#000000;">(</span>backward<span style=" color:#000000;">()));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//关联</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"前进"</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">按钮的信号到对应槽函数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">connect</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">pushButtonForeward</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SIGNAL</span><span
+style=" color:#000000;">(</span>clicked<span style=" color:#000000;">()),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textBrowser</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SLOT</span><span
+style=" color:#000000;">(</span>forward<span style=" color:#000000;">()));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}<br><br></span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+style=" color:#000000;">()</span>
+<span style=" color:#000000;">{</span>
+<span style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span>
+<span style=" color:#000000;">}</span>
+<style type="text/css">
+p, li { white-space: pre-wrap; }
+</style></pre> </div>
+    &lt;QFileDialog&gt; 就是获取文件 URL 的对话框类头文件，&lt;QUrl&gt; 是 URL 链接类的头文件。<br>
+    在构造函数里，首先将 plainTextEdit 设置为只读模式，以免用户修改程序获取的 HTML 源码，因为打开文件时用的是浏览控件
+    textBrowser，没有开启编辑功能，所以同步显示的 plainTextEdit 也设置为只读的。<br>
+    <br>
+    然后将 textBrowser 设置为能打开外部链接的状态
+    setOpenExternalLinks(true)，这样用户点击外部链接时，textBrowser 控件自动启动系统里的网页浏览器打开外部链接。<br>
+    <br>
+    接下来是设置 "后退"、"前进" 两个按钮为不可用状态 setEnabled(false)，因为程序刚启动时没有打开任何文件，既不能前进也不能后退，需要
+    将这两个按钮都设置成灰色，不可点击。<br>
+    <br>
+    构造函数最后两句都是 connect 函数调用，将 "后退" 按钮的点击信号关联到 textBrowser 的槽函数 backward()，将 "前进"
+    按钮的点击信号关联到 textBrowser 的槽函数 forward()。因为 textBrowser
+    有现成的后退、前进槽函数，所以能直接将按钮的信号关联到对应的槽函数上，而不需要从设计模式添加新的槽函数，这节省了两个额外函数的开销。可以看
+    到，textBrowser 控件使用起来是很方便的。<br>
+    <br>
+    可能有读者要问了，刚刚不是把 "后退"、"前进" 两个按钮设置成不可用的灰色，不能点击，那怎么启用这两个按钮呢？等会讲到 textBrowser
+    三个信号对应的槽函数时，会看到启用这两个按钮的代码。<br>
+    <br>
+    构造函数代码就是上面那些，然后是 "打开HTML" 按钮对应的槽函数代码：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_pushButtonOpen_clicked</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QUrl</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">urlFile</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QFileDialog</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">getOpenFileUrl</span><span style=" color:#000000;">(</span><span
+style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"open</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">HTML"</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QUrl</span><span style=" color:#000000;">(),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"HTML</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">files(*.htm</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">*.html)"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//URL</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">非空，才进行打开操作</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">urlFile</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">())</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//打印文件链接</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">urlFile</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//设置浏览的源文件</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textBrowser</span><span
+style=" color:#000000;">-&gt;</span><span style=" font-style:italic; color:#000000;">setSource</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">urlFile</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    用户点击 "打开HTML" 按钮时，会触发这个槽函数，槽函数内部先通过 QFileDialog::getOpenFileUrl()
+    函数弹出打开文件的对话框，这个函数调用使用到了 4 个参数，第一个是父窗口指针 this，第二个是打开文件对话框自己的标题 "open
+    HTML"，第三个是打开文件对话框默认的目录路径 QUrl，这里是空的，空的代表程序默认启动的目录路径，第四个参数是 HTML 文件筛选器，筛选
+    *.htm 和&nbsp; *.html 文件。<br>
+    打开文件对话框会返回一个 QUrl 对象，就是代码里的 urlFile，如果用户确实选择了一个 HTML 文件，那么 urlFile
+    就有实际存在的数值，如果用户点击的“取消”按钮结束该对话框，那么返回的是空 URL。因此需要使用函数 urlFile.isEmpty() 判断一下，当
+    URL 非空时才执行后续代码。<br>
+    在有确实存在的文件 URL 的情况下，先用 qDebug() 打印了该文件 URL 的内容，然后调用 textBrowser 的 setSource()
+    函数，让 textBrowser 打开并显示该 HTML 文件。<br>
+    获取和打开文件 URL 就是上面的几句，很简单就搞定了。<br>
+    <br>
+    一旦用户通过 textBrowser 浏览 HTML 文件，点击了本地文件链接， textBrowser 自动打开了新文件，那么 "后退"
+    按钮就会变得可用，这是通过如下的槽函数实现的：<br>
+    <div class="code"><span style=" color:#008000;">//根据能否后退，设置</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"后退"</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">按钮可用状态</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_textBrowser_backwardAvailable</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">bool</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">arg1</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonBackward</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setEnabled</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">arg1</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    当浏览控件 textBrowser 能够进行后退操作时，会发出 backwardAvailable(true) 信号，我们的 "后退"
+    按钮就会变为可用状态，用户就可以点击了。<br>
+    <br>
+    当用户点击了 "后退" 按钮之后，那意味着 "前进" 按钮会变得可用，这也是通过槽函数实现的：<br>
+    <div class="code"><span style=" color:#008000;">//根据能否前进，设置</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"前进"</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">按钮可用状态</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_textBrowser_forwardAvailable</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">bool</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">arg1</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonForeward</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setEnabled</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">arg1</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    当浏览控件 textBrowser 能够进行前进操作时，会发出 forwardAvailable(true) 信号，我们的 "前进"
+    按钮就会变得可用，用户就可以点击 "前进" 按钮。<br>
+    <br>
+    这两个槽函数都是接收 textBrowser 发出的信号，用于同步更新两个按钮的可用状态，而不是 "后退"、"前进"
+    两个按钮发出的信号。这两个按钮自己发的信号，是通过构造函数最后两句 connect 调用，关联到 textBrowser
+    原生自带的两个槽函数，读者可以回 头看一下前面构造函数的代码。<br>
+    <br>
+    例子最后一个槽函数是接收 textBrowser 发出的 textChanged()
+    信号，当左边浏览控件的文本内容变化时，比如用户点击了本地文件的链接，打开了新文件，那么这个信号就会触发，我们用这个信号，同步显示浏览控件内部解析得到的
+    HTML 源代码：<br>
+    <div class="code"><span style=" color:#008000;">//当</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">QTextBrowser</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">控件内容变化时，QPlainTextEdit</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">跟着变化</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_textBrowser_textChanged</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">html</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">字符串，设置给</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">plainTextEdit</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strHtml</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">textBrowser</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">toHtml</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">plainTextEdit</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setPlainText</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strHtml</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    textBrowser 控件的 toHtml() 函数可以得到网页文件的 HTML 源代码字符串，保存到 strHtml 变量里面。<br>
+    然后将 strHtml 设置给 plainTextEdit，右边的 plainTextEdit 控件就会显示左边浏览控件内部解析后的源码字符串。<br>
+    需要注意的是，textBrowser 控件仅支持 HTML 4 标记语言的子集，它自己将 *htm 或 *.html
+    文件内容会重新解析成自己能理解的部分，并显示出来，右边 plainTextEdit 显示的是 textBrowser 控件解析处理后的源代码，而不是
+    *.htm 或 *.html 文件原本的代码。<br>
+    <br>
+    例子的代码就是上面那么多，代码讲解完了，我们生成运行例子看看。下面示范例子运行时，用到了 4
+    个示范文件，flower.htm、flower.jpg、opensuse.htm、opensuse.jpg，可以去教程代码文件夹下载：<br>
+    <a href="https://lug.ustc.edu.cn/sites/qtguide/QtProjects/ch05/simplebrowser/">
+      https://lug.ustc.edu.cn/sites/qtguide/QtProjects/ch05/simplebrowser/ </a>
+    <br>
+    这个 4 个文件放到代码文件夹 D:\QtProjects\ch05\simplebrowser 里面就行了，等会就到代码文件夹找 *.htm 文件。<br>
+    <br>
+    程序运行后点击右下角的 "打开HTML" 按钮：<br>
+    <center><img src="images/ch05/ch05-03-12.png" alt="run1"></center>
+    打开文件对话框的标题就是我们设置的 "open HTML"，最下面文件名框子里是空的，文件类型里就是筛选器 filter 的字符串，这样上面的文件目录浏
+    览框里只会显示文件夹和 *.htm、*.html 文件。<br>
+    打开文件对话框默认的目录路径是应用程序启动的路径，注意，QtCreator 运行生成的程序时，默认启动路径不是源代码路径，如：<br>
+    D:\QtProjects\ch05\simplebrowser<br>
+    也不是调试版 exe 文件所在路径：<br>
+D:\QtProjects\ch05\build-simplebrowser-Desktop_Qt_5_4_0_MinGW_32bit-Debug\debug<br>
+    默认启动路径是构建目录的路径：<br>
+    D:\QtProjects\ch05\build-simplebrowser-Desktop_Qt_5_4_0_MinGW_32bit-Debug<br>
+    这个一定要切记，如果希望程序使用相对路径自动打开同目录的文件，那么这些同目录的文件既要放到构建文件目录一份，也要放到构建目录的 debug
+    子文件夹里一份。<br>
+    放到构建目录一份，是为了 QtCreator 调试，放到构建目录 debug 子文件夹一份，是为了能从该子目录启动 exe 时自动找到同目录的文件。<br>
+    <br>
+    运行时调用打开文件对话框就能让用户自己选择打开什么文件，这是打开文件对话框的灵活性。我们选择
+    D:\QtProjects\ch05\simplebrowser 文件夹里的 flower.htm 或者 opensuse.htm，就可以看到简易浏览器
+    的显示效果了：<br>
+    <center><img src="images/ch05/ch05-03-13.png" alt="run2"></center>
+    这时候点击本地链接就会打开新的本地文件，"后退" 按钮就会变得可用：<br>
+    <center><img src="images/ch05/ch05-03-14.png" alt="run3"></center>
+    <br>
+    如果点击 "后退" 按钮，那么 "前进"
+    按钮就会变得可用。如果点击外站链接，程序会自动调用系统里的网页浏览器，打开外站链接。读者可以自己动手试试看，这里不截更多的运行图片了。<br>
+    <br>
+    本节例子一个是简易编辑器，一个是简易浏览器，其实还少了一点点，就是怎么保存编辑过的 HTML 丰富文本呢？这个留作练习，建议读者实现一下。<br>
+    <br>
+    <div class="practice">
+      <table>
+        <tbody>
+          <tr>
+            <td><img src="images/pics/practice.png" alt="tip"></td>
+            <td> <b>练习</b> </td>
+          </tr>
+        </tbody>
+      </table>
+      ① 查阅 Qt 助手里面关于 QTextDocumentWriter 类文档，弄明白下面几句代码的意思：<br>
+      <br>
+      <span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">&lt;QTextDocumentWriter&gt;<br>
+      </span><span style=" color:#008000;">//...........</span><br>
+      <span style=" color:#c0c0c0;"> </span>QTextDocumentWriter<span style=" color:#c0c0c0;">
+      </span><span style=" color:#000000;">dw</span><span style=" color:#000000;">(</span><span
+        style=" color:#008000;">"D:/example.htm"</span><span style=" color:#000000;">,</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"HTML"</span><span
+        style=" color:#000000;">);</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">dw</span><span style=" color:#000000;">.</span>write<span
+style=" color:#000000;">(</span><span style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">textEdit</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">document</span><span style=" color:#000000;">());<br><br></span></pre>
+      然后想办法将这几句添加到本节第一个简易编辑器的例子代码中（可以将界面窗体拉大一点，添加新的 "保存" 按钮，修改 ui 文件之后一定要点击
+      QtCreator 菜单 构建--&gt; 重新构建项目 "*****" ，否则 ui_widget.h 文件不会自动更新）。 </div>
+    <br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch05-02.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch05-04.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

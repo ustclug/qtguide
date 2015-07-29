@@ -3,11 +3,9 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <title>ch05-04</title>
-    
-<link href="css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-
-<script src="thumbnailviewer.js" type="text/javascript">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -15,26 +13,1109 @@
 * Visit http://www.dynamicdrive.com/ for full source code
 ***********************************************/
 
-</script>
-
-
-  </head>
-  
-  
-<div class="os1">5.4 其他输入控件 </div>
-<br />
-其他输入控件 
-<br />
-<br />
-<br />
-
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch05-03.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch05-05.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+</script> </head>
+  <body>
+    <div class="os1">5.4 其他输入控件 </div>
+    <br>
+    本节介绍 Qt 设计师里其他几个输入控件（Input Widgets），除了前面两节的文本编辑控件，组合框 QComboBox
+    也是很常用的输入控件，所以会重点介绍组合框的使用，其他的输入控件使用是比较简单的，概括介绍一下它们的用途，然后通过示例代码展示多种输入控件的使用方式。本节列举的
+    一堆控件内容不一定要都记住，以后查帮助文档能学到更多，但是后面的示例代码是比较基础的控件运用，一定要好好学示例代码。<br>
+    <br>
+    <div class="os2">5.4.1 输入控件概览</div>
+    <br>
+    在 Qt 设计师界面，左边控件列表可以看到下图的输入控件：<br>
+    <center><img src="images/ch05/ch05-04-01.png" alt="input"></center>
+    除了前面两节的文本编辑控件，剩下十多个输入控件，其中以组合框最为常用，其他控件相对应用少一些。下面简要介绍一下图上标记的输入控件：<br>
+    （1）组合框 QComboBox<br>
+    组合框相当于是单行编辑控件加一个数据条目列表，用户可以手动输入数据，也可以从数据列表选择一个条目作为输入数据。后面 5.4.2 小节会专门讲这个控件。<br>
+    <br>
+    （2）字体组合框 QFontComboBox<br>
+    这是普通组合框的派生类，自动枚举操作系统里的各种字体家族，并作为列表提供给用户选择，上一节简易编辑器的例子已经用过了。字体组合框就是一个定制化的枚举字体
+    的组合框，其他功能与普通组合框其实没什么区别，所以不单独讲字体组合框。<br>
+    <br>
+    （3）计数器 QSpinBox<br>
+    计数器用于接收整数数值输入，一般会指定整数值下限 setMinimum()、上限 setMaximum() 和步进
+    setSingleStep()，计数器就是一个单行编辑器加右边的上下箭头图标，点击向上箭头，整数就会增加步进的值，点击向下箭头，就会减少步进的数值。就是
+    个记分牌，分值能按照步进值增加或减少，整数值不会超出下限和上限的范围，相当于也自带了一个验证器。<br>
+    计数器的输入数值属性名为 value，访问函数为：<br>
+    <div class="code">int value() const</div>
+    <div class="code">void setValue(int val)</div>
+    不管是通过直接编辑数值还是通过上下箭头调整数值，都会触发信号：<br>
+    <div class="code">void valueChanged(int i)</div>
+    <div class="code">void valueChanged(const QString &amp; text)</div>
+    两个信号一个信号参数是整数数值，另一个是整数的数字字符串。<br>
+    因为计数时可能用到一些字符的前缀或者后缀单位（千米 km、千克 kg 等），计数器里面的编辑框是可以附带前缀属性 prefix 和后缀属性
+    suffix，通过如下函数访问前缀和后缀：<br>
+    <div class="code">QString prefix() const</div>
+    <div class="code">void setPrefix(const QString &amp; prefix)</div>
+    <div class="code">QString suffix() const</div>
+    <div class="code">void setSuffix(const QString &amp; suffix) </div>
+    <br>
+    （4）浮点计数器 QDoubleSpinBox<br>
+    浮点计数器与整数计数器是类似的，只不过浮点计数器用于接收 double 类型的数值，数值的下限、上限、步进都可以是浮点数。因为用于接收 double
+    数值，涉及到数值的精度，浮点计数器的精度属性为 decimals，默认是小数点后两位，访问精度属性的函数为：<br>
+    <div class="code">int decimals() const</div>
+    <div class="code">void setDecimals(int prec)</div>
+    浮点计数器其他功能与整数计数器类似，只不过处理 double 类型 value 而已，前缀、后缀等属性与整数计数器是一样的。<br>
+    <br>
+    （5）时间编辑器 QTimeEdit<br>
+    用于接收时间的输入，包括时、分、秒。它的时间属性类型是 QTime，访问函数为：<br>
+    <div class="code">QTime time() const</div>
+    <div class="code">void setTime(const QTime &amp; time) </div>
+    当时间属性被修改时，会触发信号：
+    <div class="code">void timeChanged(const QTime &amp; time) </div>
+    <br>
+    （6）日期编辑器 QDateEdit<br>
+    用于接收日期的输入，包括公历的年、月、日。它的日期属性类型是 QDate，访问函数为：<br>
+    <div class="code">QDate date() const</div>
+    <div class="code">void setDate(const QDate &amp; date)</div>
+    当日期属性被修改时，会触发信号：
+    <div class="code">void dateChanged(const QDate &amp; date)</div>
+    日期编辑器有个附加的功能，就是弹出每个月的日历，它有个 bool 类型的属性
+    calendarPopup，决定用户编辑日期时，是否自动弹出日历供用户选择， 访问函数为：<br>
+    <div class="code">bool calendarPopup() const</div>
+    <div class="code">void setCalendarPopup(bool enable) </div>
+    <br>
+    （7）日期时间编辑器 QDateTimeEdit<br>
+    这其实是上面两个编辑器的基类，上面两个编辑器基于这个日期时间编辑器，也就是说上面两个编辑器是功能简化版而已。关于日期和时间的属性，
+    QDateTimeEdit 有三个，日期属性 QDate 类型，同上面日期编辑器的，时间属性
+    QTime，同上面时间编辑器的，还有一个更全面的属性，类型为 QDateTime，既包含日期也包含时间，其访问函数为：<br>
+    <div class="code">QDateTime dateTime() const</div>
+    <div class="code">void setDateTime(const QDateTime &amp; dateTime) </div>
+    该属性被修改时触发信号：
+    <div class="code">void dateTimeChanged(const QDateTime &amp; datetime)</div>
+    QDateTimeEdit 也能弹出每个月的日历，控制弹出日历的属性就是 bool 类型 calendarPopup，QDateEdit 是从
+    QDateTimeEdit 继承这个属性的。无论是前面的时间编辑器、日期编辑器，还是这个基类日期时间编辑器，使用方式都是比较简单的，更多内容建议查 Qt
+    助手帮助文档，后面例子会示范一段输入生日的代码。<br>
+    <br>
+    （8）转盘 QDial<br>
+    这里称呼为转盘，也可以叫拨号盘、刻度盘、仪表盘等。就是给定一个下限、上限，在圆圈最多 360
+    度的范围内映射为数值的下限、上限，通过转动转盘来接收用户输入。转盘也可以设置步进 singleStep，整数数值属性为
+    value，这个与整数计数器类似。转盘的数值属性 value 访问函数是 value() ，设置函数是
+    setValue(int)，数值改变的信号是&nbsp; valueChanged(int) 。<br>
+    比较有意思的是通过键盘来改变转盘的数值，键盘的上/下箭头或者左/右箭头控制转盘的步进，Home 键和 End
+    键快速设置为整数下限和上限，另外还可以为转盘设置比较大的步进，或叫页进，即 pageStep，按键盘上的 PageUp 和 PageDown
+    会根据大步进 pageStep 调整转盘数值，设置大步进的函数为 setPageStep(int) 。<br>
+    <br>
+    （9）滚动条 QScrollBar<br>
+    无论是水平滚动条 Horizontal Scroll Bar 还是垂直滚动条 Vertical Scroll Bar，它们隶属同一个类，就是
+    QScrollBar，水平方向和垂直方向，只是通过属性 orientation 区分一下而已，该属性的访问函数为：<br>
+    <div class="code">Qt::Orientation orientation() const</div>
+    <div class="code">void setOrientation(Qt::Orientation)</div>
+    水平方向为 Qt::Horizontal，垂直方向为 Qt::Vertical 。 <br>
+    一般很少直接用到这个滚动条类，滚动条类用于多页文档的翻页和大尺寸图片的查看，实际上 Qt 关于多页文档的编辑类，如
+    QPlainTextEdit、QTextEdit，全都自己带了水平滚动条和垂直滚动条，根本不要程序员自己编写滚动条代码。真正需要滚动条的程序，通常也不会
+    只做一个滚动条，而是水平的和垂直的都需要。<br>
+    Qt 有专门的类 QScrollArea ，它既有水平滚动条，也有垂直滚动条，如果确实需要自己添加滚动条，建议读者去查 QScrollArea
+    类的文档，一次性用 QScrollArea 搞定，免得还弄两个滚动条麻烦。为某个控件添加滚动区域只需用一个函数搞定：<br>
+    <div class="code">void QScrollArea::​setWidget(QWidget * widget)</div>
+    这个函数会将 QScrollArea 对象自动附加给被包裹的 widget 对象，这样 widget 对象就有水平和垂直滚动条了。<br>
+    <br>
+    （10）滑动条 QSlider<br>
+    与滚动条相比，滑动条才是用来接收用户输入数值的，或者显示音视频播放进度、音量大小等。无论是水平滑动条还是垂直滑动条，它们的类都是
+    QSlider，只有属性 orientation 不一样，水平方向为 Qt::Horizontal，垂直方向为 Qt::Vertical 。 <br>
+    滑动条的属性与前面转盘的属性是非常类似的，它们有共同基类
+    QAbstractSlider。转盘是圆形的，而滑动条是笔直的。函数也是类似的，下限设置函数为&nbsp; setMinimum()
+    ，上限设置函数为&nbsp; setMaximum()，步进设置函数为 setSingleStep()，大步进设置函数为&nbsp;
+    setPageStep()。<br>
+    接收的输入数值属性也是整数类型 value，访问函数、信号都和前面转盘、计数器的一样。<br>
+    QSlider 独特的一个功能是可以自定义刻度，QSlider 的刻度绘制属性为 tickPosition，访问函数为：<br>
+    <div class="code">TickPosition tickPosition() const</div>
+    <div class="code">void setTickPosition(TickPosition position)</div>
+    tickPosition 默认值是 QSlider::NoTicks ，不显示刻度，还有其他枚举常量：<br>
+    QSlider::TicksBothSides，在滑动线的两边都印刻度；<br>
+    QSlider::TicksAbove，在滑动线上方印刻度（水平滑动条）；<br>
+    QSlider::TicksBelow，在滑动线下方印刻度（水平滑动条）；<br>
+    QSlider::TicksLeft，在滑动线左边印刻度（垂直滑动条）；<br>
+    QSlider::TicksRight，在滑动线右边印刻度（垂直滑动条）。<br>
+    <br>
+    tickPosition 是指刻度绘制的位置，而到底间隔多大数值画一个刻度线，是由属性 tickInterval 决定的，该属性访问函数为：<br>
+    <div class="code">int tickInterval() const</div>
+    <div class="code">void setTickInterval(int ti)</div>
+    tickInterval 默认值为 0，如果 tickPosition 确定要画刻度，那么刻度间距的数值自动从小步进 singleStep 和大步进
+    pageStep 之间挑。当然，如果确定要显示刻度，建议手动设置一下刻度间距。比如数值限定 0 到 100 ，那么可以隔 10 画一个刻度，或者隔 20
+    画一个刻度。<br>
+    <br>
+    无论是用计数器、转盘还是滑动条，都可以接收整数范围内的数值输入，到底用哪个，可以根据实际显示效果或者窗体空间大小、用户输入习惯等方面考虑，从程序员角度，
+    三种控件编程实现的难易程度其实都一样。<br>
+    <br>
+    （11）快捷键编辑器 QKeySequenceEdit<br>
+    用户在进行文档操作时，常用复制 Ctrl+C 、粘贴 Ctrl+V、剪切 Ctrl+X ，Key Sequence
+    就是指这些快捷键序列。QKeySequenceEdit
+    就专门提供给用户自定义快捷键的，高级的文本编辑器一般带自定义快捷键功能，QKeySequenceEdit
+    就是接收用户输入新的快捷键的，类似游戏中用到的改键精灵功能。<br>
+    QKeySequenceEdit 通常配合动作类&nbsp; QAction 使用，带有菜单和工具条的主窗口程序中，每个菜单项、工具按钮都对应一个
+    QAction 实例，QKeySequenceEdit 可以接收用户输入的快捷键序列，设置给 QAction
+    对象，这样一旦用户按下自己设置的快捷键，对应的 QAction 对象就会触发，相当于点击菜单项或工具按钮。QKeySequenceEdit
+    的应用等以后学到菜单、工具条再说。<br>
+    <br>
+    本小节概括介绍了各个输入控件，这些内容不需要死记硬背的，大概知道有这些东西，实际使用时查查控件类的文档就行了。本小节列的输入控件还有很多其他的功能是没法
+    全部讲解的，上面只是列举一些实用的。下面我们先详细看看组合框 的详细内容，然后再进入示例代码的学习。<br>
+    <br>
+    <div class="os2">5.4.2 QComboBox 类</div>
+    <br>
+    组合框 QComboBox
+    与前面两节的文本编辑控件一样重要，也是常用的输入控件。组合框的功能比单行编辑控件强大得多，而且也更人性化。点击组合框右边的向下箭头图标，会弹出一个输入条
+    目列表可供用户选择，这样用户只需要点点鼠标，而不需要自己敲字符。<br>
+    上一节的字体组合框 QFontComboBox 的列表是自动添加的，普通的 QComboBox 是程序员通过代码来添加。常用的添加函数分两类，一类是追加
+    到列表末尾的 add* 函数，另一类是将条目插入到某个序号位置，即 insert* 函数。<br>
+    首先是追加到末尾的函数：<br>
+    <div class="code">void addItem(const QString &amp; text, const QVariant
+      &amp; userData = QVariant())</div>
+    <div class="code">void addItem(const QIcon &amp; icon, const QString &amp;
+      text, const QVariant &amp; userData = QVariant())</div>
+    <div class="code">void addItems(const QStringList &amp; texts)</div>
+    第一个 addItem 函数，是将参数里的 text 添加到列表末尾显示出来，userData
+    是附加的用户数据，可有可无。对于组合框的运用，一般是直接使用列表的序号或者列表的文本 text，如果需要用到序号、文本之外的复杂数据，设定
+    userData 一同添加到列表里。userData 不会显示出来，就是内存中的数据，知道序号之后，可以通过 itemData(index) 函数获取。<br>
+    第二个 addItem 函数也是添加一个条目到列表末尾，但多一个显示图标 icon，图标和文本 text 会同时显示在组合框的下拉列表里面。<br>
+    第三个函数 addItems 是批量添加多个字符串到列表末尾，这种批量添加方式没有图标，也没有用户数据，就是将 texts
+    字符串列表添加到组合框下拉列表末尾。<br>
+    <br>
+    另一类添加条目的函数是 insert* 系列函数，多一个 index 序号，会将条目插入到 index 序号的位置：<br>
+    <div class="code">void insertItem(int index, const QString &amp; text, const
+      QVariant &amp; userData = QVariant())</div>
+    <div class="code">void insertItem(int index, const QIcon &amp; icon, const
+      QString &amp; text, const QVariant &amp; userData = QVariant())</div>
+    <div class="code">void insertItems(int index, const QStringList &amp; list)</div>
+    需要注意这个 index 取值范围，组合框下拉列表的条目总数为 count()：<br>
+    如果 index 在合法的序号范围 0 到 count()-1，那么条目就正好从 index 位置插入，新的条目序号就是 index 序号开始。<br>
+    如果 index 是负数，那么插入到列表最前面。<br>
+    如果 index &gt;= count()，那么会插入到列表最后面。<br>
+    insert* 系列函数其他参数含义与 add* 函数是一样的。<br>
+    <br>
+    组合框的列表条目计数属性为 count，获取函数为 count() ，这个计数由组合框自己维护，不能手动 set
+    的。添加条目的函数很多，但是删除条目的函数只需要两个：<br>
+    <div class="code">void QComboBox::​removeItem(int index)&nbsp;&nbsp;&nbsp;
+      //删除序号为 index 的条目</div>
+    <div class="code">void QComboBox::​clear()&nbsp;&nbsp;&nbsp; //槽函数，清空所有条目</div>
+    <br>
+    用户从下拉列表选择的条目序号是由整型属性 currentIndex 确定，访问函数：<br>
+    <div class="code">int currentIndex() const</div>
+    <div class="code">void setCurrentIndex(int index)</div>
+    选中的序号变化后发送信号：
+    <div class="code">void currentIndexChanged(int index)</div>
+    <div class="code">void currentIndexChanged(const QString &amp; text) </div>
+    第一个信号参数是选中条目序号，第二个信号的参数是选中条目的文本 text。<br>
+    <br>
+    组合框另外还有一个文本的属性 currentText，是指在组合框内部包含的单行编辑器的文本。访问这个属性的函数为：<br>
+    <div class="code">QString currentText() const</div>
+    <div class="code">void setCurrentText(const QString &amp; text) </div>
+    当组合框内部包含的单行编辑器的文本发生改变时触发信号：
+    <div class="code">void currentTextChanged(const QString &amp; text) </div>
+    也许有读者会问，刚才不是有 currentIndexChanged(QString) 信号，怎么还来个
+    currentTextChanged(QString)，这两个一样吗？<br>
+    当然不一样！条目序号变化的 currentIndexChanged(QString) 信号触发时，当前文本属性的
+    currentTextChanged(QString) 会触发，但反过来不一定。<br>
+    <br>
+    默认情况下，组合框内部包含的单行编辑器是只读的，用户只能从下拉列表选择条目，然后组合框内部包含的单行编辑器的文本会变成该序号的条目文本。但是可以改变这一
+    只读特性，就是 editable 属性，该属性决定用户能不能在组合框内部包含的单行编辑器里手动敲入字符，其访问函数为：<br>
+    <div class="code">bool isEditable() const</div>
+    <div class="code">void setEditable(bool editable)</div>
+    默认是不可编辑的，如果调用
+    setEditable(true)，那么就可以编辑了。用户手动编辑的内容，一般不在下拉列表里，就不触发序号改变的信号，而只会触发当前文本属性变化的信号
+    currentTextChanged(QString)。<br>
+    对于可编辑的组合框，用户完全可以手动输入下拉列表之外的文本，然后可以用信号 currentTextChanged(QString) 或者用
+    currentText() 获取当前文本。<br>
+    而且，editable 属性为 true 时，不仅仅能允许用户自定义内部编辑框里的内容，如果用户手动输入了下拉列表之外的内容，并且在内部编辑框里面按下
+    Enter
+    回车键，那么用户新编辑的文本条目会自动添加到组合框的下拉列表里面。也就是说，程序运行时，用户可以手动新增条目到下拉列表里，所需操作就是输入新条目并按回车键。<br>
+    对于可编辑的组合框，用户手动新增的条目，默认会添加到下拉列表末尾，可以通过设置 insertPolicy 属性改变插入特性。该属性的访问函数为：<br>
+    <div class="code">InsertPolicy insertPolicy() const</div>
+    <div class="code">void setInsertPolicy(InsertPolicy policy) </div>
+    插入策略的枚举类型 InsertPolicy 的常量比较多，具体请查阅 Qt 帮助文档，这里不列举了。<br>
+    <br>
+    关于组合框列表显示，还有两个属性可能会用到，一个是
+    maxVisibleItems，因为下拉列表的条目可能很多，不可能全部显示，maxVisibleItems
+    就是指定下拉列表最多同时显示的条目数，超过这个数值时，下拉列表右边会自动出现滚动条，拖动滚动条就可以查看其他的条目。maxVisibleItems
+    默认值为 10，设置函数为 setMaxVisibleItems(int maxItems)。<br>
+    另一个属性是关于图标显示的，组合框显示的图标大小，由属性 iconSize 确定，如果图标太大也不美观。如果为条目设置了图标，那么建议所有图标文件的像素
+    宽度、高度都一样大，如果不一样大，最好手动设置显示的图标大小，通过函数 setIconSize(const QSize &amp; size) 。<br>
+    <br>
+    组合框一般情况下是直接使用选中条目的序号或显示的文本 text 信息，也有例外，就是序号和文本都不够用的时候，那就需要给条目设置用户数据，可以在
+    add*&nbsp; 或 insert* 函数里面设置用户数据，也可以手动设置各个条目的用户数据：<br>
+    <div class="code">void setItemData(int index, const QVariant &amp; value,
+      int role = Qt::UserRole)</div>
+    获取数据就用如下函数：<br>
+    <div class="code">QVariant itemData(int index, int role = Qt::UserRole)
+      const</div>
+    QVariant 是 Qt 统一表示各种变量数据的类，可以将任意 Qt 的数据类型赋值给 QVariant 对象，也可以由 QVariant
+    对象转出为其他数据类型。至于 role 角色，是为了让组合框理解数据的类型，是用于显示，还是用于干别的，目前不用修改角色，使用默认值
+    Qt::UserRole 就够了。等以后学到复杂的 Model/View 再理会角色的问题，组合框还有一些函数就是用于 Model/View
+    ，这里都没有列举，因为暂时用不到那么复杂的东西。 Model/View 是 Qt 对数据处理和图形显示的经典软件设计框架 MVC（Model View
+    Controller）的简化版，感兴趣的读者可以查询 MVC 框架的意义，或者查看 Qt 帮助文档索引 Model/View Programming 。<br>
+    <br>
+    关于组合框的内容先介绍这么多，图标这一节还没学到，我们 5.6 节示范带图标的组合框，本节后面例子只使用组合框的显示字符串和用户数据。<br>
+    <br>
+    <div class="os2">5.4.3 个人信息收集示例</div>
+    <br>
+    个人信息收集的例子经常在人员信息登记、统计过程中用到，这里是简化版的，收集姓名、性别、职业、生日四方面信息：<br>
+    姓名采用单行编辑器收集。性别信息采用默认的组合框表示，因为性别就 "男" 和
+    "女"，所以下拉列表是固定的。职业信息也是使用组合框，枚举一些职业，但是真正的职业是非常多的，不可能穷举，所以会通过代码来设置这个职业组合框为可编辑的。生日信息
+    收集是采用日期编辑控件，会弹出每个月的日历供用户选择。基本情况介绍完，下面开始这个例子。<br>
+    <br>
+    打开 QtCreator，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>
+    ①项目名称 infogather，创建路径 D:\QtProjects\ch05，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    建好项目之后，打开窗体 widget.ui 文件，进入设计模式，按照下图拖入控件：<br>
+    <center><img src="images/ch05/ch05-04-02.png" alt="ui" width="800"></center>
+    图上总共有五行控件，第一行是标签控件和单行编辑控件，标签文本为 "姓名"，右边编辑器对象名 objectName 为 lineEditName。<br>
+    第二行控件是标签和组合框，标签文本为 "性别"，组合框的对象名 objectName 为 comboBoxGender。<br>
+    第三行控件也是标签和组合框，标签文本为 "职业"，组合框的对象名 objectName 为 comboBoxJob。<br>
+    第四行控件是标签和日期编辑器，标签文本为 "生日"，日期编辑器的 objectName 为 dateEdit。<br>
+    前面四行控件的尺寸需要调整，左边一列的标签大小为 54*22，右边一列控件大小为 120*22，这样四行控件都比较好对齐。<br>
+    最后第五行是一个普通按钮，按钮文本为 "提交"，按钮的 objectName 为 pushButtonCommit。<br>
+    <br>
+    对于组合框控件，我们之前提过可以通过 add* 和 insert* 系列函数添加，如果要从图形界面预先添加条目，该怎么办呢？<br>
+    组合框的属性里面没有类似 items 之类的条目信息列表，在设计界面右下角的属性编辑器是没法预先加条目的。<br>
+    但有其他的办法，就是右击组合框控件，可以在右键菜单看到 "编辑项目" ：<br>
+    <center><img src="images/ch05/ch05-04-03.png" alt="combobox" width="800"></center>
+    "编辑项目"菜单项就是编辑组合框的条目的意思，点击它可以打开编辑条目的对话框，以后遇到类似的问题，如果在右下角属性编辑器找不到需要的东西，就右击控件看
+    看，可能右键菜单里有额外的编辑功能。组合框条目编辑的对话框如下图所示：<br>
+    <center><img src="images/ch05/ch05-04-04.png" alt="items"></center>
+    图上对话框的功能是一目了然的，第一行的大列表就是组合框的条目列表。<br>
+    第二行有五个快捷按钮，左边的加号图标按钮是添加新条目，减号图标按钮是删除选中的条目。中间上下图标按钮就是将选中条目位置上移和下移。最右边的属性按钮，点击
+    之后显示扩展的条目属性编辑内容，可以编辑每个条目自己的图标。<br>
+    对于性别组合框，我们按照上图添加 "男"、"女" 两个条目即可。添加好条目之后，点击最下方的 "OK" 按钮。<br>
+    <br>
+    然后我们对窗体里的职业组合框也类似右击它，点击 "编辑项目" 菜单项，然后按下图添加几个职业条目（读者也可以根据自己喜好添加别的职业名称）：<br>
+    <center><img src="images/ch05/ch05-04-05.png" alt="jobs"></center>
+    职业分类不可能只有图上列的五个，实际中是有无数正常的职业的，后面会在代码里设置职业组合框的 editable 属性为 true，让用户能在程序运行时添加
+    自己的职业。<br>
+    <br>
+    控件的设置内容就是上面那些，接下来我们为性别组合框、职业组合框、日期编辑器和提交按钮添加槽函数。<br>
+    首先右击性别组合框，添加 currentIndexChanged(int) 信号对应的槽函数：<br>
+    <center><img src="images/ch05/ch05-04-06.png" alt="slot1"></center>
+    其实无论接收 currentIndexChanged(int) 信号还是 currentIndexChanged(QString)
+    都可以，上图示范的是参数类型为 int 的信号。对于用户不可手动编辑的组合框（只能从下拉列表选择），通常接收这两个信号中的一个就足够了。<br>
+    <br>
+    然后右击职业组合框，为职业组合框添加 currentTextChanged(QString) 信号对应的槽函数：<br>
+    <center><img src="images/ch05/ch05-04-07.png" alt="slot2"></center>
+    注意对于用户可编辑的组合框，用户如果手动敲字符输入职业名，那么序号变化的信号不一定触发，因此应该接收当前文本变化的信号
+    currentTextChanged(QString) 信号，这样保证无论用户采用哪种手段输入，都会接收到文本变化的信号。<br>
+    <br>
+    接着为日期编辑器添加 dateChanged(QDate) 信号对应的槽函数，感知日期的变化：<br>
+    <center><img src="images/ch05/ch05-04-08.png" alt="slot3"></center>
+    <br>
+    最后为 "提交" 按钮添加普通的 clicked() 信号对应的槽函数：<br>
+    <center><img src="images/ch05/ch05-04-09.png" alt="slot4"></center>
+    添加以上四个槽函数之后，那么界面编辑就完成了，保存界面文件，然后回到代码编辑模式。<br>
+    这个例子不需要手动编辑 widget.h 头文件，用自动生成的就够了，下面仅仅是贴出代码看看而已：<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>WIDGET_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">WIDGET_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_comboBoxGender_currentIndexChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span>index<span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_comboBoxJob_currentTextChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span>arg1<span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_dateEdit_dateChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QDate</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span>date<span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonCommit_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre>
+    </div>
+    我们需要编辑的是 widget.cpp ，添加相应的功能代码，首先是包含头文件和构造函数部分：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QMessageBox&gt;</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#008000;">//消息框</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDateTime&gt;</span><span style=" color:#c0c0c0;">    </span><span
+style=" color:#008000;">//日期时间类，可以获取当前时间</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置职业组合框可编辑</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">comboBoxJob</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setEditable</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">true</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置日期编辑器在编辑时自动弹出日历</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">dateEdit</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setCalendarPopup</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">true</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    &lt;QMessageBox&gt; 是消息框的头文件，&lt;QDateTime&gt;
+    是日期时间类的头文件，里面可以用静态函数获取当前时间，等会会获取当前时间，根据用户生日和当前时间计算用户岁数。<br>
+    构造函数里就添加了两句代码，首先设置职业组合框为可编辑模式，setEditable(true)，这样用户就能手动编辑组合框里面的内容，并且，用户编辑新内
+    容之后，在组合框里按下回车键 Enter，新的内容字符串就会被自动添加到下拉列表末尾。<br>
+    然后通过日期编辑类的 setCalendarPopup(true) 设置用户在编辑日期时，自动弹出日历，可供用户挑选日期。<br>
+    <br>
+    讲完构造函数内容，后面是四个槽函数的内容，首先看看接收性别组合框信号的槽函数：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_comboBoxGender_currentIndexChanged</span><span
+        style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#000000;">index</span><span
+        style=" color:#000000;">)</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">index</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&lt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;">   </span><span
+style=" color:#008000;">//index</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">可能</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">-1，表示用户没有选，或者条目全被删除了</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//直接返回</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//打印信息</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"性别："</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">comboBoxGender</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">itemText</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">index</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    注意槽函数参数里的 index 有可能是 -1 ，如果用户没有选条目，或者条目全部被删了，参数值就是 -1。<br>
+    如果 index 是 -1，那么不处理。<br>
+    如果是正常的序号，那么根据序号获取当前条目的文本 ui-&gt;comboBoxGender-&gt;itemText(index)，然后打印到输出面
+    板。<br>
+    <br>
+    第二个槽函数是接收职业组合框文本变化信号的：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_comboBoxJob_currentTextChanged</span><span style=" color:#000000;">(</span><span
+        style=" color:#808000;">const</span><span style=" color:#c0c0c0;"> </span><span
+        style=" color:#800080;">QString</span><span style=" color:#c0c0c0;"> </span><span
+        style=" color:#000000;">&amp;</span><span style=" color:#000000;">arg1</span><span
+        style=" color:#000000;">)</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//不是基于序号的，直接得到了新的文本</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"职业"</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">arg1</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    因为参数 arg1 就是组合框新的文本，所以直接打印就行了。<br>
+    <br>
+    第三个槽函数是接收日期变化信号的：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_dateEdit_dateChanged</span><span style=" color:#000000;">(</span><span
+        style=" color:#808000;">const</span><span style=" color:#c0c0c0;"> </span><span
+        style=" color:#800080;">QDate</span><span style=" color:#c0c0c0;"> </span><span
+        style=" color:#000000;">&amp;</span><span style=" color:#000000;">date</span><span
+        style=" color:#000000;">)</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">date</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">toString</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"yyyy-MM-dd"</span><span
+style=" color:#000000;">);</span><span style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//参数是日期字符串格式</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//yyyy</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">是四位数年份，MM</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">是两位数月份，dd</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">是两位数日子，比如</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"2000-01-01"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    QDate 有非常实用的 toString() 函数，将日期转换成可读的字符串，这个函数参数里是字符串形式的日期格式模板：<br>
+    yyyy 是四位数年份，MM 是两位数月份，dd 是两位数日子，toString() 函数实际得到的日期字符串就如 "2000-01-01" 形式。<br>
+    toString() 函数还有其他格式模板，具体可以查看 Qt 帮助文档里面关于 QDate、QTime、QDateTime 三个类的文档。<br>
+    <br>
+    最后一个槽函数接收按钮点击信号，获取各个输入控件的内容，然后弹窗显示：<br>
+    <div class="code"> <span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_pushButtonCommit_clicked</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strResult</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//结果字符串</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取姓名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strResult</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"姓名：%1\r\n"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditName</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//性别</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strResult</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"性别：%1\r\n"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">comboBoxGender</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">currentText</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//职业</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strResult</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"职业：%1\r\n"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">comboBoxJob</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">currentText</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//生日</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strResult</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"生日：%1\r\n"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">dateEdit</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">date</span><span style=" color:#000000;">().</span><span
+style=" color:#000000;">toString</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//QDate::toString()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">如果不带参数格式，自动按照本地化语言的日期格式返回字符串</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//额外功能，根据当前时间和用户生日，计算用户当前岁数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QDateTime</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">dtCur</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QDateTime</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">currentDateTime</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//计算岁数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nYears</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">dtCur</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">date</span><span style=" color:#000000;">().</span><span
+style=" color:#000000;">year</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">-</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">dateEdit</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">date</span><span style=" color:#000000;">().</span><span
+style=" color:#000000;">year</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strResult</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"岁数：%1"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">nYears</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//显示消息框</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">information</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"信息"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strResult</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    该函数首先获取姓名单行编辑器的文本，并添加到结果字符串 strResult , 格式化字符串里 "\r\n" 是回车换行的意思。<br>
+    然后用组合框的 currentText()
+    直接获取性别组合框的字符串并添加到结果字符串。组合框除了根据序号获取某个条目字符串，其实获取当前字符串的内容用 currentText() 更方便。<br>
+    接下来也是用 currentText() 函数获取职业组合框的当前文本，并添加到结果字符串。<br>
+    对于生日的日期编辑器，获取日期编辑器的日期是&nbsp; date() 函数，用 QDate::toString()
+    函数变成可读的字符串添加到结果字符串。如果 QDate::toString()
+    函数不带参数，那么默认会根据操作系统本地化的语言习惯，生成日期字符串并返回。<br>
+    <br>
+    除了四个输入控件的内容。另外还计算了用户的岁数。用静态函数 QDateTime::currentDateTime() 可以获取操作系统本地时间。<br>
+    岁数计算比较简单，就是将系统时间的年份减去用户生日的年份，得到用户岁数，也添加到结果里。<br>
+    最后是用消息框弹窗显示结果字符串信息。<br>
+    <br>
+    例子的代码就上面那些，接下来生成运行例子，看看效果：<br>
+    <center><img src="images/ch05/ch05-04-10.png" alt="run1"></center>
+    因为职业组合框是可以编辑的，在该组合框里手动输入 "打更的"，然后按回车键，就会有新的条目 "打更的" 自动添加到该组合框的下拉列表里面。注意输入一个新
+    职业后，要按回车键，不按回车键就不会自动添加到下拉列表。<br>
+    然后我们看看日期编辑器自带的日历样子：<br>
+    <center><img src="images/ch05/ch05-04-11.png" alt="run2"></center>
+    点击界面最下面的 "提交" 按钮，会弹出一个消息框，里面有本地化的日期和我们计算的岁数：<br>
+    <center><img src="images/ch05/ch05-04-12.png" alt="run3"></center>
+    如果 QDate::toString() 函数不带参数，就是默认用本地化语言习惯转换日期字符串，图上看到的就是 "星期二 一月 20
+    1970"，转换的是简体汉字的星期和月份。消息框最下面一行是计算的岁数 45 ，就是年份差值 2015 - 1970 。<br>
+    <br>
+    <div class="os2">5.4.4 卖盒饭示例</div>
+    <br>
+    上个例子主要学习了组合框和日期编辑器的使用，本小节的卖盒饭例子是利用浮点计数器来表示盒饭的单价，就是每份盒饭多少钱，利用整数计数器和滑动条同步表示盒饭的
+    份数，然后计算总价钱是多少。<br>
+    盒饭的名称是列在组合框下拉列表里面，每个条目除了盒饭名称，条目内部还对应一个用户数据，保存盒饭的单价，这样用户选择某个盒饭名称的时候，盒饭单价就自动显示
+    到浮 点计数器里。不过浮点计数器的单价没有定死，可以临时调整。下面就开始这个卖盒饭的示例学习。<br>
+    <br>
+    重新打开 QtCreator，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>
+    ①项目名称 snacks，创建路径 D:\QtProjects\ch05，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    建好项目之后，打开窗体 widget.ui 文件，进入设计模式，按照下图拖入控件：<br>
+    <center><img src="images/ch05/ch05-04-13.png" alt="ui" width="800"></center>
+    图上是四行控件，第一行是标签和组合框，标签的文本为 "盒饭"，组合框的对象名 objectName 为 comboBoxSnacks。<br>
+    第二行是标签和浮点计数器，标签的文本为 "单价"，浮点计数器的对象名 objectName 为 doubleSpinBoxPrice。<br>
+    第三行是标签和整数计数器、水平滑动条，标签的文本为 "份数"，整数计数器的对象名 objectName 为 spinBoxCount，水平滑动条的对象名
+    objectName 为 horizontalSlider。<br>
+    第四行是普通按钮控件和单行编辑控件，按钮的文本为 "计算总价"，按钮 objectName 为 pushButtonCalc，单行编辑控件的
+    objectName 为 lineEditTotal。<br>
+    图上左边的标签控件和按钮的尺寸为 75*25，其他控件尺寸都是
+    100*25，这样比较好对齐，调整各个控件位置，让控件尽量像图上对齐了，只有水平滑动条是突出来放着的。 <br>
+    <br>
+    盒饭组合框的内容等会用程序代码填充，因为我们会把盒饭的价钱也填充到盒饭条目里面，作为条目的用户数据保存着。<br>
+    当用户选择某个盒饭之后，从盒饭条目的用户数据获取单价，然后设置单价的浮点计数器数值。<br>
+    对于份数的整数计数器和水平滑动条，可以通过整数计数器右边上下箭头调整，也可以拖动滑动条的滑块改变份数，整数计数器和滑动条通过信号和槽机制同步。<br>
+    点击 "计算总价" 按钮会将 单价 * 份数，得到的总价钱显示到单行编辑器里面。<br>
+    <br>
+    程序的主要功能就是这些，下面添加两个槽函数，实现我们需要的功能。<br>
+    首先为盒饭组合框添加 currentIndexChanged(int) 信号对应的槽函数：<br>
+    <center><img src="images/ch05/ch05-04-14.png" alt="slot1"></center>
+    因为需要用组合框条目的序号获取该条目的用户数据，所以选择参数为 int 的序号变化信号。<br>
+    <br>
+    然后为 "计算总价" 按钮添加普通的 clicked() 信号对应的槽函数：<br>
+    <center><img src="images/ch05/ch05-04-15.png" alt="slot2"></center>
+    另外，之前说了要对盒饭份数的计数器和滑动条同步，这会在后续代码实现，没有直接从界面里编辑。<br>
+    添加上面两个槽函数之后，保存界面文件，回到代码编辑模式，进行实际功能代码的编写。<br>
+    头文件 widget.h 的内容是自动生成的，不需要手动修改，下面贴出来仅仅是方便读者对照看看：<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>WIDGET_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">WIDGET_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_comboBoxSnacks_currentIndexChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span>index<span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonCalc_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre>
+    </div>
+    我们打开 widget.cpp 文件，添加需要的功能代码。首先是包含的头文件和构造函数内容：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//添加盒饭组合框条目</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">comboBoxSnacks</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addItem</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"番茄鸡蛋"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">8.50</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">comboBoxSnacks</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addItem</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"土豆烧肉"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">10.00</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">comboBoxSnacks</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addItem</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"鱼香肉丝"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">10.00</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">comboBoxSnacks</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addItem</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"青椒鸡蛋"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">8.50</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">comboBoxSnacks</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addItem</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"地三鲜"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">9.00</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置盒饭单价的范围和步进</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">doubleSpinBoxPrice</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setRange</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">0.00</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">100.00</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">doubleSpinBoxPrice</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setSingleStep</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">1.00</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置单价的后缀</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">元"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">doubleSpinBoxPrice</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setSuffix</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">元"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置份数计数器的范围和步进</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">spinBoxCount</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setRange</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">0</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">100</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">spinBoxCount</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setSingleStep</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">1</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置份数滑动条的范围和步进</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">horizontalSlider</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setRange</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">0</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">100</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">horizontalSlider</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setSingleStep</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">1</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置滑动条的刻度显示和刻度间隔</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">horizontalSlider</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setTickPosition</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QSlider</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">TicksBothSides</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">horizontalSlider</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setTickInterval</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">10</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//同步份数的计数器和滑动条</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">connect</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">spinBoxCount</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SIGNAL</span><span
+style=" color:#000000;">(</span>valueChanged<span style=" color:#000000;">(</span><span
+style=" color:#808000;">int</span><span style=" color:#000000;">)),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">horizontalSlider</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SLOT</span><span
+style=" color:#000000;">(</span>setValue<span style=" color:#000000;">(</span><span
+style=" color:#808000;">int</span><span style=" color:#000000;">)));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">connect</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">horizontalSlider</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SIGNAL</span><span
+style=" color:#000000;">(</span>valueChanged<span style=" color:#000000;">(</span><span
+style=" color:#808000;">int</span><span style=" color:#000000;">)),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">spinBoxCount</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SLOT</span><span
+style=" color:#000000;">(</span>setValue<span style=" color:#000000;">(</span><span
+style=" color:#808000;">int</span><span style=" color:#000000;">)));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    头文件包含就添加了调试输出类 &lt;QDebug&gt; ，程序用到的控件类的头文件都是在 ui_widget.h
+    里面，所以不用自己添加各个控件类的头文件。<br>
+    构造函数里，首先用组合框的 addItem() 函数添加了五个盒饭的名字和对应的单价，单价会存到条目的用户数据里面，以后就能根据组合框条目序号查询用户数
+    据。<br>
+    <br>
+    然后对表示单价的浮点计数器进行了设置，单价下限 0.00，上限 100.00，步进 1.00。浮点计数器的取值范围就是 0.00 到
+    100.00，默认的精度是小数点 2 位。浮点计数器右边有上下箭头，点击箭头会以步进 1.00 增加或减少。<br>
+    盒饭的计价是有单位的，就是人名币 " 元"，元字前面加了个空格方便看数字和单位。不论是浮点计数器还是整数计数器都可以设置前缀、后缀，这里是为单价添加了后
+    缀单位 setSuffix(tr(" 元")) 。<br>
+    <br>
+    接下来是份数的整数计数器和滑动条设置代码，将整数计数器和滑动条的范围都设置为 0 到 100，步进为 1。<br>
+    滑动条默认是不显示刻度的，因此这里手动设置滑动条显示刻度的模式，setTickPosition(QSlider::TicksBothSides)，就是滑
+    动线两边都显示刻度，然后设置刻度的数值间距为 10，即 setTickInterval(10)。因为取值为 0 到 100，所以每隔 10
+    就画一根刻度，实际显示的是 11 根刻度线，起点和终点都有刻度线。<br>
+    <br>
+    构造函数最后两句 connect 函数调用是用于同步份数的计数器和滑动条数值，<br>
+    第一句 connect，如果计数器的数值变了，滑动条会设置为一样的新值；<br>
+    第二个 connect，如果滑动条的数值变量，计数器会设置为一样的新值。<br>
+    因此，不论哪个数值变化，另一个都会同步。<br>
+    不用担心信号变化的循环传递，比如：<br>
+    计数器数值改变，发送 QSpinBox::valueChanged(int)，滑动条设置新值 QSlider::setValue(int)；<br>
+    这时候滑动条设置新值也会触发自己的 QSlider::valueChanged(int)，然后计数器 QSpinBox::setValue(int)
+    又会重新接收到这个数值，但是这个新值与计数器的当前数值一样，就不会再触发值变化的信号。<br>
+    Qt 库中 setValue() 这类函数都会对接收的数值与原本的数值做对比，如果是一样的就直接返回，而不做其他操作。这样能避免同样数值传递导致的
+    信号-槽-信号-槽 死循环。<br>
+    <br>
+    构造函数代码讲完了，接下来是盒饭组合框的槽函数：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_comboBoxSnacks_currentIndexChanged</span><span
+        style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#000000;">index</span><span
+        style=" color:#000000;">)</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">index</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&lt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;">   </span><span
+style=" color:#008000;">//序号为负数不处理</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//正常序号</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">double</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">dblPrice</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">comboBoxSnacks</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">itemData</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">index</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">toDouble</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置单价的浮点计数器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">doubleSpinBoxPrice</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setValue</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">dblPrice</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//打印当前的盒饭名和单价</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">comboBoxSnacks</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">currentText</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#008000;">"\t"</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">dblPrice</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    这个槽函数先判断序号是否为负数，如果是负数就直接返回不处理。<br>
+    对于正常序号，获取该序号条目的用户数据，是用 itemData(index) 函数，这个函数返回 Qt 通用变量类 QVariant
+    对象，可以用一系列的 to*** 函数把 QVariant 对象转为自己需要的变量类型，这里用的是 toDouble()。<br>
+    然后将得到的双精度浮点数 dblPrice 设置给表示单价的浮点计数器，显示盒饭的单价。<br>
+    该槽函数最后一句是打印组合框的当前文本和单价。<br>
+    <br>
+    最后一个槽函数是接收 "计算总价" 按钮点击信号的：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_pushButtonCalc_clicked</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">double</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">dblTotal</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">doubleSpinBoxPrice</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">value</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#000000;">*</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">spinBoxCount</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">value</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置单行编辑控件显示文本</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditTotal</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"%1</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">元"</span><span style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">dblTotal</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    这个槽函数比较简单，获取单价的浮点计数器和份数的整数计数器数值，将它们相乘，得到总价钱，然后显示到单行编辑控件里面，总价钱也带了单位 " 元"。<br>
+    <br>
+    例子代码就是上面那些，现在来生成运行例子看看：<br>
+    <center><img src="images/ch05/ch05-04-16.png" alt="run"></center>
+    选择盒饭的名字，然后单价浮点计数器会自动修改为该盒饭的单价。<br>
+    份数的整数计数器可以设置份数，或者拖动右边的滑动条也可以方便地设置份数。<br>
+    点击 "计算总价" 按钮，就会计算得到 盒饭单价 * 份数 的总价，显示在单行编辑控件里。<br>
+    其实例子的单价浮点计数器和总价单行编辑控件，没有设置为只读的，可以临时改价钱的，当作讨价还价吧。<br>
+    本节的内容就到这，下节示范几个简单的显示控件。<br>
+    <br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch05-03.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch05-05.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

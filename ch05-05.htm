@@ -3,11 +3,9 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <title>ch05-05</title>
-    
-<link href="css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-
-<script src="thumbnailviewer.js" type="text/javascript">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -15,26 +13,1835 @@
 * Visit http://www.dynamicdrive.com/ for full source code
 ***********************************************/
 
-</script>
-
-
-  </head>
-  
-  
-<div class="os1">5.5 显示类的控件 </div>
-<br />
-显示类的控件 
-<br />
-<br />
-<br />
-
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch05-04.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch05-06.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+</script> </head>
+  <body style="                      background-color: white;">
+    <div class="os1">5.5 显示类的控件 </div>
+    <br>
+    本节显示类控件是指作为显示用途的控件，本节先对 Qt 设计师里面的显示类控件做个简要介绍，然后详细讲解 QLabel
+    的功能，因为标签控件是最常用到的。显示类的控件有简单的，也有很复杂的，例子代码是展示简单显示控件的用途，本节有两个示例，一个是用标签控件显示图片的例子，第二个是
+    电子钟的例子。 <br>
+    <br>
+    <div class="os2">5.5.1 显示控件概览</div>
+    <br>
+    在 Qt 设计师左边控件列表里可以看到如下图所示的显示控件：<br>
+    <center><img src="images/ch05/ch05-05-01.png" alt="display"></center>
+    下面概括介绍图上标出的各个显示控件：<br>
+    （1）标签控件 QLabel<br>
+    标签控件毫无疑问是最常用的，本教程第二章都是拿标签控件作为显示的例子，但之前只是用，没有全面地介绍这个控件类，我们在后面 5.5.2 节专门讲
+    QLabel。<br>
+    <br>
+    （2）丰富文本浏览控件 QTextBrowser<br>
+    QTextBrowser 就是 QTextEdit 的只读版本，并且添加了额外的浏览器的功能，这个类在 5.3.3 节已经讲过了。<br>
+    <br>
+    （3）图形视图 QGraphicsView<br>
+    这是专门用于绘制图形的视图类，它的内部工作原理也是遵循 View/Modal 框架的，QGraphicsView 类是属于视图显示的部分，而内部模型是
+    QGraphicsScene，绘图场景类内部可以添加各种图形，如线条、矩形、多边形，另外还可以自定义绘图条目
+    QGraphicsItem，本教程有图形图像专题，等到该专题的章节再详细介绍。<br>
+    <br>
+    （4）日历控件 QCalendarWidget<br>
+    前面 5.4 节讲过日期编辑器有自动弹出日历的功能，弹出的其实就是 QCalendarWidget 日历控件，QCalendarWidget
+    一般只用于日历显示。日历控件常用的属性是 selectedDate，就是选中的高亮的日子，该属性访问函数为：<br>
+    <div class="code">QDate selectedDate() const</div>
+    <div class="code">void setSelectedDate(const QDate &amp; date)</div>
+    用户是可以从日历界面自己选中日子的，选中日子变化时，发送信号：<br>
+    <div class="code">void selectionChanged()</div>
+    日历控件默认是不显示日子列表的网格，可以通过属性 gridVisible 改变是否显示网格的特性，访问函数为：<br>
+    <div class="code">bool isGridVisible() const</div>
+    <div class="code">void setGridVisible(bool show)</div>
+    日历控件因为有一个月的日子列表，比较占界面的空间，如果涉及到日子编辑，建议用日期编辑器，日期编辑器也是可以弹出日历的，日期编辑器占的地方也比较小。<br>
+    <br>
+    （5）LCD 数字显示 QLCDNumber<br>
+    这里的 LCD 数字显示控件就是比较传统的电子表、计算器等液晶显示器，也俗称 888 显示器，每个数字都是通过部分 8
+    的笔画来显示。QLCDNumber 的属性及设置函数、描述如下表所示：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 140px;" align="center"><b>属性</b></td>
+          <td style="width: 280px;" align="center"><b>设置函数</b></td>
+          <td align="center"><b>描述</b></td>
+        </tr>
+        <tr>
+          <td><b>digitCount</b></td>
+          <td>void setDigitCount(int)</td>
+          <td>数字的位数限定，这个控件类不限定数值大小，只限定数的位数。</td>
+        </tr>
+        <tr class="d1">
+          <td><b>segmentStyle</b></td>
+          <td style="height: 30px;">void setSegmentStyle(SegmentStyle)</td>
+          <td>设置笔画线段的显示风格。SegmentStyle 是枚举类型，有三种，默认是QLCDNumber::Filled </td>
+        </tr>
+        <tr>
+          <td><b>intValue 和<br>
+              value </b></td>
+          <td>void display(int num) <br>
+            void display(double num)<br>
+            void display(const QString &amp; s) </td>
+          <td> 既可以获取整型数值 intValue()，也可以获取浮点数值 value()。数值的设置函数不叫 set*，而是
+            display() 函数。 </td>
+        </tr>
+        <tr class="d1">
+          <td><b>smallDecimalPoint</b></td>
+          <td> void setSmallDecimalPoint(bool) </td>
+          <td> 小数点的显示方式，默认情况下该属性为 false，小数点会占一个数字位。如果设置函数参数为
+            true，小型小数点就显示在数字之间的缝隙，而不会单独占一位。 </td>
+        </tr>
+        <tr>
+          <td><b>mode</b></td>
+          <td> void setMode(Mode) </td>
+          <td> 设置显示的数字类型，比如十进制、二进制等，默认是十进制 QLCDNumber::Dec。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    关于上面属性表格，再说明一下，属性的设置函数上面列举了，而属性的获取函数与属性名一样，所以没列。<br>
+    <br>
+    setSegmentStyle() 函数用于设置数字笔画的显示风格，显示风格 SegmentStyle 有三个枚举常量：<br>
+    ①QLCDNumber::Outline，用背景色绘制笔画，这个显示风格其实看不清数字，不建议用。<br>
+    ②QLCDNumber::Filled，用背景色填充每个笔画的边框，笔画内部用前景色绘制。在控件比较小时，每个数字位也比较小，笔画比较细，这个显示风格就
+    看不清数字，因为几乎全是用背景色画笔画。如果控件比较大，那么前景色绘制的部分就比较清晰。如果控件比较小，也不建议用这个风格。<br>
+    ③QLCDNumber::Flat，笔画全部用前景色填充，笔画的边框也是一样的前景色，所以称为扁平风格，这个显示风格最推荐使用，笔画非常清晰。<br>
+    <br>
+    LCD 数字显示控件的数值，有两个属性，intValue 是整数类型，value
+    是双精度浮点数类型，这个控件类不限定数值的大小，只限定显示的数字位数。因为是数字显示控件，不是编辑控件，它的显示通过三个 display()
+    函数设置，使用 QString 为参数的 display() 函数，除了显示数字和小数点，还能显示一些能支持的字符，比如
+    字母O/数字0、S/5、g/9、负号、小数点、十六进制数、冒号、度数（°）等。<br>
+    <br>
+    LCD 数字显示控件的工作模式 mode 有四种，QLCDNumber::Hex 是十六进制、QLCDNumber::Dec
+    是十进制、QLCDNumber::Oct 是八进制、QLCDNumber::Bin 是二进制，默认的模式是十进制的。QLCDNumber
+    的功能基本围绕以上属性展开，弄清楚属性之后，使用该类控件就比较简单了。<br>
+    <br>
+    （6）进度条 QProgressBar<br>
+    进度条在文件的网络上传和下载过程中经常见到，因为某一个事情比较耗费时间，需要用进度条显示该事件完成的进度，一般显示进度的百分比，比如 78% 。进度条
+    QProgressBar 常用的属性、设置函数和描述如下表（不常用的略过了，详细情况可以查看帮助文档）：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 140px;" align="center"><b>属性</b></td>
+          <td style="width: 280px;" align="center"><b>设置函数</b></td>
+          <td align="center"><b>描述</b></td>
+        </tr>
+        <tr>
+          <td><b>orientation</b></td>
+          <td>void setOrientation(Qt::Orientation)</td>
+          <td>显示的方向，Qt::Horizontal 是水平进度条（默认值），Qt::Vertical 是垂直进度条。</td>
+        </tr>
+        <tr class="d1">
+          <td><b>format</b></td>
+          <td style="height: 30px;">void setFormat(const QString &amp; format)</td>
+          <td>设置显示文本的格式，默认格式是 "%p%"，就是百分比显示，如 78% </td>
+        </tr>
+        <tr>
+          <td><b>textVisible</b></td>
+          <td>void setTextVisible(bool visible) </td>
+          <td> 决定是否显示百分比的文本，一般是显示的，例外的是苹果系统风格从不显示进度条文本的。 </td>
+        </tr>
+        <tr class="d1">
+          <td><b>maximum</b></td>
+          <td>void setMaximum(int maximum)</td>
+          <td> 进度条数值的上限。</td>
+        </tr>
+        <tr>
+          <td><b>minimum</b></td>
+          <td>void setMinimum(int minimum)</td>
+          <td> 进度条数值的下限。 </td>
+        </tr>
+        <tr class="d1">
+          <td><b>value</b></td>
+          <td>void setValue(int value)</td>
+          <td> 进度条当前数值。</td>
+        </tr>
+        <tr>
+          <td><b>text</b></td>
+          <td>无</td>
+          <td> 进度条文本通过 format 属性设置，可以获取文本 text()，但不能直接设置文本。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    首先要明确的是进度条的数值设置，默认下限是 0，默认上限是 100，这样当数值 value 为 24 时，显示的文本就是 %24
+    ，通过下限、上限、当前数值来计算需要显示的百分比文本，而不能直接设置显示的文本。<br>
+    数值的范围由 setMaximum() 和 setMinimum() 函数限定，或者用如下范围设置函数一次设置：<br>
+    <div class="code">void setRange(int minimum, int maximum)</div>
+    <br>
+    显示的文本格式通过 setFormat() 函数来控制，参数字符串默认是 "%p%" ，意义为：<br>
+    第一个 "%p" 是格式串占位符，指计算百分比数值，第二个 "%" 就是指百分号本身，这样显示的就是如 "24%" 字样。<br>
+    如果希望显示当前数值本身，而不是百分比，那么用格式串占位符 "%v" ，就代表当前的 value 值。<br>
+    另外还有一个格式串占位符是 "%m" ，代表上限减去下限的差额。<br>
+    <br>
+    三个格式串占位符是可以混搭的，比如 "%v/%m" 就是既显示当前值，也显示总差额，比如显示为 "24/100" 。<br>
+    除去三个占位符的其他字符，会照原样显示，比如 / 字符。再比如 "%v MB/%m MB"，实际显示为 "24 MB/100 MB" 。<br>
+    <br>
+    默认是显示文本的，调用函数 setTextVisible(false) 就会不显示文本，只显示进度条本身。<br>
+    orientation 属性决定进度条的显示方向，水平进度条最为常见，对于垂直进度条的文本显示，有个例外的属性 textDirection，这个
+    textDirection 只对垂直进度条有效，表示垂直进度条的文本显示方向，其设置函数为 <br>
+    <div class="code">void setTextDirection(QProgressBar::Direction
+      textDirection) </div>
+    QProgressBar::TopToBottom 表示从顶部到底部显示文本，QProgressBar::BottomToTop
+    是从底部到顶部显示文本。<br>
+    <br>
+    （7）线条 Line<br>
+    线条控件就是纯粹作为分隔用途的，比如有多个用途的控件，可以用线条 Line 分隔一下。<br>
+    水平线条和垂直线条的类虽然在设计师里显示的类名叫 Line，实际上没有这个 Line 类。<br>
+    线条其实是用 QFrame 类模拟实现的，水平线条代码举例如下：<br>
+    <div class="code"> line = new QFrame(Form); <br>
+      line-&gt;setObjectName(QStringLiteral("line")); <br>
+      line-&gt;setGeometry(QRect(60, 60, 118, 3)); <br>
+      line-&gt;setFrameShape(QFrame::HLine); <br>
+      line-&gt;setFrameShadow(QFrame::Sunken); </div>
+    参数里的 Form 是父窗口指针，QFrame::HLine 就是画水平线条，QFrame::Sunken 是指绘制一个凹下去效果的三维阴影。<br>
+    垂直线条的代码举例如下：<br>
+    <div class="code">line_2 = new QFrame(Form); <br>
+      line_2-&gt;setObjectName(QStringLiteral("line_2")); <br>
+      line_2-&gt;setGeometry(QRect(70, 100, 3, 61)); <br>
+      line_2-&gt;setFrameShape(QFrame::VLine); <br>
+      line_2-&gt;setFrameShadow(QFrame::Sunken);</div>
+    水平线条和垂直线条属性 orientation 的取值不一样，Horizontal 是水平线条，Vertical 是垂直线条，其他都是类似的。Qt
+    设计师会根据线条的方向、位置、粗细，计算出线条占用的矩形，然后设置给 QFrame 对象。<br>
+    QFrame 是专门用于绘制边框的类，一般有边框特效的控件就是从 QFrame 派生的，本节标签控件、进度条控件、LCD 数字显示控件 的基类就是
+    QFrame。<br>
+    <br>
+    （8）OpenGL 三维绘图控件 QOpenGLWidget<br>
+    QOpenGLWidget 这个控件非常新，是从 Qt 5.4 版本才开始有的，这个控件用于在普通窗体里面进行 OpenGL
+    绘图。本教程有专门的图形图像专题，等到该专题的 OpenGL 3D 绘图章节再介绍这个控件。<br>
+    <br>
+    （9）QtQuick 1 控件 QDeclarativeView<br>
+    这个控件是从 Qt 4 保留而来的，目前 QtQuick 1 已经弃用了，所以不建议用这个控件了。在 Qt 设计师独立程序能看到这个控件，而在
+    QtCreator 设计模式已经没有这个控件了。<br>
+    <br>
+    （10）QtQuick 2 控件 QQuickWidget<br>
+    QQuickWidget 是 QtQuick 2 集成到普通窗体程序里的控件，是目前建议使用的控件。因为本教程暂时没有打算编写 QtQuick 2 和
+    QML 相关内容，所以也不讲这个控件。关于这个控件的使用方法请参考 QQuickWidget 帮助文档。<br>
+    <br>
+    （11）网页浏览视图 QWebView<br>
+    之前介绍过 QTextBrowser 是一个不完全的浏览器，而 QWebView 则是一个完整的浏览器控件，支持 HTML
+    全部特性，当然也有网络访问功能。QWebView 位于 Qt 的 webkitwidgets 模块里，使用该控件需要添加该模块到 *.pro
+    文件里面。在 Qt 5 之后，网页浏览相关的控件和类都基于 Chrome 核心了，所以效率是比较高的。在本教程的网络专题里面，专门讲这个浏览器控件。<br>
+    <br>
+    <div class="os2">5.5.2 QLabel 类</div>
+    <br>
+    之前用过很多次标签控件，比如显示丰富文本，利用 Qt Style Sheet 设置前景色、背景色，为伙伴控件设置快捷键等等，这里系统地把 QLabel
+    类讲解一下。<br>
+    QLabel 主要用于显示文本和图片，图片既可以是静态的 BMP、JPG、PNG 等，也可以是动态图格式如
+    GIF、MNG。标签控件是单纯用于显示的，没有编辑文本等用户交互功能，它的基类是 QFrame，意味着可以设置丰富的控件边框。<br>
+    QLabel 的构造函数有两个：<br>
+    <div class="code">QLabel(QWidget * parent = 0, Qt::WindowFlags f = 0)</div>
+    <div class="code">QLabel(const QString &amp; text, QWidget * parent = 0,
+      Qt::WindowFlags f = 0)</div>
+    parent 是父窗口指针，f 是标签控件的窗口标志位，在 Qt 帮助文档关于 QLabel 构造函数详细内容里，可以点击
+    Qt::WindowFlags 链接，有很多的窗口标志位，对应不同的显示效果和功能，具体参考相应的帮助文档，这里不列举了。<br>
+    第二个构造函数的 text 就是显示的文本字符串。<br>
+    <br>
+    QLabel 可显示的内容是很丰富的，下表是从 Qt 帮助文档取出来并翻译的，展示了各种内容的设置函数：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 140px;" align="center"><b>内容</b></td>
+          <td align="center"><b>设置方法</b></td>
+        </tr>
+        <tr>
+          <td><b>普通文本</b></td>
+          <td>传递 QString 字符串给 setText() 函数。</td>
+        </tr>
+        <tr class="d1">
+          <td><b>丰富文本</b></td>
+          <td>传递含有 HTML 标记的 QString 字符串给 setText() 函数。</td>
+        </tr>
+        <tr>
+          <td><b>像素图</b></td>
+          <td>传递一个 QPixmap 对象给 setPixmap() 函数。</td>
+        </tr>
+        <tr class="d1">
+          <td><b>短片</b></td>
+          <td>传递一个 QMovie 对象给 setMovie() 函数，QMovie 仅支持动态图，不是真的电影。</td>
+        </tr>
+        <tr>
+          <td><b>数字</b></td>
+          <td>传递一个 int 或 double 变量给 setNum() 函数，会显示普通的数字字符串。</td>
+        </tr>
+        <tr class="d1">
+          <td><b>无</b></td>
+          <td>等同于设置一个空字符串，也可以用函数 clear() 清空所有内容。</td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    （1）文本设置<br>
+    首先从文本相关的函数开始，setText() 函数根据参数里的 QString 字符串内容，自动判断有没有 HTML 标记，如果是
+    HTML丰富文本，就按照丰富文本格式显示，否则按照普通无格式文本显示。除了自动判断文本格式，还可以用<br>
+    <div class="code">void setTextFormat(Qt::TextFormat)</div>
+    明确指定当前文本格式，可选的有三种格式，默认是 Qt::AutoText，自动判断；如果设置为
+    Qt::PlainText，就是强制作为普通无格式文本显示；如果设置为 Qt::RichText，那就一定作为丰富文本格式显示。<br>
+    <br>
+    对于丰富文本里带有的超链接文本，默认情况下 QLabel
+    是不会根据用户点击打开超链接的，如果希望用户点击超链接之后，自动用系统浏览器打开超链接，那么可以设置 openExternalLinks 属性为
+    true：<br>
+    <div class="code">void setOpenExternalLinks(bool open) </div>
+    <br>
+    对于长文本显示，将标签控件设置得足够大，就可以显示多行文本，标签控件默认不会自动换行，要让标签控件的文本换行，有两种方式：一是改变标签的文本内容，手动加
+    "\r\n" 或者 "&lt;br&gt;" 换行字符；另一种是设置 setWordWrap(true)，wordWrap 属性为 true
+    时，自动根据文本长度换行显示。<br>
+    <br>
+    （2）像素图设置<br>
+    然后是像素图 QPixmap 的显示，QPixmap
+    类是专门用于将图片文件或者用代码绘制的图形显示到屏幕上，凡是各种控件界面显示用到的图标、图片等，一般都先用 QPixmap
+    加载，然后设置给控件来显示。QPixmap 加载一个图片文件是非常简单的：<br>
+    <div class="code">bool QPixmap::​load(const QString &amp; fileName, const
+      char * format = 0, Qt::ImageConversionFlags flags = Qt::AutoColor)</div>
+    参数里第一个 fileName 是文件名，可以用绝对路径，也可以用相对路径。QtCreator
+    运行生成的程序时，相对路径是目标程序的工作路径，也就是影子构建路径，而不是源代码路径或 exe 文件路径，不清楚的读者请看 2.4 节末尾部分。<br>
+    参数第二个 format 是图片的格式字符串，可以不设置格式字符串，该函数会自动根据文件扩展名判断图片文件格式。Qt 支持的图片格式很多，主流的
+    BMP、JPG、PNG、XPM 等都支持，具体请查阅帮助文档索引 Reading and Writing Image Files。<br>
+    参数里第三个 flags 是像素图的颜色标志，默认的标志位是 Qt::AutoColor，如果图片的一个像素只占 1
+    bit，说明是黑白图，那么加载后是单色的黑白像素图，如果是彩色图，那就按照桌面设置的默认颜色深度来加载图片。<br>
+    flags 其他两个可选的标志位：对于 Qt::ColorOnly，就是全部当作彩色图，按照桌面设置的颜色深度（一般是真彩色）加载所有图片；对于
+    Qt::MonoOnly，就是全部转成单色的黑白图片加载。<br>
+    load() 函数如果加载成功就返回 true，否则返回 false。加载图片成功之后就可以将 QPixmap 对象设置给标签显示。<br>
+    <br>
+    （3）短片设置<br>
+    接下来是关于短片的显示，QMovie 类不是真的可以放电影，它其实仅支持无声的动态图格式，比如常见的 GIF 图，还有一种基于 PNG 的开源 MNG
+    动态图。因为是动态图，所以不是一次性加载的，没有 load
+    函数，而是通过设置文件名并播放的形式打开动态图。采取影片播放形式，首先是设置文件名，可以通过构造函数或者设置文件名函数指定：<br>
+    <div class="code">QMovie(const QString &amp; fileName, const QByteArray
+      &amp; format = QByteArray(), QObject * parent = 0)</div>
+    <div class="code">void QMovie::​setFileName(const QString &amp; fileName)</div>
+    构造函数里的 format 也是动态图格式，可以不指定格式字符串，QMovie 会根据文件扩展名自动判断格式。<br>
+    如果要判断指定的文件是否被支持，那么可以用后面的 error() 信号判断或者用下面函数判断动态图是否可用：<br>
+    <div class="code">bool QMovie::​isValid() const</div>
+    <br>
+    设置文件名之后，就可以利用标签控件的 setMovie() 函数把 QMovie 对象设置给标签，然后开始播放：<br>
+    <div class="code">void QMovie::​start() //槽函数，开始播放</div>
+    当然播放过程中，可以进行暂停或停止：
+    <div class="code">void QMovie::​setPaused(bool paused) //槽函数，bool参数控制暂停或继续</div>
+    <div class="code">void QMovie::​stop() //槽函数，停止播放，下次 start() 会从头播放</div>
+    <br>
+    播放过程中除了暂停、继续、停止等，还可以进行跳帧：<br>
+    <div class="code">bool QMovie::​jumpToNextFrame() //跳到下一帧</div>
+    <div class="code">bool QMovie::​jumpToFrame(int frameNumber) //跳到指定序号的帧</div>
+    跳帧的时候，有可能没有下一帧或者没有指定帧，跳转失败就会返回 false。<br>
+    动态图帧的总数可以用如下函数获取：<br>
+    <div class="code">int QMovie::​frameCount() const</div>
+    一般情况下，这个函数会返回正确的计数，但是注意，如果有些动态图格式不支持总帧数计数，那么这个函数会返回 0。<br>
+    <br>
+    获取当前帧号和帧的像素图，使用下面函数：<br>
+    <div class="code">int QMovie::​currentFrameNumber() const</div>
+    <div class="code">QPixmap QMovie::​currentPixmap() const</div>
+    播放过程中有几个重要的信号，如下所示：<br>
+    <div class="code">void QMovie::​error(QImageReader::ImageReaderError error)
+      //打开动态图出错时发的信号</div>
+    <div class="code">void QMovie::​finished()&nbsp; //播放结束信号</div>
+    <div class="code">void QMovie::​frameChanged(int frameNumber) //当前帧号变化信号</div>
+    <div class="code">void QMovie::​started()&nbsp; //开始播放的信号</div>
+    无论是用 start() 播放短片还是 jumpTo*** 函数跳帧，一定要在这些加载图片帧的函数之前，关联打开出错的 error()
+    信号，这样才能知道加载图片帧的时候是否出错以及错误原因。QImageReader::ImageReaderError
+    枚举类型请查看帮助文档，这里不列举了。<br>
+    <br>
+    动态图比较有意思的是自带循环计数，可以用如下函数获取循环次数：<br>
+    <div class="code">int QMovie::​loopCount() const</div>
+    如果返回值为 0，代表仅播放一次，不循环；而对于有些 GIF 图片，会返回 -1，代表无限循环播放。QMovie
+    还有其他设置播放速度、背景色、拉伸图片大小等函数，这里不列举了。<br>
+    <br>
+    （4）内容对齐、边框、伙伴设置<br>
+    上面讲了不少关于 QMovie 的内容，是因为后面例子用到了。现在回到 QLabel 类的介绍，无论是用标签显示文本还是图片，都可以设置内容的对齐方式：<br>
+    <div class="code">void QLabel::setAlignment(Qt::Alignment) </div>
+    默认的对齐方式是左对齐和垂直居中，当然也可以设置为其他的对齐方式，水平方向有：<br>
+    Qt::AlignLeft（左对齐）、Qt::AlignRight（右对齐）、Qt::AlignHCenter（水平居中）、
+    Qt::AlignJustify（两端对齐）。<br>
+    垂直方向的对齐有：<br>
+    Qt::AlignTop（从顶部起）、Qt::AlignBottom（从底部起）、Qt::AlignVCenter（垂直居中）、
+    Qt::AlignBaseline（基线对齐）。<br>
+    还有一个常量 Qt::AlignCenter，就是水平和垂直都居中，等同于 AlignVCenter | AlignHCenter。<br>
+    水平方向和垂直方向的标志为可以用 | 位或运算符同时启用。<br>
+    <br>
+    标签控件除了设置内部文本或图片的显示方式，因为基类是 QFrame，所以能设置丰富的边框格式，默认的标签是扁平的，没有边框，如果调用如下函数：<br>
+    <div class="code">void ​QFrame::​setFrameStyle(int style)</div>
+    就可以改变边框风格，比如 QFrame::Panel | QFrame::Sunken 就是三维凹槽风格的边框。具体的 style 参考基类
+    QFrame 的帮助文档。<br>
+    <br>
+    QLabel 最后一部分内容是关于伙伴快捷键的，在 QLabel 文本里面加上如 "&amp;P"
+    字样，然后把标签控件的伙伴设置为其他控件，就可以为伙伴设置快捷键 Alt+P 。例如：<br>
+    <div class="code"> QLineEdit *phoneEdit = new QLineEdit(this); <br>
+      QLabel *phoneLabel = new QLabel("&amp;Phone:", this); <br>
+      phoneLabel-&gt;setBuddy(phoneEdit); </div>
+    &nbsp; <br>
+    <div class="os2">5.5.3 图片浏览示例</div>
+    <br>
+    这个示例就是用 QLabel 控件做一个浏览图片的程序，因为图片有可能比较大，需要用到 QScrollArea
+    包裹标签控件，这样就能利用滚动区域显示大图。对于动态图，需要播放、停止等按钮，并通过一个水平滑动条展示动态图播放进度。大概的功能就是这些，下面开始这个例子的编
+    写。<br>
+    打开 QtCreator，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>
+    ①项目名称 imgshow，创建路径 D:\QtProjects\ch05，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    建好项目之后，打开窗体 widget.ui 文件，进入设计模式，按照下图拖入控件：<br>
+    <center><img src="images/ch05/ch05-05-02.png" alt="ui" width="800"></center>
+    首先把主界面窗体大小设置为 480*400，这样能容纳较大的标签控件。<br>
+    界面里第一行是一个标签控件，objectName 为 labelShow，文本内容清空，因为是用来显示图片用的。<br>
+    标签控件占用矩形 geometry 为 X：10，Y：10，宽度：461，高度：321，占据着窗体最大的一块地皮。<br>
+    之前提到要用滚动区域显示大图，现在 labelShow 的矩形是为后面代码里的滚动区域对象占据的，利用滚动区域显示大图。<br>
+    <br>
+    主界面第二行的控件是四个普通按钮，第一个按钮文本是 "打开图片"，objectName 为 pushButtonOpenPic；<br>
+    第二个按钮文本是 "打开动态图"，objectName 为 pushButtonOpenMov；<br>
+    第三个按钮文本是 "播放"，objectName 为 pushButtonStart；<br>
+    第四个按钮文本是 "停止"，objectName 为 pushButtonStop。<br>
+    调整四个按钮，让它们处于对齐状态，均匀分布在水平线上。<br>
+    主界面第三行控件是一个水平滑动条，objectName 为
+    horizontalSlider。这个水平滑动条适用于显示动态图播放进度的，因此与右边三个按钮对齐。<br>
+    <br>
+    主界面就是如图上设置，现在为四个按钮都添加 clicked() 信号对应的槽函数：<br>
+    <center><img src="images/ch05/ch05-05-03.png" alt="slot"></center>
+    添加四个按钮的槽函数之后，保存界面文件，回到代码编辑模式，添加例子需要的代码。<br>
+    首先是 widget.h 头文件的代码，需要增加新的槽函数和成员变量：<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>WIDGET_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">WIDGET_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QPixmap&gt;</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#008000;">//像素图</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QMovie&gt;</span><span style=" color:#c0c0c0;">   </span><span
+style=" color:#008000;">//动态图</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QImageReader&gt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//可以打开图片或者查看支持的图片格式</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//接收出错的信号</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">RecvPlayError</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QImageReader</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">ImageReaderError</span><span
+style=" color:#c0c0c0;"> </span>error<span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//接收播放时帧号变化</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">RecvFrameNumber</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span>frameNumber<span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonOpenPic_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonOpenMov_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonStart_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonStop_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//像素图指针</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QPixmap</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">m_pPixMap</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//动态图指针</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QMovie</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">m_pMovie</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//是否为动态图</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">bool</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_bIsMovie</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//动态图是否在播放中，如果在播放中，那么循环播放</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">bool</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_bIsPlaying</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//清除函数，在打开新图之前，清空旧的</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">ClearOldShow</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre>
+    </div>
+    在 widget.h 头文件新加了三个头文件包含，&lt;QPixmap&gt; 是像素图的头文件，&lt;QMovie&gt;
+    是动态图（短片）的头文件，&lt;QImageReader&gt; 是图片读取类的头文件，QMovie 类就是使用 QImageReader
+    读取动态图里一帧帧图像的，如果读取出错，就发出读取错误信号，信号里的参数是 QImageReader::ImageReaderError
+    类型，因此提前包含 &lt;QImageReader&gt; 。<br>
+    <br>
+    在 Widget 类声明里，我们手动添加两个公有槽函数，RecvPlayError()
+    是用于接收动态图播放错误的信号，RecvFrameNumber() 用于在动态图播放时更新水平滑动条。这两个信号的参数不是凭空想象的，而是根据 Qt
+    帮助文档里面 QMovie 类信号来确定的，要注意查阅 Qt 帮助文档。<br>
+    <br>
+    Widget 类声明里四个按钮的槽函数是刚才从设计模式添加的，这里不需要变动私有槽函数。然后我们在类声明里面添加私有成员变量：<br>
+    m_pPixMap 是用于保存像素图 QPixmap 对象的指针；<br>
+    m_pMovie 是用于保存动态图 QMovie 对象的指针；<br>
+    m_bIsMovie 用于标识是否处于动态图（短片）浏览模式；<br>
+    m_bIsPlaying 表示是否处于动态图的播放过程中。<br>
+    最后一个私有成员函数 ClearOldShow() 用于在打开新图之前，清理旧的像素图、动态图对象，并重置两个标志位变量。<br>
+    <br>
+    头文件内容就上面那些，下面为源文件 widget.cpp 添加实体功能代码，首先是头文件包含和构造函数部分：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QFileDialog&gt;</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#008000;">//打开文件对话框</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QScrollArea&gt;</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#008000;">//为标签添加滚动区域</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QMessageBox&gt;</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#008000;">//消息框</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//初始化成员变量</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_pPixMap</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">NULL</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_pMovie</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">NULL</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_bIsMovie</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">false</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_bIsPlaying</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">false</span><span style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取标签矩形</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QRect</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">rcLabel</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">labelShow</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">geometry</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//为标签添加滚动区域，方便浏览大图</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QScrollArea</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">pSA</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QScrollArea</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span><span
+style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//该对象交给主窗体自动管理，不用手动删除</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//把标签填充到滚动区域里</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">pSA</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">labelShow</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置滚动区域占据矩形</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">pSA</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setGeometry</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">rcLabel</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//打印支持的图片格式</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#800080;">QImageReader</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">supportedImageFormats</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//打印支持的动态图格式</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#800080;">QMovie</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">supportedFormats</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    widget.cpp 新包含的头文件有四个，调试类的头文件就不多说了，&lt;QFileDialog&gt;
+    是打开文件对话框的头文件，&lt;QScrollArea&gt; 是滚动区域的头文件，&lt;QMessageBox&gt; 是消息框的头文件。<br>
+    <br>
+    在构造函数里，首先对四个成员变量 m_pPixMap、m_pMovie、m_bIsMovie、m_bIsPlaying 进行初始化。<br>
+    <br>
+    然后是关于滚动区域的代码段，获取了标签控件 labelShow 占用的矩形 rcLabel ，<br>
+    新建了一个 QScrollArea 滚动区域对象，对象指针为 pSA ，pSA 父对象是主窗口，<br>
+    主窗口销毁时，子对象都会自动销毁，所以后面不需要手动 delete 这个 pSA 指向的对象。<br>
+    让滚动区域包裹标签，只需要一句&nbsp; pSA-&gt;setWidget(ui-&gt;labelShow) 搞定，<br>
+    滚动区域包裹标签之后，将滚动区域对象的矩形设置为原先标签占的矩形，这样主界面就能看到滚动区域对象了，<br>
+    标签控件会自动显示在滚动区域内部。<br>
+    构造函数里最后两句是打印支持的静态图格式和动态图格式。<br>
+    <br>
+    构造函数讲完了，下面是析构函数：<br>
+    <div class="code"><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+        style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//手动清空</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">ClearOldShow</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//原有的代码</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    析构函数内部调用了私有函数 ClearOldShow()，用于清理像素图对象和动态图对象。通常 Qt
+    的控件对象不需要自己清理，因为它们有父对象，父对象销毁时，子对象自动销毁。但是这里用到的像素图、动态图是我们自己的 new
+    的，它们其实没有父对象，所以手动清理了。<br>
+    <br>
+    私有的清理函数 ClearOldShow() 代码如下：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">ClearOldShow</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//清空标签内容</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">labelShow</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">clear</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//像素图不空就删除</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_pPixMap</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">NULL</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//删除像素图</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_pPixMap</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">   </span><span style=" color:#800000;">m_pPixMap</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">NULL</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//如果短片不为空，就删除</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_pMovie</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">NULL</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//如果正在播放则停止</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">m_bIsPlaying</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#800000;">m_pMovie</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">stop</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//删除动态图</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_pMovie</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_pMovie</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">NULL</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//标志位重置</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_bIsMovie</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">false</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_bIsPlaying</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">false</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    这个清理函数首先调用标签对象的 clear() 函数，清空标签显示的所有内容。<br>
+    如果像素图指针 m_pPixMap 不为空，那就删除像素图，并将指针置空。<br>
+    如果动态图指针 m_pMovie 不为空，先判断是否处于播放中，如果在播放中就先停止播放，然后把动态图对象删除，指针也置空。<br>
+    最后将两个标志位成员变量都重置为 false。<br>
+    ClearOldShow() 会在析构函数和新打开图片时调用，用于清理旧的像素图和动态图，并重置标志位。<br>
+    <br>
+    接下来是 "打开图片" 按钮的槽函数：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_pushButtonOpenPic_clicked</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strFileName</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//文件名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strFileName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QFileDialog</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">getOpenFileName</span><span style=" color:#000000;">(</span><span
+style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"打开静态图片"</span><span
+style=" color:#000000;">),</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">""</span><span
+style=" color:#000000;">,</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                               </span><span style=" color:#008000;">"Pictures</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">(*.bmp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">*.jpg</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">*.jpeg</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">*.png</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">*.xpm);;All</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">files(*)"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strFileName</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">())</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//文件名为空，返回</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//清空旧的图片或短片</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">ClearOldShow</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//打印文件名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strFileName</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//新建像素图</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_pPixMap</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QPixmap</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//加载</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_pPixMap</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">load</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strFileName</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//加载成功</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//设置给标签</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">labelShow</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setPixmap</span><span
+style=" color:#000000;">(*</span><span style=" color:#800000;">m_pPixMap</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//设置标签的新大小，与像素图一样大</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">labelShow</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setGeometry</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_pPixMap</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">rect</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//设置</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">bool</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">状态</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">m_bIsMovie</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">false</span><span style=" color:#000000;">;</span><span
+style=" color:#c0c0c0;">     </span><span style=" color:#008000;">//不是动态图</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">m_bIsPlaying</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">false</span><span style=" color:#000000;">;</span><span
+style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//不是动态图播放</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">else</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//加载失败，删除图片对象，返回</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_pPixMap</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">   </span><span style=" color:#800000;">m_pPixMap</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">NULL</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//提示失败</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">critical</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"打开失败"</span><span style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                              </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"打开图片失败，文件名为：\r\n%1"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">strFileName</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    先解释一下 QFileDialog::getOpenFileName() 静态函数，这个函数与之前 5.3.4 节
+    QFileDialog::getOpenFileUrl() 函数类似，本节的 QFileDialog::getOpenFileName()
+    用于获取真正的文件系统路径，而之前的 QFileDialog::getOpenFileUrl() 是获取文件 URL。
+    QFileDialog::getOpenFileName() 函数声明如下：<br>
+    <div class="code">QString QFileDialog::​getOpenFileName(QWidget * parent =
+      0, const QString &amp; caption = QString(), const QString &amp; dir =
+      QString(), const QString &amp; filter = QString(), QString *
+      selectedFilter = 0, Options options = 0)</div>
+    parent 是父窗口指针；<br>
+    caption 是打开文件对话框标题；<br>
+    dir 是初始显示的文件夹路径，QtCreator 运行程序时默认为工作路径（影子构建路径）；<br>
+    filter 是文件扩展名筛选格式串，与 5.3.4 介绍的是一样的；<br>
+    selectedFilter 是从多个筛选格式串默认选中一个；<br>
+    options 是打开文件对话框的选项，一般用不着。<br>
+    如果用户选择了正确的文件名，就返回有用的文件名字符串，否则返回空串。<br>
+    <br>
+    在上面的 on_pushButtonOpenPic_clicked() 槽函数里，打开文件对话框的父窗口是主界面 this，标题是 "打开静态图片"
+    ，初始显示的文件路径 ""，为空的，就是默认的工作路径开始，QtCreator 运行程序时的工作路径默认就是影子构建路径，筛选格式串为
+    "Pictures (*.bmp *.jpg *.jpeg *.png *.xpm);;All files(*)"
+    ，这个筛选格式串其实有两个，双分号前面的是正常的图片筛选字符串，双分号后面的是不筛选，所有文件都能看到。<br>
+    <br>
+    在获取图片文件名 strFileName ，先判断字符串是否为空，如果为空就返回，在文件名不为空的情况下，继续后面代码。<br>
+    得到确实存在的文件名之后，调用 ClearOldShow() 清空旧的内容，并打印新的文件名。<br>
+    <br>
+    清空旧的内容之后，我们新建一个 QPixmap 对象，指针存到 m_pPixMap，<br>
+    然后调用 m_pPixMap-&gt;load(strFileName) 尝试加载图片文件：<br>
+    如果加载成功，那就把像素图设置给标签对象，并将标签对象的矩形设置为与像素图的矩形一样大，并设置两个标志位成员变量都为 false，因为这里是处理静态图显
+    示的。<br>
+    如果加载失败，那么删除像素图，将该指针置空，然后弹出消息框提示打开出错。<br>
+    <br>
+    QMessageBox::critical() 与其他两个
+    QMessageBox::​information()、QMessageBox::​warning() 是完全类似的，只不过
+    QMessageBox::critical() 用于提示严重错误，图标一般是个红底 X 号。<br>
+    <br>
+    静态图片打开并显示的过程是比较简单的，因为不涉及到播放，下面来看看动态图的打开过程。<br>
+    "打开动态图" 按钮的槽函数内容相对较多，我们拆成三块来讲解，首先是函数头和文件名获取、判断：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_pushButtonOpenMov_clicked</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strFileName</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//文件名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strFileName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QFileDialog</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">getOpenFileName</span><span style=" color:#000000;">(</span><span
+style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"打开动态图片"</span><span
+style=" color:#000000;">),</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">""</span><span
+style=" color:#000000;">,</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                               </span><span style=" color:#008000;">"Movies</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">(*.gif</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">*.mng);;All</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">files(*)"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strFileName</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">())</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//文件名为空，返回</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//清除旧的图片或短片</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">ClearOldShow</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//打印文件名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">strFileName</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//新建动态图</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_pMovie</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QMovie</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strFileName</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//判断是否动态图文件可用</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_pMovie</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">isValid</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//不可用</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">critical</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"动态图不可用"</span><span style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                              </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"动态图格式不支持或读取出错，文件名为：\r\n%1"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">strFileName</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//清除</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_pMovie</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_pMovie</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">NULL</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//不可用就直接返回</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//待续</span></pre>
+    </div>
+    槽函数开始位置，也是用 QFileDialog::getOpenFileName() 静态函数获取动态图文件名 strFileName
+    ，这里的筛选格式串 "Movies (*.gif *.mng);;All files(*)"
+    也是用双分号隔开的两段，双分号之前是普通的动态图筛选串，双分号之后的是不筛选，所有文件都能看到。<br>
+    <br>
+    得到 strFileName 之后，判断文件名是否为空，如果为空就返回；如果有实际文件名就继续后面代码。<br>
+    确认有实际文件名之后，用 ClearOldShow() 清空旧的内容，并打印动态图的文件名。<br>
+    然后根据文件名新建 QMovie 对象，指针存到&nbsp; m_pMovie。<br>
+    动态图 QMovie 的使用方式与之前的像素图使用方式不一样，要用动态图的 isValid() 函数判断给定的文件是否可用，<br>
+    如果不可用就提示错误消息，删除动态图对象，将指针置空，然后返回。<br>
+    如果动态图可以用，那么继续后面的代码。on_pushButtonOpenMov_clicked() 槽函数第二块代码如下：<br>
+    <div class="code"><span style=" color:#c0c0c0;">&nbsp;&nbsp;&nbsp; </span><span
+        style=" color:#008000;">//动态图的总帧数</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nCount</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">m_pMovie</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">frameCount</span><span style=" color:#000000;">();</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//如果动态图格式不支持计数，那么会返回</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">0</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//打印帧数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"总帧数：%1"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">nCount</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//如果有统计帧数，那就设置滑动条上限</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nCount</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&gt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">horizontalSlider</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setMaximum</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">nCount</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">else</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//获取不到帧数，默认当作</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">100</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">horizontalSlider</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setMaximum</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">100</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//把动态图设置给标签</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">labelShow</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setMovie</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">m_pMovie</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//修改</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">bool</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">状态</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_bIsMovie</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">true</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_bIsPlaying</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">false</span><span style=" color:#000000;">;</span><span
+style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//还没点击播放开始的按钮</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//待续</span></pre>
+    </div>
+    因为要显示动态图播放进度，所以用动态图对象的 frameCount() 获取总帧数，并打印出来。<br>
+    有些动态图格式可能不支持总帧数计数，这种情况会返回 0 。<br>
+    我们接下来对总帧数 nCount 进行判断，如果大于 0，那就把总帧数设为水平滑动条的上限数值，<br>
+    如果总帧数是 0 或负数，那么把滑动条的上限设置为默认的 100。<br>
+    <br>
+    设置好水平滑动条之后，把动态图对象设置给标签控件 ui-&gt;labelShow-&gt;setMovie(m_pMovie)，<br>
+    并修改 m_bIsMovie 为 true，表示处于动态图显示模式，<br>
+    m_bIsPlaying 为 false，因为用户还没有点击播放按钮，处于未播放状态。<br>
+    <br>
+    on_pushButtonOpenMov_clicked() 槽函数第三块代码如下：<br>
+    <div class="code">
+      <style type="text/css">
+p, li { white-space: pre-wrap; }
+</style> <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//关联播放时的信号</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//播放出错信号</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">connect</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">m_pMovie</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SIGNAL</span><span
+style=" color:#000000;">(</span>error<span style=" color:#000000;">(</span><span
+style=" color:#800080;">QImageReader</span><span style=" color:#000000;">::</span><span
+style=" color:#800080;">ImageReaderError</span><span style=" color:#000000;">)),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#808000;">this</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SLOT</span><span
+style=" color:#000000;">(</span>RecvPlayError<span style=" color:#000000;">(</span><span
+style=" color:#800080;">QImageReader</span><span style=" color:#000000;">::</span><span
+style=" color:#800080;">ImageReaderError</span><span style=" color:#000000;">)));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//播放的帧号变化信号</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">connect</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">m_pMovie</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SIGNAL</span><span
+style=" color:#000000;">(</span>frameChanged<span style=" color:#000000;">(</span><span
+style=" color:#808000;">int</span><span style=" color:#000000;">)),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#808000;">this</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SLOT</span><span
+style=" color:#000000;">(</span>RecvFrameNumber<span style=" color:#000000;">(</span><span
+style=" color:#808000;">int</span><span style=" color:#000000;">)));</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//将动态图片跳转到起始帧</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;">  </span><span style=" color:#800000;">m_pMovie</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">jumpToFrame</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">0</span><span style=" color:#000000;">)</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//跳转成功</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//对于打头的帧，设置标签的矩形为帧的矩形</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">labelShow</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setGeometry</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_pMovie</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">frameRect</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//如果跳转失败，槽函数</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">RecvPlayError()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">会提示出错</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    注意 connect 函数调用是在 m_pMovie 指针有实际存在的动态图对象之后调用的， connect
+    函数是将源头对象的信号关联到接收对象的槽函数，如果 m_pMovie 没有指向实际源头对象是不能关联的，因此 connect
+    不是放置在窗体构造函数里，而是放在新建了动态图对象之后的位置。<br>
+    第一个 connect 是将源头的 error(QImageReader::ImageReaderError) 信号关联到主窗体的
+    RecvPlayError(QImageReader::ImageReaderError)&nbsp; 槽函数，用于接收动态图读取和播放过程中可能出现的
+    错误。<br>
+    第二个 connect 是将源头的 frameChanged(int) 关联到主窗体的 RecvFrameNumber(int)
+    槽函数，用于接收动态图播放过程中帧号的变化，将播放进度同步显示到水平滑动条上。<br>
+    <br>
+    最后的 if(&nbsp; m_pMovie-&gt;jumpToFrame(0) ) 是跳转到动态图的初始帧，如果跳转成功，那么将标签控件的矩形设置为
+    与动态图帧的矩形一样大。<br>
+    如果跳帧失败，那么会触发 error(QImageReader::ImageReaderError) 信号，由对应的槽函数去处理。<br>
+    <br>
+    "打开动态图" 按钮的槽函数代码就是上面的三段，打开动态图之后，没有自动播放，需要用户点击才能开始播放。<br>
+    下面来看看 "播放" 按钮的槽函数：<br>
+    <div class="code"><span style=" color:#008000;">//播放开始按钮</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonStart_clicked</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_bIsMovie</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//不是动态图</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_bIsPlaying</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#008000;">//已经在播放了</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//播放动态图</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_bIsPlaying</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">true</span><span style=" color:#000000;">;</span><span style=" color:#c0c0c0;">    </span><span
+style=" color:#008000;">//开始播放状态</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_pMovie</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">start</span><span
+style=" color:#000000;">();</span><span style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//播放</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//打印动态图默认的播放循环轮数，0</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">代表不循环，-1</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">代表无限循环</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"循环计数：%1"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_pMovie</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">loopCount</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    在该槽函数里面，先判断 m_bIsMovie 标志位，是不是动态图，如果不是动态图立即返回；<br>
+    如果是动态图就继续后面代码。<br>
+    然后判断&nbsp; m_bIsPlaying&nbsp; 标志位，如果之前已经在播放了就不处理，直接返回；<br>
+    如果不是处于播放状态，那么继续后面代码。<br>
+    <br>
+    进行播放操作时，先将标志位 m_bIsPlaying 设置为 true，然后调用 m_pMovie-&gt;start() 开始播放。<br>
+    该槽函数最后一句是打印动态图里指定的循环播放次数。<br>
+    <br>
+    与 "播放" 按钮相反的是 "停止" 按钮，停止播放的槽函数为：<br>
+    <div class="code"><span style=" color:#008000;">//停止播放按钮</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonStop_clicked</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_bIsMovie</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//不是动态图</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_bIsPlaying</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//没有处于播放状态</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//停止播放</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_bIsPlaying</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">false</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_pMovie</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">stop</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    "停止" 按钮槽函数里，也是先对动态图显示的标志位 m_bIsMovie 进行判断，不是动态图就返回。<br>
+    如果是动态图模式，那么判断是否在播放进行中，m_bIsPlaying 为 false，说明没播放，就直接返回。<br>
+    如果正好处于播放进行中，那么将 m_bIsPlaying 设置为 false，然后调用 m_pMovie-&gt;stop() 停止播放。<br>
+    播放停止之后，如果下次点击 "播放" 按钮，那么会直接从打头的帧重新播放。<br>
+    <br>
+    接下来是如果播放过程中出现读取错误，那么会触发 QMovie::error(QImageReader::ImageReaderError)
+    信号，下面的槽函数就会被调用：<br>
+    <div class="code"><span style=" color:#008000;">//接收播放错误信号</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">RecvPlayError</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QImageReader</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">ImageReaderError</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">error</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//打印</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"读取动态图错误的代码：%1"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">error</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//提示播放出错</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">critical</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"播放出错"</span><span style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                          </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"播放动态图出错，文件名为：\r\n%1"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#800000;">m_pMovie</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">fileName</span><span style=" color:#000000;">()));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//回到停止状态</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_bIsPlaying</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">false</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    因为播放过程中出错，所以播放会自动停止，直接执行这个接收错误信息的槽函数。<br>
+    该槽函数先打印错误代号，这个代号可以从 QImageReader 类的文档查到，目前共有有 5 种可能的错误，这里不列举了。<br>
+    然后是用消息框提示播放动态图出错的信息。<br>
+    最后将播放标志位 m_bIsPlaying 设置为 false。<br>
+    <br>
+    如果播放过程中没出错，那么皆大欢喜，我们可以接收帧号变化的信号，通过水平滑动条显示播放进度：<br>
+    <div class="code"><span style=" color:#008000;">//接收帧号变化信号</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">RecvFrameNumber</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">frameNumber</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">horizontalSlider</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setValue</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">frameNumber</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    <br>
+    整个例子代码就是上面那么多，这个图片浏览例子是既支持静态的图片，也支持 GIF
+    等动态图。下面生成并运行例子，看看效果。例子用到的图片可以从教程代码文件夹的网址下载：<br>
+    <a href="https://lug.ustc.edu.cn/sites/qtguide/QtProjects/ch05/imgshow/">
+      https://lug.ustc.edu.cn/sites/qtguide/QtProjects/ch05/imgshow/ </a> <br>
+    两张图，opensuse.png 和 cat.gif，放到例子代码文件夹一块。<br>
+    <br>
+    运行例子后，可以看到带有滚动区域的效果：<br>
+    <center><img src="images/ch05/ch05-05-04.png" alt="run" width="800"></center>
+    其实标签控件和封装它的滚动区域 QScrollArea 对象尺寸是一样大的，由于滚动区域自带滚动条，占去了两块地皮，所以标签控件没有完全显示出来，通过拖
+    动滚动条才能看到标签控件全貌。<br>
+    在输出面板可以看到 Qt 支持的静态图片格式非常丰富，能报出名字的应该都支持。动态图格式本身很少，这里支持 gif 和 mng 的动态图。<br>
+    <br>
+    点击 "打开图片" 按钮，打开本节的 opensuse.png ，由于这张图比较大，所以需要滚动浏览的图片区域也多：<br>
+    <center><img src="images/ch05/ch05-05-05.png" alt="run2"></center>
+    如果有读者记性比较好，5.3.4 节 simplebrowser 例子文件夹有一张 opensuse.jpg，读者可尝试打开旧的
+    opensuse.jpg 图片，会出现如下错误：<br>
+    <center><img src="images/ch05/ch05-05-06.png" alt="run3"></center>
+    都是图片，opensuse.png 能打开，opensuse.jpg 打开出错，这是为什么呢？<br>
+    用这两张图片举例，不是为了说明 png 格式比 jpg 好，也不是为了说明我们例子代码有问题，<br>
+    <span style="font-weight: bold;">而是为了说明有些错误不在程序本身！</span><br>
+    我们举例的 opensuse.png 和 opensuse.jpg 两张图片文件的数据是一模一样的，就是复制了一份，改了个扩展名而已。<br>
+    opensuse 的图片原本就是 PNG 格式的，在下载的时候错误地保存为 opensuse.jpg。虽然操作系统的图片查看器、之前的
+    QTextBrowser 示例都能浏览这个错误扩展名的图片，但是 QPixmap::load() 函数根据 jpg 扩展名加载 opensuse.jpg
+    时出现了错误，因为这张图根本不是 jpg 图片。<br>
+    <span style="font-weight: bold;">这里打开 opensuse.jpg 出错，就是因为图片扩展名错了，与程序本身没关系。</span><br>
+    <br>
+    那么 5.3.4 QTextBrowser 示例怎么能正确显示 opensuse.jpg 呢？那是因为它没有用 QPixmap::load()
+    函数加载图片，而是 QImage::​loadFromData() 函数，感兴趣的读者可以看看 QImage::​loadFromData()
+    函数帮助文档，它是直接从文件数据头判断文件格式，而不管扩展名是什么，因此能正确显示扩展名错误的图片。<br>
+    <br>
+    看完静态图浏览，接着看看动态图浏览过程，点击 "打开动态图" 按钮，打开 cat.gif 动态图，先看到初始帧：<br>
+    <center><img src="images/ch05/ch05-05-07.png" alt="run4"></center>
+    滚动区域里的标签控件大小是根据图像帧的大小自动调整的，这张猫图比滚动区域小，不需要滚动条，就自动隐藏了。<br>
+    我们在打开动态图的代码里跳到了第 0 号帧，所以能看到打头的帧图像。<br>
+    读者可以点击 "播放" 、"停止" 按钮测试一下动态图的播放效果，这里不截图了，与常规的影片播放差不多，美中不足的是水平滑动条只能显示播放进度，不能进行
+    快进跳帧而已。<br>
+    cat.gif 默认是无限循环播放的，一轮结束了会自动从头播放，不需要操作。<br>
+    <br>
+    <div class="os2">5.5.4 电子钟示例</div>
+    <br>
+    上一个例子一堆内容，其实只示范了标签控件的功能。本小节的例子主要展示日历控件 QCalendarWidget、LCD 数字显示
+    QLCDNumber、进度条 QProgressBar ，利用这三种控件做一个日期、时间显示的例子，就是一个电子时钟。<br>
+    <br>
+    重新打开 QtCreator，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>
+    ①项目名称 timeshow，创建路径 D:\QtProjects\ch05，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    建好项目之后，打开窗体 widget.ui 文件，进入设计模式，按照下图拖入控件：<br>
+    <center><img src="images/ch05/ch05-05-08.png" alt="ui" width="800"></center>
+    首先把主窗体大小调整为 400*300，方便容纳内部的控件。<br>
+    窗体内部有两行控件，第一行的是 LCD 数字显示控件和进度条控件，<br>
+    LCD 数字显示控件的对象名 objectName 为 lcdNumber，占据的矩形为 <br>
+    X：10，Y：10，宽度：341，高度：95，其他属性如下图所示：<br>
+    <center><img src="images/ch05/ch05-05-09.png" alt="LCDNumber"></center>
+    显示位数 digitCount 为 8，其中小时占 2 位数，分钟占 2 位数，秒钟占 2 位数，还有 2 个冒号分隔。<br>
+    segmentStyle 是选择扁平风格 flat，这种笔画最清晰。数值设置为 8 个 8 。<br>
+    <br>
+    进度条控件的对象名 objectName 为 progressBar，占位矩形为 <br>
+    X：360，Y：10，宽度：31，高度：95，其他属性如下图设置：<br>
+    <center><img src="images/ch05/ch05-05-10.png" alt="progressBar"></center>
+    最小值是 0，最大值是 9，当前 value 也是 9，<br>
+    文本是否能看见的属性 textVisible 的勾选取消，不显示文本，<br>
+    orientation 属性选择 Vertical，垂直进度条。<br>
+    这个进度条的用途是显示秒钟的个位数循环，从 0 到 9 ，再从 0 到 9。<br>
+    之所以将垂直进度条高度设置为 95，是因为刚好放下 9 个进度格子，对应 1 到 9 秒。<br>
+    <br>
+    第二行也是两个控件，左边日历控件的对象名 objectName 为 calendarWidget，占据的矩形为<br>
+    X：13，Y：110，宽度：341，高度：171，日历控件其他属性不用修改。<br>
+    <br>
+    第二行右边的按钮对象名 objectName 为 pushButtonToday，占据的矩形为<br>
+    X：360，Y：110，宽度：31，高度：171。<br>
+    按钮并没有方向属性，不能设置为水平或垂直的，图上的按钮仅仅是将文本设置为四行而已，<br>
+    点击按钮 text 属性编辑框右边的 "..." 小按钮编辑按钮的文本如下图所示：<br>
+    <center><img src="images/ch05/ch05-05-11.png" alt="button"></center>
+    把按钮宽度设置比较窄，文本一个字占一行，那么看起来就像是一个垂直按钮了。<br>
+    <br>
+    界面就是如上设置，因为图中有三个控件纯粹作为显示用的，不需要关联 LCD 数字显示、进度条、日历的信号，<br>
+    只需要为 "回到今天" 按钮添加一个普通的 clicked() 信号对应的槽函数即可：<br>
+    <center><img src="images/ch05/ch05-05-12.png" alt="slot"></center>
+    添加槽函数之后，保存界面文件，回到代码编辑模式，下面开始添加例子的代码。<br>
+    <br>
+    编辑 widget.h 头文件，添加定时器类头文件包含以及成员变量、接收定时器信号槽函数：<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>WIDGET_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">WIDGET_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QTimer&gt;</span><span style=" color:#c0c0c0;">   </span><span
+style=" color:#008000;">//定时器类</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//接收定时器信号的槽函数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">RecvTimer</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonToday_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QTimer</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">m_timer</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre>
+    </div>
+    头文件 &lt;QTimer&gt; 是定时器类，定时器可以每过一定的时间间隔触发 timeout() 信号，这样我们的电子钟就能每秒更新时间了。<br>
+    Widget 类声明里添加了一个公有槽函数 RecvTimer()，用于接收定时器的信号更新时钟。<br>
+    Widget 类声明里还添加了一个私有成员指针 m_timer，用于保存定时器对象。<br>
+    <br>
+    头文件 widget.h 代码就是上面那些，接下来是编辑 widget.cpp 的内容，添加功能代码，首先是头文件包含和构造函数的内容：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDateTime&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span><span
+style=" color:#c0c0c0;">    </span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//窗体标题改为电子钟</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">this</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setWindowTitle</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"电子钟"</span><span style=" color:#000000;">));</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//新建定时器对象</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_timer</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QTimer</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置定时器循环触发</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_timer</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setSingleShot</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">false</span><span
+style=" color:#000000;">);</span><span style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//非单次触发</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置定时器触发时间间隔，单位毫秒</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_timer</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setInterval</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">1</span><span
+style=" color:#000000;">*</span><span style=" color:#000080;">1000</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//关联定时器信号到槽函数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">connect</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">m_timer</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SIGNAL</span><span
+style=" color:#000000;">(</span>timeout<span style=" color:#000000;">()),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SLOT</span><span style=" color:#000000;">(</span>RecvTimer<span
+style=" color:#000000;">()));</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//启动定时器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_timer</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">start</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//调用一次</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"回到今天"</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">槽函数，初始化日历</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">on_pushButtonToday_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    &lt;QDateTime&gt; 头文件是日期时间类的头文件，也能用该类的静态函数获取当前时间。<br>
+    在构造函数里，调用了 setWindowTitle() 把主界面窗体标题设置为 "电子钟" ，<br>
+    然后新建了 QTimer 类对象，定时器对象指针为 m_timer。<br>
+    <br>
+    定时器有两种工作模式，setSingleShot(false) 代表不是单次触发信号，意味着一直循环触发信号，不会自动停止。<br>
+    如果参数里是 true，那么定时器触发一次信号就自动停了。我们要做电子钟，当然要一直循环触发。<br>
+    <br>
+    定时器的信号触发间隔是通过 setInterval 函数设置，参数里的时间以毫秒为单位，我们代码里是 1000 毫秒，<br>
+    就是设置每隔 1 秒发一次信号，用于更新时钟。<br>
+    <br>
+    在启动定时器之前，要预先把定时器的信号 timeout() 关联到主窗体的 RecvTimer()，这样定时器启动之后，<br>
+    每次触发 timeout() 信号，该槽函数都会自动干活。<br>
+    <br>
+    定时器和信号关联都弄好之后，就可以启动定时器了 m_timer-&gt;start() 。<br>
+    构造函数最后一句是手动调用了 "回到今天" 按钮的槽函数，把日历控件选中的日子设置为今天。<br>
+    <br>
+    构造函数的准备工作已经做好了，接下来是接收定时器信号的槽函数：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">RecvTimer</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取当前时间</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QDateTime</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">dt</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QDateTime</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">currentDateTime</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//构造时间字符串</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strTime</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">dt</span><span style=" color:#000000;">.</span><span style=" color:#000000;">time</span><span
+style=" color:#000000;">().</span><span style=" color:#000000;">toString</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"HH:mm:ss"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">LCD</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">时钟</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lcdNumber</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">display</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strTime</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置进度条的显示：</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">秒数%10</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">progressBar</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setValue</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">dt</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">time</span><span style=" color:#000000;">().</span><span
+style=" color:#000000;">second</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">%</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">10</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    RecvTimer() 槽函数里用 QDateTime::currentDateTime() 获取当前的日期和时间，存到 dt 变量。<br>
+    对于时间显示，获取时间用 dt.time()，然后用 QTime 对象的 toString() 函数生成当前时间字符串，<br>
+    时间字符串的格式就是 "HH:mm:ss" ，HH 代表 24 小时格式的小时，mm 代表分钟，ss 代表秒钟，冒号就是真的冒号。<br>
+    时间字符串刚好 8 个字符，然后将时间字符串交给 lcdNumber 显示即可。<br>
+    该槽函数最后一句是求出当前时间的秒钟个位数 dt.time().second() % 10 ，然后将秒钟个位数数值设置给进度条，<br>
+    1 秒钟 就对应进度条的 1 个小格子。<br>
+    <br>
+    我们在定时器信号对应的槽函数里没有主动更新当前的日期，因为一天时间太长，没必要每秒钟都刷一次日历。<br>
+    利用下面 "回到今天" 按钮，用户点击一下，就会将日历选中的日子设置为今天了：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_pushButtonToday_clicked</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取当前时间</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QDateTime</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">dt</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QDateTime</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">currentDateTime</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置日历为今天</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">calendarWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setSelectedDate</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">dt</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">date</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//点击按钮时，输入焦点在按钮上，这时候日历选中的日子是灰色，容易看不清</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//将输入焦点回到日历控件，这样日历选中日子会重新变成高亮蓝色</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">calendarWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setFocus</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    在按钮的槽函数里，也是用 QDateTime::currentDateTime() 获取当前日期时间，然后用日历控件的
+    setSelectedDate() 函数，把选中的日期设置为当前日期。<br>
+    按钮槽函数里最后一句是把输入焦点强制回到日历控件，因为点击按钮时，输入焦点在按钮上，<br>
+    日历控件的当前选中日子是灰色的，看不太清楚。<br>
+    强制把输入焦点返回到日历控件，就能看清选中的日子了。<br>
+    <br>
+    例子代码不多，就是上面几个函数而已。可以看出用 Qt 实现一个电子时钟是很简单的事，我们生成运行一下例子，可以看到电子时钟的效果：<br>
+    <center><img src="images/ch05/ch05-05-13.png" alt="run"></center>
+    电子钟例子就讲到这，注意 QTimer 是定时器类，而 QTime 是时间类，就差一个字母。<br>
+    <br>
+    最后补充一点，关于 QTime::toString() 参数里的时间格式串，具体内容请查看 Qt 帮助文档，我们列举几个常用的，上面是 24
+    小时格式时间的例子：<br>
+    <div class="code">curTime.toString("HH:mm:ss");</div>
+    对于 12 小时时间格式，举例如下：<br>
+    <div class="code">curTime.toString("hh:mm:ss AP");</div>
+    <div class="code">curTime.toString("hh:mm:ss ap");</div>
+    小写的 hh 就是十二进制时钟，末尾的 "AP" 代表大写的上午 AM 和下午 PM，小写的 "ap" 代表小写的 am 和 pm。<br>
+    Qt 比较智能的地方是会根据本地化语言设置上午、下午的文本，所以如果看到类似 "08:17:12 下午" 的字符串不要惊讶。<br>
+    <br>
+    日期类 QDate 也有类似的 toString() 函数，日期类常用的格式字符串举例如下：<br>
+    <div class="code">curDate.toString("yyyy-MM-dd");</div>
+    <div class="code">curDate.toString("yy-MM-dd");</div>
+    "yyyy" 代表 4 位数年份，"yy" 代表 2 位数年份，大写的 "MM" 是月份（小写的 "mm" 是分钟），日子就是 "dd" 。<br>
+    <div class="code">curDate.toString("yyyy.MM.dd ddd");</div>
+    <div class="code">curDate.toString("yyyy.MM.dd dddd");</div>
+    2 个连续 d 是普通的日子；<br>
+    而 3 个连续 d 是本地化星期几的缩写，三个字母，如 Mon 是星期一；<br>
+    4 个连续 d 是本地化的星期几全拼，如 Monday。<br>
+    对于中文而言，三个及以上的连续 d 都是星期几，没中文缩写。<br>
+    <br>
+    日期的年、月、日的分隔符可以用横杠、点号、英文逗号、斜杠，或者按自己喜好设置其他分隔符。<br>
+    本节内容就到这里，下一节介绍内嵌图标、图片资源的程序。<br>
+    <br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch05-04.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch05-06.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

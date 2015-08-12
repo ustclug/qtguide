@@ -3,11 +3,9 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <title>ch05-06</title>
-    
-<link href="css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-
-<script src="thumbnailviewer.js" type="text/javascript">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -15,27 +13,1233 @@
 * Visit http://www.dynamicdrive.com/ for full source code
 ***********************************************/
 
-</script>
-
-
-  </head>
-  
-  
-<div class="os1">5.6 Qt 资源文件 </div>
-<br />
-Qt 资源文件
-<br />
-<br />
-尝试用 QTextBrowser 打开资源里面的 HTML 文件。
-<br />
-
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch05-05.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch06-00.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+</script> </head>
+  <body>
+    <div class="os1">5.6 Qt 资源文件 </div>
+    <br>
+    前面介绍的例子都在使用不带图标、图片内容的控件，这种使用方式是比较枯燥的，除了看文字，就没有别的可视化显示。实际的应用程序是会用到大量的图片、图标，这些
+    图看起来一目了然，不像文字那样乏味，为按钮、以及后面章节的菜单、工具栏等控件配备美观、意义清晰的图标，会让程序生动很多。Qt
+    专门定义了一套资源系统，采用 *.qrc 文件定义程序内嵌使用的图片以及其他资源，*.qrc 通过资源编译器 rcc 生成一个 qrc_*.cpp 标准
+    C++ 文件，然后就可以通过任意的 C++ 编译器编译，与其他源文件一块链接到目标程序里使用。Qt
+    资源系统是跨平台通用的，并且不依赖特定的编译器，只要是 C++ 编译器都可以。<br>
+    <br>
+    本节首先概括介绍 Qt 资源系统，然后介绍资源编译器 rcc 的使用，以及图片和 *.qrc
+    文件是如何集成到应用程序里的。介绍完基本原理，我们学习两个例子，第一个例子是在程序中使用带图标的控件，第二个例子是程序启动时显示图片闪屏并为应用程序添加自己专
+    属图标。<br>
+    <br>
+    <div class="os2">5.6.1 Qt 资源系统</div>
+    <br>
+    关于 Qt 资源系统的内容，主要参考 Qt 帮助文档索引 The Qt Resource System，本小节内容是对该主题帮助文档的翻译。<br>
+    Qt
+    资源系统是平台无关的一种机制，用于在生成的可执行程序文件中存储二进制文件资源。当你的应用程序需要一堆资源，比如图标、翻译文件、文档文件等，可以将这些资源内嵌到目
+    标程序内部，而不需要额外附带一堆文件。理论上是这样，但是实际测试时，编译器通常对单个源文件如 src.cpp 有个最大限定，比如 40 MB 或 80
+    MB，所以太大的图片、视频文件由于编译器限制，并不能被编译进应用程序里。一般超过 4 MB 的图片、音视频、压缩包等文件就不建议放进资源文件 *.qrc
+    里面，可以放在操作系统的文件夹里或者编译成独立的二进制资源文件 *.rcc。<br>
+    <br>
+    Qt 资源系统基于 qmake、rcc(Qt's resource compiler) 和 QFile
+    三方面紧密协作，让资源文件的使用与普通操作系统里的文件使用方式很相似，Qt 应用程序内部的资源文件有一套自己的虚拟文件系统，文件路径类似
+    ":/pic.png"
+    ，冒号打头的就是代表目标程序内嵌的资源文件，注意目标程序里所有内嵌的资源文件都是只读的，在程序运行时不能修改资源里的文件，只能读取使 用。<br>
+    <br>
+    Qt 的资源系统通过 *.qrc 文件描述，是程序源代码的一部分，与 *.ui 文件有相似的地方，都是 XML 格式的文本。比如 *.qrc
+    文件简单例子：<br>
+    <div class="code">&lt;!DOCTYPE RCC&gt;&lt;RCC version="1.0"&gt;<br>
+      &lt;qresource&gt;<br>
+      &nbsp;&nbsp;&nbsp; &lt;file&gt;images/copy.png&lt;/file&gt;<br>
+      &nbsp;&nbsp;&nbsp; &lt;file&gt;images/cut.png&lt;/file&gt;<br>
+      &nbsp;&nbsp;&nbsp; &lt;file&gt;images/new.png&lt;/file&gt;<br>
+      &nbsp;&nbsp;&nbsp; &lt;file&gt;images/open.png&lt;/file&gt;<br>
+      &nbsp;&nbsp;&nbsp; &lt;file&gt;images/paste.png&lt;/file&gt;<br>
+      &nbsp;&nbsp;&nbsp; &lt;file&gt;images/save.png&lt;/file&gt;<br>
+      &lt;/qresource&gt;<br>
+      &lt;/RCC&gt;</div>
+    *.qrc 文件通常放在与项目源代码一样的文件夹里。上面举例的代码包含了 6 个 png 图片，这些实际的图片文件是放在源代码文件夹的 images
+    子文件夹里。<br>
+    <br>
+    程序使用资源文件的过程分两阶段，第一阶段是在编写程序代码之前用 *.qrc 表述程序需要用到的图片、文档等资源，举例来说，widget.qrc
+    放在项目文件夹里，copy.png 放在项目文件夹的子文件夹 images 里面，这是相关资源文件在操作系统里的真实路径分布。<br>
+    第二阶段是如何在代码中引用 widget.qrc 里面描述的图片、文档等文件，Qt 资源系统有自己的一套虚拟文件系统，对于刚才的
+    images/copy.png 图片，使用目标程序里对应的内嵌资源文件，就以路径 ":/images/copy.png"
+    访问，加了冒号和右斜杠打头，代表虚拟文件系统的路径。对于 QFile 等访问文件的类，就可以将 ":/images/copy.png"
+    作为路径文件名打开该图片了。之前还用过文件的 URL 链接形式，程序内嵌资源文件也有 URL 形式描述，比如
+    "qrc:///images/copy.png" ，就是把常规操作系统的文件 URL 里面的 "file:///" 换成了 "qrc:///" 。<br>
+    <br>
+    无论是类似文件系统路径的 ":/images/copy.png" 还是 URL 形式 "qrc:///images/copy.png"
+    ，都可以访问对应的同一个文件，都对应目标程序内嵌的 copy.png，至于使用哪种形式，要看控件类的函数是接收文件路径形式还是 URL 路径形式。<br>
+    <br>
+    *.qrc 对图片、文档等文件的表述支持别名和虚拟前缀，比如取别名的句式为：<br>
+    <div class="code">&lt;file
+      alias="cut-img.png"&gt;images/cut.png&lt;/file&gt;</div>
+    在程序代码里可以用 ":/cut-img.png" 或者 ":/images/cut.png" 都能正确表示对应的 cut.png 图片。<br>
+    对于加虚拟前缀的句式举例如下：<br>
+    <div class="code">&lt;qresource prefix="/myresources"&gt;<br>
+      &nbsp;&nbsp;&nbsp; &lt;file
+      alias="cut-img.png"&gt;images/cut.png&lt;/file&gt;<br>
+      &lt;/qresource&gt;</div>
+    这三句同时用了别名和前缀，对应的文件虚拟路径为：<br>
+    ":/myresources/cut-img.png"&nbsp; 和 ":/myresources/images/cut.png" 。<br>
+    <br>
+    关于 *.qrc 文件大致介绍这些，下面我们来看看如何将各种图片、文档和 *.qrc 如何编译集成到应用程序里。<br>
+    <br>
+    <div class="os2">5.6.2 rcc 工具</div>
+    <br>
+    Qt 自带的开发工具集里有专门的 rcc 工具，用于将 *.qrc 里面描述的图片、文档等编译成对应的源代码文件 qrc_*.cpp
+    或者独立的二进制资源文件 *.rcc。下面介绍 rcc 工具的两种用途：<br>
+    <br>
+    （1）生成独立的二进制资源文件 *.rcc<br>
+    对于太大的图片、音频、视频等文件，不适合集成到目标程序内部，可以放到操作系统文件路径，或者单独编译成外挂资源 *.rcc
+    。举例来说，myresource.qrc 包含了很多图片和视频，没法编译成目标程序内嵌资源时，可以打开 Qt 命令行，进入 myresource.qrc
+    所在的文件夹，执行命令：<br>
+    <div class="code">rcc -binary myresource.qrc -o myresource.rcc</div>
+    rcc 会把 myresource.qrc 里面描述的所有图片、视频等文件，都压缩打包，生成一个二进制的 myresource.rcc 文件，这个
+    myresource.rcc 包含了所有的资源，这样程序发布时就不需要带一堆乱七八糟的碎文件了，一个 myresource.rcc 搞定。<br>
+    <br>
+    那么代码中如何使用 myresource.rcc 呢？需要在 main 函数开始的位置注册这个独立的二进制资源文件：<br>
+    <div class="code">QResource::registerResource("/path/to/myresource.rcc");</div>
+    然后也是使用之前类似的虚拟文件路径，比如 ":/images/copy.png" 、":/images/cat.gif" 。<br>
+    二进制资源文件 *.rcc 是用于外挂的，其实应用程序里面更常见的是内嵌资源，接下来介绍内嵌使用方式。<br>
+    <br>
+    （2）应用程序内嵌资源<br>
+    如果希望一个资源描述文件 application.qrc 在程序编译时内嵌到目标程序里，需要在 *.pro 文件里加一句话：<br>
+    <div class="code">RESOURCES += application.qrc</div>
+    qmake 会自动根据这句话，为 application.qrc 添加编译脚本，其编译过程如下图所示：<br>
+    <center><img src="images/ch05/ch05-06-01.png" alt="rcc"></center>
+    rcc 工具会解析 application.qrc 内的 XML 文本，找到需要添加的各种文件，默认情况下，rcc 工具会对这些文件做 ZIP
+    压缩，然后将压缩后的 ZIP 数据的每个字节转换成比如 0x6f, 数值形式，所有文件压缩后的数据对应一个 C++ 静态数组
+    qt_resource_data[] ，并添加注册、取消注册、初始化、清除等函数和资源描述结构体，最终形成一个 qrc_application.cpp
+    文件。然后用编译器编译 qrc_application.cpp文件，得到 qrc_applicaotion.o ，链接到目标程序内部，就可以用
+    ":/images/copy.png" 等形式访问程序内嵌资源了。<br>
+    <br>
+    注意到刚才向 *.pro 文件里添加 qrc 资源描述文件使用的运算符是 +=&nbsp; ，也就是说可以为应用程序添加多个 *.qrc
+    文件，如果涉及的图片比较多，可以用多个 *.qrc 对图片分类存放：<br>
+    <div class="code">RESOURCES += buttons.qrc <br>
+      RESOURCES += backgrounds.qrc</div>
+    使用多个 *.qrc 与使用一个 *.qrc 的方式是一样的，虚拟文件路径都类似 ":/buttons/ok.png"
+    、":/backgrounds/bgmain.png" 等，这里的 ok.png 放在项目文件夹的 buttons 子文件夹里，而 bgmain.png
+    是放在项目文件夹的 backgrounds 子文件夹里，因此两个文件的路径是不同的。<br>
+    <br>
+    qmake 为内嵌资源添加的 rcc 编译命令，类似下面这样：<br>
+    <div class="code">rcc -name application&nbsp; application.qrc -o
+      qrc_application.cpp</div>
+    得到 qrc_application.cpp 源文件之后，剩下的编译、链接就与普通 .cpp 文件一模一样了。<br>
+    <br>
+    qrc_application.cpp 文件中不仅有各种图片、文档对应的静态数组，还有些结构体和函数，比如初始化和清除函数。<br>
+    对于 rcc 命令，如果不加 -name application&nbsp; 选项参数，那么在 qrc_application.cpp
+    里面生成的初始化和清除函数名为：<br>
+    <div class="code">int QT_RCC_MANGLE_NAMESPACE(qInitResources)();<br>
+      int QT_RCC_MANGLE_NAMESPACE(qCleanupResources)();</div>
+    如果加了 -name application&nbsp; 选项参数，那么资源的初始化和清除函数名变为：<br>
+    <div class="code">int QT_RCC_MANGLE_NAMESPACE(qInitResources_application)();<br>
+      int QT_RCC_MANGLE_NAMESPACE(qCleanupResources_application)();</div>
+    QT_RCC_MANGLE_NAMESPACE() 这个宏其实没什么用，仅用于提示作用。资源的初始化函数和清除函数会在资源加载和卸载时自动被调用。<br>
+    <br>
+    应用程序的内嵌资源通常不需要手动初始化，但也有例外情况，比如在使用某些链接库中的资源文件时，如果出现使用了正确的文件路径
+    ":/images/copy.png" 却找不到资源里图片文件的情况，那么需要在使用该资源的类声明里或者在 main
+    函数里打头的位置加入一句手动初始化：<br>
+    <div class="code">Q_INIT_RESOURCE(resources);</div>
+    resources 是指 resources.qrc 的简短名字形式，不需要扩展名。<br>
+    <br>
+    关于资源系统和 rcc 工具的原理就介绍这么多，下面看看实际例子中如何添加并使用 Qt 的资源文件。<br>
+    <br>
+    <div class="os2">5.6.3 图标使用示例</div>
+    <br>
+    这里说的图标就是小尺寸的图片，可以是 ico 扩展名，也可以是 jpg 或者 png 扩展名的图片，一般开源程序用 png 图标的居多，因为 png
+    本身就是一种开源格式。所有的按钮类控件、组合框以及后面要学的菜单项、工具条都可以设置自己的图标，控件的图标就是用于形象地展示该控件的功能，一般情况下控件的文本与
+    图标是同时显示的，这样控件的用途就能更清晰地表示了。<br>
+    <br>
+    对于 Qt 资源文件里面的图片文件，可以用三种类加载：QIcon、QImage、QPixmap。对于配合按钮、组合框、菜单项、工具条等图标的加载，使用
+    QIcon 类读取资源文件里的图片，因为按钮的尺寸比较小，这类图标图片也比较小，比如 16*16 或者 24*24、32*32 。<br>
+    QImage 和 QPixmap 一般用于加载较大的图片，QImage
+    倾向于图片文件本身内容的加载，与桌面系统和显示器无关，并且尊重图片原本的格式和颜色深度，不会自动修改图片内容格式，一般用于图像处理。<br>
+    而 QPixmap 侧重屏幕显示，与桌面系统和显示器是有关的，通常会自动把加载的图片转成桌面系统设置的真彩色像素图，QPixmap
+    像素点的颜色深度一般是固定的，比如 32 位真彩色，QPixmap 专门用于配合控件的显示用途。QLabel 控件就是使用 QPixmap
+    像素图显示图片，下面小节的闪屏 QSplashScreen 也是用 QPixmap。<br>
+    <br>
+    本小节的例子是使用程序内嵌的资源文件，并使用 QIcon 加载图标，也就是 *.png 小尺寸图片。这些图片的下载地址为：<br>
+    <a href="https://lug.ustc.edu.cn/sites/qtguide/QtProjects/ch05/helloqrc/" target="new">
+      https://lug.ustc.edu.cn/sites/qtguide/QtProjects/ch05/helloqrc/ </a> <br>
+    在该网页的 images 子目录里面，有 8 个 png 小图片。等会新建了项目之后，也同样放在项目源代码文件夹的 images 子文件夹里面。<br>
+    <br>
+    新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>
+    ①项目名称 helloqrc，创建路径 D:\QtProjects\ch05，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    建好项目之后，打开窗体 widget.ui 文件，进入设计模式，按照下图拖入控件：<br>
+    <center><img src="images/ch05/ch05-06-02.png" alt="ui" width="800"></center>
+    第一行的控件是一个标签和单行编辑控件，标签文本为 "姓名" ，宽度默认，高度 22。单行编辑控件 objectName 为
+    lineEditName，宽度 150，高度 22 。<br>
+    <br>
+    第二行是一个标签控件和两个单选按钮，标签文本为 "性别" ，宽度默认，高度 22。<br>
+    第一个单选按钮文本为 "男"，objectName 为 radioButtonMan，宽度 71，高度 22。<br>
+    第二个单选按钮文本为 "女"，objectName 为 radioButtonWoman，宽度 71，高度 22。<br>
+    <br>
+    第三行是一个标签和一个组合框，标签文本为 "性格特质"，宽度默认，高度 22 。<br>
+    组合框的 objectName 为 comboBox，宽度 150 ，高度 22 。<br>
+    &nbsp;头三行的控件高度都是 22，方便像图上对齐控件。<br>
+    <br>
+    最后一行控件是两个按钮，都是默认大小，第一个按钮文本 "提交"，objectName 为 pushButtonCommit。<br>
+    第二个按钮的文本 "取消"，objectName 为 pushButtonCancel 。将窗体里的控件调整位置，大致像上图那样对齐就行了。<br>
+    <br>
+    添加好控件之后我们为两个按压按钮都添加 clicked() 信号对应的槽函数：<br>
+    <center><img src="images/ch05/ch05-06-03.png" alt="slot"></center>
+    添加好槽函数后保存界面文件。我们回到代码编辑模式。直到这里，我们都是普通的图形界面编程，还没用到资源描述文件 *.qrc 和图标图片。<br>
+    现在我们在代码编辑模式，右击侧边栏的 helloqrc 项目根节点，再右键菜单点击 “添加新文件”：<br>
+    <center><img src="images/ch05/ch05-06-04.png" alt="addnew" width="800"></center>
+    会进入新建文件的对话框：<br>
+    <center><img src="images/ch05/ch05-06-05.png" alt="addnew2" width="800"></center>
+    左边一栏选择 Qt，然后在中间一栏选择 Qt Resource File，再点击右下角的 Choose... 按钮，进入新建资源文件的向导：<br>
+    <center><img src="images/ch05/ch05-06-06.png" alt="addnew3" width="800"></center>
+    在名称里面输入 icons 就行了，这个资源描述文件名是自己取的，是英文名就行，没其他要求。扩展名 .qrc 不写也是可以的，QtCreator
+    会自动加正确的扩展名。路径就用默认的项目文件夹。<br>
+    然后点击下方的 “下一步”，进入如下界面：<br>
+    <center><img src="images/ch05/ch05-06-07.png" alt="addnew4" width="800"></center>
+    默认会添加到我们的 helloqrc.pro 项目中，点击“完成”即可。添加好 icons.qrc 之后，QtCreator 会自动打开它：<br>
+    <center><img src="images/ch05/ch05-06-08.png" alt="qrc" width="800"></center>
+    在例子开始之前说过，把从网上下载的 8 个 png 小图片放到项目文件夹的 images 子文件夹，现在 8 个图片的存储路径为：<br>
+    D:\QtProjects\ch05\helloqrc\images ，<br>
+    把 8 个图片存好之后，我们回到 icons.qrc 编辑界面，如果出现双击 icons.qrc
+    不能自动打开资源编辑器的情况，那么右击该资源文件，右键菜单选择 "Open in Editor" 就能进入这个资源文件的编辑界面了。<br>
+    <br>
+    现在要将 8 个 png 都添加到 icons.qrc 里面，按照如下操作，右击项目侧边栏里的 icons.qrc ，右键菜单选择 "添加现有文件" ，<br>
+    <center><img src="images/ch05/ch05-06-09.png" alt="qrc2" width="800"></center>
+    先解释一下 qrc 文件的右键菜单，常用的是 "添加现有文件" ，这一条用于添加磁盘中已有的图片、文档等文件。菜单项 "Add Existing
+    Directory" 是添加磁盘里的文件夹，"Add Prefix" 是添加一个虚拟前缀。菜单项 "Rename" 是重命名这个文件名，"Remove
+    file" 是从项目里剔除这个文件，"Open In Editor" 是打开该文件编辑器。<br>
+    <br>
+    选择右键菜单 "添加现有文件" 之后，会弹出选择文件的对话框：<br>
+    <center><img src="images/ch05/ch05-06-10.png" alt="qrc3" width="800"></center>
+    进入 images 子文件夹，选中所有的 png 文件，然后点击“打开”按钮，这 8 个 png 图片就会全部添加到 icons.qrc
+    ，添加完成之后，可以看到如下图的效果：<br>
+    <center><img src="images/ch05/ch05-06-11.png" alt="qrc4" width="800"></center>
+    我们这里的图片比较简单，不需要虚拟前缀，也不需要别名，添加好之后直接使用，不需要做其他操作。<br>
+    <br>
+    为控件添加图标既可以用代码实现，也可以直接用 Qt 设计师编辑，我们两种方法都学。<br>
+    下面我们打开 widget.ui 文件，进入 QtCreator 设计模式，我们为两个单选按钮和按压按钮添加图标。<br>
+    选中第一个单选按钮，即 radioButtonMan，在 QtCreator 右下角看到属性编辑器，找到 icon 属性，<br>
+    <center><img src="images/ch05/ch05-06-12.png" alt="radioicon" width="800"></center>
+    点击进入该属性编辑栏，然后点击属性编辑栏右边的 "..." 按钮，进入图标选择界面：<br>
+    <center><img src="images/ch05/ch05-06-13.png" alt="radioicon2" width="800"></center>
+    “选择资源”对话框，左边是虚拟文件路径，右边是虚拟文件夹中的图标，我们为 radioButtonMan 单选按钮选择 man.png 文件，然后点击
+    “OK” 按钮。<br>
+    这样就为 radioButtonMan 单选按钮添加好了图标，我们可以看到实际效果：<br>
+    <center><img src="images/ch05/ch05-06-14.png" alt="radioicon3" width="800"></center>
+    现在 radioButtonMan 既有图标也有文字了，为单选按钮添加图标的操作，等价于下面这几句代码：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; QIcon icon;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      icon.addFile(QStringLiteral(":/images/man.png"), QSize(), QIcon::Normal,
+      QIcon::Off);<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      radioButtonMan-&gt;setIcon(icon);</div>
+    QIcon 对象 icon 其实可以添加多个图片文件，每个图片文件对应控件不同状态下的显示。上面这段代码仅仅设置了一个图片文件，addFile()
+    函数第一个参数是内嵌资源文件的虚拟文件路径，第二个是图片尺寸，没有限定图片大小，第三个参数是表示该图标使用模式，QIcon::Normal
+    即控件的平常显示模式，第四个参数代表该图标对应的控件状态显示，QIcon::Off 表示控件处于非选中状态时显示该图标。<br>
+    <br>
+    在设计模式，如果我们点击该单选按钮的 icon 属性一栏左侧的 + 号，展开 icon 属性，可以看到 Qt 根据初始的 man.png
+    自动生成的各种模式、状态对应的丰富图标：<br>
+    <center><img src="images/ch05/ch05-06-15.png" alt="radioicon4" width="800"></center>
+    通常我们只需要为按钮等控件添加一个基本的图片文件就够了，QIcon
+    会自动根据该图片文件自动生成如上图所示的按钮各种状态对应的显示图标。如果程序员对程序界面特别讲究，也可以为按钮的每种状态定做一个图标，然后在上图属性编辑器里添加
+    一个按钮在各种状态下的图片文件。当然，通常情况下，一个按钮控件用一个图片文件就足够了。<br>
+    <br>
+    为 radioButtonMan 单选按钮添加 ":/images/man.png" 图标之后，我们如法炮制：<br>
+    为第二个单选按钮 radioButtonWoman 添加 ":/images/woman.png" 图标；<br>
+    为最下面一行的按压按钮 pushButtonCommit 添加 ":/images/yes.png" 图标；<br>
+    为最下面一行的按钮按钮 pushButtonCancel 添加 ":/images/no.png" 图标。<br>
+    添加操作是完全类似的。添加好单选按钮和按压按钮的图标之后，窗体界面如下图所示：<br>
+    <center><img src="images/ch05/ch05-06-16.png" alt="icons" width="800"></center>
+    这样就用完了 4 个小图片文件，我们还剩下 4
+    个小图片暂时没用到：ellipse.png、polygon.png、rectangle.png、triangle.png，
+    等会我们通过代码来向组合框添加条目时再用。<br>
+    <br>
+    现在保存界面文件，关闭 qrc 和 ui 文件，然后进入代码编辑模式，添加我们例子的功能代码。<br>
+    头文件 widget.h 不需要手动修改，这里只是把它的代码贴出来方便读者阅读比对：<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>WIDGET_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">WIDGET_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonCommit_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonCancel_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre>
+    </div>
+    <br>
+    下面我们编辑 widget.cpp 源文件，添加代码，首先是头文件包含和构造函数部分的代码：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QMessageBox&gt;</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#008000;">//消息框</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QIcon&gt;</span><span style=" color:#c0c0c0;">        </span><span
+style=" color:#008000;">//图标类</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QPixmap&gt;</span><span style=" color:#c0c0c0;">      </span><span
+style=" color:#008000;">//像素图的类</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//选中一个默认的单选按钮（如果不设置，那么初始时都处于不选中状态）</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">radioButtonMan</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setChecked</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">true</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//添加组合框条目</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">comboBox</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addItem</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QIcon</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">":/images/triangle.png"</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                           </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"锐意进取"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">comboBox</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addItem</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QIcon</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">":/images/rectangle.png"</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                           </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"大方得体"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">comboBox</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addItem</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QIcon</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">":/images/polygon.png"</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                           </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"灵活善变"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">comboBox</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addItem</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QIcon</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">":/images/ellipse.png"</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                           </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"精明圆滑"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//组合框默认选中第</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">0</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">号条目，不用设置</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    &lt;QIcon&gt; 是用于表示图标的类的头文件，&lt;QPixmap&gt; 是像素图的类的头文件。<br>
+    构造函数里，使用单选按钮 radioButtonMan 的 setChecked() 函数，把默认的性别设置为了 "男" 。<br>
+    如果不在构造函数里设置默认单选按钮，那么单选按钮都会处于非选中状态。<br>
+    <br>
+    然后我们为组合框 comboBox 添加了四个条目，每个条目都有一个图标和一个字符串。QIcon
+    构造函数有很多个，我们在代码里使用的是最简单的一个，只需指定图片在资源文件里的虚拟文件路径就行了。条目的文本字符串是我随手编的，大概看起来和图标勉强对得上。为组
+    合框添加好条目之后，组合框默认就选中第 0&nbsp; 号条目，不需要用代码做额外设置了。<br>
+    <br>
+    接下来看看 "提交" 按钮对应的槽函数代码：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_pushButtonCommit_clicked</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strResult</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//添加姓名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strResult</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"姓名：%1\r\n"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditName</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//添加性别</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">radioButtonMan</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">isChecked</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">strResult</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"性别：男\r\n"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">else</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">strResult</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"性别：女\r\n"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//添加性格特质</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strResult</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"性格特质：%1\r\n"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">comboBox</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">currentText</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//取出性格特质条目的像素图</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nIndex</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">comboBox</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">currentIndex</span><span style=" color:#000000;">();</span><span
+style=" color:#c0c0c0;">      </span><span style=" color:#008000;">//当前条目序号</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QIcon</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">icon</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">comboBox</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">itemIcon</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nIndex</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#008000;">//当前条目图标对象</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QPixmap</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">pixmap</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">icon</span><span style=" color:#000000;">.</span><span style=" color:#000000;">pixmap</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QSize</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">32</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">32</span><span style=" color:#000000;">));</span><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//从图标对象取出一个</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">32*32</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">的像素图</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//自定义消息框</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">theMessageBox</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置标题</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">theMessageBox</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setWindowTitle</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"人员信息"</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置消息</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">theMessageBox</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strResult</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置显示的按钮</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">theMessageBox</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setStandardButtons</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Ok</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置图标像素图</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">theMessageBox</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setIconPixmap</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">pixmap</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//弹窗显示</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">theMessageBox</span><span
+style=" color:#000000;">.</span><span style=" font-style:italic; color:#000000;">exec</span><span
+style=" color:#000000;">();</span><span style=" color:#c0c0c0;">   </span><span
+style=" color:#008000;">//模态显示</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+    </div>
+    这个槽函数主要功能就是收集用户输入的信息并弹窗显示。<br>
+    strResult 就是弹窗显示的消息字符串。槽函数里的代码大致过程如下：<br>
+    ① 将姓名单行编辑控件的文本作为一行，添加到 strResult 。<br>
+    ② 根据性别单选按钮的状态，确定当前性别，并构造一句性别文本，添加到 strResult 。<br>
+    ③ 将性格特质组合框的文本也作为一行，添加到 strResult 。<br>
+    ④ 根据组合框的当前条目序号 nIndex ，获取当前条目的图标对象 icon ，再从 icon 对象里抽取一个 32*32
+    的像素图，后面会用到这个像素图。<br>
+    ⑤ 自己定义了一个 theMessageBox 消息框，设置它的标题、消息文本、拥有的按钮，<br>
+    然后设置这个消息框的图标像素图为性格特质的图标像素图 pixmap，这里就定制了消息框显示的图标。<br>
+    ⑥ 弹窗显示 theMessageBox.exec() 。<br>
+    注意消息框的 exec() 函数是模态显示，该消息框会强制显示主窗体的上面，如果不关闭消息框，就不能回到主窗体。<br>
+    消息框另一个显示函数 show() 是非模态显示，这种情况不关闭消息框也可以回到主窗体，消息框与主窗体是可以同时点击使用的。一般情况下，消息框都使用
+    exec() 模态显示，而对于其他类型的工具对话框，可能使用 show() 显示。<br>
+    <br>
+    theMessageBox 是我们自己定制的消息框，它的图标其实就是 32*32 的性格特质图标。不同的性格特质图标对应的消息框的图标也不同，这是比较有意
+    思的地方，等会运行时会看到。<br>
+    <br>
+    最后是 "取消" 按钮的槽函数代码：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_pushButtonCancel_clicked</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">   </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">ret</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;">  </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">information</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                             </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"退出"</span><span style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                             </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"您确定要退出程序吗？"</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                             </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Yes</span><span style=" color:#000000;">|</span><span
+style=" color:#800080;">QMessageBox</span><span style=" color:#000000;">::</span><span
+style=" color:#800080;">No</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">   </span><span style=" color:#808000;">if</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QMessageBox</span><span style=" color:#000000;">::</span><span
+style=" color:#800080;">Yes</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">==</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">ret</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">   </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">       </span><span style=" color:#008000;">//确认退出</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">       </span><span style=" color:#808000;">this</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">close</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">   </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">   </span><span style=" color:#808000;">else</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">   </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">       </span><span style=" color:#008000;">//不退出，不需要操作</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">   </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+    </div>
+    这个槽函数功能不是简单地关闭主窗体退出程序，而是先弹出一个消息框，询问用户是否确认要退出，消息框里有两个标准按钮，一个按钮是 "Yes" 按钮，另一个是
+    "No" 按钮。<br>
+    如果用户点击 "Yes"，消息框返回值为 QMessageBox::Yes，<br>
+    如果用户点击 "No"，消息框返回值为 QMessageBox::No。<br>
+    根据用户选择的不同，如果确认要退出，那么关闭主窗体退出程序，否则回到主窗体，不退出程序。<br>
+    <br>
+    例子的代码就是上面那些，我们生成运行例子看看效果：<br>
+    <center><img src="images/ch05/ch05-06-17.png" alt="run1"></center>
+    可以看到性别单选按钮和两个按压按钮都有图标显示，我们通过代码添加的组合框条目也是既有图标也有文本，界面看起来比没有图标时会形象一些。如果在
+    QtCreator 设计模式把文本去掉，只显示图标也是可行的，当然这个要求图标的意义足够清晰明了。<br>
+    如果在性格特质里选择 "灵活善变" 的条目，再点击 "提交" 按钮，可以看到我们自定义图标的消息框：<br>
+    <center><img src="images/ch05/ch05-06-18.png" alt="run2"></center>
+    消息框的图标就是我们用代码获取的，尺寸 32*32 ，对应性格特质当前条目的图标。<br>
+    程序界面还有个 "取消" 按钮，读者可以自行测试 "取消" 按钮的功能，与上面的槽函数代码对比看看。<br>
+    <br>
+    这个例子的 icons.qrc 经过 rcc 编译后的 qrc_icons.cpp 位于影子构建文件夹的 debug 子文件夹里面，即：<br>
+    D:\QtProjects\ch05\build-helloqrc-Desktop_Qt_5_4_0_MinGW_32bit-Debug\debug<br>
+    感兴趣的读者可以自己打开该文件看看代码，这里就不贴了。<br>
+    <br>
+    对于本例子，我们画出它完整的编译、链接过程，读者可以与 2.3 节末尾的图对比看看：<br>
+    <center><img src="images/ch05/ch05-06-19.png" alt="build"></center>
+    对于使用资源文件的简单 Qt 程序，源代码的编译、链接过程通常都类似上图的过程，以后还会学到多个 ui 文件和对应界面类，多 ui
+    文件和界面类，就是对该图 main.cpp 左半边部分的扩展；对于使用多个内嵌 qrc 的项目，编译链接过程就是对该图 main.cpp
+    右半边部分的扩展。本小节例子是针对内嵌资源文件的，下个例子我们自己制作一个外挂的 *.rcc 二进制资源文件，然后在程序代码里加载它并使用其中的图片。<br>
+    <br>
+    <div class="os2">5.6.4 闪屏和应用程序图标</div>
+    <br>
+    在本小节的例子开始之前，先学两个知识点，一个是关于 QSplashScreen 闪屏类，另一个是为目标程序添加应用图标。<br>
+    （1）QSplashScreen 闪屏类<br>
+    闪屏就是在程序进入主窗体之前，在桌面中央位置显示一个无边框的图片窗口，并且在图片下面还可以显示提示信息，比如 "加载中" 。知名软件如
+    Photoshop、Eclipse 等启动时都有闪屏界面。 QSplashScreen 类就是用于是实现闪屏的类，构造函数有两个：<br>
+    <div class="code">QSplashScreen(const QPixmap &amp; pixmap = QPixmap(),
+      Qt::WindowFlags f = 0)</div>
+    <div class="code">QSplashScreen(QWidget * parent, const QPixmap &amp; pixmap
+      = QPixmap(), Qt::WindowFlags f = 0)</div>
+    pixmap 是闪屏显示的像素图，f 是窗口风格标志位，一般不用设置标志位，使用默认的就行。<br>
+    通常程序启动时的闪屏以桌面为父窗口，一般使用第一个构造函数，没有父窗口，即代表以桌面为父窗口。<br>
+    如果在主界面显示之后，通过某些操作显示一个闪屏，那么可以用第二个构造函数，指定父窗口指针 parent。<br>
+    <br>
+    除了可以在构造函数指定像素图，也可以通过函数设置：<br>
+    <div class="code">void setPixmap(const QPixmap &amp;pixmap)</div>
+    闪屏界面显示消息文本的函数为：<br>
+    <div class="code">void showMessage(const QString &amp; message, int
+      alignment = Qt::AlignLeft, const QColor &amp; color = Qt::black) </div>
+    message 就是消息文本，alignment 是文本对齐方式，color 是文本颜色。<br>
+    因为闪屏会出现在主窗口之前，这时候还没有事件处理循环，如果希望闪屏界面能处理事件、信号、槽，那么需要手动调用&nbsp;
+    QApplication::processEvents() 函数，例如：<br>
+    <div class="code">int main(int argc, char *argv[])<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp; QApplication app(argc, argv);<br>
+      &nbsp;&nbsp;&nbsp; QPixmap pixmap(":/splash.png");<br>
+      &nbsp;&nbsp;&nbsp; QSplashScreen splash(pixmap);<br>
+      &nbsp;&nbsp;&nbsp; splash.show();<br>
+      &nbsp;&nbsp;&nbsp; app.processEvents();<br>
+      &nbsp;&nbsp;&nbsp; ...<br>
+      &nbsp;&nbsp;&nbsp; QMainWindow window;<br>
+      &nbsp;&nbsp;&nbsp; window.show();<br>
+      &nbsp;&nbsp;&nbsp; splash.finish(&amp;window);<br>
+      &nbsp;&nbsp;&nbsp; return app.exec();<br>
+      }</div>
+    显示了主窗体之后，就可以结束闪屏进入主窗体，即调用如下函数：<br>
+    <div class="code">void QSplashScreen::​finish(QWidget * mainWin)</div>
+    该函数参数里的主窗体 mainWin 显示完成之后，闪屏就自动关闭了。<br>
+    QSplashScreen 内容主要就是这些，根据 Qt 帮助文档的示例代码可以很容易为自己的程序添加闪屏。<br>
+    <br>
+    （2）应用程序图标<br>
+    无论是 Windows、Linux 桌面操作系统还是 Andorid 之类的手机操作系统，应用程序都有一个标志性的图标，比如 Windows
+    桌面通常都能看到一大堆程序的图标，Andorid 手机里也是。Qt 帮助文档主题 Setting the Application Icon
+    就是介绍在各种操作系统平台设置应用程序图标的。以 Windows 操作系统为例，添加应用程序图标需要三步：<br>
+    ① 弄一个图标文件，比如 myappico.ico，放到项目源代码文件夹。<br>
+    ② 用记事本编一个 myapp.rc 文件，里面填写一句代码：<br>
+    <div class="code">IDI_ICON1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      ICON&nbsp;&nbsp;&nbsp; DISCARDABLE&nbsp;&nbsp;&nbsp;&nbsp; "myappico.ico"</div>
+    ③ 在项目的 pro 文件添加一句代码：<br>
+    <div class="code">RC_FILE = myapp.rc</div>
+    然后用 QtCreator 或者 qmake 编译生成程序即可。 QtCreator 或者 qmake 会自动将 Windows 资源文件
+    myapp.rc 编译成二进制资源文件 *.res ，然后链接进目标程序里。<br>
+    <br>
+    Qt 帮助文档里描述的上述方法从 Qt4 到 Qt5 都是管用的，不过 Qt5 新增了一种添加应用程序图标的方法，过程简化了许多。<br>
+    新方法操作如下：<br>
+    ① 弄一个图标文件，比如 myappico.ico，放到项目源代码文件夹。<br>
+    ② 在项目的 pro 文件添加一句代码：<br>
+    <div class="code">RC_ICONS = myappico.ico</div>
+    然后用 QtCreator 或者 qmake 编译生成程序即可。我们下面的例子用 Qt5 的新方法。<br>
+    <br>
+    在新建例子的项目之前，我们有两项准备工作，首先是下载一个应用程序图标 qt.ico 和一个闪屏图片 splash.png：<br>
+    <a href="https://lug.ustc.edu.cn/sites/qtguide/QtProjects/ch05/splash/" target="new">
+      https://lug.ustc.edu.cn/sites/qtguide/QtProjects/ch05/splash/ </a> <br>
+    把这两个文件放到目录 D:\QtProjects\ch05\splash 。<br>
+    splash.png 是相当大的，有 2.81
+    MB，这个可以集成到程序的内嵌资源，但是我们这里因为要示范外挂资源，所以将这个闪屏图标单独做一个二进制资源文件。<br>
+    <br>
+    我们重新打开 QtCreator，先不建项目，直接从菜单“文件”--&gt;“新建文件或项目”：<br>
+    <center><img src="images/ch05/ch05-06-20.png" alt="newqrc" width="800"></center>
+    左边一栏选择 Qt，中间一栏选择 Qt Resource File，再点击右下角 Choose... 按钮。然后进入如下界面：<br>
+    <center><img src="images/ch05/ch05-06-21.png" alt="newqrc2" width="800"></center>
+    名称里面填写 bigpics ，路径填写 D:\QtProjects\ch05\splash ，然后点击下一步。进入如下界面：<br>
+    <center><img src="images/ch05/ch05-06-22.png" alt="newqrc3" width="800"></center>
+    点击完成按钮，看到 bigpics.qrc 文件编辑界面：<br>
+    <center><img src="images/ch05/ch05-06-23.png" alt="newqrc4" width="800"></center>
+    点击“添加”按钮，会出现图上的下拉菜单，选择“添加前缀”，看到新的前缀如下图：<br>
+    <center><img src="images/ch05/ch05-06-24.png" alt="newqrc5" width="800"></center>
+    选中上面的 /new/prefix1 虚拟前缀，然后在下面的“前缀”编辑框修改，修改后只有一个斜杠 /&nbsp; ，如下图所示：<br>
+    <center><img src="images/ch05/ch05-06-25.png" alt="newqrc6" width="800"></center>
+    添加前缀之后，就可以点击“添加”按钮，从下拉菜单选择“添加文件”，把刚才下载的大图 splash.png 添加 bigpics.qrc 资源文件里面：<br>
+    <center><img src="images/ch05/ch05-06-26.png" alt="newqrc7" width="800"></center>
+    这样 bigpics.qrc 资源描述文件就编辑好了，保存它，然后关闭 QtCreator。<br>
+    我们这里的 bigpics.qrc 是要手动用 rcc 工具编译生成外挂资源的。<br>
+    我们从开始菜单打开 Qt 命令行，执行如下两句命令：<br>
+    <div class="code">cd /d D:\QtProjects\ch05\splash</div>
+    <div class="code">rcc -binary bigpics.qrc -o bigpics.rcc</div>
+    然后就可以在 D:\QtProjects\ch05\splash 文件夹看到新的二进制资源文件 bigpics.rcc ，留着等会用。<br>
+    <br>
+    关闭命令行窗口，重新打开 QtCreator，我们开始新建项目：<br>
+    ①项目名称 splash，创建路径 D:\QtProjects\ch05，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    <br>
+    在刚才第①步里面可以看到黄色背景文字提示“项目已存在”：<br>
+    <center><img src="images/ch05/ch05-06-27.png" alt="newpro" width="800"></center>
+    我们之前有 D:\QtProjects\ch05\splash 文件夹，但是并没有 pro 文件和代码，所以这里可以无视这个提示信息，点击 “下一步”
+    就行。其他的与从前的操作步骤都类似。<br>
+    <br>
+    在 QtCreator 里面，我们在项目侧边栏里双击打开 splash.pro 文件，添加我们的应用程序图标，修改后该 pro 文件内容为：<br>
+    <div class="code"> <span style=" color:#008000;">#-------------------------------------------------</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">#</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">#</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Project</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">created</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">by</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">QtCreator</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">2015-08-12T11:21:28</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">#</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">#-------------------------------------------------</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">QT</span><span style=" color:#c0c0c0;">       </span>+=<span
+style=" color:#c0c0c0;"> </span>core<span style=" color:#c0c0c0;"> </span>gui</pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">greaterThan(<span
+style=" color:#800080;">QT_MAJOR_VERSION</span>,<span style=" color:#c0c0c0;"> </span>4):<span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QT</span><span style=" color:#c0c0c0;"> </span>+=<span
+style=" color:#c0c0c0;"> </span>widgets</pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">TARGET</span><span style=" color:#c0c0c0;"> </span>=<span
+style=" color:#c0c0c0;"> </span>splash</pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">TEMPLATE</span><span style=" color:#c0c0c0;"> </span>=<span
+style=" color:#c0c0c0;"> </span>app</pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">SOURCES</span><span style=" color:#c0c0c0;"> </span>+=<span
+style=" color:#c0c0c0;"> </span>main.cpp\</pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>widget.cpp</pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">HEADERS</span><span style=" color:#c0c0c0;">  </span>+=<span
+style=" color:#c0c0c0;"> </span>widget.h</pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">FORMS</span><span style=" color:#c0c0c0;">    </span>+=<span
+style=" color:#c0c0c0;"> </span>widget.ui</pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">RC_ICONS<span
+style=" color:#c0c0c0;"> </span>=<span style=" color:#c0c0c0;"> </span>qt.ico</pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+    </div>
+    pro 文件最后一句 RC_ICONS 就是为应用程序添加图标的意思。修改好之后保存 pro
+    文件，关闭该文件，我们现在不修改程序源码，直接先生成该项目，看看效果。<br>
+    在影子构建文件夹，可以看到 QtCreator 自动生成的 splash_resource.rc 资源文件，然后在影子构建文件夹的子文件夹
+    debug，可以看到带有应用程序图标的 splash.exe ，如下图所示：<br>
+    <center><img src="images/ch05/ch05-06-28.png" alt="exe" width="800"></center>
+    这说明我们例子第一个目标已经实现，现在的目标程序是有一个应用程序图标的。<br>
+    <br>
+    例子第二个目标是使用外挂资源 bigpics.rcc，我们在程序代码里使用相对路径注册这个二进制资源文件，QtCreator
+    运行目标程序时默认的工作路径就是影子构建文件夹，<span style="font-weight: bold; color: red;">我们需要复制或
+      剪切一份 bigpics.rcc ，放到影子构建文件夹：<br>
+      D:\QtProjects\ch05\build-splash-Desktop_Qt_5_4_0_MinGW_32bit-Debug<br>
+      这样程序运行时才能正常加载外挂资源 bigpics.rcc </span>，将 bigpics.rcc 存到影子构建文件夹之后，我们回到
+    QtCreator，进行实际的界面和代码编辑。<br>
+    <br>
+    打开项目里的 widget.ui 文件，进入设计模式，按照下图拖入两个按钮：<br>
+    <center><img src="images/ch05/ch05-06-29.png" alt="ui" width="800"></center>
+    第一个按钮文本为 "关于本程序" ，objectName 为 pushButtonAbout ；<br>
+    第二个按钮文本为 "关于 Qt"，objectName 为 pushButtonAboutQt 。<br>
+    放在主窗体比较中间的位置，并且调整一下，注意对齐。<br>
+    一般的应用程序都有关于程序本身的弹窗介绍，第一个按钮就是弹窗介绍程序本身的，第二个按钮是弹窗显示 Qt 的版本信息。<br>
+    <br>
+    我们为两个按钮都添加 clicked() 信号对应的槽函数：<br>
+    <center><img src="images/ch05/ch05-06-30.png" alt="slot"></center>
+    添加好槽函数后，保存界面文件并关闭，回到代码编辑模式，开始添加功能代码。<br>
+    我们这里不需要手动修改 widget.h 头文件内容，下面只是贴出来方便读者对照：<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>WIDGET_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">WIDGET_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonAbout_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonAboutQt_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre>
+    </div>
+    我们打开 widget.cpp 源代码文件，编辑里面的内容，主要是为两个按钮的槽函数添加代码：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QMessageBox&gt;</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#008000;">//消息框</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonAbout_clicked</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">about</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"关于本程序"</span><span style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                       </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"闪屏程序，版本</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">1.0，\r\n使用外挂资源</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">splash.rcc。"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonAboutQt_clicked</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">aboutQt</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"关于</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Qt"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    widget.cpp 里面的内容很简单，主要是两个槽函数里的代码，首先是 "关于本程序" 按钮的，里面调用用静态函数
+    QMessageBox::about() ，这个函数第一个参数是父窗口指针，第二个是消息框标题，第三个是关于程序自身的介绍字符串。<br>
+    该静态函数专门用于弹窗显示关于程序自身信息的，比如版本号、网址、作者等等。<br>
+    第二个槽函数对应的是 "关于 Qt" 按钮，静态函数 QMessageBox::aboutQt() 专门用于显示 Qt
+    版本信息，它只有两个参数，第一个是父窗口指针，第二个是消息框标题，消息框内部的正文内容由 Qt 库自己设置，不需要我们操心。<br>
+    等到运行时，读者可以点击这两个按钮测试运行效果。<br>
+    <br>
+    主窗体的内容就是上面那么多，我们这小节的第二个任务是使用外挂资源中的图片，作为闪屏来显示。闪屏的代码全部在 main.cpp 中，我们打开
+    main.cpp 文件，按照下面代码编辑：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QApplication&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QSplashScreen&gt;</span><span style=" color:#c0c0c0;">    </span><span
+style=" color:#008000;">//闪屏类</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QPixmap&gt;</span><span style=" color:#c0c0c0;">          </span><span
+style=" color:#008000;">//像素图</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QResource&gt;</span><span style=" color:#c0c0c0;">        </span><span
+style=" color:#008000;">//外挂资源注册</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QThread&gt;</span><span style=" color:#c0c0c0;">          </span><span
+style=" color:#008000;">//线程类</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">main</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">argc</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">char</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span
+style=" color:#000000;">argv</span><span style=" color:#000000;">[])</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//应用程序对象</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QApplication</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">a</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">argc</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">argv</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//注册外挂资源</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//bigpics.rcc位于影子构建路径</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QResource</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">registerResource</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"bigpics.rcc"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//加载外挂资源文件中的像素图</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QPixmap</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">pixmapSplash</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">":/splash.png"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//原图太大，缩小点方便显示</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">pixmapSplash</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">pixmapSplash</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">scaled</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QSize</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">480</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">270</span><span style=" color:#000000;">)</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//定义闪屏</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QSplashScreen</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">theSplash</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">pixmapSplash</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//显示闪屏</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">theSplash</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">show</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//在闪屏里面显示消息</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">theSplash</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">showMessage</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QObject</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"加载中</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">..."</span><span
+style=" color:#000000;">),</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Qt</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">AlignLeft</span><span
+style=" color:#000000;">|</span><span style=" color:#800080;">Qt</span><span style=" color:#000000;">::</span><span
+style=" color:#800080;">AlignBottom</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//启动应用程序的事件处理</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">a</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">processEvents</span><span style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//主窗体</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">w</span><span style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//下面一句睡眠不是必须的</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//这里等3秒，否则闪屏结束太快，看不到</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">w</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">thread</span><span style=" color:#000000;">()-&gt;</span><span
+style=" color:#000000;">sleep</span><span style=" color:#000000;">(</span><span
+style=" color:#000080;">3</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//显示主窗体</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">w</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">show</span><span style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//主窗体出现后就闪屏就可以结束了</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">theSplash</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">finish</span><span
+style=" color:#000000;">(&amp;</span><span style=" color:#000000;">w</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">return</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">a</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">exec</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    头文件包含新增了：<br>
+    &lt;QSplashScreen&gt;，就是闪屏类；&lt;QPixmap&gt; 用于从资源文件中加载像素图；<br>
+    &lt;QResource&gt; 用于手动注册外挂资源文件 bigpics.rcc；<br>
+    &lt;QThread&gt; 是线程类，线程类其实不是必须的，因为我们的主窗体程序比较小，主窗体启动非常快，原本闪屏的时间太短。<br>
+    这里引入线程类，是为了在闪屏显示之后，睡眠 3 秒，方便看清楚闪屏用的。<br>
+    <br>
+    在 main() 函数里添加了关于外挂资源注册和闪屏显示的代码，我们根据 main() 函数代码描述其过程如下：<br>
+    ① 定义应用程序入口对象 a 。<br>
+    ② 用 QResource::registerResource()&nbsp; 函数注册外挂资源文件 "bigpics.rcc"
+    ，这个文件用的是相对路径，我们之前已经把该二进制资源文件放到影子构建文件夹了，这里直接用该文件名即可。<br>
+    ③ 根据资源文件里的图片 ":/splash.png" 定义像素图 pixmapSplash。<br>
+    ④ 因为我们的 splash.png 原本非常大，1920*1080，这里用 QPixmap::scaled() 函数把原图缩放到 480*270，<br>
+    再保存到 pixmapSplash 对象里面，这样用较小的图做闪屏更合适。<br>
+    ⑤ 根据像素图 pixmapSplash 定义闪屏对象 theSplash；<br>
+    调用闪屏对象的 show() 函数显示闪屏本身；<br>
+    调用闪屏对象的 showMessage() 函数显示附加提示消息，该函数第一个参数是消息文本，<br>
+    showMessage() 第二个参数是文本显示的对齐方式，默认是显示在左上角，我们代码里的 Qt::AlignLeft|Qt::AlignBottom
+    是将提示文本显示在左下角。<br>
+    ⑥ 调用应用程序对象的事件处理函数 a.processEvents()，因为主窗口还没有启动，需要手动调用该函数处理事件，比如鼠标点击等。<br>
+    ⑦ 定义主窗体 w，在定义主窗体之后，我们手动调用了 w.thread()-&gt;sleep(3) ，获取主线程并睡眠 3 秒，<br>
+    这个是用来拖时间，让闪屏显示了 3 秒，方便看清楚效果的。实际的程序中，不需要调用 sleep() 函数的。<br>
+    ⑧ 调用&nbsp; w.show() 显示主窗口，主窗口显示之后，<br>
+    就可以调用闪屏对象的 finish() 函数，这样当主窗口显示出来之后，闪屏会自动关闭。<br>
+    ⑨ main() 函数最后一句 return a.exec() 是进入程序的事件处理循环，直到程序主窗口被关闭。<br>
+    <br>
+    程序代码到这里就完整了，闪屏代码与其他窗口代码都不一样，要在主窗口之前显示，因此需要放到 main() 函数里面。<br>
+    <br>
+    外挂资源的使用要点有两条：<br>
+    第一是把二进制资源文件 bigpics.rcc 放对位置，对于 QtCreator
+    运行程序，需要放在影子构建文件夹，如果是发布应用程序，那么一般放在和目标程序（*.exe）一样的文件目录。<br>
+    第二是在 main 函数里面手动调用 QResource::registerResource() 注册外挂资源，外挂资源注册之后，就与内嵌资源的使用没有
+    区别了，都是类似 ":/splash.png" 这样的文件路径。<br>
+    <br>
+    讲完例子代码，我们生成并运行例子看看，程序启动时有 3 秒钟的闪屏：<br>
+    <center><img src="images/ch05/ch05-06-31.png" alt="splash"></center>
+    闪屏结束后就会进入程序的主窗体，我们在主窗体点击第一个按钮，可以看到关于程序本身的消息框：<br>
+    <center><img src="images/ch05/ch05-06-32.png" alt="run"></center>
+    注意到主窗体和弹窗的消息框左上角都有我们自己的 Qt 应用程序图标，设置了应用程序图标之后，主窗体和其他弹出的子窗口默认都继承并显示该图标。<br>
+    主窗体还有第二个按钮，是 "关于 Qt" 的，读者可以自己测试看看，这里不截图了。<br>
+    <br>
+    例子的示范到这里就结束了。关于 Qt 的资源文件，我们最后再说明三条：<br>
+    ① 内嵌资源文件是通过 rcc 生成 qrc_*.cpp 文件，然后交给 C++ 编译器编译的，编译器通常对 *.cpp 源文件有个大小限制，如果
+    cpp 文件太大，比如超过 80MB 时， g++ 编译器可能会报错，在 QtCreator 下面的问题面板和编译输出面板的错误信息如下：<br>
+    <div class="code"><span style=" color:#aa0000;">cc1plus.exe: out of memory
+        allocating 1073745919 bytes</span></div>
+    g++ 会调用内部编译器 cc1plus.exe 编译源文件，这个内部编译器最大申请内存是 1073745919 字节，大约 1GB
+    内存，由于编译的过程很复杂，编译过程中的数据结构占用内存也很大，虽然源文件是 80 MB，但编译它需要的内存已经超过了
+    1GB，导致无法继续编译，因此才出错的。<br>
+    <br>
+    针对 *.qrc 引用较大图片或音视频文件的情况，建议直接把大文件放在操作系统文件夹里使用，而不是放在目标程序内嵌资源里；或者按照本节第二个示例，用
+    rcc 工具手动编译成外挂资源 *.rcc 文件。Qt 的工具 rcc 编译二进制资源文件 *.rcc
+    ，是不限制资源文件大小的，可以放置视频之类的大文件。<br>
+    <br>
+    ② *.qrc
+    文件里面不仅可以引用图片文件，还可以引用其他任意文件，是不限制文件类型的。当然，内嵌资源文件不要太大，外挂的资源文件可以不限大小。以后的章节我们还会学到把
+    *.txt 、*.htm 文件嵌入目标程序资源里使用。资源里的图片、音视频、文档等文件，使用方式与操作系统里的非常类似，二者的区别为 Qt
+    资源系统里的文件都是只读的，资源里的虚拟文件路径是以 ":/" 打头。<br>
+    <br>
+    ③ 图标、图片等文件从哪里寻找呢？<br>
+    本节的图标、图片都是从网上搜刮的，读者以后设计程序时，如果需要图片、图标，可以自己百度或谷歌。当然，如果读者自己会画，或者有艺术家朋友，那就更好了。<br>
+    这里推荐几个专门下载图标文件的网站：<br>
+    <a href="http://www.iconpng.com/" target="new">http://www.iconpng.com/</a><br>
+    <a href="http://www.easyicon.net/" target="new">http://www.easyicon.net/</a><br>
+    <a href="http://findicons.com/" target="new">http://findicons.com/</a><br>
+    <br>
+    本节的内容就到这里，本章也就结束了，我们之前所有的窗口在运行时都没有考虑这样一个问题：<br>
+    如果用户拖动窗口边框，把窗口大小改变了，那么新尺寸的窗口会变得有多丑呢？<br>
+    读者可以自己试试。我们下一章学习 Qt 窗口布局，在窗口大小变化后，窗口里的控件自动调整大小和位置，这样让窗口随时随地都看起来比较美观整齐。<br>
+    <br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch05-05.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch06-00.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

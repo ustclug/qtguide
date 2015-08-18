@@ -3,11 +3,9 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <title>ch06-01</title>
-    
-<link href="css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-
-<script src="thumbnailviewer.js" type="text/javascript">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -15,48 +13,2409 @@
 * Visit http://www.dynamicdrive.com/ for full source code
 ***********************************************/
 
-</script>
+</script> </head>
+  <body>
+    <div class="os1">6.1 传统窗口调整技术 </div>
+    <br>
+    在介绍 Qt 布局器之前，我们先学习一下传统窗口调整技术， 通过手动计算来调整控件分布，以及限定窗口最大尺寸和最小尺寸。 虽然使用 Qt
+    布局器非常方便，不需要我们自己去计算控件实时的位置和大小， 但是我们还是应该学习如何根据窗口大小，自己编写代码计算各个控件的位置和大小，
+    这是一项传统的技术活，多学点基本知识总是好的，因为布局器也不是万能的，我们得多留一条出路。 <br>
+    <br>
+    手动计算和调整控件分布这项传统技术有缺点，就是没有通用性，控件多一个、少一个都得重新计算。
+    但也有优点，就是程序员对界面调整的掌控有最大的自由度和灵活度。我们本节第一个例子是限定窗口的最大尺寸和最小尺寸。第二个例子是根据窗口大小和控件的类型、数
+    目，手动计算调整控件的分布。 第三个例子根据程序默认字体和不同文本长度计算按钮控件实时的宽度，其他控件根据文本内容调整大小的原理也是类似的。 <br>
+    <br>
+    <div class="os2">6.1.1 限定窗口大小</div>
+    <br>
+    本章主要讲解如何对控件布局，基本不讲新的功能控件。我们主要对第 5 章的例子进行复习，添加布局方面的功能。<br>
+    窗体里用到的控件几乎都是以 QWidget 为基类，QWidget 关于控件或窗口大小的设置有如下几个函数：<br>
+    设置窗口占用矩形的函数：<br>
+    <div class="code">void setGeometry(int x, int y, int w, int h)</div>
+    <div class="code">void setGeometry(const QRect &amp;)</div>
+    x 和 y 是控件距离父窗口左上角的坐标，w 是宽度，h 是高度。QRect 也是以类似的 4 个参数构造。<br>
+    <br>
+    如果不改变窗口大小，只是移动窗口左上角坐标，那么使用如下函数：<br>
+    <div class="code">void move(int x, int y)</div>
+    <div class="code">void move(const QPoint &amp;)</div>
+    <br>
+    如果不移动窗口左上角坐标，只改变窗口的尺寸大小，那么使用如下函数：<br>
+    <div class="code">void resize(int w, int h)</div>
+    <div class="code">void resize(const QSize &amp;)</div>
+    w 是宽度，h 是高度。QSize 也是以宽度、高度为参数构造。<br>
+    <br>
+    当窗体尺寸变化时，不会发送信号，而是调用内部保护类型的虚函数
+    resizeEvent()。因为一方面信号和槽有开销，这对实时绘图不利，另一方面窗体变化应该由类对象内部处理，而不是交给外部对象处理，所以窗口大小变化时，调用的
+    是内部保护类型虚函数：<br>
+    <div class="code">void QWidget::​resizeEvent(QResizeEvent *
+      event)&nbsp;&nbsp;&nbsp; //virtual protected</div>
+    注意一般不要在 ​resizeEvent() 函数内部调用 setGeometry() 或者 resize() 改变窗口尺寸，那样容易导致
+    ​resizeEvent() 函数循环触发，进入死循环。<br>
+    <br>
+    限定窗口的尺寸范围有两个属性 minimumSize （最小尺寸，该属性又可细分为 minimumWidth、minimumHeight）和
+    maximumSize （最大尺寸，该属性又可细分为 maximumWidth、maximumHeight），无论使用代码调用设置函数还是用 Qt
+    设计师直接设置属性都可以限定窗口尺寸范围：<br>
+    <div class="code">void setMinimumSize(const QSize &amp;)&nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;&nbsp; //最小尺寸</div>
+    <div class="code">void setMinimumSize(int minw, int minh)&nbsp;&nbsp; //最小尺寸</div>
+    <div class="code">void setMaximumSize(const QSize
+      &amp;)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //最大尺寸</div>
+    <div class="code">void setMaximumSize(int maxw, int maxh)&nbsp;&nbsp; //最大尺寸</div>
+    如果同时将窗口的最大尺寸和最小尺寸设置为一样大，那么窗口就是固定尺寸的，不能拉伸或缩小。<br>
+    设置固定大小的窗口，可以同时设置上面的最小尺寸和最大尺寸，或者调用一个比较方便的函数：<br>
+    <div class="code">void setFixedSize(const QSize &amp; s)</div>
+    <div class="code">void setFixedSize(int w, int h)</div>
+    如果只希望单独设置固定宽度或者固定高度，则可以使用如下函数：
+    <div class="code">void setFixedWidth(int w)&nbsp;&nbsp;&nbsp; //单独设置固定宽度</div>
+    <div class="code">void setFixedHeight(int h)&nbsp;&nbsp; //单独设置固定高度</div>
+    窗口的尺寸和坐标设置函数就介绍这些，控件的尺寸和坐标设置函数是一样的。<br>
+    <br>
+    下面我们把 5.5.4 小节 D:\QtProjects\ch05\ 目录里的 timeshow 子文件夹复制一份，<br>
+    保存到第 6 章例子目录 D:\QtProjects\ch06\ 里面，然后进行下面操作：<br>
+    ①把新的 timeshow 文件夹重命名为 timeshowfixed，并把 timeshowfixed 里面 timeshow.pro.user
+    用户文件删掉。<br>
+    ②进入 timeshowfixed 文件夹，把 timeshow.pro 重命名为 timeshowfixed.pro。<br>
+    ③用记事本打开 timeshowfixed.pro，修改里面的 TARGET 一行，变成下面这句：<br>
+    <div class="code">TARGET = timeshowfixed</div>
+    进行这样三步操作后，我们本章第一个例子的项目 timeshowfixed 就建立好了。<br>
+    <br>
+    双击打开新的 timeshowfixed.pro 文件或者从 QtCreator 里面打开 timeshowfixed.pro
+    项目，在配置项目界面选择所有套件并点击 "Configure Project" ，配置好项目后，打开 widget.ui 界面文件，进入
+    QtCreator 设计模式：<br>
+    <center><img src="images/ch06/ch06-01-01.png" alt="ui" width="800"></center>
+    我们右击主窗体下面空白区域，右键菜单里选择 "大小限定" ，然后看到 6 个子菜单项，解释一下：<br>
+    ① "设定最小宽度"，就是将现在看到的窗体宽度设置为该窗体的最小宽度。<br>
+    ② "设定最小高度"，就是将现在看到的窗体高度设置为该窗体的最小高度。<br>
+    ③ "设定最小大小"，就是将现在看到的窗体尺寸设置为该窗体的最小尺寸。<br>
+    ④ "设定最大宽度"，就是将现在看到的窗体宽度设置为该窗体的最大宽度。<br>
+    ⑤ "设定最大高度"，就是将现在看到的窗体高度设置为该窗体的最大高度。<br>
+    ⑥ "设定最大大小"，就是将现在看到的窗体尺寸设置为该窗体的最大尺寸。<br>
+    这里是右击主窗体空白区的，设置的就是主窗体的大小限定。如果右击某一个控件，那么就是设置该控件的大小限定，过程类似。<br>
+    <br>
+    现在设置主窗体的最小尺寸，就是选择上图的 "设置最小大小"，点击该子菜单项后，看到设计模式右下角的 minimumSize 变化：<br>
+    <center><img src="images/ch06/ch06-01-02.png" alt="ui2" width="800"></center>
+    通过右键菜单设置窗体的最小尺寸，与在右下角直接设置 minimumSize 属性的数值，两种方法是等价的。也可以再修改 minimumSize
+    ，调整成自己希望的最小尺寸。<br>
+    <br>
+    然后我们如法炮制，右击主窗体的空白区，将当前窗体的尺寸设置为该窗体的最大尺寸，设置后看到 maximumSize 属性变化：<br>
+    <center><img src="images/ch06/ch06-01-03.png" alt="ui3" width="800"></center>
+    设置后最大尺寸是 400*300，最小尺寸也是 400*300，这个窗体尺寸就固定了，无法被拉伸，控件大小自然也全固定了。<br>
+    我们保存界面文件，不需要手动编写代码，用 Qt 设计师（QtCreator 设计模式）就设置好了。<br>
+    <br>
+    现在构建并运行这个新例子，看到效果：<br>
+    <center><img src="images/ch06/ch06-01-04.png" alt="run"></center>
+    这个窗口大小是固定的，鼠标指向主窗体边框，没有拉伸的鼠标提示。<br>
+    <br>
+    作为对比，如果我们运行 5.5.4
+    小节电子钟的示例，鼠标指向旧例子的窗体边框时，会看到有双向箭头提示可以拉伸，如果我们把旧的电子钟示例窗口拉伸，看到类似下面效 果：<br>
+    <center><img src="images/ch06/ch06-01-05.png" alt="runold"></center>
+    好好的一个电子钟，拉大了之后显然没法看，因此我们选择这个例子，作为固定窗口大小的示例。<br>
+    同时限定窗口的最小尺寸和最大尺寸，是调整窗口和控件大小的最傻瓜的办法——就是打死不调整，全部固定住。<br>
+    当然，实际应用程序中，不可能全部的窗口都固定住，很多窗口大小是需要实时调整控件尺寸和分布情况的。<br>
+    我们下一个例子就介绍如何手动计算各个控件的分布和大小。<br>
+    <br>
+    <div class="os2">6.1.2 手动计算调整控件分布</div>
+    <br>
+    在不使用 Qt
+    布局器的情况下，我们可以手动规划各个控件的位置和尺寸设置，当然，这个手动计算的过程要根据不同界面进行不同的规划。手动计算调整控件分布的缺点就是没有什么通用性，换
+    个程序界面或者多一个控件、少一个控件都需要改写 cpp 文件中的源代码。我们这里以 5.5.3 图片浏览示例为底版，设计一个能跟随窗口大小变化而自动调整
+    各个控件分布和尺寸的程序。<br>
+    <br>
+    我们从之前 D:\QtProjects\ch05\ 目录复制 imgshow 子文件夹，保存到第 6
+    章例子的文件夹：D:\QtProjects\ch06\ ，然后进行如下操作：<br>
+    ① 把新的 imgshow 文件夹重命名为 imgshowdynamic，并把里面的 imgshow.pro.user 用户文件删除。<br>
+    ② 进入 imgshowdynamic 文件夹，把项目文件 imgshow.pro 改名为 imgshowdynamic.pro 。<br>
+    ③ 用记事本打开 imgshowdynamic.pro ，修改里的 TARGET 一行为下面这句：<br>
+    <div class="code">TARGET = imgshowdynamic</div>
+    <br>
+    然后我们双击打开 imgshowdynamic.pro 或者用 QtCreator 打开该项目文件，进入配置项目界面，选中所有套件，然互点击
+    "Configure Project" 按钮，进入 QtCreator 编辑模式。<br>
+    我们打开界面文件 widget.ui ，进入设计模式，看到下图所示的主窗体：<br>
+    <center><img src="images/ch06/ch06-01-06.png" alt="ui"></center>
+    ● 首先是主界面窗体的大概情况设定：<br>
+    主窗体第一行是非常大的标签控件 labelShow ，占据其他控件剩下的区域。<br>
+    第二行是四个按压按钮，目前的尺寸都是 75*23
+    ，四个按钮的文字能全部显示出来，在窗口变大时，不需要拉伸，但是需要均匀分布在同一水平线上，四个按钮之间的间隔相同。<br>
+    我们从这四个按钮计算主界面最小宽度，比如按钮间隔最小为 10，与两边框间距为 10，那么最小宽度就是<br>
+    10 * 5 + 75 * 4 == 350 ，我们将主窗体最小高度设置为与最小宽度一样，比较省事，就是最小尺寸 350 * 350 ，最大尺寸不限。<br>
+    主窗体第三行的控件就是一个水平滑动条 horizontalSlider ，我们希望它距离主窗体底部 10
+    ，宽度与第二行右边三个按钮占据宽度一样，水平滑动条高度是固定为原本的 21 。<br>
+    <br>
+    ● 现在我们来详细规划并计算各个控件的分布和尺寸：<br>
+    这个主窗体的规划思路是这样的，控件之间以及控件与四个边界都是有 10 像素的间隙，然后水平方向因为第二行控件最多，并且第三行的水平滑动条依赖第二行右边三
+    个按钮，我们从这第二行开始规划。<br>
+    <br>
+    当窗体拉伸后的宽度的 W，高度为 H ，按钮尺寸固定为 75*23 ，<br>
+    第一个按钮的左上角起点坐标：<br>
+    水平 x1 = 10，距离左边界为 10，这个是固定的。<br>
+    垂直 y1 = H - 10 - 21 - 10 - 23 ，其中第一个 10 是水平滑动条距离底部的垂直空隙，21 是水平滑动条的高度，<br>
+    第二个 10 是水平滑动条与按钮的垂直间隙，23 是按钮自己的高度。<br>
+    <br>
+    四个按钮的在同一水平线上，也就是 y1 == y2 == y3 == y4。<br>
+    第四个按钮也是距离右边界 10 个像素空隙，那么可以容易得出：<br>
+    x4 = W - 10 - 75 ，75 是按钮自己的宽度。<br>
+    <br>
+    四个按钮之间有三个大间隙，计算这个三个间隙总大小：<br>
+    nTriGap = W - 10 - 10 - 75*4 ，两个 10 是两个边界间隙，75*4 是按钮自己占的宽度，那么单个的大间隙就为：<br>
+    nGap = nTriGap / 3 。<br>
+    然后计算第二个和第三个按钮的水平坐标：<br>
+    x2 = x1 + 75 + nGap;<br>
+    x3 = x4 - 75 - nGap.<br>
+    这样四个按钮的坐标和尺寸就都确定了。<br>
+    <br>
+    按钮设置好之后，其他的就好办了，第三行的水平滑动条：<br>
+    xSlider = x2 ，<br>
+    ySlider = H - 10 - 21 ，最后的 21 是滑动条自己的高度。<br>
+    滑动条宽度是 wSlider = W - x2 - 10 ，高度固定为 hSlider = 21。<br>
+    <br>
+    现在可以计算第一行的标签控件矩形了(其实应该是包裹标签的滚动区域矩形)，标签坐标为：<br>
+    xLabel = 10;<br>
+    yLabel = 10;<br>
+    现在要计算标签的宽度和高度，<br>
+    宽度为 wLabel = W - 10 - 10；<br>
+    高度为 hLabel = H - 10 - 21 - 10 - 23 - 10 - 10 。<br>
+    高度计算里面第一个 10 是底部边界间隙， 21 是水平滑动条高度，<br>
+    第二个 10 是水平滑动条与按钮的间隙，23 是按钮的高度，<br>
+    第三个 10 是按钮与标签控件的间隙，<br>
+    第四个 10 是标签距离顶部的间隙。<br>
+    <br>
+    到这里按钮的分布情况就确定了。这个界面只有 6 个控件而已，如果控件再多些，计算就会更复杂了。<br>
+    <br>
+    下面开始介绍代码方面的内容，当窗口大小改变时，我们需要重载主窗体基类的事件函数：<br>
+    <div class="code">void QWidget::​resizeEvent(QResizeEvent * event)</div>
+    参数 event 是 QResizeEvent 类型，除了构造函数，这个 QResizeEvent 只有两个自己的公有函数：<br>
+    <div class="code">const QSize &amp; QResizeEvent::​oldSize() const</div>
+    oldSize() 用于获取窗体的旧尺寸，就是变化前的尺寸。
+    <div class="code">const QSize &amp; QResizeEvent::​size() const</div>
+    size() 用于获取窗体当前的新尺寸，就是变化后的尺寸。 当然，我们都是根据新尺寸调整里面各个控件的分布和尺寸。<br>
+    <br>
+    开始编写代码之前，介绍两个技巧：<br>
+    ① 符号名的重命名。<br>
+    比如希望重名一个类名或者对象名、变量名等等，右击该符号名，右键菜单选择 "Refactor"，如下图所示：<br>
+    <center><img src="images/ch06/ch06-01-07.png" alt="replace1" width="800"></center>
+    "Refactor" 有个子菜单项 "Rename Symbol Under Cursor" ，快捷键
+    Ctrl+Shift+R，就是重命名鼠标指向的名称的意思。<br>
+    点击重命名的子菜单项，看到类似下面界面：<br>
+    <center><img src="images/ch06/ch06-01-08.png" alt="replace2" width="800"></center>
+    点击重命名子菜单项后，会自动进入下面的 "Search Results" 信息面板，搜索结果面板可以看到查找到的旧的名称出现的代码行，<br>
+    在搜索结果面板上面部分，是替换相关的工具条，可以看到旧名字，并且可以设置替换后的新名字。<br>
+    勾选搜索结构面板里的代码行，然后点击 "Replace" 按钮，就可以把旧名字替换为新名字。<br>
+    上图示范的是类名，类名的覆盖区域很广，因此是全部替换。如果是修改函数里的变量名，那么一般修改该函数内部的代码行。<br>
+    <span style="font-weight: bold;">具体是替换哪些代码行，是需要根据实际情况来定的。</span><br>
+    <br>
+    ②重载基类函数<br>
+    我们本小节的示例需要重载基类的 ​resizeEvent() 函数，我们可以手动在 Widget 类的 .h 文件和 .cpp&nbsp;
+    里面，按照帮助文档里给定的函数名和参数，手动添加代码行进行重载。<br>
+    或者按照下面示范的操作，可以用右键菜单实现自动重载基类函数。<br>
+    打开 widget.h 头文件，选中类名 Widget，右击类名 Widget，然后也是在右键菜单选择 "Refactor" ，<br>
+    <center><img src="images/ch06/ch06-01-09.png" alt="Refactor" width="800"></center>
+    "Refactor" 第二个子菜单项是 "Insert Virtual Functions of Base Classes"
+    ，就是重载基类虚函数的意思。<br>
+    点击重载基类虚函数的子菜单项，进入下面插入基类虚函数对话框：<br>
+    <center><img src="images/ch06/ch06-01-10.png" alt="Reimplement1" width="800"></center>
+    该对话框最上面是树形列表，列举了所有基类可重载的虚函数，<br>
+    然后有个复选框 "Hide reimplemented functions" ，是隐藏之前已经重载过的虚函数的意思。<br>
+    接下来是 "Insertion options" 分组框，里面有一个组合框，用于设置插入虚函数的选项，<br>
+    组合框里面有四项内容：<br>
+    "Insert only declarations" ，只在类声明里面插入一个虚函数声明，不添加函数定义。<br>
+    "Insert definitions inside class"，把函数定义直接放到类声明里面，函数声明直接省了，在类声明里编写新函数实体。<br>
+    "Insert definitions outside class"
+    ，把函数定义和声明都放在头文件里面，函数声明放在类声明里面，函数定义放在类声明结束之后外面的代码位置。<br>
+    "Insert definitions in implementation file" ，函数声明放到头文件的类声明里面，函数的实体定义放到对应的
+    .cpp 文件末尾的位置。第四种是最为推荐的用法。当然，如果类的 .h 名与 .cpp
+    文件简短名不一样，那么可能找不到实现文件。这种情况才会用第一选项，只添加声明，回头自己在实现文件补上函数定义。<br>
+    <br>
+    组合框下面又是一个复选框 "Add keyword 'virtual' to function declearation"
+    ，这个是建议勾选的，基类是虚函数，虽然能自动继承虚函数特性，但明确加上 virtual
+    关键字其实更好，让代码意义更清晰，并且将来当前类的派生类也能重载该虚函数。<br>
+    <br>
+    讲完该对话框，我们在最上面的树形列表里面选中基类 QWidget 的 resizeEvent() 函数，<br>
+    组合框里面选择第四个 "Insert definitions in implementation file" ，<br>
+    勾选插入关键字 virtual 的复选框，如下图所示：<br>
+    <center><img src="images/ch06/ch06-01-11.png" alt="Reimplement2"></center>
+    点击 "OK" 按钮，QtCreator 就会自动为我们添加希望重载的基类虚函数。<br>
+    <br>
+    现在就可以看到 widget.h 新的完整代码，不需要手动修改这个头文件，下面只是贴代码方便读者对比看看：<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>WIDGET_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
 
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
 
-  </head>
-  
-  
-<div class="os1">6.1 传统窗口调整技术 </div>
-<br />
-在介绍 Qt 布局器之前，我们先学习一下传统窗口调整技术，
-通过手动计算来调整控件分布，以及限定窗口最大尺寸和最小尺寸。
-虽然使用 Qt 布局器非常方便，不需要我们自己去计算控件实时的位置和大小，
-但是我们还是应该学习如何根据窗口大小，自己编写代码计算各个控件的位置和大小，
-这是一项传统的技术活，多学点基本知识总是好的，因为布局器也不是万能的，我们得多留一条出路。
-<br />
-<br />
-手动计算和调整控件分布这项传统技术有缺点，就是没有通用性，控件多一个、少一个都得重新计算。
-但也有优点，就是程序员对界面调整的掌控有最大的自由度和灵活度。我们本节第一个例子是限定窗口的最大尺寸和最小尺寸。第二个例子是根据窗口大小和控件的类型、数目，手动计算调整控件的分布。
-第三个例子根据程序默认字体和不同文本长度计算按钮控件实时的宽度，其他控件根据文本内容调整大小的原理也是类似的。
-<br />
-<br />
-<div class="os2">6.1.1 限定窗口大小</div>
-<br />
-<br />
+style=" color:#000080;">WIDGET_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
 
-<div class="os2">6.1.2 手动计算调整控件分布</div>
-<br />
-<br />
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
 
-<div class="os2">6.1.3 计算文本显示宽度</div>
-<br />
-<br />
-<br />
-<br />
-<br />
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
 
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch06-00.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch06-02.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">&lt;QPixmap&gt;</span><span style=" color:#c0c0c0;">  </span><span
+
+style=" color:#008000;">//像素图</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">&lt;QMovie&gt;</span><span style=" color:#c0c0c0;">   </span><span
+
+style=" color:#008000;">//动态图</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">&lt;QImageReader&gt;</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">//可以打开图片或者查看支持的图片格式</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#808000;">public</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//接收出错的信号</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">RecvPlayError</span><span
+
+style=" color:#000000;">(</span><span style=" color:#800080;">QImageReader</span><span
+
+style=" color:#000000;">::</span><span style=" color:#800080;">ImageReaderError</span><span
+
+style=" color:#c0c0c0;"> </span>error<span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//接收播放时帧号变化</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">RecvFrameNumber</span><span
+
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span>frameNumber<span
+
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonOpenPic_clicked</span><span
+
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonOpenMov_clicked</span><span
+
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonStart_clicked</span><span
+
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonStop_clicked</span><span
+
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+
+style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//像素图指针</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QPixmap</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">m_pPixMap</span><span
+
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//动态图指针</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QMovie</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">m_pMovie</span><span
+
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//是否为动态图</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">bool</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_bIsMovie</span><span
+
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//动态图是否在播放中，如果在播放中，那么循环播放</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">bool</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_bIsPlaying</span><span
+
+style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//清除函数，在打开新图之前，清空旧的</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">ClearOldShow</span><span
+
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">QWidget</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">interface</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#808000;">protected</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">virtual</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" font-style:italic; color:#000000;">resizeEvent</span><span style=" color:#000000;">(</span><span
+
+style=" color:#800080;">QResizeEvent</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">*);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre>
+    </div>
+    在类声明末尾看到新的 resizeEvent() 函数，在 QtCreator 中，这个函数名的字体是斜体显示的，代表是从基类重载的虚函数。<br>
+    <br>
+    我们打开 widget.cpp 源代码文件，首先在构造函数添加头文件包含和设置主界面窗体最小尺寸的代码：<br>
+    <div class="code"> <span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">"ui_widget.h"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">&lt;QFileDialog&gt;</span><span style=" color:#c0c0c0;">  </span><span
+
+style=" color:#008000;">//打开文件对话框</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">&lt;QScrollArea&gt;</span><span style=" color:#c0c0c0;">  </span><span
+
+style=" color:#008000;">//为标签添加滚动区域</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">&lt;QMessageBox&gt;</span><span style=" color:#c0c0c0;">  </span><span
+
+style=" color:#008000;">//消息框</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">&lt;QResizeEvent&gt;</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">//调整窗口大小的事件类</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//初始化成员变量</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_pPixMap</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">NULL</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_pMovie</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">NULL</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_bIsMovie</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#808000;">false</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_bIsPlaying</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#808000;">false</span><span style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取标签矩形</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QRect</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">rcLabel</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+
+style=" color:#800000;">labelShow</span><span style=" color:#000000;">-&gt;</span><span
+
+style=" color:#000000;">geometry</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//为标签添加滚动区域，方便浏览大图</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QScrollArea</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">pSA</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QScrollArea</span><span
+
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span><span
+
+style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//该对象交给主窗体自动管理，不用手动删除</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//把标签填充到滚动区域里</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">pSA</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setWidget</span><span
+
+style=" color:#000000;">(</span><span style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+
+style=" color:#800000;">labelShow</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置滚动区域占据矩形</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">pSA</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setGeometry</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">rcLabel</span><span
+
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//打印支持的图片格式</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#800080;">QImageReader</span><span
+
+style=" color:#000000;">::</span><span style=" color:#000000;">supportedImageFormats</span><span
+
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//打印支持的动态图格式</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#800080;">QMovie</span><span
+
+style=" color:#000000;">::</span><span style=" color:#000000;">supportedFormats</span><span
+
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置主界面窗体最小尺寸</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">this</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setMinimumSize</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000080;">350</span><span style=" color:#000000;">,</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">350</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">}</span></pre>
+    </div>
+    新增了一句头文件包含 &lt;QResizeEvent&gt; ，这是窗口大小调整的事件类，resizeEvent() 函数参数里传递的是该类对象。<br>
+    构造函数最后一句就是设置最小尺寸为 350*350 ，其他代码都是旧例子的，没有修改构造函数其他代码。<br>
+    <br>
+    然后我们在 widget.cpp 文件末尾可以看到新的 Widget::resizeEvent() 函数实体定义，我们修改这个函数定义代码如下：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+
+        style=" font-style:italic; color:#000000;">resizeEvent</span><span style=" color:#000000;">(</span><span
+
+        style=" color:#800080;">QResizeEvent</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#000000;">*</span><span style=" color:#000000;">event</span><span
+
+        style=" color:#000000;">)</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取当前宽度、高度</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">W</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">event</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">size</span><span
+
+style=" color:#000000;">().</span><span style=" color:#000000;">width</span><span
+
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">H</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">event</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">size</span><span
+
+style=" color:#000000;">().</span><span style=" color:#000000;">height</span><span
+
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//先计算第二行四个按钮的左上角坐标，按钮尺寸固定为</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">75*23</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//第一个按钮</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">x1</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">10</span><span
+
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">            </span><span
+
+style=" color:#008000;">//左边距</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">10</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">y1</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">H</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">-</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">10</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">-</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">21</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">-</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">10</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">-</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">23</span><span style=" color:#000000;">;</span><span style=" color:#c0c0c0;">  </span><span
+
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">10</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">都是间隔，21</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">是水平滑动条高度，23</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">是按钮高度</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//第四个按钮</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">x4</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">W</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">-</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">10</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">-</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">75</span><span style=" color:#000000;">;</span><span
+
+style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//10</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">是右边距，75</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">是按钮宽度</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">y4</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">y1</span><span
+
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">            </span><span
+
+style=" color:#008000;">//与第一个按钮同一水平线</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//计算四个按钮的三个间隙总大小</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nTriGap</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">W</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">-</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">10</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">-</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">10</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">-</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">75</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">4</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//计算单个间隙</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nGap</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nTriGap</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">/</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">3</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//计算第二个按钮坐标</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">x2</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">x1</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">75</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nGap</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">y2</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">y1</span><span
+
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//计算第三个按钮左边</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">x3</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">x4</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">-</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">75</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">-</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nGap</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">y3</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">y1</span><span
+
+style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置四个按钮的矩形</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonOpenPic</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setGeometry</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">x1</span><span style=" color:#000000;">,</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">y1</span><span style=" color:#000000;">,</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">75</span><span style=" color:#000000;">,</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">23</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonOpenMov</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setGeometry</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">x2</span><span style=" color:#000000;">,</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">y2</span><span style=" color:#000000;">,</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">75</span><span style=" color:#000000;">,</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">23</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonStart</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setGeometry</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">x3</span><span style=" color:#000000;">,</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">y3</span><span style=" color:#000000;">,</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">75</span><span style=" color:#000000;">,</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">23</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonStop</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setGeometry</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">x4</span><span style=" color:#000000;">,</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">y4</span><span style=" color:#000000;">,</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">75</span><span style=" color:#000000;">,</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">23</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//计算第三行水平滑动条的坐标和尺寸</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">xSlider</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">x2</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">ySlider</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">H</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">-</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">10</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">-</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">21</span><span
+
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">wSlider</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">W</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">-</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">x2</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">-</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">10</span><span
+
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">hSlider</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">21</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置水平滑动条的矩形</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">horizontalSlider</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setGeometry</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">xSlider</span><span
+
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">ySlider</span><span
+
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">wSlider</span><span
+
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">hSlider</span><span
+
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//计算包裹标签的滚动区域占用的矩形</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">xLabel</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">10</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">yLabel</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">10</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">wLabel</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">W</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">-</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">10</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">-</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">10</span><span
+
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">hLabel</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">H</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">-</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">10</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">-</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">21</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">-</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">10</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">-</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">23</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">-</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">10</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">-</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">10</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置包裹标签的滚动区域矩形</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QScrollArea</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">pSA</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#808000;">this</span><span style=" color:#000000;">-&gt;</span><span
+
+style=" color:#000000;">findChild</span><span style=" color:#000000;">&lt;</span><span
+
+style=" color:#800080;">QScrollArea</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">*&gt;();</span><span style=" color:#c0c0c0;">    </span><span
+
+style=" color:#008000;">//查找子对象</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">pSA</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">NULL</span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;">    </span><span
+
+style=" color:#008000;">//如果</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">pSA</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">不为</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">NULL</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">才能设置矩形</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">pSA</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setGeometry</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">xLabel</span><span
+
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">yLabel</span><span
+
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">wLabel</span><span
+
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">hLabel</span><span
+
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+    </div>
+    这个函数代码就是刚才分析规划主界面窗体时一样的过程，变量名也一样。对照刚才对主界面窗体计算的的过程来看就行了。<br>
+    <br>
+    唯一有区别的是最后关于标签控件的代码，因为我们在构造函数里用滚动区域 pSA 替代了标签占用的矩形，<br>
+    把标签对象塞到滚动区域内部了，现在标签对象自己的矩形我们不用管。<br>
+    需要把计算出来的 xLabel 、yLabel、wLabel、hLabel 设置给主界面里的滚动区域对象。<br>
+    注意，在构造函数里的 pSA 是临时指针，我们没有存储它，其实应该把滚动区域对象的指针存为成员变量的，但我们没有存。<br>
+    <br>
+    没有存成员变量，也有不存的搞法。Qt 类库的总基类 QObject 支持实时查询当前父对象包含的子对象，就是 findChild 模板函数：<br>
+    <div class="code">T QObject::​findChild(const QString &amp; name =
+      QString(), Qt::FindChildOptions options = Qt::FindChildrenRecursively)
+      const</div>
+    这是一个模板函数，需要把被查询的指针类型用尖括号包裹，放在函数名与小括号之间，比如：<br>
+    <div class="code">
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;"></span><span style=" color:#800080;">QScrollArea</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">pSA</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#808000;">this</span><span style=" color:#000000;">-&gt;</span><span
+
+style=" color:#000000;">findChild</span><span style=" color:#000000;">&lt;</span><span
+
+style=" color:#800080;">QScrollArea</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">*&gt;();</span><span style=" color:#c0c0c0;">    </span><span
+
+style=" color:#008000;">//查找子对象</span></pre>
+    </div>
+    QScrollArea * 就是要查找的子对象指针类型，我们这里因为主界面窗体里面只有一个 QScrollArea * 对象指针，不需要参数就能查找到。<br>
+    ​findChild() 第一个参数 name 是对象名称，就是 setObjectName() 函数设置的名字。<br>
+    第二个参数 options 是查找选项，默认的 Qt::FindChildrenRecursively 是一直递归查找所有的子对象以及子对象的子对象。<br>
+    如果调用下面这句，就是仅仅查找直属的子对象，不递归查找：<br>
+    <div class="code">QPushButton *button = parentWidget-&gt;findChild<qpushbutton
+
+        *="">("button1", Qt::FindDirectChildOnly);</qpushbutton></div>
+    这一句就是查找按压按钮的指针，对象名为 "button1"，Qt::FindDirectChildOnly 就是仅仅搜寻直属子对象，不递归。<br>
+    <br>
+    如果查找不到指定的对象指针，那么&nbsp; findChild() 函数会返回 NULL 空指针。<br>
+    因此在代码里需要判断该函数的返回值是否为空再进行操作，例如：<br>
+    <div class="code">
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置包裹标签的滚动区域矩形</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QScrollArea</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">pSA</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#808000;">this</span><span style=" color:#000000;">-&gt;</span><span
+
+style=" color:#000000;">findChild</span><span style=" color:#000000;">&lt;</span><span
+
+style=" color:#800080;">QScrollArea</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">*&gt;();</span><span style=" color:#c0c0c0;">    </span><span
+
+style=" color:#008000;">//查找子对象</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">pSA</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">NULL</span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;">    </span><span
+
+style=" color:#008000;">//如果</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">pSA</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">不为</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">NULL</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">才能设置矩形</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">pSA</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setGeometry</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">xLabel</span><span
+
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">yLabel</span><span
+
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">wLabel</span><span
+
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">hLabel</span><span
+
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+    </div>
+    <br>
+    关于本例的代码讲解到这，我们生成并运行例子看看：<br>
+    <center><img src="images/ch06/ch06-01-12.png" alt="run" width="800"></center>
+    我们拉大程序窗口的边框，然后打开 opensuse.png 图片，这回终于可以开开心心看大图了。<br>
+    四个按钮是均匀分布在水平线上，滑动条与右边三个按钮占据的宽度一样，上面滚动区域（标签）占据了剩下的大部分区域。<br>
+    这就是我们最初想要的效果。另外，这个程序窗口设定了最小尺寸 350*350，读者可以自行测试一下。<br>
+    这里的按钮尺寸是固定的，如果需要根据按钮的文本内容，动态调整按钮宽度，我们看下面的例子。<br>
+    <br>
+    <div class="os2">6.1.3 计算文本显示宽度</div>
+    <br>
+    在自己规划和计算界面控件分布的时候，可能遇上控件宽度是根据文本长度变化的情况。本小节根据按钮控件自身的字体设置，计算某一段按钮文本的显示宽度，根据这个文
+    本显示宽度来确定按钮的动态宽度。<br>
+    <br>
+    Qt 控件的基类 QWidget 原本有 能让控件根据显示内容自动调整大小 的函数：<br>
+    <div class="code">void QWidget::​adjustSize()</div>
+    我们例子没有用这个函数，而是自己手动计算并调整控件宽度的。无论是用 ​adjustSize()
+    函数还是自己手动计算，都能达到类似的效果，本小节是通过例子学习手动计算的方法，以备将来不时之需。<br>
+    <br>
+    QWidget 类有获取当前字体的函数：<br>
+    <div class="code">const QFont &amp; QWidget::font() const</div>
+    另外还有获取 QFontMetrics 对象的函数，QFontMetrics 对象专门用于根据文本字符串计算文本宽度：
+    <div class="code">QFontMetrics QWidget::​fontMetrics() const</div>
+    我们获取控件的 QFontMetrics 字体度量对象，然后就可以用该对象的函数来确定某一段文本的显示宽度：<br>
+    <div class="code">int QFontMetrics::​width(const QString &amp; text, int len
+      = -1) const</div>
+    <div class="code">int QFontMetrics::​width(QChar ch) const</div>
+    第一个 width() 函数中，text 就是需要计算的文本字符串，len 是指定字符串片段的字符个数，如果 len 为默认的
+    -1，说明计算全部字符串的显示宽度。第二个 width() 函数负责计算单个字符的显示宽度。<br>
+    QFontMetrics 通常只是计算单行字符串的宽度和高度，字体度量的单行高度是用如下函数获取：<br>
+    <div class="code">int QFontMetrics::​height() const</div>
+    高度函数里没有参数，这个字体高度是最大高度，以 xbg 三个字母为例，b 上凸，g
+    下凹，字体高度是从最上面的水平线计算到最下面水平线，这是一个最大高度。<br>
+    <br>
+    QFontMetrics 有一个 size() 函数可以计算多行文本的总宽度和总高度，返回 QSize 对象表示尺寸：<br>
+    <div class="code">QSize QFontMetrics::​size(int flags, const QString &amp;
+      text, int tabStops = 0, int * tabArray = 0) const</div>
+    第一个参数 flags 可以是如下几个标志位进行位或 | 后的数值：<br>
+    <ul>
+      <li>Qt::TextSingleLine 代表忽略换行符，把所有文本作为一行来计算。</li>
+      <li>Qt::TextExpandTabs 代表展开 '\t' 制表符，用空白区域填充制表符。</li>
+      <li>Qt::TextShowMnemonic 是指将 "&amp;x" 替换为 <span style="text-decoration: underline;">x</span> 来计算，这在伙伴快捷键里常用到。</li>
+    </ul>
+    其他标志位见 enum Qt::​TextFlag 枚举常量列表。<br>
+    如果不设置任何标志位，就把 flags 设置为 0 ，这时候换行符 '\n' 会起作用，自动计算多行文本占用的尺寸。<br>
+    QFontMetrics::​size() 函数第二个参数 text 就是要计算的文本字符串。<br>
+    <br>
+    QFontMetrics::​size() 函数第三个参数和第四个参数只在 Qt::TextExpandTabs
+    标志位启用的时候有作用，使用方法比较怪异：<br>
+    如果第四个 tabArray 不为空数组，这个数组指定每个制表符的像素点位置，tabArray 数组最后一个数值必须是 0，作为结束标志。<br>
+    如果第四个 tabArray 为空指针，那么再看第三个 tabStops ，tabStops 如果非 0 ，就是指每个制表符占据的空白区域像素宽度；<br>
+    如果 tabStops 和 tabArray 都没设置，都是默认的 0，那么交给 QFontMetrics 用默认策略扩展制表符。<br>
+    QFontMetrics::​size() 函数最简单的用法举例：<br>
+    <div class="code">QFontMetrics fm = pWidget-&gt;fontMetrics();<br>
+      QSize szMulti = fm.size(0, "ABC\n123\nXYZ");</div>
+    上面第二句就是计算三行文本的总尺寸。<br>
+    <br>
+    讲完基本知识，我们开始本小节的例子，重新打开 QtCreator，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>
+    ①项目名称 textwidth，创建路径 D:\QtProjects\ch06，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    建好项目之后，打开窗体 widget.ui 文件，进入设计模式，按照下图拖入控件：<br>
+    <center><img src="images/ch06/ch06-01-13.png" alt="ui" width="800"></center>
+    图上就是三行简单的控件，所有控件的高度都是固定的 24，方便对齐。<br>
+    第一行是控件为：<br>
+    一个标签，文本为 "按钮文本" ，objectName 为 label_1 ，<br>
+    一个单行编辑控件，objectName 为 lineEdit。<br>
+    第二行控件为：<br>
+    一个标签，文本为 "动态按钮"，objectName 为 label_2 ，<br>
+    一个按钮，文本暂时为 "动态" ，objectName 为 pushButtonDynamic。<br>
+    第三行控件为：<br>
+    一个标签，文本为 "固定按钮"，objectName 为 label_3 ，<br>
+    一个按钮，文本暂时为 "固定" ，objectName 为 pushButtonFixed 。<br>
+    <br>
+    程序主要功能就是在 lineEdit 里面编辑文本时，动态按钮根据该文本计算显示宽度，动态调整自己的宽度；<br>
+    而固定按钮的尺寸是不变的，它会根据 lineEdit
+    文本内容自动计算能够显示的文本片段，如果能全部显示出来就全部显示，如果不能全部显示，它就显示前面一小段文本和 "..." ，比如文本字符串
+    "哈哈哈哈哈哈哈哈哈" 太长了，固定按钮就显示 "哈哈哈哈..." 。<br>
+    另外这里会为控件设置工具提示信息，随后会看到设置工具提示信息的代码。<br>
+    <br>
+    当然本节的例子少不了根据窗口变化手动计算控件尺寸和坐标分布的功能，我们看下面的界面图形：<br>
+    <center><img src="images/ch06/ch06-01-14.png" alt="ui2"></center>
+    我们上个小节图片浏览器的例子，它的控件在垂直方向是非均匀分布的，因为显示图片的滚动区域面积最大。<br>
+    现在这个计算显示宽度的例子，它的三行控件在垂直方向是均匀分布的，并且控件高度全部固定为 24 。<br>
+    这样如图所示，三行控件的中轴线把主窗体分割成均匀的四块区域，根据图上规划就很容易计算各个控件的分布情况了。<br>
+    第一行的单行编辑控件宽度是根据窗口大小变化的，<br>
+    第二行的按钮控件是根据单行编辑器里的文本动态调整宽度。<br>
+    只有第三行的按钮控件，尺寸是固定的，我们根据第三行控件可以定出窗口的最小尺寸：<br>
+    最小宽度是 10+54+10+75+10 ，其中 10 都是间隙和边距，54 是标签的固定宽度，75 是第三行按钮的宽度。<br>
+    最小高度是 24*3 + 10*4 ，24是每行控件高度，10 是间隙和边距。<br>
+    窗口大致的规划就是这样，详细的计算放在后面代码里。<br>
+    <br>
+    我们现在从设计模式添加需要的槽函数，界面里的两个按钮只是摆设，单纯用于显示的，不需要槽函数。<br>
+    只需要为单行编辑控件添加 textEdited(QString) 信号对应的槽函数：<br>
+    <center><img src="images/ch06/ch06-01-15.png" alt="slot"></center>
+    然后保存界面文件，回到代码编辑模式。我们打开 widget.h 头文件，添加重载窗口调整大小的函数 resizeEvent() ，这个操作也是按照前面
+    6.1.2 添加 resizeEvent() 的过程，一样地添加就行了，即选中并右击类名，从右键菜单选择<br>
+    &nbsp;"Refactor" --&gt; "Insert Virtual Functions of Base Classes" ，<br>
+    然后从弹出的对话框添加窗口大小调整的事件函数：<br>
+    <center><img src="images/ch06/ch06-01-11.png" alt="Reimplement2"></center>
+    添加好事件函数之后，现在可以看到完整的 widget.h 头文件内容了：<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>WIDGET_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">WIDGET_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_lineEdit_textEdited</span><span
+
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span>arg1<span
+
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+
+style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">QWidget</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">interface</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#808000;">protected</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">virtual</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" font-style:italic; color:#000000;">resizeEvent</span><span style=" color:#000000;">(</span><span
+
+style=" color:#800080;">QResizeEvent</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">*);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre>
+    </div>
+    <br>
+    下面我们打开 widget.cpp 源代码文件，添加功能代码。首先是头文件包含和构造函数：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">"ui_widget.h"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">&lt;QResizeEvent&gt;</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">//调整大小的事件</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">&lt;QFontMetrics&gt;</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">//字体度量对象，用于计算文本显示宽度</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//指定窗口最小尺寸，根据第三行控件定宽度</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">this</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setMinimumSize</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000080;">10</span><span style=" color:#000000;">+</span><span
+
+style=" color:#000080;">54</span><span style=" color:#000000;">+</span><span style=" color:#000080;">10</span><span
+
+style=" color:#000000;">+</span><span style=" color:#000080;">75</span><span style=" color:#000000;">+</span><span
+
+style=" color:#000080;">10</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">24</span><span style=" color:#000000;">*</span><span style=" color:#000080;">3</span><span
+
+style=" color:#000000;">+</span><span style=" color:#000080;">10</span><span style=" color:#000000;">*</span><span
+
+style=" color:#000080;">4</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+
+style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">}</span></pre>
+    </div>
+    新包含的 &lt;QResizeEvent&gt; 是窗口大小调整的事件，&lt;QFontMetrics&gt; 是字体度量类，用于计算文本显示宽度。<br>
+    在构造函数里面增加了一句 setMinimumSize() 函数调用，把我们之前规划的最小尺寸设置给主窗体，没有限定最大尺寸。<br>
+    <br>
+    接着是槽函数 on_lineEdit_textEdited() 的内容，这个槽函数代码比较多，我们分两块来讲解，第一块代码是关于 "动态按钮"
+    尺寸计算和设置的：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+
+        style=" color:#000000;">on_lineEdit_textEdited</span><span style=" color:#000000;">(</span><span
+
+        style=" color:#808000;">const</span><span style=" color:#c0c0c0;"> </span><span
+
+        style=" color:#800080;">QString</span><span style=" color:#c0c0c0;"> </span><span
+
+        style=" color:#000000;">&amp;</span><span style=" color:#000000;">arg1</span><span
+
+        style=" color:#000000;">)</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取按钮文本字体度量对象</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QFontMetrics</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">fm</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonDynamic</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">fontMetrics</span><span
+
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//计算按钮文本的显示宽度</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nTextWidth</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">fm</span><span style=" color:#000000;">.</span><span style=" color:#000000;">width</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">arg1</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取动态按钮原先尺寸</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QSize</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">szButtonDynamic</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+
+style=" color:#800000;">pushButtonDynamic</span><span style=" color:#000000;">-&gt;</span><span
+
+style=" color:#000000;">size</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//修改宽度即可</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">szButtonDynamic</span><span
+
+style=" color:#000000;">.</span><span style=" color:#000000;">setWidth</span><span
+
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nTextWidth</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">10</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">10</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">是为文本两端留点空隙</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//不需要调整坐标，只需要重置大小</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonDynamic</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">resize</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">szButtonDynamic</span><span
+
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置动态按钮的文本</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonDynamic</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">arg1</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置动态按钮的工具提示信息</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonDynamic</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setToolTip</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">arg1</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//待续</span></pre>
+    </div>
+    槽函数开始处获取了按钮的字体度量对象 fm；<br>
+    然后计算文本字符串 arg1 的显示宽度 nTextWidth ；<br>
+    接着获取按钮原来尺寸 szButtonDynamic ；<br>
+    动态按钮新尺寸不要修改高度，我们将 szButtonDynamic 的宽度设置为 nTextWidth + 10，这个 10 是为文本显示左右两端各留了
+    5 个像素的空白，这样按钮文字看起来不会挤到边框；<br>
+    得到新尺寸 szButtonDynamic ，用 resize() 函数把这个新尺寸设置给动态按钮；<br>
+    然后设置动态按钮的文本为 arg1；<br>
+    设置动态按钮的工具提示信息也为 arg1。<br>
+    <br>
+    图形界面的控件都可以设置工具提示信息
+    setToolTip(QString)，当鼠标悬停在控件上的时候，过一阵子会自动显示一行提示信息，就是表示该控件附加提示信息的，一般用于展示控件的功能作
+    用等。<br>
+    <br>
+    槽函数后半部的代码是关于固定按钮文本设置的：<br>
+    <div class="code"><span style=" color:#c0c0c0;">&nbsp;&nbsp;&nbsp; </span><span
+
+        style=" color:#008000;">//设置固定按钮，两个按钮的字体一样，不需要重新计算原文</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">arg1</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">显示宽度</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//固定按钮尺寸为</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">75*24，可显示文本的宽度为</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">75-10</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">==</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">65</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">nTextWidth</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&lt;=</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">65</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//文字全部能显示</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonFixed</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">arg1</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">else</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//文本不能显示完全</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QString</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strPart</span><span
+
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QString</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strDot</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">"..."</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nStrLen</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">arg1</span><span style=" color:#000000;">.</span><span style=" color:#000000;">length</span><span
+
+style=" color:#000000;">();</span><span style=" color:#c0c0c0;">    </span><span
+
+style=" color:#008000;">//字符串长度</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nNewTextWidth</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">0</span><span style=" color:#000000;">;</span><span style=" color:#c0c0c0;">            </span><span
+
+style=" color:#008000;">//新的文本显示长度</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">for</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span style=" color:#000000;">=</span><span
+
+style=" color:#000080;">0</span><span style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">i</span><span style=" color:#000000;">&lt;</span><span style=" color:#000000;">nStrLen</span><span
+
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span
+
+style=" color:#000000;">++)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">            </span><span style=" color:#000000;">strPart</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">arg1</span><span style=" color:#000000;">[</span><span style=" color:#000000;">i</span><span
+
+style=" color:#000000;">];</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//添加一个字符</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">            </span><span style=" color:#008000;">//计算</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">strPart</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">和</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">strDot</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">的总长度</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">            </span><span style=" color:#000000;">nNewTextWidth</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">fm</span><span style=" color:#000000;">.</span><span style=" color:#000000;">width</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">strPart</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">strDot</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">            </span><span style=" color:#808000;">if</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">nNewTextWidth</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&gt;=</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">65</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">            </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">                </span><span style=" color:#008000;">//当文本截取的片段加上</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"..."</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">长度刚好超了</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">65，就跳出循环</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">                </span><span style=" color:#808000;">break</span><span
+
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">            </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//为固定按钮设置截取的文本和</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"..."</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonFixed</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strPart</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">strDot</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置固定按钮的工具提示信息</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonFixed</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setToolTip</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">arg1</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">}</span></pre>
+    </div>
+    因为固定按钮的尺寸是 75*24，为文本两端要留 10 像素间隙，文本能占有的宽度就是 75 - 10 == 65。<br>
+    这是判断 arg1 文本显示宽度 nTextWidth 是否不超过 65，如果不超过就直接把 arg1 文本设置给固定按钮，不需要额外计算。<br>
+    <br>
+    如果 nTextWidth 超过了 65，那么需要进行计算：<br>
+    strPart 是我们最终需要从 arg1 里面截取的前面一部分字符串；<br>
+    strDot 是省略号 "..."；<br>
+    nStrLen 是字符串的总长度，也就是所有字符计数；<br>
+    nNewTextWidth 用于计算 (strPart + strDot) 字符串总长度。<br>
+    然后进入 for 循环，该循环每次为 strPart 添加一个字符，计算新的 (strPart + strDot) 总的显示宽度
+    nNewTextWidth ，<br>
+    如果新的 nNewTextWidth 刚刚好超了可显示宽度 65，那么就退出循环。<br>
+    <br>
+    经过该循环处理后，(strPart + strDot) 就是我们在固定按钮里需要显示的文本，<br>
+    我们把 (strPart + strDot) 设置给固定按钮。<br>
+    <br>
+    槽函数最后一句是为固定按钮设置工具提示信息 arg1 ，这样即使固定按钮自己显示不了全部的文本，它工具提示信息显示的是完整的文本 arg1 。<br>
+    <br>
+    槽函数就是上面那些，槽函数功能主要是设置两个按钮的文本、工具提示信息，并且根据文本内容实时调整动态按钮的尺寸，如果文本过长，固定按钮只会显示文本前面的片
+    段和 "..."。<br>
+    <br>
+    widget.cpp 里面最后部分是 resizeEvent()
+    虚函数的代码，根据窗口大小调整各个控件的分布情况。我们有三行控件，下面就针对每一行的控件设置代码来讲解，首先是第一行标签和单行编辑控件的：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+
+        style=" font-style:italic; color:#000000;">resizeEvent</span><span style=" color:#000000;">(</span><span
+
+        style=" color:#800080;">QResizeEvent</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#000000;">*</span><span style=" color:#000000;">event</span><span
+
+        style=" color:#000000;">)</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取当前宽度、高度</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">W</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">event</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">size</span><span
+
+style=" color:#000000;">().</span><span style=" color:#000000;">width</span><span
+
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">H</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">event</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">size</span><span
+
+style=" color:#000000;">().</span><span style=" color:#000000;">height</span><span
+
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//计算第一行控件分布，标签尺寸都是</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">54*24</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//标签1</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">xLabel1</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">10</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">yLabel1</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">H</span><span style=" color:#000000;">/</span><span style=" color:#000080;">4</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">-</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">12</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//标签尺寸不变，移动坐标即可</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">label_1</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">move</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">xLabel1</span><span
+
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">yLabel1</span><span
+
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//单行编辑控件</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">xLineEdit</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">xLabel1</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">+</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">54</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">10</span><span style=" color:#000000;">;</span><span style=" color:#c0c0c0;">  </span><span
+
+style=" color:#008000;">//54是标签宽度，10是间隙</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">yLineEdit</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">yLabel1</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">wLineEdit</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">W</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">-</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">xLineEdit</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">-</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">10</span><span style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">10</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">是右边距</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">hLineEdit</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">24</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置矩形</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEdit</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setGeometry</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">xLineEdit</span><span
+
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">yLineEdit</span><span
+
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">wLineEdit</span><span
+
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">hLineEdit</span><span
+
+style=" color:#000000;">);<br></span><span style=" color:#c0c0c0;"></span><span
+
+style=" color:#008000;">    //待续</span></pre>
+    </div>
+    W 是主窗体宽度，H 是主窗口宽度。<br>
+    xLabel1 是第一行标签的左边距，固定为 10；<br>
+    yLabel1 = H/4 - 12，其中 H/4 是第一行控件的中轴线，12 是控件上半截的高度。<br>
+    标签控件尺寸固定，只需要用 move() 函数把坐标移动到 (xLabel1, yLabel1) 就行了。<br>
+    <br>
+    单行编辑控件的 xLineEdit = xLabel1 + 54 + 10，是标签控件右边间隔 10 的位置，54 是标签宽度；<br>
+    yLineEdit 与标签控件 yLabel1 一样的垂直位置；<br>
+    wLineEdit 是单行编辑控件宽度，除去单行编辑控件左边区域 xLineEdit 和右边距 10，剩下的就是自己的宽度；<br>
+    单行编辑控件高度固定 hLineEdit&nbsp; 为 24 。<br>
+    然后设置单行编辑控件占据的矩形，就完成第一行控件的分布了。<br>
+    <br>
+    第二行标签和动态按钮的调整代码如下：<br>
+    <div class="code"><span style=" color:#c0c0c0;">&nbsp;&nbsp;&nbsp; </span><span
+
+        style=" color:#008000;">//计算第二行控件分布，标签控件</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">54*24</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//标签2</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">xLabel2</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">10</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">yLabel2</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">2</span><span style=" color:#000000;">*</span><span style=" color:#000000;">H</span><span
+
+style=" color:#000000;">/</span><span style=" color:#000080;">4</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">-</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">12</span><span
+
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//移动标签</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">label_2</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">move</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">xLabel2</span><span
+
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">yLabel2</span><span
+
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//动态按钮</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">xButtonDynamic</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">xLabel2</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">+</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">54</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">10</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">yButtonDynamic</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">yLabel2</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//移动即可，尺寸由上面槽函数</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">on_lineEdit_textEdited</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">处理</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonDynamic</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">move</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">xButtonDynamic</span><span
+
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">yButtonDynamic</span><span
+
+style=" color:#000000;">);<br></span><span style=" color:#008000;">    //待续</span></pre>
+    </div>
+    标签控件 xLabel2 = 10，距离左边界 10 像素；<br>
+    yLabel2 = 2*H/4 - 12 ，第二行中轴线的垂直坐标是 2*H/4，12 是控件上半截的高度。 <br>
+    标签控件尺寸是固定的，将坐标移动到 (xLabel2, yLabel2) 就行了。<br>
+    <br>
+    动态按钮的 xButtonDynamic = xLabel2 + 54 + 10，是距离标签右边间隔 10 的位置，54 是标签的宽度。<br>
+    yButtonDynamic 与标签垂直位置 yLabel2 一样。<br>
+    这个动态按钮的尺寸由前面槽函数调整，这里只需要把坐标移动到 (xButtonDynamic, yButtonDynamic) 即可。<br>
+    <br>
+    第三行控件的调整代码如下所示：<br>
+    <div class="code">
+      <style type="text/css">
+p, li { white-space: pre-wrap; }
+</style> <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//计算第三行控件分布，标签控件</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">54*24</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//标签3</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">xLabel3</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">10</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">yLabel3</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">3</span><span style=" color:#000000;">*</span><span style=" color:#000000;">H</span><span
+
+style=" color:#000000;">/</span><span style=" color:#000080;">4</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">-</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">12</span><span
+
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//移动标签</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">label_3</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">move</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">xLabel3</span><span
+
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">yLabel3</span><span
+
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//固定按钮</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">xButtonFixed</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">xLabel3</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">+</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">54</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000080;">10</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">yButtonFixed</span><span
+
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+
+style=" color:#000000;">yLabel3</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//移动即可，尺寸固定</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonFixed</span><span
+
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">move</span><span
+
+style=" color:#000000;">(</span><span style=" color:#000000;">xButtonFixed</span><span
+
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">yButtonFixed</span><span
+
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+
+style=" color:#000000;">}</span></pre>
+    </div>
+    标签控件 xLabel3 = 10，也是距离左边界 10 像素。<br>
+    yLabel3 = 3*H/4 - 12，其中 3*H/4 是第三行控件的中轴线垂直位置，12 是控件上半部分高度。<br>
+    标签大小不需要调整，只需要移动到坐标 (xLabel3, yLabel3) 。<br>
+    <br>
+    固定按钮的 xButtonFixed = xLabel3 + 54 + 10，是位于标签控件右边间隔 10 的位置，54 是标签控件宽度。<br>
+    yButtonFixed 与标签的垂直坐标 yLabel3 一样。<br>
+    固定按钮的尺寸不用调整，直接移动到坐标 (xButtonFixed, yButtonFixed) 就行了。<br>
+    <br>
+    到这里程序代码就讲完了。我们生成运行例子看看效果：<br>
+    <center><img src="images/ch06/ch06-01-16.png" alt="run"></center>
+    拉动窗体边框，然后在单行编辑控件里输入文字，就可以在下面看到两个按钮的显示，动态按钮宽度是根据文本内容自动拉伸的。<br>
+    固定按钮在文本超出可显示范围后，就截取前面片段加上 "..." 显示出来。<br>
+    如果把鼠标悬停在按钮上几秒，会看到我们设置的工具提示信息：<br>
+    <center><img src="images/ch06/ch06-01-17.png" alt="run2"></center>
+    <br>
+    下面对本节的例子总结一下，我们自己可以手动根据界面上的不同控件，来计算它们在主窗体上的位置分布和尺寸，实现代码就是放在重载的虚函数
+    resizeEvent() 里面。对不同的界面，就需要进行不同的规划，编写不同的代码，如果界面控件变多或变少，都需要重新编写 resizeEvent()
+    里面的代码。手动为控件计算位置和尺寸的过程随着控件的数目变多，其过程和代码都会变复杂。<br>
+    Qt 专门为界面上的控件分布调整，引入了一整套的布局器，我们下一节开始正式的布局器学习。<br>
+    <br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch06-00.htm"><img class="pic"
+
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch06-02.htm"><img class="pic"
+
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

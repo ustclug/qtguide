@@ -3,11 +3,9 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <title>ch06-03</title>
-    
-<link href="css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-
-<script src="thumbnailviewer.js" type="text/javascript">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -15,39 +13,192 @@
 * Visit http://www.dynamicdrive.com/ for full source code
 ***********************************************/
 
-</script>
-
-
-  </head>
-  
-  
-<div class="os1">6.3 网格布局器 </div>
-<br />
-介绍网格布局器 QGridLayout，当控件分布的行、列都比较有规律时，适合用网格布局。
-<br />
-<br />
-<div class="os2">6.3.1 *</div>
-<br />
-<br />
-
-<div class="os2">6.3.2 *</div>
-<br />
-<br />
-
-<div class="os2">6.3.3 *</div>
-<br />
-<br />
-<br />
-<br />
-<br />
-
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch06-02.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch06-04.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+</script> </head>
+  <body>
+    <div class="os1">6.3 网格布局器 </div>
+    <br>
+    本节介绍网格布局器
+    QGridLayout，当控件分布的行、列都比较有规律时，可以不用一行行设置布局器，而是直接用网格布局器设置所有的行和列。网格布局器里面的控件既可以占一个格子，
+    也可以占据&nbsp; rowSpan * columnSpan
+    连续多行多列的位置。网格布局器的行、列尺寸可以均匀分布，也可以非均匀分布，通常由尺寸调整的伸展策略和伸展因子灵活控制，6.5 节会详细介绍伸展策略和伸展
+    因子。<br>
+    <br>
+    <div class="os2">6.3.1 QGridLayout 类</div>
+    <br>
+    QGridLayout
+    类将控件放置到网格中布局，它本身会从父窗口或父布局中占据尽可能多的界面空间，然后把自己的空间划分为行和列，再把每个控件塞到设置好的一个或多个单元格中。
+    QGridLayout 类既有控制行的函数，也有对应控制列的函数。对于列来说，有设置每列的最小宽度的函数：<br>
+    <div class="code">void setColumnMinimumWidth(int column, int minSize)</div>
+    如果要设置各个列在窗口变化时拉伸比例不同，可以用如下函数：<br>
+    <div class="code">void setColumnStretch(int column, int stretch)</div>
+    每列控件之间可以设置布局的水平间隙：<br>
+    <div class="code">void setHorizontalSpacing(int spacing)</div>
+    对于行，也都有类似的函数，只是把英文单词换一下：<br>
+    <div class="code">void setRowMinimumHeight(int row, int minSize) //设置行最小高度</div>
+    <div class="code">void setRowStretch(int row, int
+      stretch)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //设置行的伸展因子</div>
+    <div class="code">void setHorizontalSpacing(int
+      spacing)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //设置行的垂直间隙</div>
+    <br>
+    如果要添加控件或其他布局器、自定义布局条目，使用如下函数：<br>
+    <div class="code">void addWidget(QWidget * widget, int row, int column,
+      Qt::Alignment alignment = 0)</div>
+    <div class="code">void addWidget(QWidget * widget, int fromRow, int
+      fromColumn, int rowSpan, int columnSpan, Qt::Alignment alignment = 0)</div>
+    <div class="code">void addLayout(QLayout * layout, int row, int column,
+      Qt::Alignment alignment = 0)</div>
+    <div class="code">void addLayout(QLayout * layout, int row, int column, int
+      rowSpan, int columnSpan, Qt::Alignment alignment = 0)</div>
+    <div class="code">void addItem(QLayoutItem * item, int row, int column, int
+      rowSpan = 1, int columnSpan = 1, Qt::Alignment alignment = 0)</div>
+    函数第一个参数都是要添加的控件、布局器或自定义布局条目，<br>
+    row 和 column 是左上角起始的单元格坐标，<br>
+    如果没有指定 rowSpan 和 columnSpan 那么就是 1*1 的唯一单元格，<br>
+    指定了 rowSpan 和 columnSpan 就会占据 rowSpan * columnSpan 的小矩形，占据连续多行多列单元格。<br>
+    最后的 alignment 是控件或布局器、布局条目在单元格中的对齐方式，比如水平的左对齐、居中、右对齐，垂直方向顶部对齐、底部对齐、垂直居中等等，具体
+    的可以查 Qt 帮助文档。Qt 关于对齐方式的枚举常量都是通用的。<br>
+    通常情况下 QGridLayout 不需要自己添加空白条
+    QSpacerItem，因为其他功能控件把各自的单元格占据之后，剩下没控件占据的单元格自然就是空的，空的格子默认里面什么都没有，也没有空白条。<br>
+    <center><img src="images/ch06/ch06-03-01.png" alt="grid"></center>
+    如果要获知网格有多少行、有多少列（包括空的格子计数），使用如下函数：<br>
+    <div class="code">int rowCount() const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //行计数</div>
+    <div class="code">int columnCount() const&nbsp;&nbsp; //列计数</div>
+    如果要获取某个单元格的布局条目，使用：<br>
+    <div class="code">QLayoutItem * itemAtPosition(int row, int column) const</div>
+    注意，如果某个格子是全空的，也没有手动添加空白条，那么 itemAtPosition() 返回 NULL 指针。因此使用这个函数必须判断返回值是否为空。<br>
+    <br>
+    rowCount * columnCount 是总共的单元格计数，但并不是控件或子布局的计数。控件或子布局的计数用重载的虚函数：<br>
+    <div class="code">virtual int count() const</div>
+    用 add* 函数添加控件或子布局时，每个控件或子布局都对应一个序号，这个序号与网格坐标是无关的，是由 add* 函数添加顺序决定的。<br>
+    QGridLayout 提供了根据控件或子布局序号查询单元格位置、分布的函数（但没有反查序号的函数）：<br>
+    <div class="code">void getItemPosition(int index, int * row, int * column,
+      int * rowSpan, int * columnSpan) const</div>
+    getItemPosition() 函数会填充参数里的四个指针指向的变量，四个指针指向的变量就是 add* 函数里面指定的单元格坐标和分布。<br>
+    根据控件或子布局的序号获取布局条目的函数为：<br>
+    <div class="code">virtual QLayoutItem * itemAt(int index) const</div>
+    根据控件序号可以从 QGridLayout 中移除布局条目：<br>
+    <div class="code">virtual QLayoutItem * takeAt(int index)</div>
+    凡是函数返回值为指针的都要判断是否为空指针，因为上面函数的序号如果超出范围，也会返回空指针。涉及到指针的操作一定要细心判断。<br>
+    <br>
+    得到非空的 QLayoutItem 对象指针之后，就可以从 QLayoutItem 对象里提取实际的控件或布局器、空白条：<br>
+    <div class="code">QWidget * QLayoutItem::​widget()</div>
+    <div class="code">QLayout * QLayoutItem::​layout()</div>
+    <div class="code">QSpacerItem * QLayoutItem::​spacerItem()</div>
+    另外如果是自己定制的 QLayoutItem 派生类对象，可以把获取的基类对象指针 QLayoutItem * ，通过 dynamic_cast
+    转成派生类对象指针试试。 注意判断函数返回的指针是否为空，非空指针才能进行下一步操作。<br>
+    <br>
+    <div class="os2">6.3.2 个人信息收集示例网格布局</div>
+    <br>
+    我们本节以前一章 5.4.3 个人信息收集示例为底板来进行布局，因为这个例子的行列分布很有规律，适合用网格布局。<br>
+    我们复制 D:\QtProjects\ch05\ 目录里的 infogather 文件夹，到第 6 章的示例目录 D:\QtProjects\ch06\
+    ，然后进行下面操作：<br>
+    ① 把新的 infogather 文件夹重命名为 infogathergrid，并删除里面的 infogather.pro.user 文件。<br>
+    ② 把 infogathergrid 文件夹里面的 infogather.pro 重命名为 infogathergrid.pro 。<br>
+    ③ 用记事本打开 infogathergrid.pro ，修改里面的 TARGET 一行，变成下面这句：<br>
+    <div class="code">TARGET = infogathergrid</div>
+    这样就得到了新项目 infogathergrid，我们用 QtCreator 打开这个项目，在配置项目界面选择所有套件并点击 "Configure
+    Project" ，配置好项目后，打开 widget.ui 界面文件，进入 QtCreator 设计模式：<br>
+    <center><img src="images/ch06/ch06-03-02.png" alt="ui" width="800"></center>
+    在进行布局之前，我们先把四个标签控件的背景色修改一下，这是为了和下一节的表单控件作对比用的。<br>
+    设以第一个标签为例，选中 "姓名" 标签，可以在右下角属性编辑栏找到 styleSheet 属性进行编辑，或者右击它，在右键菜单里面选择 "改变样式表
+    ..." ，这两种操作是等价的：<br>
+    <center><img src="images/ch06/ch06-03-03.png" alt="ui2" width="800"></center>
+    都会弹出样式表编辑对话框，我们添加标签的背景色，这里改成浅绿色的背景（是浅绿色就行，不用太纠结哪种浅绿）：<br>
+    <center><img src="images/ch06/ch06-03-04.png" alt="QSS"></center>
+    然后对第二个、第三个、第四个标签都设置背景色，设置好之后如下图所示：<br>
+    <center><img src="images/ch06/ch06-03-05.png" alt="ui3" width="800"></center>
+    下面我们开始网格布局的操作，因为窗体的里控件分布非常规则，一个主布局器就够了。我们点击窗体空白位置，不选中任何控件，直接在设计模式上方点击网格布局器按钮
+    即可，会看到如下图所示的布局效果：<br>
+    <center><img src="images/ch06/ch06-03-06.png" alt="ui4" width="800"></center>
+    图上比较别扭的是按钮控件，网格布局器的同一列的拉伸方式是一样的，按钮随着上面三行的输入控件，也拉得很宽，这需要调整。<br>
+    我们在 6.2.4 节学过用空白条与按钮组合成水平布局器，来避免按钮被拉伸。这一节我们学一个新方法，也可以避免按钮被拉伸。<br>
+    我们选中 "提交" 按钮，在右下角属性编辑栏找到 sizePolicy 属性，把水平策略修改为 Fixed，这样按钮的水平策略和垂直策略都变成
+    Fixed（就是保存尺寸不变的意思），如下图所示：<br>
+    <center><img src="images/ch06/ch06-03-07.png" alt="fixed" width="800"></center>
+    现在这个界面看起来还是差一点，就是我们希望按钮靠右边放。我们之前介绍过网格布局器的 add*
+    函数里可以设置控件在自己网格里的对齐方式，那么从设计师或设计模式如果设置控件的对齐方式呢？<br>
+    因为按钮已经在网格布局器里面了，所以这时候右击按钮控件，会有额外的关于布局器对齐方式的设置，我们右击这个按钮，可以看到新增的菜单项 "Layout
+    Alignment" ，里面有多个子菜单项目，如下图所示：<br>
+    <center><img src="images/ch06/ch06-03-08.png" alt="align" width="800"></center>
+    我们在选择 "Layout Alignment" 子菜单项里的 "Right" 就是右对齐，将按钮右对齐之后，就变成想要的效果了：<br>
+    <center><img src="images/ch06/ch06-03-09.png" alt="align-right" width="800"></center>
+    当然，读者也可以按钮设置成其他对齐方式。我们按照上面布局设置之后，保存界面文件，重新生成该项目，并运行例子看看效果：<br>
+    <center><img src="images/ch06/ch06-03-10.png" alt="run"></center>
+    拉伸窗口之后，在水平方向上，标签控件不拉伸，因为文本全显示出来就是最佳大小，没必要拉伸。而右边的输入控件全部拉伸了，占据了大部分的水平空间。<br>
+    在垂直方向上，总共 5 行控件是均匀分布在窗口里，每行控件之间的间隙会随着窗口变高而变大。<br>
+    这个例子暂时到这，我们下一节介绍表单控件时还会与这个例子做对比。<br>
+    <br>
+    <div class="os2">6.3.3 分布不均匀的网格布局</div>
+    <br>
+    上面示例在垂直方向上分布是均匀的，因为五行控件的高度都没变。我们这一节自己构造一个复杂点的界面例子，来试试复杂点的界面如何进行布局。<br>
+    我们重新打开 QtCreator，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>
+    ①项目名称 complexgrid，创建路径 D:\QtProjects\ch06，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    建好项目之后，打开窗体 widget.ui 文件，进入设计模式，按照下图拖入控件：<br>
+    <center><img src="images/ch06/ch06-03-11.png" alt="ui" width="800"></center>
+    对于窗体里各个控件的文本，按照图上设置即可，下面罗列一下各个控件的 objectName 对象名称：<br>
+    第一行：标签 labelName ，单行编辑控件 lineEdit；<br>
+    第二行：标签 labelGender，单选按钮 radioButtonMan，单选按钮 radioButtonWoman；<br>
+    第三行：标签 labelHobbies，复选框五个，分别为：checkBoxRead、checkBoxClimb、checkBoxSwim、<br>
+    checkBoxDaze、checkBoxShopping；<br>
+    第四行：标签 labelDescription，丰富文本编辑器 textEdit。<br>
+    在进行布局之前，我们先把所有标签控件的背景色修改为浅绿色，操作同上一个例子，标签的样式表 styleSheet 都是：<br>
+    <div class="code">background-color: rgb(170, 255, 127);</div>
+    把单选按钮和复选框的背景色都设置为浅黄色，其样式表 styleSheet 都是：<br>
+    <div class="code">background-color: rgb(255, 255, 127);</div>
+    然后界面效果如下：<br>
+    <center><img src="images/ch06/ch06-03-12.png" alt="QSS" width="800"></center>
+    因为界面比较复杂，我们需要为这个界面设计一个布局思路，从大框架来说，第一列都是标签，第二列都是一些输入控件，我们的主布局设置为一个网格布局器，两个大列，
+    四个大行。<br>
+    第一行就两个控件，比较简单；<br>
+    第二行需要把两个单选按钮包裹到一起，用水平布局器；<br>
+    第三行需要把五个复选框打包到一起，应该用一个小网格布局器，2 行 3 列。<br>
+    第四行也就两个控件，也比较简单。<br>
+    布局思路有了之后，我们开始操作：<br>
+    （1）第二行：<br>
+    选中两个单选按钮，点击设计模式上面的水平布局按钮，构成一个水平布局：<br>
+    <center><img src="images/ch06/ch06-03-13.png" alt="lay1"></center>
+    （2）第三行：<br>
+    选中五个复选框，然后点击设计模式上面的网格布局按钮，构成一个小网格布局器：<br>
+    <center><img src="images/ch06/ch06-03-14.png" alt="lay2"></center>
+    （3）主布局器：<br>
+    点击窗体空白位置，不选中任何控件和子布局器，直接在设计模式上面点击网格布局器按钮，为主窗体自动设置主布局器：<br>
+    <center><img src="images/ch06/ch06-03-15.png" alt="lay3"></center>
+    到这里窗体的布局功能就完成了。主窗体里面总共有 13 个功能控件，如果没有 Qt 布局器，我们自己去一个个计算每个控件的分布和尺寸调整公式，那将会是非常
+    痛苦的事。<br>
+    而通过 Qt 布局器，简单三步就搞定了全部的控件布局，这是极为方便的，还不用自己写代码，用设计师就够了。<br>
+    本小节的例子就不编写实际的功能代码了，仅用于学习布局器。<br>
+    我们保存界面文件，然后生成并运行例子看看效果：<br>
+    <center><img src="images/ch06/ch06-03-16.png" alt="run"></center>
+    我们拉大窗口之后，可以看到在水平方向上，标签控件在占据足够显示 "个人描述" 文本的矩形之后就不变宽了，新增的拉伸区域都由右边大列的输入控件瓜分了。<br>
+    在垂直方向上，头两行的标签是不拉伸的，第三行的标签控件与右边五个复选框占据的矩形同高度之后也不会拉伸，垂直方向新增的拉伸区域都被第四行的标签控件占据了。<br>
+    其实决定网格里控件如何拉伸的，主要不是看标签，而是看右边多个输入控件的拉伸策略。<br>
+    单行编辑控件、单选按钮、复选按钮这些控件的垂直伸展策略都是 Fixed，因此不会拉伸。<br>
+    而下面最大的丰富文本编辑器，它的垂直伸展策略是 Expanding，这种策略就是尽可能占据一切空间，因此会被优先拉伸。<br>
+    等到 6.5
+    节再专门讲解伸展策略和伸展因子，本节学会用网格布局器就够了。我们下一节学习表单布局器，表单布局器的例子与本节的底板一样，方便对比两种控件的差异。<br>
+    <br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch06-02.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch06-04.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

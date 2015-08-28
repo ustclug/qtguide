@@ -3,11 +3,9 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <title>ch06-04</title>
-    
-<link href="css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-
-<script src="thumbnailviewer.js" type="text/javascript">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -15,42 +13,328 @@
 * Visit http://www.dynamicdrive.com/ for full source code
 ***********************************************/
 
-</script>
-
-
-  </head>
-  
-  
-<div class="os1">6.4 表单布局器 </div>
-<br />
-介绍 QFormLayout，Qt 设计师里面翻译成窗体布局器，其实这个布局器准确叫法是表单布局器，
-或者直观地叫双列表格布局器， 对于接收用户输入的窗体（网页设计中对应称之为表单），
-通常是每行一个标签用于提示信息、一个输入控件接收用户输入，
-QFormLayout 就是对这种每行两列的控件分布进行建模并简化界面的构建过程。
-<br />
-<br />
-<div class="os2">6.4.1 *</div>
-<br />
-<br />
-
-<div class="os2">6.4.2 *</div>
-<br />
-<br />
-
-<div class="os2">6.4.3 *</div>
-<br />
-<br />
-<br />
-<br />
-<br />
-
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch06-03.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch06-05.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+</script> </head>
+  <body>
+    <div class="os1">6.4 表单布局器 </div>
+    <br>
+    本节介绍 QFormLayout，Qt 设计师里面翻译成 "在窗体布局中布局"，其实这个布局器准确叫法是表单布局器， 或者直观地叫双列表格布局器，
+    对于接收用户输入的窗体（网页设计中对应称之为表单）， 通常是每行一个标签用于提示信息、一个输入控件接收用户输入， QFormLayout
+    就是对这种每行两列的控件分布进行建模并简化界面的构建过程。表单布局器的规律性、限制性比网格布局器更强，是严格的两列布局，通常第一列固定是标签，第二列是输入控件或
+    者输入控件组合成的布局器。我们这一节先介绍 QFormLayout
+    类，然后通过两个例子与上一节的网格布局器做对比，在实际布局设计中要根据应用场景决定哪种布局器更适合。<br>
+    <br>
+    <div class="os2">6.4.1 QFormLayout 类</div>
+    <br>
+    QFormLayout 专门用于管理输入控件和与之相关的标签等表单布局，QFormLayout
+    固定为两列布局，并针对表单做了建模，配套了一堆方便使用的函数。网格布局器的基本单元是单元格，而表单布局器的基本单元是行。表单布局器是高度建模并封装的，它没有
+    addWidget() 和 addLayout() 之类的函数，它只有 addRow() 函数。<br>
+    <br>
+    表单布局器中每行的控件或子布局器都有特定的角色，表单布局器的第一列称为标签，角色为
+    QFormLayout::LabelRole；第二列称为域，或叫字段，角色为 QFormLayout::FieldRole。<br>
+    如果表单布局器某一行的两列空间全部由单独一个控件或子布局器占据，那么这个控件或子布局器的角色就称为
+    QFormLayout::SpanningRole，可以叫跨越角色。表单布局器举例如下图所示：<br>
+    <center><img src="images/ch06/ch06-04-01.png" alt="formlayout"></center>
+    下面我们把表单布局器的功能函数大致分几块来看看。<br>
+    （1）添加行的函数<br>
+    添加现有的标签控件和域控件或子布局：<br>
+    <div class="code">void addRow(QWidget * label, QWidget * field)</div>
+    <div class="code">void addRow(QWidget * label, QLayout * field)</div>
+    <div class="code">void insertRow(int row, QWidget * label, QWidget * field)</div>
+    <div class="code">void insertRow(int row, QWidget * label, QLayout * field)</div>
+    addRow() 函数是把 label 和 field 添加到最后一行，而 insertRow() 是把 label 和 field 添加指定的 第
+    row 行。这些添加函数不仅能把标签和控件/布局器添加到表单的行，并且能将每行的 label 和 field 自动设置为伙伴，而不需要自己调用
+    setBuddy() 函数。<br>
+    <br>
+    表单布局可以根据文本自动建立内部的标签控件，这时候调用如下的添加函数：<br>
+    <div class="code">void addRow(const QString &amp; labelText, QWidget *
+      field)</div>
+    <div class="code">void addRow(const QString &amp; labelText, QLayout *
+      field)</div>
+    <div class="code">void insertRow(int row, const QString &amp; labelText,
+      QWidget * field)</div>
+    <div class="code">void insertRow(int row, const QString &amp; labelText,
+      QLayout * field)</div>
+    如果调用这些添加函数，表单布局会自动根据 labelText 新建该行的标签控件，程序员就只需要新建 field
+    控件或布局器。这些添加函数也会自动把标签控件与同一行的域控件或布局器设置为伙伴关系。<br>
+    <br>
+    如果希望用一个单独的控件或布局器占据一行的全部两列，就是 QFormLayout::SpanningRole
+    角色的控件或布局器，可以直接用下面几个函数添加：<br>
+    <div class="code">void addRow(QWidget * widget)</div>
+    <div class="code">void addRow(QLayout * layout)</div>
+    <div class="code">void insertRow(int row, QWidget * widget)</div>
+    <div class="code">void insertRow(int row, QLayout * layout)</div>
+    <br>
+    （2）访问和修改行的函数<br>
+    之前添加的行还可以用如下函数修改：<br>
+    <div class="code">void setWidget(int row, ItemRole role, QWidget * widget)</div>
+    <div class="code">void setLayout(int row, ItemRole role, QLayout * layout)</div>
+    <div class="code">void setItem(int row, ItemRole role, QLayoutItem * item)</div>
+    setWidget() 是把指定的第 row 行的 role 角色的格子内容设置为新的 widget。<br>
+    role 角色就是之前说的三种，第一列就是 QFormLayout::LabelRole，第二列是
+    QFormLayout::FieldRole。如果把角色设置为跨越角色 QFormLayout::SpanningRole，那么这一个控件会占据该行全部
+    的两列。<br>
+    setLayout() 是把第 row 行的 role 角色的格子内容设置为新的 layout。<br>
+    setItem() 是把第 row 行的 role 角色的格子内容设置为新的 item，这个 item 通常是空白条或者其他自定义的布局条目。<br>
+    对于上面三个 set* 函数，如果之前有第 row 行，那么会对原有的控件或布局器进行替换，如果原本没有第 row 行，那么表单布局器自动新增到第
+    row 行并添加相应的控件或布局器。<br>
+    <br>
+    表单布局器当前的行计数使用如下函数：<br>
+    <div class="code">int rowCount() const</div>
+    如果要查询某行、某角色的布局条目，可以用如下函数：<br>
+    <div class="code">QLayoutItem * itemAt(int row, ItemRole role) const</div>
+    如果返回的指针非空，那就可以使用 QLayoutItem 的 widget()、layout()、spacerItem()
+    等函数获取该格子里的控件或布局器，当然也要注意判断返回的指针是否为空。<br>
+    <br>
+    如果已知某个控件或布局器，想查找它在表单布局器里的行和角色，可以用如下函数：<br>
+    <div class="code">void getWidgetPosition(QWidget * widget, int * rowPtr,
+      ItemRole * rolePtr) const</div>
+    <div class="code">void getLayoutPosition(QLayout * layout, int * rowPtr,
+      ItemRole * rolePtr) const</div>
+    如果查找不到，那么 rowPtr 指向的变量数值就是 -1 。<br>
+    <br>
+    因为表单布局器在添加行时可以自动根据文本新建标签控件，如果知道域控件或布局器，查询该行对应的标签控件，可以用如下函数：<br>
+    <div class="code">QWidget * labelForField(QWidget * field) const</div>
+    <div class="code">QWidget * labelForField(QLayout * field) const</div>
+    返回的就是该行的标签控件，注意判断返回的指针是否为空。<br>
+    <br>
+    （3）基于控件序号的访问、删除等操作<br>
+    获取表单布局器中的控件或子布局器等计数的函数为：<br>
+    <div class="code">virtual int count() const</div>
+    在标签、控件或子布局器添加时，都有对应的序号，这个序号与行号、角色没有直接的计算公式，但可以查询。如果要根据序号查询布局条目，使用如下函数：<br>
+    <div class="code">virtual QLayoutItem * itemAt(int index) const</div>
+    这个 itemAt() 函数功能与上面另一个 itemAt() 功能类似，这里是根据控件序号 index，上面另一个
+    itemAt()是根据行号和角色查询。<br>
+    <br>
+    如果要查询某个序号的控件或布局器对应的行号和角色，使用如下函数：<br>
+    <div class="code">void getItemPosition(int index, int * rowPtr, ItemRole *
+      rolePtr) const</div>
+    查询到的数值会存到 rowPtr 和 rolePtr 指向的变量。如果查不到，那么 rowPtr 指向的数值就是 -1。<br>
+    <br>
+    如果要删除某个序号的控件，使用下面的函数：<br>
+    <div class="code">virtual QLayoutItem * takeAt(int index)</div>
+    <br>
+    （4）设置行的显示格式、对齐格式<br>
+    表单布局器与网格布局器一个较大的不同点是可以将一大行拆成两小行显示，如果标签控件的文本特别长，那么这个特性就有用了，在两个小行中，上面的小行显示标签，下
+    面的小行显示域控件。<br>
+    设置大行内部是否自动换行的函数为：<br>
+    <div class="code">void setRowWrapPolicy(RowWrapPolicy policy) </div>
+    QFormLayout::​RowWrapPolicy 有三种在大行内部的自动换行策略：<br>
+    ● QFormLayout::DontWrapRows，就是始终不换行，标签和域显示在同一水平行里。<br>
+    ● QFormLayout::WrapLongRows，对于特别长的行自动换行，比如标签文本特别长，那么拆成两小行，上面是标签，下面是域。<br>
+    ● QFormLayout::WrapAllRows，所有的行都拆成两小行，上面小行显示标签，下面小行显示域。<br>
+    这里的rowWrapPolicy 仅仅决定显示的时候是否自动换行，它对表单布局里原本的大行划分没有影响，从布局管理上，两小行的标签和域还是原来的一大行。
+    &nbsp; <br>
+    <br>
+    表单布局器可以设置表单整体的对齐方式，使用下面的函数：<br>
+    <div class="code">void setFormAlignment(Qt::Alignment alignment)</div>
+    这个函数设置内部的全部内容在表单布局器所占大空间里的对齐方式，通常是&nbsp; Qt::AlignLeft | Qt::AlignTop
+    ，就是从左上角开始排布控件。<br>
+    <br>
+    第一列的标签也有专门的对齐方式设置函数：<br>
+    <div class="code">void setLabelAlignment(Qt::Alignment alignment) </div>
+    标签一般是左对齐的。没有直接设置右边域对齐方式的函数，因为域内的元素种类很多，可能是控件、布局器、自定义布局条目，比较复杂。如果要控制右边域的对齐，可以
+    用水平布局器把域的控件封装起来，通过水平布局器和空白条控制对齐。<br>
+    <br>
+    （5）伸展策略和布局间隙<br>
+    表单布局里面，左边的标签控件足够显示该列的文本之后，就不拉伸了。<br>
+    所以只有设置域的伸展策略函数：<br>
+    <div class="code">void setFieldGrowthPolicy(FieldGrowthPolicy policy)</div>
+    QFormLayout::​FieldGrowthPolicy 枚举常量有三个，对应不同的拉伸策略，这个策略影响所有行的域拉伸：<br>
+    ● QFormLayout::FieldsStayAtSizeHint，拉伸到最佳大小就保持不变了，苹果系统风格默认是这样的。<br>
+    ● QFormLayout::ExpandingFieldsGrow，根据域里面的控件而定，里面控件自己的策略如果是 Expanding 或
+    MinimumExpanding 就增长，其他的不增长。Qt 的 Plastique 风格（KDE 桌面）默认是这样。<br>
+    ●
+    QFormLayout::AllNonFixedFieldsGrow，根据域内部控件的策略而定，控件的策略允许增长就增长，控件的策略不增长那就不变。大部分的情况
+    默 认都是这种伸展策略。<br>
+    <br>
+    表单布局器的布局间隙设置和网格布局器类似，用下面函数设置即可：<br>
+    <div class="code">void setHorizontalSpacing(int spacing)&nbsp; //控件之间水平间隙</div>
+    <div class="code">void setVerticalSpacing(int spacing)&nbsp;&nbsp;&nbsp; //行
+      与行之间的垂直间隙</div>
+    <br>
+    （6）与网格布局的代码对比<br>
+    对于两列的控件，使用表单布局器的代码比网格布局器节省很多代码，下面的代码就是从 Qt 帮助文档里面摘的，两部分代码功能相同，但代码行的数目有明显差异。<br>
+    使用表单布局器：<br>
+    <div class="code">QFormLayout *formLayout = new QFormLayout;<br>
+      formLayout-&gt;addRow(tr("&amp;Name:"), nameLineEdit);<br>
+      formLayout-&gt;addRow(tr("&amp;Email:"), emailLineEdit);<br>
+      formLayout-&gt;addRow(tr("&amp;Age:"), ageSpinBox);<br>
+      setLayout(formLayout);</div>
+    使用网格布局器： <br>
+    <div class="code">nameLabel = new QLabel(tr("&amp;Name:"));<br>
+      nameLabel-&gt;setBuddy(nameLineEdit);<br>
+      <br>
+      emailLabel = new QLabel(tr("&amp;Name:"));<br>
+      emailLabel-&gt;setBuddy(emailLineEdit);<br>
+      <br>
+      ageLabel = new QLabel(tr("&amp;Name:"));<br>
+      ageLabel-&gt;setBuddy(ageSpinBox);<br>
+      <br>
+      QGridLayout *gridLayout = new QGridLayout;<br>
+      gridLayout-&gt;addWidget(nameLabel, 0, 0);<br>
+      gridLayout-&gt;addWidget(nameLineEdit, 0, 1);<br>
+      gridLayout-&gt;addWidget(emailLabel, 1, 0);<br>
+      gridLayout-&gt;addWidget(emailLineEdit, 1, 1);<br>
+      gridLayout-&gt;addWidget(ageLabel, 2, 0);<br>
+      gridLayout-&gt;addWidget(ageSpinBox, 2, 1);<br>
+      setLayout(gridLayout);</div>
+    经过上面的对比，明显可以看到表单布局器的优势，可以自动新建标签控件，可以自动设置伙伴关系，每次可以同时添加一行里的两个控件。而网格布局器都不具备这三个特
+    性。<br>
+    当然，表单布局器的缺点也是有的，它只能添加两列，多的必须全部用布局器封装成右边的域。网格布局器可以添加任意列的控件。<br>
+    <br>
+    关于表单布局器介绍到这，下面我们把上一节的两个网格布局器例子重新用表单布局器布局一下，对比看看效果。<br>
+    <br>
+    <div class="os2">6.4.2 个人信息收集示例表单布局</div>
+    <br>
+    我们进入第 6 章例子文件夹 D:\QtProjects\ch06\ ，把上一节的 infogathergrid
+    文件夹复制并就地粘贴一份，新的文件夹重命名为 infogatherform，然后进入
+    D:\QtProjects\ch06\infogatherform\ 文件夹，进行如下操作：<br>
+    ① 把旧的 infogathergrid.pro.user 用户文件删掉。<br>
+    ② 把 infogathergrid.pro 重命名为 infogatherform.pro 。<br>
+    ③ 用记事本打开新的 infogatherform.pro 文件，修改里面的 TARGET 一行，变成下面这句：<br>
+    <div class="code">TARGET = infogatherform</div>
+    这样就生成了新的 infogatherform 项目，用 QtCreator 打开这个项目，在配置项目界面选择所有套件并点击 "Configure
+    Project" ，配置好项目后，打开 widget.ui 界面文件，进入 QtCreator 设计模式：<br>
+    <center><img src="images/ch06/ch06-04-02.png" alt="ui" width="800"></center>
+    我们按 Ctrl+A 快捷键，选中全部控件，然后点击上面的打破布局按钮，回到没有任何布局的状态：<br>
+    <center><img src="images/ch06/ch06-04-03.png" alt="ui2" width="800"></center>
+    现在就是没有任何布局的状态，"提交" 按钮在上一节把 sizePolicy 的水平策略和垂直策略都设置为了 Fixed，这里一样，还是固定大小的
+    "提交" 按钮。<br>
+    <br>
+    我们之前的小节说过，表单右边域没有设置对齐的函数，需要自己用水平布局封装来实现对齐的效果。<br>
+    我们希望 "提交" 按钮靠右边对齐，那么就需要一个空白条和一个水平布局器，把水平布局器放在水平布局器左半部分，"提交"
+    按钮放在水平布局器右边就行了。下面我们就拖一个水平空白条放到 "提交" 按钮左边，并对二者进行水平布局：<br>
+    <center><img src="images/ch06/ch06-04-04.png" alt="ui3" width="800"></center>
+    有左边的空白条存在，按钮自然会显示在靠右边的地方。<br>
+    <br>
+    然后我们点击主窗体的空白位置，不选中任何控件，直接点击上面的表单布局按钮，得到下图的主布局效果：<br>
+    <center><img src="images/ch06/ch06-04-05.png" alt="ui4" width="800"></center>
+    表单布局器的效果就是图上所示的，和网格布局器显示效果有明显的不同，表单布局器在垂直方向上不拉伸，所有行的控件都挤一块，而不会拉伸行与行之间的间隙。<br>
+    <br>
+    我们在上面的界面随便点击一下某个控件，再点击窗体空白位置，这样能重新选中主窗体，主窗体的属性编辑栏就会刷新，可以看到新增的表单布局器属性：<br>
+    <center><img src="images/ch06/ch06-04-06.png" alt="mainlayout"></center>
+    我们在前面小节介绍表单布局器的一些设置函数，在这里有对应的属性，表单布局器明显比其他布局器多出四个大的属性：<br>
+    layoutFieldGrowthPolicy，设置域列的伸展策略。<br>
+    layoutRowWrapPolicy，设置大行内部的自动换行。<br>
+    layoutLabelAlignment，设置标签的对齐方式，细分为水平对齐和垂直对齐。<br>
+    layoutFormAlignment，设置表单整体的对齐方式，也细分为水平对齐和垂直对齐。<br>
+    <br>
+    这里需要说明的就是第四个大属性 layoutFormAlignment，如果表单的整体对齐是垂直居中 AlignVCenter，会得到下图所示的效果：<br>
+    <center><img src="images/ch06/ch06-04-07.png" alt="vcenter" width="800"></center>
+    如果在垂直方向是靠底部对齐 AlignBottom，显示效果为：
+    <center><img src="images/ch06/ch06-04-08.png" alt="bottom" width="800"></center>
+    一般推荐用垂直方向的顶部对齐和垂直居中对齐。<br>
+    我们现在把 layoutFormAlignment 还原到原本的 AlignTop，保存界面文件，然后重新生成例子，可以看到实际的运行效果：<br>
+    <center><img src="images/ch06/ch06-04-09.png" alt="run"></center>
+    表单布局器在水平方向是自动拉伸的，而在垂直方向上，每行之间的垂直间隔是固定的，没有拉伸。<br>
+    上一节网格布局器在水平和垂直方向都是自动拉伸的。<br>
+    <br>
+    <div class="os2">6.4.3 分布不均匀的表单布局</div>
+    <br>
+    我们进入第 6 章例子文件夹 D:\QtProjects\ch06\ ，把上一节的 complexgrid 文件夹复制并就地粘贴一份，新的文件夹重命名为
+    complexform，然后进入新的 D:\QtProjects\ch06\complexform\ 文件夹，进行如下操作：<br>
+    ① 把旧的 complexgrid.pro.user 用户文件删掉。<br>
+    ② 把 complexgrid.pro 重命名为 complexform.pro 。<br>
+    ③ 用记事本打开新的 complexform.pro 文件，修改里面的 TARGET 一行，变成下面这句：<br>
+    <div class="code">TARGET = complexform</div>
+    这样就生成了新的 complexform 项目，用 QtCreator 打开这个项目，在配置项目界面选择所有套件并点击 "Configure
+    Project" ，配置好项目后，打开 widget.ui 界面文件，进入 QtCreator 设计模式：<br>
+    <center><img src="images/ch06/ch06-04-10.png" alt="ui" width="800"></center>
+    我们按 Ctrl+A 快捷键选中所有的控件和布局器，点击上方的打破布局按钮，把所有的布局全部打破，回到没有任何布局的状态：<br>
+    <center><img src="images/ch06/ch06-04-11.png" alt="ui2" width="800"></center>
+    打破布局按钮的特点就是，如果选中一个布局器，它就打破那一个布局器，并且不处理子布局器。如果选中所有的布局器和控件，点击打破布局的按钮，那么全部的布局都会
+    打破，回到没有任何布局的状态。<br>
+    <br>
+    我们本小节的布局思路和 6.3.3 小节思路类似，也是分三步走：<br>
+    （1）第二行：<br>
+    选中两个单选按钮，点击上面的水平布局按钮，得到下图效果：<br>
+    <center><img src="images/ch06/ch06-04-12.png" alt="lay1"></center>
+    （2）第三大行：<br>
+    这里的五个复选框只能按照网格布局，因为根本不符合表单布局的规律。我们选中五个复选框，然后点击上面的网格布局按钮，得到如下图的效果：<br>
+    <center><img src="images/ch06/ch06-04-13.png" alt="lay2"></center>
+    （3）主布局器<br>
+    我们点击主窗体的空白位置，不选中任何控件和子布局，直接在设计模式上面点击表单布局按钮（该按钮工具提示文本是 "在窗体布局中布局"，这个叫法其实不恰当），
+    自动为窗体设置主布局器：<br>
+    <center><img src="images/ch06/ch06-04-14.png" alt="lay3"></center>
+    得到最后的主布局器之后，可以和 6.3.3
+    节例子做对比，可以明显看到标签有区别，网格布局的标签自动跟随右边的输入控件拉伸，而表单布局的标签压根不拉伸。我 们设置标签的背景色就是方便看效果的。<br>
+    <br>
+    表单布局器的标签默认不拉伸，但可以设置对齐方式，该列的标签对齐方式是统一的。<br>
+    我们点击窗体里面任意一个控件，再重新点击窗体的空白位置，刷新一下右下角的主窗体属性编辑栏，可以看到新的 formLayout
+    主布局器，上一个例子示范了表单的整体对齐方式，我们在这一小节示范标签的对齐方式。<br>
+    我们把 formLayout 主布局器的 layoutLabelAlignment 设置为水平和垂直都居中：<br>
+    <center><img src="images/ch06/ch06-04-15.png" alt="lay4" width="800"></center>
+    理论上说，左边的标签控件应该在自己的格子里水平和垂直都居中，但实际情况是根本没反应，修改 layoutLabelAlignment
+    属性没有效果。这里就是说明一下，其实开发库也有不靠谱的时候，遇到没有实现文档里描述的效果也是可能发生的。<br>
+    <br>
+    遇到无奈的情况，可以有两种处理方式，第一种不处理，凑合着用。我们先按第一种方式走，保存界面文件，生成并运行例子，查看运行效果：<br>
+    <center><img src="images/ch06/ch06-04-16.png" alt="run1"></center>
+    当窗口拉伸时，表单布局器会在水平方向拉伸域列的控件，<br>
+    但是，在垂直方向，表单布局器仍然是不拉伸的，即使有一个巨大的丰富文本编辑器，程序运行时垂直方向的控件就是不拉伸，这是表单布局器的特点，在垂直方向上它是固
+    化的。<br>
+    <br>
+    对无奈的情况，第二种处理方式，我们可以用别的方法尝试挣扎一下。我们这里试着把第四个标签弄成垂直居中的，给大家示范一下。我们先点击主窗体空白位置，不选中任
+    何控件和子布局，点击上面的打破布局按钮，这样只会打破一个主布局，而两个子布局器不会变：<br>
+    <center><img src="images/ch06/ch06-04-17.png" alt="lay5" width="800"></center>
+    这样相当于回到之前布局第（2）步操作之后的状态。<br>
+    <br>
+    我们现在把 "个人描述" 拖到比较居中的位置，在它上面放一个垂直空白条，下面也放一个空白条，如下图所示：<br>
+    <center><img src="images/ch06/ch06-04-18.png" alt="lay6" width="800"></center>
+    然后我们选中这两个空白条和 "个人描述" 标签，点击上面的垂直布局按钮，得到下图效果：<br>
+    <center><img src="images/ch06/ch06-04-19.png" alt="lay7" width="800"></center>
+    然后我们点击主窗体空白区域，不选中任何控件，点击上面的表单布局按钮，自动为窗体生成主布局器：<br>
+    <center><img src="images/ch06/ch06-04-20.png" alt="lay8" width="800"></center>
+    这里我们可以看到，表单布局的第一列也是可以设置为布局器的。表单布局是很灵活的，它的标签列可以设置任意的控件或布局器，并不限于标签。但要注意，第一列的宽度
+    默认是固定的，表单布局只拉伸第二列的域控件。<br>
+    <br>
+    设置好界面之后，我们保存界面文件，点击 QtCreator 菜单【构建--&gt;重新构建 "项目名"】，重新构建一下 complexform
+    项目，然后运行例子，就可以看到效果：<br>
+    <center><img src="images/ch06/ch06-04-21.png" alt="run2"></center>
+    现在 "个人描述" 标签是垂直居中的。但是，表单布局在垂直方向依旧是不拉伸的，这是表单布局的特点。<br>
+    因为在网页设计中，表单在垂直方向就是不拉伸的，Qt 的表单布局和网页设计中的表单特性是一样的。<br>
+    <br>
+    读者如果以后遇到需要选择表单布局或者网格布局时，可以根据实际控件的分布特点来定。<br>
+    表单布局器是两大列控件，第一列通常是不拉伸的标签，第二列是可以水平拉伸的输入控件，并且表单布局器在垂直方向上是固定的高度，垂直方向都不拉伸。<br>
+    如果实际遇到情况和表单布局的特点符合，那就用表单布局。<br>
+    如果实际情况不符合表单布局的特点，那么建议用网格布局或者水平布局、垂直布局。<br>
+    <br>
+    本小节最后教大家一个用表单布局器的窍门，设计师或 QtCreator 设计模式有针对表单布局器的优化操作，我们打开 Qt 设计师，新建 Widget
+    窗体，按照下图操作，拖一个表单布局器到窗体里面：<br>
+    <center><img src="images/ch06/ch06-04-22.png" alt="form1" width="800"></center>
+    我们右击该表单布局器，可以看到右键菜单多出了一个 "添加窗体布局行" （其实应该叫表单布局）：<br>
+    <center><img src="images/ch06/ch06-04-23.png" alt="form2" width="800"></center>
+    点击 "添加窗体布局行 ..." 菜单项之后，可以看到表单布局器独有的添加行窗口：<br>
+    <center><img src="images/ch06/ch06-04-24.png" alt="form3" width="800"></center>
+    "添加表单布局行" 这个对话框，可以设置标签的文本、名称，右边的域（字段）类型、名称，并且默认勾选 "伙伴" 关系，一次可以添加两个控件，左边是标签，右
+    边是指定类型的输入控件。<br>
+    需要注意的就是 "添加表单布局行" 这个对话框，它的行号是从 1 开始计数，而实际的代码都是从 0 开始计数。该对话框的行号 1 对应的就是第 0 行。<br>
+    <br>
+    "添加表单布局行" 对话框里面关于域（字段）控件，有很多类型，我们截个图看一下：<br>
+    <center><img src="images/ch06/ch06-04-25.png" alt="form4" width="800"></center>
+    可以看出 Qt 对表单布局是做了很多优化工作的，针对类似网页的表单形式接收用户输入的界面，添加了相关的便捷函数，并在设计师里专门订做了
+    "添加表单布局行" 对话框，就是为了方便表单布局的使用。<br>
+    <br>
+    本节的内容就到这，我们下一节讲解关于布局器很重要的知识，就是了解为什么有些控件会随着窗口拉伸而拉伸，而另外一些控件经常不拉伸。<br>
+    <br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch06-03.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch06-05.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

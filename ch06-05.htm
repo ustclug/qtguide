@@ -3,11 +3,9 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <title>ch06-05</title>
-    
-<link href="css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-
-<script src="thumbnailviewer.js" type="text/javascript">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -15,39 +13,1289 @@
 * Visit http://www.dynamicdrive.com/ for full source code
 ***********************************************/
 
-</script>
-
-
-  </head>
-  
-  
-<div class="os1">6.5 控件尺寸调整策略 </div>
-<br />
-介绍所有布局器的核心内容，即控件尺寸调整策略 QSizePolicy。
-<br />
-<br />
-<div class="os2">6.5.1 水平和垂直伸展策略</div>
-<br />
-<br />
-
-<div class="os2">6.5.2 水平和垂直伸展因子</div>
-<br />
-<br />
-
-<div class="os2">6.5.3 *</div>
-<br />
-<br />
-<br />
-<br />
-<br />
-
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch06-04.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch06-06.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+</script> </head>
+  <body>
+    <div class="os1">6.5 控件尺寸调整策略</div>
+    <br>
+    本节知识主要来自 Qt 帮助文档中索引 Layout Management 和 QSizePolicy
+    两个帮助页内容，这两个页面详细介绍了布局器的原理和布局器里控件尺寸调整策略。在实际编程中，使用前面几节的布局器不一定能直接实现想要的效果，这时候很可能需要调整控
+    件的 sizePolicy
+    属性，设置不同的尺寸调整策略来实现想要的拉伸效果。本节就是介绍布局器的原理和控件的尺寸调整策略，面对复杂的布局情况，这些知识就很有用了。<br>
+    <br>
+    基于 QWidget 的控件都会继承 sizePolicy 属性（ QSizePolicy 类型），这个属性包括两个大的方面内容：伸展因子
+    （Stretch Factor）和
+    伸展策略（Policy），这些都会影响到界面最终的布局显示。我们本节先大致介绍布局器的工作原理，然后分两小节讲解伸展因子、伸展策略以及
+    QSizePolicy 类其他内容，并通过 Qt 设计师进行一些控件伸展因子设置的示范，最后是两个尺寸调整策略设置的示例。<br>
+    <br>
+    <div class="os2">6.5.1 布局器工作原理</div>
+    <br>
+    当添加控件到布局器时，布局器的工作原理如下：<br>
+    （1）所有的控件初始时，布局器根据控件自己的 QWidget::sizePolicy() 和&nbsp;
+    QWidget::sizeHint()，分配相应的空间给各个控件。sizePolicy() 就是控件的尺寸调整策略，比如
+    QSizePolicy::Fixed 就是不拉伸，空间就是固定的，而 QSizePolicy::Expanding
+    就是尽可能占据空间，死劲拉伸。sizeHint() 就是控件本身的建议尺寸，或叫最佳尺寸，这个建议尺寸是 Qt
+    类库自己根据需要显示的内容计算的，所有的控件和窗体都能自己计算建议尺寸。<br>
+    （2）如果有控件自己设置了大于零的伸展因子（stretch
+    factors），那么在主界面窗口变大时，新增的空闲区域按照控件的伸展因子比例进行分配。伸展因子的内容在下面 6.5.2 小节专门讲解。<br>
+    （3）如果有控件的伸展因子设置为 0，那么这个控件会尽量不占用窗口变大后的空闲区域，如果其他控件都不想要空闲区域，伸展因子为 0
+    的控件才会去尝试占据窗口变大后的空闲区域。默认情况下，所有控件的伸展因子其实都是 0，这时候布局器会优先拉伸尺寸策略为
+    QSizePolicy::Expanding 的控件。<br>
+    （4）当窗口缩小时，布局器会根据控件的最小尺寸限定控件尺寸下限，控件到达它的最小尺寸后就不会继续缩小。最小尺寸可以是 minimumSize
+    指定的最小尺寸，如果没设置 minimumSize ，那么最小尺寸是 minimumSizeHint 指定的最小建议尺寸，minimumSizeHint
+    是 Qt 类库自己计算的，一般不需要程序员设置。（有些特殊情况，如果控件尺寸仅仅由伸展因子 stretch factor
+    决定，那么就没有最小尺寸和最小建议尺寸）<br>
+    （5）当窗口变大时，布局器会根据控件的最大尺寸限定控件的尺寸上限，控件达到它的最大尺寸后就不再增长。最大尺寸由控件的 maximumSize
+    指定。（有些特殊情况，如果控件尺寸仅仅由伸展因子 stretch factor 决定，那么就没有最大尺寸）<br>
+    <br>
+    上面是 Qt 帮助文档内容的翻译和解释，我们现在稍微归纳一下布局器中影响控件拉伸的因素：<br>
+    ① 最小尺寸和最大尺寸，控件尺寸会限定在最小尺寸和最大尺寸之间。<br>
+    ② 建议尺寸 QWidget::sizeHint()，这个建议尺寸是后续尺寸调整的基础，在布局时会先给控件分配建议尺寸的空间。<br>
+    ③ 伸展因子（stretch factors），根据伸展因子的比例分配新增的空闲空间给各个控件。<br>
+    ④ 尺寸策略 QWidget::sizePolicy()，在上述处理之后，那么再根据各个控件的尺寸调整策略决定控件应该尽可能拉伸还是尽量不拉伸。<br>
+    <br>
+    这些规律对水平布局器、垂直布局器、网格布局器都是通用的。比较例外的是表单布局器，表单布局器在垂直方向不拉伸，第一列的标签也不拉伸，受尺寸调整策略影响的只
+    有第二列的域在水平方向的拉伸行为。<br>
+    <br>
+    在影响界面布局的因素中，最小尺寸和最大尺寸可以直接设置控件的 minimumSize 和 maximumSize 属性，对应的函数为：<br>
+    <div class="code">void setMinimumSize(const QSize
+      &amp;)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //最小尺寸</div>
+    <div class="code">void setMinimumSize(int minw, int minh)&nbsp; //最小尺寸</div>
+    <div class="code">void setMaximumSize(const QSize
+      &amp;)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //最大尺寸</div>
+    <div class="code">void setMaximumSize(int maxw, int maxh)&nbsp; //最大尺寸</div>
+    这些函数和属性我们在 6.1.1 小节专门介绍过，设置最小尺寸和最大尺寸是没啥技术含量的，比较简单，这里不赘述了。<br>
+    建议尺寸 QWidget::sizeHint() 通常是 Qt 类库自己根据需要显示的内容计算的，并没有直接的设置函数，只能用
+    QWidget::sizeHint() 函数获取建议的尺寸。如果程序员不自己定制新的控件类和布局器类，是不需要操心建议尺寸的。<br>
+    影响控件拉伸的四个因素中，头两个因素通常都比较简单不用操心，因此我们本节就主要学习伸展因子和尺寸调整策略。<br>
+    <br>
+    <div class="os2">6.5.2 QSizePolicy 之一：伸展因子</div>
+    <br>
+    控件和水平布局器、垂直布局器、网格布局器都可以设置伸展因子。窗口拉伸时，布局器会根据每个控件或子布局器的水平和垂直方向的伸展因子，分配新增的空闲空间。例
+    外的是如果控件设置了 sizePolicy 属性里的策略为 QSizePolicy::Fixed
+    固定高度或固定宽度，那就不拉伸控件，只拉伸控件之间的间隙。对于固定宽度或高度的控件，没什么好讨论，因为它们不拉伸。我们下面考虑会拉伸的情形。<br>
+    <br>
+    本小节是通过三个 ui 文件示范的，没有用到新项目。读者可以从如下网址获取 ui 文本：<br>
+    <a href="https://lug.ustc.edu.cn/sites/qtguide/QtProjects/ch06/stretchfactors/"
+      target="new">
+      https://lug.ustc.edu.cn/sites/qtguide/QtProjects/ch06/stretchfactors/</a><br>
+    下载 threebuttons.ui、fourbuttons.ui、fourlayouts.ui 三个文件，然后可以用 Qt 设计师或
+    QtCreator 打开它们，根据下面的示范操作这些界面文件。<br>
+    <br>
+    （1）控件本身的水平和垂直伸展因子<br>
+    通常控件都是从 QWidget 直接或间接派生的，都可以设置 sizePolicy 属性，在 Qt 设计师或 QtCreator
+    设计模式，可以在右下角属性编辑栏看到选中控件或窗体的 sizePolicy 属性：<br>
+    <center><img src="images/ch06/ch06-05-01.png" alt="sizePolicy"></center>
+    上图标出的就是 sizePolicy 属性，里面分为四个小属性，"水平策略" 和 "垂直策略" 就是下一小节介绍的伸展策略，"水平伸展" 和
+    "垂直伸展" 就是本小节的伸展因子。<br>
+    <br>
+    以三个按钮控件为例，如果它们的伸展因子都是 0，那么三个按钮在水平布局里就是均匀拉伸：<br>
+    <center><img src="images/ch06/ch06-05-02.png" alt="buttons1"></center>
+    如果把 "One" 按钮的 "水平伸展" 设为 1，"Two" 按钮的 "水平伸展" 设为 2，"Three" 按钮的 "水平伸展" 设为
+    3，那么在窗口拉大时，该行三个按钮的伸展因子之和为 1+2+3 == 6，新的空间就按照 1/6 ，2/6 ，3/6
+    的比例划分给这三个按钮，显示效果就如下面这样：<br>
+    <center><img src="images/ch06/ch06-05-03.png" alt="buttons2"></center>
+    如果把 "One" 按钮的 "水平伸展" 设为 2，"Two" 按钮的 "水平伸展" 设为 4，"Three" 按钮的 "水平伸展" 设为
+    0，那么在窗口拉大时，分配规律就是：先计算伸展因子之和 2+4+0 == 6，新的空间按照 2/6 ，4/6，0/6
+    的比例划分给这三个按钮，显示效果如下：<br>
+    <center><img src="images/ch06/ch06-05-04.png" alt="buttons3"></center>
+    因为第三个按钮的伸展因子是 0，第三个按钮会保持一个建议尺寸，其他两个按钮会根据伸展因子的占比进行拉伸。三个水平伸展因子为
+    2、4、0，其实也可以直接写成 1、2、0，两种是等价的，不管有没有公约数。<br>
+    <br>
+    通过设计师或 QtCreator 设计模式修改伸展因子是很简单的，如果要通过代码来修改，那么可以用类似下面的代码：<br>
+    <div class="code"><span style=" color:#c0c0c0;">&nbsp;&nbsp;&nbsp; </span><span
+        style=" color:#008000;">//获取旧的尺寸策略作为底板，修改需要变动的伸展因子</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QSizePolicy</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">sp</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButton1</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">sizePolicy</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">sp</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setHorizontalStretch</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">2</span><span style=" color:#000000;">);</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//水平伸展因子</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">sp</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setVerticalStretch</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">0</span><span style=" color:#000000;">);</span><span
+style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//垂直伸展因子</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//把新策略设置给按钮1</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButton1</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setSizePolicy</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">sp</span><span style=" color:#000000;">);</span></pre>
+    </div>
+    其他类型的控件代码也可类似的编写，先获取旧的策略，在旧策略基础上修改我们需要变动的伸展因子。设置水平伸展因子的函数声明为：<br>
+    <div class="code">void QSizePolicy::​setHorizontalStretch(int stretchFactor)</div>
+    设置垂直伸展因子的函数声明为：<br>
+    <div class="code">void QSizePolicy::​setVerticalStretch(int stretchFactor)</div>
+    注意 stretchFactor 的取值范围是 0 到 255，负数就当做 0，大于 255 就当做 255，因此设置超出范围的数也没意义。一般用个位数
+    的伸展因子就够用了，伸展因子没必要弄太大。<br>
+    <br>
+    除了控件自身可以设置伸展因子，布局器也可以为内部直属的控件或子布局器设置伸展因子。如果布局器和内部直属的控件都设置了伸展因子，那么布局器的设置会覆盖直属
+    控件的伸展因子。<span style="font-weight: bold; color: red;">因此不建议直接设置控件自己的伸展因子属性，而是
+      通过布局器来设置各个子控件或子布局器的伸展因子。</span><br>
+    另外，从设计上看，控件只能管自己的局部矩形，控件不知道自己的伸展因子会对相邻控件造成多大影响，控件自身没有宏观的概念。尤其是网格布局器，某一行某一列的控
+    件设置伸展因子，会影响到全部网格的控件排列，如果每行的控件都设置一些乱七八糟的伸展因子，那么整个网格的布局就无法预料了。<br>
+    我们应该从布局器的角度考虑界面划分，布局器则通常管理多个控件的一大片区域，通过布局器来设置各个子条目的伸展因子，就能从宏观角度合理分配空间，决定各个子条
+    目按多大的比例进行拉伸。<br>
+    <br>
+    （2）水平和垂直布局器的伸展因子设置<br>
+    QHBoxLayout 和 QVBoxLayout 都是通过基类 QBoxLayout
+    的函数设置内部直属的各个控件和子布局的伸展因子，对应的设置函数为：<br>
+    <div class="code">void setStretch(int index, int stretch)</div>
+    <div class="code">bool setStretchFactor(QWidget * widget, int stretch)</div>
+    <div class="code">bool setStretchFactor(QLayout * layout, int stretch)</div>
+    第一个函数是设置序号为 index 的控件或子布局的伸展因子。<br>
+    第二个函数是设置布局器内部 widget
+    控件的伸展因子，使用这个函数设置伸展因子会覆盖控件自身原来设置的伸展因子属性。这个函数仅仅设置直属的子控件，该布局器的子布局器内部的孙子控件是不管的。如果设置成
+    功就返回 true，如果 widget 不是该布局器的直属子控件，那么会返回 false。<br>
+    第三个函数是设置内部子布局器 layout 的伸展因子。这个函数也是设置直属的子布局器，而在子布局器内部的孙子布局器是不管的。如果设置正确就返回
+    true，否则返回 false。<br>
+    <br>
+    如果要获取某个序号的控件或子布局器的伸展因子是多少，可以用如下函数：<br>
+    <div class="code">int stretch(int index) const</div>
+    <br>
+    在设计师或 QtCreator 设计模式，选中某个水平或垂直布局器，可以在右下角设置布局器的属性栏：<br>
+    <center><img src="images/ch06/ch06-05-05.png" alt="lay1" width="800"></center>
+    选中布局器之后，右下角属性编辑栏可以看到 layoutStretch 一栏，里面是英文逗号分隔的数字，对应三个按钮的情况，默认就是<br>
+    0,0,0 <br>
+    数字的个数与直属的子控件和子布局器总共的计数是一致的，分别与各个序号的子控件和子布局对应。在上图中，如果把 layoutStretch
+    设置为（注意是英文逗号）<br>
+    1,2,3 <br>
+    那么显示效果就是：<br>
+    <center><img src="images/ch06/ch06-05-06.png" alt="lay2" width="800"></center>
+    如果把 layoutStretch 设置为<br>
+    1,2,0<br>
+    那么显示效果就变成：
+    <center><img src="images/ch06/ch06-05-07.png" alt="lay3" width="800"></center>
+    我们这里都是拿水平布局器作为例子示范，主要是因为很多控件的水平伸展策略都是可以拉伸的。<br>
+    而按钮控件，默认在垂直方向上的伸展策略是 QSizePolicy::Fixed
+    ，按钮的高度是固定的，所以没有拿垂直布局器举例。在控件不能拉伸的情况，设置伸展因子就没有用：<br>
+    <center><img src="images/ch06/ch06-05-08.png" alt="lay4" width="800"></center>
+    上面都是以功能控件举例的，控件通过 sizePolicy
+    属性控制伸展策略，可以限定控件为固定高度等等。如果是子布局器，那么子布局器在水平和垂直方向通常都是可以拉伸的。因此伸展因子对直属的子布局器总是有效的，而
+    对固定高度或固定宽度的控件会出现失效的情况。<br>
+    <br>
+    （3）网格布局器的伸展因子设置<br>
+    网格布局器本身是二维的，它会始终保持控件在行和列上的对齐。不建议直接设置网格布局器内部控件的伸展因子属性，因为改变一个控件的伸展因子属性就会影响到全部的
+    网格布局。应该通过网格布局器的函数或属性来设置行或列的伸展因子。<br>
+    网格布局器为了保持网格的对齐特性，它都是整行或者整列第设置伸展因子：<br>
+    <div class="code">void setRowStretch(int row, int
+      stretch)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //设置整行的伸展因子</div>
+    <div class="code">void setColumnStretch(int column, int stretch) //设置整列的伸展因子</div>
+    另外还可以设置某个整行的最小高度，或者设置某个整列的最小宽度：<br>
+    <div class="code">void setRowMinimumHeight(int row, int
+      minSize)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //第 row 行最小高度设置为 minSize</div>
+    <div class="code">void setColumnMinimumWidth(int column, int minSize) //第
+      column 列的最小宽度设置为 minSize</div>
+    <br>
+    在设计师或 QtCreator 设计模式，可以设置网格布局器对应的四个特有属性，如下所示：<br>
+    <center><img src="images/ch06/ch06-05-09.png" alt="grid1" width="800"></center>
+    layoutRowStretch 就是各个行对应的伸展因子；<br>
+    layoutColumnStretch 就是各个列对应的伸展因子；<br>
+    layoutRowMinimumHeight 是各个行对应的最小高度；<br>
+    layoutColumnMinimumWidth 是各个列对应的最小宽度。<br>
+    如果我们把两个列的伸展因子调整为<br>
+    1,3<br>
+    那么，得到效果就是：<br>
+    <center><img src="images/ch06/ch06-05-10.png" alt="grid1" width="800"></center>
+    如果控件的宽度或者高度为固定的，那么网格控件也不会拉伸控件，比如上面按钮的高度就是固定的，没有被拉伸。<br>
+    在控件高度都不能拉伸时，设置网格布局器各个行的伸展因子也没意义，比如下图：<br>
+    <center><img src="images/ch06/ch06-05-11.png" alt="grid2" width="800"></center>
+    在上图里，虽然设置了 layoutRowStretch 为<br>
+    3,1<br>
+    但是两行的占比其实是一样的，因为两行的控件在垂直方向都不能拉伸，垂直伸展因子就没效果。<br>
+    <br>
+    如果上面四个格子不是按钮控件，而是四个子布局器，那么两个方向的伸展因子都会生效：<br>
+    <center><img src="images/ch06/ch06-05-12.png" alt="grid3" width="800"></center>
+    上图四个大格子，每个格子里都是水平布局器，每个水平布局器里放一个标签和一个按钮。<br>
+    每个格子都是子布局器的情况下，我们看到列的比例是 1:3 ，行的比例是 3:1 ，和右下角设置的比例就完全对上了。<br>
+    <br>
+    网格布局器的伸展因子设置就介绍到这，作为对比，我们提一下表单布局器。<br>
+    表单布局器因为第一列宽度固定，并且在垂直方向不拉伸，所以没有设置伸展因子的函数和属性，它只有设置域列增长策略的函数：<br>
+    <div class="code">void QFormLayout::setFieldGrowthPolicy(FieldGrowthPolicy
+      policy)</div>
+    QFormLayout::setFieldGrowthPolicy() 我们在 6.4.1 小节讲过了，感兴趣的读者可以去回顾一下，这里不重复介绍了。<br>
+    <br>
+    实际的布局中，其实伸展因子用的比较少，因为很少有遇到控件必须按照某些比例来拉伸的，尤其是控件的类型不同时，设置不同种类的控件拉伸比例，通常没多大意义。实
+    际编程中最常用的是伸展策略。只有实际的功能控件有伸展策略相关的函数和属性，布局器是没有自己独立的伸展策略的。<br>
+    <span style="font-weight: bold; color: #000099;"><br>
+      <span style="color: red;">对于伸展因子和伸展策略的运用，我们这里建议一个大致的分工原则：<br>
+        在实际布局中，如果要控制某个布局器直属的子布局器、控件之间的拉伸比例，就通过布局器的伸展因子来设置；<br>
+        如果要控制功能控件是尽量拉伸还是尽量固定，那么通过控件自己的伸展策略属性来设置。</span></span><br>
+    <br>
+    <div class="os2">6.5.3 QSizePolicy 之二：伸展策略</div>
+    <br>
+    控件的 sizePolicy 属性包括两方面内容，上面介绍了第一方面的伸展因子，本小节是第二方面的伸展策略：<br>
+    <center><img src="images/ch06/ch06-05-01.png" alt="sizePolicy"></center>
+    属性编辑栏里的水平策略和垂直策略就是本小节讲解的伸展策略。伸展策略应用最多，也最复杂。<br>
+    <br>
+    QSizePolicy 关于伸展策略的内容可以分为两个层级：<br>
+    （1）策略的基本标志位<br>
+    由 QSizePolicy::​PolicyFlag 类型枚举，包括四个基本标志位：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 200px;"><b>枚举标志位</b></td>
+          <td style="width: 100px;"><b>数值</b></td>
+          <td><b>描述</b></td>
+        </tr>
+        <tr>
+          <td style="width: 200px;"><b>QSizePolicy::GrowFlag</b></td>
+          <td style="width: 100px;"> 1 </td>
+          <td> 可增长标志，如果有必要的话，可以在建议尺寸之外继续增长。 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 200px;"><b>QSizePolicy::ExpandFlag</b></td>
+          <td style="width: 100px;"> 2 </td>
+          <td style="height: 15px;"> 尽量扩展标志，能占多大空间就占多大。 </td>
+        </tr>
+        <tr>
+          <td style="width: 200px;"><b>QSizePolicy::ShrinkFlag</b></td>
+          <td style="width: 100px;"> 4 </td>
+          <td> 可收缩标志，如果有必要的话，可以在缩小到建议尺寸之后继续缩小。 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 200px;"><b>QSizePolicy::IgnoreFlag</b></td>
+          <td style="width: 100px;"> 8 </td>
+          <td> 忽略建议尺寸，这个增长方式最野蛮，能占多大空间就占多大空间 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    建议尺寸就是通过控件的 sizeHint() 函数获取的尺寸，这个尺寸通常由 Qt 类库自己根据要显示的内容计算。建议尺寸是伸展策略的基准。<br>
+    控件通常不会直接设置策略的基本标志位，因为没有这方面的设置函数。基本标志位的用途，是为了组合成为实用的策略枚举常量，也就是下面第二层级的内容。<br>
+    <br>
+    （2）策略的枚举常量<br>
+    伸展策略的枚举常量由 QSizePolicy::​Policy 类型枚举，有七个定义好的常量，用于设置控件的水平和垂直伸展策略：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 200px;"><b>枚举常量</b></td>
+          <td style="width: 100px;"><b>数值</b></td>
+          <td style="width: 100px;"><b>拉伸特点</b></td>
+          <td><b>描述</b></td>
+        </tr>
+        <tr>
+          <td style="width: 200px;"><b>QSizePolicy::Fixed</b></td>
+          <td style="width: 100px;"> 0 </td>
+          <td style="width: 100px;"> 固定 </td>
+          <td> 以建议尺寸固定住，对于水平方向是固定宽度，垂直方向是固定高度。 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 200px;"><b>QSizePolicy::Minimum</b></td>
+          <td style="width: 100px;"> GrowFlag </td>
+          <td style="width: 100px;"> 被动拉大 </td>
+          <td> 以建议尺寸为最小尺寸，如果有多余的空间就拉伸，没有多余的空间就保持建议尺寸。被动扩张。 </td>
+        </tr>
+        <tr>
+          <td style="width: 200px;"><b>QSizePolicy::Maximum</b></td>
+          <td style="width: 100px;"> ShrinkFlag </td>
+          <td style="width: 100px;"> 被动缩小 </td>
+          <td> 以建议尺寸为最大尺寸，窗口缩小时，如果其他控件需要，该控件可以尽量缩小为其他控件腾出空间。 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 200px;"><b>QSizePolicy::Preferred</b></td>
+          <td style="width: 100px;"> GrowFlag | <br>
+            ShrinkFlag </td>
+          <td style="width: 100px;"> 被动伸缩 </td>
+          <td> 以建议尺寸为最佳尺寸，能屈能伸，窗口缩小时可以为其他控件腾出空间，窗口变大时，也可以占据其他控件不需要的空闲空间。基类
+            QWidget 默认是这种策略。被动扩张。 </td>
+        </tr>
+        <tr>
+          <td style="width: 200px;"><b>QSizePolicy::Expanding</b></td>
+          <td style="width: 100px;"> GrowFlag | <br>
+            ShrinkFlag | <br>
+            ExpandFlag </td>
+          <td style="width: 100px;"> 主动扩张 </td>
+          <td> 建议尺寸仅仅是明智的建议，但控件基本不采用。这个模式也是能屈能伸，但它倾向于主动扩张，它会尽可能占据新增的区域。 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 200px;"><b>QSizePolicy::MinimumExpanding</b></td>
+          <td style="width: 100px;"> GrowFlag | <br>
+            ExpandFlag </td>
+          <td style="width: 100px;"> 主动扩张 </td>
+          <td> 以建议尺寸作为最小尺寸，主动扩张，尽可能占据新增的区域。 </td>
+        </tr>
+        <tr>
+          <td style="width: 200px;"><b>QSizePolicy::Ignored</b></td>
+          <td style="width: 100px;"> ShrinkFlag | <br>
+            GrowFlag | <br>
+            IgnoreFlag </td>
+          <td style="width: 100px;"> 野蛮扩张 </td>
+          <td> 忽略建议尺寸，虽然能屈能伸，但是它会尽最大可能占据空间。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    我们对七个策略常量大致分两类，第一类是固定、单向缩小、单向拉大的，相同布局情景中，占据的尺寸大小排序为：<br>
+    QSizePolicy::Maximum ≤ QSizePolicy::Fixed ≤ QSizePolicy::Minimum ≤
+    QSizePolicy::MinimumExpanding 。<br>
+    第二类是能屈能伸的，如果在相同布局情景中，占据尺寸大小排序为：<br>
+    QSizePolicy::Preferred ≤ QSizePolicy::Expanding ≤ QSizePolicy::Ignored 。<br>
+    <br>
+    七个策略枚举常量，最常用到的只有如下四个，我们考虑它们在相同布局场景中，占据的尺寸大小进行不严格排序（有例外）：<br>
+    QSizePolicy::Fixed ≤ QSizePolicy::Preferred ≈ QSizePolicy::Minimum ≤
+    QSizePolicy::Expanding<br>
+    虽然 Preferred 和 Expanding 都是能屈能伸的类型，但实际情况是只有窗口缩小到特别小的情况，这两个才会比 Fixed 小。<br>
+    窗口如果特别小，那么窗口的可用性显然受限，这通常属于不合理的设置，因此正常情况下不会遇到 Preferred 和 Expanding 比 Fixed
+    占用空间小的情况。<br>
+    <br>
+    以上的策略枚举常量是用于尺寸策略的设置函数中，控件和窗口的伸展策略细分为水平方向和垂直方向，通过如下两个函数分别设置：<br>
+    <div class="code">void QSizePolicy::​setHorizontalPolicy(Policy
+      policy)&nbsp; //设置水平策略</div>
+    <div class="code">void QSizePolicy::​setVerticalPolicy(Policy
+      policy)&nbsp;&nbsp;&nbsp; //设置垂直策略</div>
+    水平和垂直策略在大多数情况下都是不相关的，各自管各自的维度。除了调用函数，设计师和 QtCreator 设计模式也可以直接设置控件的
+    sizePolicy 属性两个子属性："水平策略" 和 "垂直策略" 。<br>
+    <br>
+    伸展策略的常量有七个，每个常量都有各自的特性，我们在这里把它们简化一下，在实际使用中可以按照下面三条建议来运用策略的枚举常量：<br>
+    <br>
+    <span style="font-weight: bold; color: red;">①
+      如果希望控件尺寸在水平或垂直方向固定住，那么把该维度的策略设置为 QSizePolicy::Fixed。<br>
+      ② 如果希望控件被动拉伸，其他控件不需要空间时这个控件才会占据新增区域，那么可以用 QSizePolicy::Preferred
+      （尺寸下限是隐含的最小建议尺寸）或者 QSizePolicy::Minimum（尺寸下限是建议尺寸）。<br>
+      ③ 如果希望控件尽量拉伸，主动扩张，那就把策略设置为 QSizePolicy::Expanding。</span><br>
+    <br>
+    Qt 里面的控件默认策略也是基本符合上面三条建议的，所以希望大家记住这三条建议，因为比较实用。<br>
+    <br>
+    <div class="os2">6.5.4 QSizePolicy 之三：其他内容</div>
+    <br>
+    QSizePolicy 除了上面两小节的伸展因子和伸展策略，还有一些其他的内容，这部分补充内容应用会比较少，但是会影响界面的一些细节，有必要在这讲一下。<br>
+    （1）控件类型设置<br>
+    QSizePolicy::ControlType 枚举类型有一大堆枚举常量，大部分的 Qt 控件都对应一个枚举常量，比如 <br>
+    按压按钮对应的常量为 QSizePolicy::PushButton，单行编辑控件对应的枚举常量是 QSizePolicy::LineEdit，类似的还
+    有很多，这里不列举了。<br>
+    <br>
+    QSizePolicy 类中关于控件类型获取和设置的函数为：<br>
+    <div class="code">ControlType QSizePolicy::​controlType() const</div>
+    <div class="code">void QSizePolicy::​setControlType(ControlType type)</div>
+    这个控件类型应用比较少，不是什么时候都生效的，而且对界面布局影响很小，只是一些细节有差异。控件类型只会被一些特定的 Qt 界面风格（可以查询
+    QStyle 类文档）采用，比如苹果系统风格的 QMacStyle，不同的控件类型会影响各个控件之间的默认间隙。比如 Mac OS X Aqua
+    指导方针中指出按压按钮之间需要 12 像素的间隙，而垂直方向排布的单选按钮间隔是 6 像素。因为控件类型影响很小，所以通常可以忽略这个设置。<br>
+    <br>
+    （2）建议尺寸的宽度和高度相关性设置<br>
+    多数情况下建议尺寸&nbsp; sizeHint()
+    的高度和宽度是不相关的，但有些特殊情况，比如能够自动换行的标签控件、菜单栏（后面章节讲解），比如一行长文本自动换行变成两行时，高度是双倍的，如果把标签拉宽，当两
+    行文本恢复成一行的时候，高度就变成单行的。这种控件越宽，它高度相对低一些，越窄，高度就高一些。因此这些控件的建议尺寸计算时，高度和宽度是相关的。<br>
+    可以通过如下函数设置在计算建议尺寸时，高度和宽度相关：<br>
+    <div class="code">void QSizePolicy::​setHeightForWidth(bool
+      dependent)&nbsp;&nbsp; //设置高度依赖宽度</div>
+    dependent 如果为 true，那么控件的建议尺寸高度就和宽度相关。如果 dependent 为 false 那么就是无关的。<br>
+    <br>
+    如果要获知建议尺寸的高度是否与宽度相关，可以用如下函数：<br>
+    <div class="code">bool QSizePolicy::​hasHeightForWidth()
+      const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //判断高度是否依赖宽度</div>
+    <br>
+    另外还有一对相反功能的函数，计算建议尺寸时，宽度可能会依赖高度，这个设置只对 QGraphicsLayout 的子类有用，一般是用不到的：<br>
+    <div class="code">void QSizePolicy::​setWidthForHeight(bool dependent)&nbsp;
+      //设置宽度依赖高度</div>
+    <div class="code">bool QSizePolicy::​hasWidthForHeight()
+      const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //判断宽度是否依赖高度</div>
+    HeightForWidth 和 WidthForHeight 二者最多只能有一个生效，不能双向依赖的。<br>
+    <br>
+    注意无论是 HeightForWidth 还是 WidthForHeight
+    ，都只对建议尺寸的计算有影响，不会直接影响窗口或控件的高度和宽度拉伸比例。如果希望窗口或控件的高度和宽度保持一定比例，比如 2 : 3
+    ，那么这些函数是完全没用的，因为根本不是一个概念。<br>
+    <br>
+    （3）控件隐藏时是否仍然占据布局空间<br>
+    程序运行时，控件都可以通过函数 hide() 隐藏自己。在控件隐藏时，控件是否还占据布局器里的空间，这是可以设置的：<br>
+    <div class="code">void QSizePolicy::​setRetainSizeWhenHidden(bool
+      retainSize)&nbsp; //设置控件在隐藏时是否仍占据布局器空间</div>
+    <div class="code">bool QSizePolicy::​retainSizeWhenHidden()
+      const&nbsp;&nbsp;&nbsp;&nbsp; //判断隐藏控件是否占据布局器空间</div>
+    默认情况下，控件调用 hide() 隐藏之后，就不会在通过布局器分配空间了，因为没有必要。<br>
+    如果遇到特殊情况需要保留隐藏控件在布局器里的占用的空间，可以用上述函数设置。<br>
+    如果设置保留隐藏控件的空间，那么布局器会留下一块空白区域，就是控件在隐藏前应该占据的区域。<br>
+    <br>
+    （4）水平和垂直方向的设置互换<br>
+    为了应对可能的屏幕旋转操作，QSizePolicy 提供了一个快捷函数，能够把水平方向的伸展因子、伸展策略与垂直方向上的伸展因子、伸展策略完全互换过来：<br>
+    <div class="code">void QSizePolicy::​transpose()</div>
+    这个函数读者可以根据实际情况试试。<br>
+    <br>
+    关于控件的尺寸调整策略就介绍这么多，下面通过两个例子试一试伸展因子和伸展策略的功效。<br>
+    <br>
+    <div class="os2">6.5.5 伸展策略对比示例</div>
+    <br>
+    这一小节通过两个窗口来对比常用到的四个伸展策略枚举常量，主界面的窗口里面是六个按钮，点击里面的第一个按钮会弹出第二个示范窗口，第二个示范窗口里面放置六个
+    单行编辑控件。两个窗口的布局器和各个控件的水平伸展策略都是一样的，我们一方面对比四个常用策略的拉伸特性，另一方面对比按钮和单行编辑控件对布局器和策略的不
+    同反应。<br>
+    <br>
+    打开 QtCreator，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>
+    ①项目名称 comparepolicies，创建路径 D:\QtProjects\ch06，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    建好项目之后，打开窗体 widget.ui 文件，进入设计模式，按照下图拖入六个按钮：<br>
+    <center><img src="images/ch06/ch06-05-13.png" alt="ui" width="800"></center>
+    我们按从上到下、从左到右顺序说明一下六个按钮的属性：<br>
+    ① 文本 "Fixed" ，对象名称 pushButtonFixed ，水平策略选择 Fixed 。<br>
+    ② 文本 "Preferred" ，对象名称 pushButtonPreferred，水平策略选择 Preferred 。<br>
+    ③ 文本 "Preferred2" ，对象名称 pushButtonPreferred2，水平策略选择 Preferred 。<br>
+    ④ 文本 "Minimum" ，对象名称 pushButtonMinimum，水平策略选择 Minimum 。<br>
+    ⑤ 文本 "Minimum2" ，对象名称 pushButtonMinimum2，水平策略选择 Minimum 。<br>
+    ⑥ 文本 "Expanding" ，对象名称 pushButtonExpanding，水平策略选择 Expanding 。<br>
+    <br>
+    设置好六个按钮的属性之后，我们对每个行进行布局，先对第一行两个按钮水平布局，第二行和第三行也一样用水平布局，得到的效果如下：<br>
+    <center><img src="images/ch06/ch06-05-14.png" alt="lay1" width="800"></center>
+    然后我们点击主窗体空白区域，不选中任何控件和子布局器，直接点击上面的垂直布局按钮，自动为窗口设置主布局器：<br>
+    <center><img src="images/ch06/ch06-05-15.png" alt="lay2" width="800"></center>
+    这样主界面的布局就设置完毕。下面我们要为第一个 "Fixed" 按钮添加一个 clicked()
+    信号的槽函数，等会我们在槽函数添加代码来弹出第二个示范窗口：<br>
+    <center><img src="images/ch06/ch06-05-16.png" alt="slot"></center>
+    添加好槽函数之后，保存界面文件，我们回到代码编辑模式，首先是编辑主窗体头文件 widget.h
+    ，我们要为第二个示范窗口添加成员指针和创建第二个示范窗口的函数：<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>WIDGET_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">WIDGET_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonFixed_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//第二个示范窗口，全部放置</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">QLineEdit</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">m_pWidget</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//通过代码构造第二个示范窗口</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">CreateWidget</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre>
+    </div>
+    m_pWidget 是我们自己用代码构造的第二个示范窗口，CreateWidget()
+    就是负责构造第二个示范窗口的函数。头文件里其他代码行都是自动添加的。<br>
+    <br>
+    主窗体的界面不需要调整，我们刚才在设计模式都设置好了。我们下面编辑源代码文件 widget.cpp 主要是为了构建第二个示范窗口的内容，并通过
+    "Fixed" 按钮的槽函数弹窗显示。<br>
+    在 widget.cpp 文件中，首先是头文件包含和主窗体的构造函数：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QLineEdit&gt;</span><span style=" color:#c0c0c0;">    </span><span
+style=" color:#008000;">//单行编辑器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QHBoxLayout&gt;</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#008000;">//水平布局器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QVBoxLayout&gt;</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#008000;">//垂直布局器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//按钮的建议尺寸和最小建议尺寸</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"Preferred</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">按钮："</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">           </span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">pushButtonPreferred</span><span style=" color:#000000;">-&gt;</span><span
+style=" font-style:italic; color:#000000;">sizeHint</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">           </span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">pushButtonPreferred</span><span style=" color:#000000;">-&gt;</span><span
+style=" font-style:italic; color:#000000;">minimumSizeHint</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"Expanding</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">按钮："</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">           </span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">pushButtonExpanding</span><span style=" color:#000000;">-&gt;</span><span
+style=" font-style:italic; color:#000000;">sizeHint</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">           </span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">pushButtonExpanding</span><span style=" color:#000000;">-&gt;</span><span
+style=" font-style:italic; color:#000000;">minimumSizeHint</span><span style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_pWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">NULL</span><span style=" color:#000000;">;</span><span style=" color:#c0c0c0;">   </span><span
+style=" color:#008000;">//初始空指针</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">CreateWidget</span><span
+style=" color:#000000;">();</span><span style=" color:#c0c0c0;">     </span><span
+style=" color:#008000;">//构建第二个示范窗口</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    我们新增了三个头文件包含，是第二个示范窗口要用到的单行编辑器和水平布局器、垂直布局器。<br>
+    在构造函数里面，我们首先打印了 "Preferred" 按钮和 "Expanding" 按钮的建议尺寸和最小建议尺寸。<br>
+    因为这两个按钮都是能伸能屈的，建议尺寸是最优的尺寸，但是在需要伸缩的情况下，这两个按钮可能变大也可能变小。<br>
+    我们在设计模式没有设置按钮的最小尺寸 minimumSize，在这种情况下，minimumSizeHint()
+    尺寸会自动成为尺寸下限，按钮缩小到这个最小建议尺寸，就不会再缩小。<br>
+    <br>
+    打印按钮的信息之后，我们将 m_pWidget 初始化为空指针，然后调用 CreateWidget()
+    构建第二个示范窗口的界面。CreateWidget() 函数代码等会讲解。我们先看看析构函数的内容：<br>
+    <div class="code"><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+        style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//删除第二个窗口</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">m_pWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">NULL</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_pWidget</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">   </span><span style=" color:#800000;">m_pWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">NULL</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//删除ui</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    析构函数中，我们对 m_pWidget 做了判断，如果是非空指针，就删除第二个示范窗口，并把 m_pWidget 设为空。<br>
+    析构函数最后一句是原本自动生成的代码，不用变。<br>
+    <br>
+    接下来是 CreateWidget() 函数，就是构建第二个示范窗口的代码，我们没有用新的 ui
+    文件，直接用代码构建该示范窗口。这个函数内容比较多，我们按照几个小块来分开讲解，首先是窗口新建和主布局器新建：<br>
+    <div class="code"><span style=" color:#008000;">//建立第二个示范窗口，包括内部的单行编辑控件和布局器</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//仿造主界面的架构，只是把按钮换成单行编辑器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">CreateWidget</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//构建第二个示范窗口</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_pWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Qt</span><span style=" color:#000000;">::</span><span
+style=" color:#800080;">Window</span><span style=" color:#000000;">);</span><span
+style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//独立窗口</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_pWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">resize</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">480</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">360</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_pWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setWindowTitle</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"单行编辑器的布局"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//主布局器是垂直排列的三行</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QVBoxLayout</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">mainLayout</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QVBoxLayout</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">m_pWidget</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//待续</span></pre>
+    </div>
+    主界面是不同水平伸展策略的按钮，我们这第二个示范窗口则是不同水平伸展策略的单行编辑器。<br>
+    CreateWidget() 函数内，第一句是新建一个独立的子窗口用于弹窗，注意 QWidget()
+    构造函数第二个参数，是窗口类型标志位，如果不设置标志位，那么 m_pWidget 会作为大部件显示在主窗体内部，而在设置标志位是 Qt::Window
+    或 Qt::Dialog ，那么新建的 m_pWidget 才是独立的子窗口，不会放在主窗体内部。<br>
+    <br>
+    然后我们把第二个示范窗口大小重置为 480*360 ，并设置该窗口标题为 "单行编辑器的布局" 。<br>
+    接着新建了主布局器，用于容纳三个水平行的布局器。主布局器构造时指定了 m_pWidget 为父窗口指针。<br>
+    <br>
+    下面来看看第一行的控件和布局器代码：<br>
+    <div class="code"><span style=" color:#c0c0c0;">&nbsp;&nbsp;&nbsp; </span><span
+        style=" color:#008000;">//构建六个单行编辑器，分成三行做对比</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//第一行</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//第一个是固定尺寸的</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QLineEdit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">leFixed</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QLineEdit</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">m_pWidget</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">leFixed</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"Fixed"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QSizePolicy</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">sp</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">leFixed</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">sizePolicy</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//修改第一个的水平策略为</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Fixed</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">sp</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setHorizontalPolicy</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QSizePolicy</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Fixed</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">leFixed</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setSizePolicy</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">sp</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//第二个编辑器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QLineEdit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">lePreferred</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QLineEdit</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">m_pWidget</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">lePreferred</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"Preferred"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">sp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">lePreferred</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">sizePolicy</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//修改第二个的水平策略为</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Preferred</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">sp</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setHorizontalPolicy</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QSizePolicy</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Preferred</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">lePreferred</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setSizePolicy</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">sp</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//第一行的布局器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QHBoxLayout</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">lay1</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QHBoxLayout</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">lay1</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">leFixed</span><span
+style=" color:#000000;">);</span><span style=" color:#c0c0c0;">       </span><span
+style=" color:#008000;">//添加第一个编辑器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">lay1</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">lePreferred</span><span
+style=" color:#000000;">);</span><span style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//添加第二个编辑器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//把第一行的布局器添加到主布局器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">mainLayout</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addLayout</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">lay1</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//待续</span></pre>
+    </div>
+    第一个单行编辑器新建时是指定 m_pWidget 为父窗口，这样该控件会由 m_pWidget 窗口管理。<br>
+    然后设置第一个单行编辑器的文本为 "Fixed" ，并把水平策略修改为 QSizePolicy::Fixed 。<br>
+    第一个编辑器的尺寸会固定为建议尺寸，不会被拉宽。<br>
+    <br>
+    第二个单行编辑器新建时也是指定 m_pWidget 为父窗口，然后设置文本为 "Preferred"，修改水平策略为
+    QSizePolicy::Preferred，这个编辑器会被动地拉大或缩小。虽然没有指定该编辑器最小尺寸，但是等会程序运行时我们会看到
+    "Preferred" 编辑器以隐含的最小建议尺寸为下限。<br>
+    <br>
+    然后我们新建了第一行的水平布局器 lay1，注意这个布局器没有指定父窗口。<br>
+    我们把第一行的两个编辑器添加给 lay1 ，然后把 lay1 添加到主布局器。<br>
+    <br>
+    下面看看第二行控件和布局器的代码：<br>
+    <div class="code"><span style=" color:#c0c0c0;">&nbsp;&nbsp;&nbsp; </span><span
+        style=" color:#008000;">//第二行</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//第三个编辑器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QLineEdit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">lePreferred2</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QLineEdit</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">m_pWidget</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">lePreferred2</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"Preferred2"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">sp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">lePreferred</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">sizePolicy</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//修改第三个的水平策略为</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Preferred</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">sp</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setHorizontalPolicy</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QSizePolicy</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Preferred</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">lePreferred2</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setSizePolicy</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">sp</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//第四个编辑器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QLineEdit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">leMinimum</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QLineEdit</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">m_pWidget</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">leMinimum</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"Minimum"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">sp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">leMinimum</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">sizePolicy</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//修改第三个的水平策略为</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Minimum</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">sp</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setHorizontalPolicy</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QSizePolicy</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Minimum</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">leMinimum</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setSizePolicy</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">sp</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//第二行的布局器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QHBoxLayout</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">lay2</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QHBoxLayout</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">lay2</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">lePreferred2</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">lay2</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">leMinimum</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//添加到主布局器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">mainLayout</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addLayout</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">lay2</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//待续</span></pre>
+    </div>
+    第三个单行编辑器也是以 m_pWidget 为父窗口，设置文本为 "Preferred2"，修改水平策略为
+    QSizePolicy::Preferred。<br>
+    第四个单行编辑器也是以 m_pWidget 为父窗口，设置文本为 "Minimum"，修改水平策略为 QSizePolicy::Minimum。<br>
+    然后新建了第二行的布局器 lay2 ，这个布局器没有指定父窗口指针。<br>
+    接着将 lePreferred2 和 leMinimum 两个编辑器添加给布局器 lay2 ，再把第二行布局器 lay2 添加到主布局器
+    mainLayout 。<br>
+    <br>
+    接下来是第三行控件和布局器的代码：<br>
+    <div class="code"><span style=" color:#c0c0c0;">&nbsp;&nbsp;&nbsp; </span><span
+        style=" color:#008000;">//第三行</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//第五个编辑器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QLineEdit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">leMinimum2</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QLineEdit</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">m_pWidget</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">leMinimum2</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"Minimum2"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">sp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">leMinimum2</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">sizePolicy</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//修改第五个的水平策略为</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Minimum</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">sp</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setHorizontalPolicy</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QSizePolicy</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Minimum</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">leMinimum2</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setSizePolicy</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">sp</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//第六个编辑器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QLineEdit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">leExpanding</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QLineEdit</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">m_pWidget</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">leExpanding</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"Expanding"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">sp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">leExpanding</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">sizePolicy</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//修改第六个的水平策略为</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Expanding</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">sp</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setHorizontalPolicy</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QSizePolicy</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Expanding</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">leExpanding</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setSizePolicy</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">sp</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//第三行的布局器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QHBoxLayout</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">lay3</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QHBoxLayout</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">lay3</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">leMinimum2</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">lay3</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">leExpanding</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">mainLayout</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addLayout</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">lay3</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//待续</span></pre>
+    </div>
+    第五个单行编辑器也是以 m_pWidget 为父窗口，设置文本为 "Minimum2" ，修改水平策略为 QSizePolicy::Minimum。<br>
+    第六个单行编辑器也是以 m_pWidget 为父窗口，设置文本为 "Expanding"，修改水平策略为 QSizePolicy::Expanding。<br>
+    然后新建了第三行的布局器 lay3 ，这个布局器没有指定父窗口。<br>
+    接着把第三行的两个编辑器 leMinimum2、leExpanding 添加到 布局器 lay3 ，并把 lay3 添加到主布局器
+    mainLayout。<br>
+    <br>
+    注意上面关于控件的代码写法：<br>
+    单行编辑控件的父窗口是 m_pWidget ，而不是布局器，也不能是布局器。<br>
+    布局器仅仅是辅助布局的手段，布局器不是实际的功能控件。<br>
+    <span style="font-weight: bold;">布局器基类是
+      QLayoutItem，不能独立存在，它需要依附于其他实体功能控件或窗口，但不会拥有任何控件，也就是不能作为父窗口。<br>
+      实体功能控件的基类是 QWidget，可以独立存在，也可以借助布局器进行布局，QWidget 派生类控件可以作为其他控件的父窗口，可以拥有子控件。</span><br>
+    <br>
+    CreateWidget() 函数最后一小部分代码是设置主布局器和打印调试信息的：<br>
+    <div class="code"><span style=" color:#c0c0c0;">&nbsp;&nbsp;&nbsp; </span><span
+        style=" color:#008000;">//设置该窗口的主布局器</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_pWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setLayout</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">mainLayout</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//如果只有一个布局器的</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">parent</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">设置为该窗口，那么可以不调用</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">setLayout()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//上面的</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">setLayout()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">一句其实可以省略，mainLayout</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">自动是主布局器</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//打印信息</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"Fixed</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">编辑器建议尺寸："</span><span
+style=" color:#000000;">)&lt;&lt;</span><span style=" color:#000000;">leFixed</span><span
+style=" color:#000000;">-&gt;</span><span style=" font-style:italic; color:#000000;">sizeHint</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"Preferred</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">编辑器建议尺寸："</span><span
+style=" color:#000000;">)&lt;&lt;</span><span style=" color:#000000;">lePreferred</span><span
+style=" color:#000000;">-&gt;</span><span style=" font-style:italic; color:#000000;">sizeHint</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"Preferred</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">编辑器最小建议尺寸："</span><span
+style=" color:#000000;">)&lt;&lt;</span><span style=" color:#000000;">lePreferred</span><span
+style=" color:#000000;">-&gt;</span><span style=" font-style:italic; color:#000000;">minimumSizeHint</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"Minimum</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">编辑器建议尺寸："</span><span
+style=" color:#000000;">)&lt;&lt;</span><span style=" color:#000000;">leMinimum</span><span
+style=" color:#000000;">-&gt;</span><span style=" font-style:italic; color:#000000;">sizeHint</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"Expanding</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">编辑器建议尺寸："</span><span
+style=" color:#000000;">)&lt;&lt;</span><span style=" color:#000000;">leExpanding</span><span
+style=" color:#000000;">-&gt;</span><span style=" font-style:italic; color:#000000;">sizeHint</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"Expanding</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">编辑器最小建议尺寸："</span><span
+style=" color:#000000;">)&lt;&lt;</span><span style=" color:#000000;">leExpanding</span><span
+style=" color:#000000;">-&gt;</span><span style=" font-style:italic; color:#000000;">minimumSizeHint</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    通常设置某个窗口的主布局器就是调用它的 setLayout() 函数，这是主动设置窗口主布局器的方式。<br>
+    还有第二种设置主布局器的方式，就是 ui_*.h 里面采用的方式，当有且只有一个布局器将父窗口指针设置为窗口 m_pWidget
+    时，这个布局器就自动成为 m_pWidget 的主布局器了。<br>
+    我们之前代码里的 lay1、lay2、lay3 构造时都没有父窗口指针，只有 mainLayout 指定了父窗口为 m_pWidget，其实
+    mainLayout 已经成为 m_pWidget 主布局器了，因此上面的 setLayout() 一句代码可以省略。<br>
+    <br>
+    最后几句 qDebug() 打印了 "Fixed" 和 "Minimum" 编辑器的建议尺寸，并打印了 "Preferred" 和
+    "Expanding" 编辑器的建议尺寸和最小建议尺寸。<br>
+    <br>
+    CreateWidget() 函数代码就是上面那些。
+    程序两个窗口的控件个数和布局格式是一样的，但第二个示范窗口的代码其实已经不少了。而我们通过设计模式生成的主界面窗口，就没编写什么代码。可见通过 Qt
+    设计师和 QtCreator 设计图形界面是很方便的，节省了很多关于新建控件、布局器等重复无聊的代码。<br>
+    <br>
+    源代码文件 widget.cpp 最后一部分是我们主界面第一个按钮的槽函数代码：<br>
+    <div class="code"><span style=" color:#008000;">//点击按钮弹出第二个窗口</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonFixed_clicked</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">m_pWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">NULL</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">m_pWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">show</span><span
+style=" color:#000000;">();</span><span style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//显示</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    这个槽函数非常简单，就是判断 m_pWidget 是否非空，如果非空就弹出该窗口。<br>
+    操作指针之前判断一下指针非空，有利于增加程序的健壮性，以免操作空指针。<br>
+    <br>
+    整个例子的代码到这里就完整了。主界面的窗口其实完全靠 QtCreator
+    设计模式完成的，而第二个示范窗口是完全靠手动编写代码实现的。下面生成并运行例子看看，先看主界面窗口：<br>
+    <center><img src="images/ch06/ch06-05-17.png" alt="run1"></center>
+    在主界面窗口比较大时，明显看到第一行的 "Fixed" 按钮比较窄，而 "Preferred" 按钮比较宽。因为 "Fixed"
+    按钮宽度是固定的，不能拉伸，因此水平布局器只能尝试拉伸 "Preferred" 按钮，正好 "Preferred" 按钮能够被动拉伸，就被拉宽了。<br>
+    第二行的 "Preferred" 按钮和 "Minimum" 按钮是等宽的，因为二者都是被动拉伸，谁也不占上风，就平均拉伸。<br>
+    第三行的 "Minimum" 按钮属于被动拉伸，而 "Expanding" 按钮属于主动拉伸，所有额外的空间都被 "Expanding"
+    按钮占据了，"Minimum" 按钮仅保持了建议尺寸。<br>
+    <br>
+    我们把主界面窗口缩到最小尺寸，可以看到下图效果：<br>
+    <center><img src="images/ch06/ch06-05-18.png" alt="run2"></center>
+    注意，"Fixed" 按钮和 "Minimum" 按钮的尺寸下限是建议尺寸 sizeHint()，<br>
+    而 "Preferred" 和 "Expanding" 按钮尺寸下限是最小建议尺寸 minimumSizeHint()。<br>
+    上图中六个按钮最小情况下都是一样大的，因为按钮的建议尺寸和最小建议尺寸是一样大的，我们可以在输出面板看到按钮的尺寸信息：<br>
+    <div class="code"><span style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">"Preferred
+        按钮：" QSize(75, 23) QSize(75, 23)</span>
+      <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+          style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">"Expanding
+          按钮：" QSize(75, 23) QSize(75, 23)</span></p>
+    </div>
+    对于按钮组成的布局器，四种常用伸展策略是符合下面公式的：<br>
+    QSizePolicy::Fixed ≤ QSizePolicy::Preferred ≈ QSizePolicy::Minimum ≤
+    QSizePolicy::Expanding<br>
+    <br>
+    主窗口的三行按钮对比完毕。我们下面点击主界面第一个 "Fixed" 按钮进行弹窗，看到第二个示范窗口：<br>
+    <center><img src="images/ch06/ch06-05-19.png" alt="run3"></center>
+    在窗口比较大时，六个编辑器的拉伸特性和主窗口没区别，都符合上面的公式。<br>
+    下面我们把第二个示范窗口缩到最小，再看看效果：<br>
+    <center><img src="images/ch06/ch06-05-20.png" alt="run4"></center>
+    这时候就明显看到 "Fixed" 和 "Minimum" 编辑器保持一个建议尺寸，不会再变小。<br>
+    而 "Preferred" 和 "Expanding" 编辑器已经缩到比建议尺寸更小了，这两个可伸缩的编辑器的尺寸下限是由最小建议尺寸指定的。我们可以在
+    调试输出信息里看到：<br>
+    <div class="code"><span style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">"Fixed
+        编辑器建议尺寸：" QSize(133, 20)</span>
+      <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+          style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">"Preferred
+          编辑器建议尺寸：" QSize(133, 20)</span></p>
+      <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+          style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">"Preferred
+          编辑器最小建议尺寸：" QSize(39, 18)</span></p>
+      <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+          style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">"Minimum
+          编辑器建议尺寸：" QSize(133, 20)</span></p>
+      <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+          style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">"Expanding
+          编辑器建议尺寸：" QSize(133, 20)</span></p>
+      <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+          style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">"Expanding
+          编辑器最小建议尺寸：" QSize(39, 18)</span></p>
+    </div>
+    单行编辑器的建议尺寸都是 133*20，最小建议尺寸是 39*18 。<br>
+    因为单行编辑器的最小建议尺寸比普通的建议尺寸更小，因此上面的公式在窗口特别小的时候不成立。<br>
+    不过窗口特别小的时候，控件的可用性已经大大降低了，单行编辑器连一个单词都显示不完整了，这种情况在实际应用中是很少遇见的。<br>
+    <br>
+    本小节的例子就是为了印证 6.5.3
+    小节关于常用伸展策略的三条建议，伸展策略的枚举常量原本有七个，我们把七个策略常量简化为三条使用建议，希望大家记住这三条建议，到实际布局时会比较实用。<br>
+    <br>
+    <div class="os2">6.5.6 图标使用示例的布局设置</div>
+    <br>
+    本小节是对上一章 5.6.3 小节的图标使用示例进行布局，我们简单示范一下布局器的伸展因子和伸展策略用法。<br>
+    我们复制 D:\QtProjects\ch05\ 目录里面的 helloqrc 文件夹，粘贴到第 6 章的示例目录
+    D:\QtProjects\ch06\ ，然后进行下面操作：<br>
+    ① 把新的 helloqrc 文件夹重命名为 helloqrcnew ，并删除里面的 helloqrc.pro.user 用户文件。<br>
+    ② 把 helloqrcnew 文件夹里面的 helloqrc.pro 重命名为 helloqrcnew.pro 。<br>
+    ③ 用记事本打开新的 helloqrcnew.pro 文件，修改里面的 TARGET 一行，变成下面这句：<br>
+    <div class="code">TARGET = helloqrcnew</div>
+    这样就得到新项目 helloqrcnew ，我们用 QtCreator 打开这个新项目，在配置项目界面选择所有套件并点击 "Configure
+    Project" ，配置好项目后，打开 widget.ui 界面文件，进入 QtCreator 设计模式：<br>
+    <center><img src="images/ch06/ch06-05-21.png" alt="ui" width="800"></center>
+    这个界面的布局思路大概是这样的，我们把上面三行用网格布局器排布，第一列和第二列的伸展因子比例设置为 1:3 ，这样在窗口拉大时，标签占
+    1/4，右边输入控件占 3/4。我们之前 6.3.2 和 6.4.2
+    小节的个人信息收集示例布局都出现了标签控件很窄，而右边输入控件很宽，看着有点别扭。通过网格布局器的伸展因子比例设置，可以把标签也拉宽些。这样在窗口比较大时，整体
+    界面不会太别扭。<br>
+    第四行的两个按钮，我们用水平布局器封装，然后把网格布局器与按钮布局器组合成一个垂直布局器，作为窗口的主布局器。<br>
+    <br>
+    下面我们开始操作：<br>
+    （1）选中两个单选按钮，点击上面的水平布局按钮，把单选按钮组合到一块：<br>
+    <center><img src="images/ch06/ch06-05-22.png" alt="lay1"></center>
+    <br>
+    （2）我们选中前三行的控件和单选按钮布局器，点击上面的网格布局按钮，实现网格布局：<br>
+    <center><img src="images/ch06/ch06-05-23.png" alt="lay2" width="800"></center>
+    实现网格布局后，把该网格布局器的列伸展因子 layoutColumnStretch 调整为 <br>
+    1,3<br>
+    这样标签占 1/4 ，右边一列占 3/4 。<br>
+    <br>
+    （3）我们选中两个按压按钮，点击上面的水平布局工具按钮，实现水平布局：<br>
+    <center><img src="images/ch06/ch06-05-24.png" alt="lay3"></center>
+    （4） 我们点击主窗体空白区域，不选中任何控件，直接点击上面的垂直布局按钮，得到下图的效果：<br>
+    <center><img src="images/ch06/ch06-05-25.png" alt="lay4" width="800"></center>
+    目前这个界面不是我们想看到的，首先是下面的按钮布局器太高了，而且按钮也拉得太宽。<br>
+    <br>
+    （4）下面按钮部分微调<br>
+    我们选中 "提交" 按钮，把它的水平策略调整为 Fixed；<br>
+    我们选中 "取消" 按钮，把它的水平策略也调整为 Fixed。得到下图效果：<br>
+    <center><img src="images/ch06/ch06-05-26.png" alt="lay5" width="800"></center>
+    然后我们点击主窗体的空白区域，选中主窗体本身，可以看到主布局器属性栏，把垂直布局器的 layoutStretch 伸展因子设置为：<br>
+    3,1<br>
+    这样让网格布局器占据垂直方向大部分区域：<br>
+    <center><img src="images/ch06/ch06-05-27.png" alt="lay6" width="800"></center>
+    现在下面两个按钮的布局问题算是解决了。上面网格布局器还是有问题，第二行的单选按钮布局器占据了太大空间，而不是我们希望的每行各占三分之一。<br>
+    <br>
+    （5）网格布局器细节调整<br>
+    对于上面的网格布局器，我们希望三行各占三分之一，最直观的想法是设置垂直方向的伸展因子。<br>
+    因为界面里多个布局器嵌套，选中某个子布局器的操作其实不好实现。<br>
+    我们直接在右上角的布局树，点击 gridLayout 条目，就可以很快捷地选中该网格布局器，然后把垂直方向的行伸展因子&nbsp;
+    layoutRowStretch 设置为<br>
+    1,1,1<br>
+    得到下图的效果：<br>
+    <center><img src="images/ch06/ch06-05-28.png" alt="lay7" width="800"></center>
+    这里看到设置三个行的伸展因子并没有效果，因为右边一列的单行编辑控件和组合框在垂直方向都是固定高度的，而中间的单选按钮布局器默认是尽量拉伸，所以即使设置了
+    行的伸展因子也没有用。<br>
+    如果我们修改右边单行编辑控件和组合框的垂直伸展策略为主动扩张，那么这两个控件会被拉得很高，但是只显示一行文本，从显示上看会非常别扭。<br>
+    <br>
+    <span style="font-weight: bold;">我们的视野不要局限在右边一列，可以从左边一列的标签控件来打主意。</span><br>
+    标签在垂直方向默认都是 Preferred 被动拉伸的策略，如果我们把左边一列三个标签的垂直策略全部设置成
+    Expanding，让三个标签都去主动占据垂直方向的空间，那么会有惊喜出现：<br>
+    <center><img src="images/ch06/ch06-05-29.png" alt="lay8" width="800"></center>
+    这样就得到了我们想要的布局效果了。<br>
+    我们保存界面文件，然后生成运行例子，看看运行效果：<br>
+    <center><img src="images/ch06/ch06-05-30.png" alt="run"></center>
+    <br>
+    最后顺便提一下，如果读者希望标签的文本在水平方向居中，是可以设置标签控件的 alignment 属性的，调整为水平居中 AlignHCenter
+    即可。修改界面后要点击 QtCreator 菜单【构建--&gt;重新构建
+    "项目名"】，然后就可以看到文本水平居中的标签。读者可以自行测试一下，这里不再截图示范了。<br>
+    <br>
+    本小节的例子同时示范了伸展策略和伸展因子的运用，另外，布局时不但可以从我们需要调整的列考虑，还可以从相邻的列角度考虑问题，比如要调整第二列的输入控件布
+    局，其实可以调整第一列标签控件的垂直策略来实现我们想要的效果。思维可以开阔一些，旁敲侧击有时候也是好方法。<br>
+    <br>
+    本节的内容也就到这里，注意要复习上面加红和加粗的文字内容，都是比较实用的，可以加深对布局器细节调整的理解。我们下一节学习分裂器的使用方法并解析相关代码。<br>
+    <br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch06-04.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch06-06.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

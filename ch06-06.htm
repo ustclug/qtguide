@@ -3,11 +3,9 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <title>ch06-06</title>
-    
-<link href="css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-
-<script src="thumbnailviewer.js" type="text/javascript">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -15,42 +13,1451 @@
 * Visit http://www.dynamicdrive.com/ for full source code
 ***********************************************/
 
-</script>
-
-
-  </head>
-  
-  
-<div class="os1">6.6 分裂器 </div>
-<br />
-之前布局器中控件大小是根据窗口大小自动调整，用户能拉伸窗口但是不能拉伸单个的控件。 而分裂器是将每个控件的大小调整都交给用户手动控件，用户能在程序运行时自由调整各个控件的大小， 并能自动隐藏很窄或很扁的控件，为其他控件腾出显示空间。 
-注意分裂器内部不能直接放置布局器，只能放置 QWidget 对象或其派生类对象。
-通常窗体都采用布局器，少数情况采用分裂器，比如界面有多个占用面积很大的子控件，使用分裂器可以由用户拖动隐藏部分子控件。 
-<br />
-<br />
-<div class="os2">6.6.1 *</div>
-<br />
-<br />
-
-<div class="os2">6.6.2 *</div>
-<br />
-<br />
-
-<div class="os2">6.6.3 *</div>
-<br />
-<br />
-分裂器的 ui_*.h 单独讲解。介绍 Qt 设计师关于布局器的内幕代码， 用 QWidget 对象包裹每个布局器，有一石三鸟之功能。
-<br />
-<br />
-<br />
-
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch06-05.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch07-00.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+</script> </head>
+  <body>
+    <div class="os1">6.6 分裂器 </div>
+    <br>
+    之前布局器中控件大小是根据窗口大小自动调整，用户能拉伸窗口但是不能拉伸单个的控件。
+    而分裂器是将每个控件的大小调整都交给用户手动控制，用户能在程序运行时自由调整分裂器内各个控件的大小，
+    并能自动隐藏缩到很窄或很扁的控件，为其他控件腾出显示空间。 注意分裂器内部不能直接放置布局器，只能放置 QWidget 对象或其派生类对象。
+    通常窗体都采用布局器，少数情况采用分裂器，比如界面有多个占用面积很大的子控件，使用分裂器可以由用户拖动隐藏部分子控件，这样可以为其他控件腾出更多显示空间。
+    <br>
+    <br>
+    本节先介绍分裂器 QSplitter 的内容，注意 QSplitter
+    和之前的布局器是完全不同的东西，将分裂器知识放在本章是因为分裂器也具有一定的布局功能。介绍完分裂器基础知识之后，我们将 5.3.4 小节的
+    simplebrowser 例子使用分裂器进行布局，最后小节通过一个在分裂器内部间接添加布局器的例子，解析一下 ui_*.h
+    文件中关于分裂器和布局器混搭的代码。<br>
+    <br>
+    <div class="os2">6.6.1 QSplitter 类</div>
+    <br>
+    与前面几节的布局器不同，分裂器 QSplitter 是一个实体功能控件，它的基类是 QFrame，QFrame 基类正是
+    QWidget。QSplitter 可以独立存在，可以作为父窗口容纳多个子控件，分裂器会完全拥有内部的子控件。我们先看看分裂器长什么样：<br>
+    <center><img src="images/ch06/ch06-06-01.png" alt="splitter" width="800"></center>
+    在 Qt 设计师或 QtCreator 设计模式左边 Widget Box
+    里面没有分裂器可以拖动，使用分裂器的方式是：选中已有的控件，然后点击上面工具栏的水平分裂器或垂直分裂器按钮。比如上图是将三个丰富文本编辑器作为一个水平分裂器排布
+    的。分裂器内每个控件都有一个手柄 Handle，水平分裂器内控件的手柄在左边，垂直分裂器内控件的手柄在控件上方。第 0
+    个控件的手柄是永久隐藏的，分裂器自身占据的大矩形四个边界线通常不能拖动拉大，只能拖动控件之间的手柄，比如上图的手柄 1 和 手柄 2
+    。分裂器整体的尺寸不是用户控制的，而在分裂器内部的控件尺寸可以让用户手工拖动手柄来控制。在程序运行时，水平分裂器内各个控件的宽度、垂直分裂器内部各个控件的高度，
+    一般都是用户拖动手柄控制，这是分裂器和布局器最大的不同。<br>
+    <br>
+    水平分裂器和垂直分裂器的类都是 QSplitter，只是 orientation 属性不一样，水平方向是
+    Qt::Horizontal（水平方向是默认值），垂直方向是 Qt::Vertical。QSplitter 的构造函数和 orientation
+    设置函数都可以指定排布方向：<br>
+    <div class="code"> QSplitter(Qt::Orientation orientation, QWidget * parent =
+      0)</div>
+    <div class="code">void setOrientation(Qt::Orientation)</div>
+    <br>
+    向分裂器内添加控件可以通过如下函数：<br>
+    <div class="code">void addWidget(QWidget * widget)</div>
+    <div class="code">void insertWidget(int index, QWidget * widget)</div>
+    addWidget() 函数是把控件添加到分裂器排布的末尾，而 insertWidget() 是把控件插入到分裂器排布序号为 index 的位置。<br>
+    注意分裂器只有添加控件的函数，不能直接添加任何布局器。<br>
+    如果希望将布局器添加到分裂器中，需要通过变相绕路的方式，用新的 QWidget 对象容纳该布局器，然后把 QWidget 对象添加给分裂器，例如：<br>
+    <div class="code"><span style=" color:#c0c0c0;">&nbsp;&nbsp;&nbsp; </span><span
+        style=" color:#008000;">//比如</span><span style=" color:#c0c0c0;"> </span><span
+        style=" color:#008000;">lay1</span><span style=" color:#c0c0c0;"> </span><span
+        style=" color:#008000;">和</span><span style=" color:#c0c0c0;"> </span><span
+        style=" color:#008000;">lay2</span><span style=" color:#c0c0c0;"> </span><span
+        style=" color:#008000;">是已有的布局器，要添加到分裂器里</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//分裂器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QSplitter</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">spl</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QSplitter</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">Qt</span><span style=" color:#000000;">::</span><span
+style=" color:#800080;">Horizontal</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">spl</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setGeometry</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">0</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">400</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">300</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//用</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">wid1</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">包裹</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">lay1，添加到分裂器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">wid1</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">wid1</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setLayout</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span>lay1<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span><span style=" color:#c0c0c0;">    </span><span
+style=" color:#008000;">//设置</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">wid1</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">的布局器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">spl</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">wid1</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//用</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">wid2</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">包裹</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">lay2，添加到分裂器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">wid2</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">wid2</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setLayout</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span>lay2<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span><span style=" color:#c0c0c0;">    </span><span
+style=" color:#008000;">//设置</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">wid2</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">的布局器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">spl</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">wid2</span><span style=" color:#000000;">);</span></pre>
+    </div>
+    普通的 QWidget 对象也都可以用 setLayout() 设置自己唯一的主布局器，因此可以用普通的 QWidget 对象包裹一下各个布局器，然后将
+    QWidget 对象添加到分裂器里面。<br>
+    可以通过上述方法间接地把布局器添加到分裂器内部，如果是添加普通的功能控件，那就直接用 addWidget() 或者
+    insertWidget()，不用绕远路。如果控件已经处于分裂器内部，再次调用 addWidget() 或者
+    insertWidget()，那么只会调整控件的排布位置， addWidget() 会把控件移动到末尾，insertWidget() 会把控件移动到
+    index 位置。同一个控件只会出现在一个序号的位置上，不会重复显示的。<br>
+    <br>
+    添加了控件之后，可以通过如下函数统计有几个直属控件：<br>
+    <div class="code">int count() const</div>
+    如果要获知刚才添加的某个控件 widget 在分裂器内部的序号：
+    <div class="code">int indexOf(QWidget * widget) const</div>
+    如果要根据分裂器的序号查询是哪个控件，用如下函数：
+    <div class="code">QWidget * widget(int index) const</div>
+    <br>
+    默认情况下，用户可以拖动手柄来控制分裂器内控件的尺寸，控件的尺寸范围可以在尺寸下限和尺寸上限之间变化，尺寸下限可以是最小尺寸 minimumSize()
+    或者最小建议尺寸 minimumSizeHint() ，尺寸上限是最大尺寸 maximumSize()
+    。当然因为控件在分裂器内部，因此控件最大尺寸是不会超过分裂器自己占用的矩形范围的。<br>
+    <br>
+    分裂器手柄的宽度可以通过 handleWidth 属性设置，设置手柄宽度的函数：<br>
+    <div class="code">void setHandleWidth(int)</div>
+    如果设置的手柄宽度太小，比如 0 或 1，那么分裂器自动拓展手柄宽度以供用户拖动，而不会隐藏手柄。<br>
+    用户拖动控件的手柄时，分裂器会发出如下信号（一般用不着这个信号）：<br>
+    <div class="code">void splitterMoved(int pos, int index)&nbsp; //手柄拖动信号</div>
+    pos 是手柄移动后的一维新位置，index 是手柄编号。<br>
+    <br>
+    当用户通过拉伸手柄，把分裂器内部某个控件压缩到低于尺寸下限时，分裂器默认情况下会自动折叠隐藏该控件。这个折叠特性是通过
+    childrenCollapsible 属性控制的，其设置函数如下：<br>
+    <div class="code">void setChildrenCollapsible(bool)</div>
+    默认会折叠小于尺寸下限的子控件，如果把上面设置函数参数设置为 false，那么控件拖动到尺寸下限后就不折叠隐藏。<br>
+    对于默认折叠隐藏的情况，控件折叠后，可以拉伸它的相邻控件边框，重新把该控件显示出来，相邻控件变小了，腾出足够的空间显示被折叠的控件时，那么被折叠的控件就
+    会重新显示出来，等会我们的例子运行时可以展示这个折叠功能。<br>
+    <br>
+    childrenCollapsible 属性控制的是所有子控件的折叠特性，如果要设置单个的子控件是否可以折叠，通过如下函数：<br>
+    <div class="code">void setCollapsible(int index, bool collapse)</div>
+    index 是子控件序号，collapse 指定是否可以折叠，collapse 如果为 true 就可以折叠，如果为 false 就是不能折叠。<br>
+    如果要获知某个序号的控件是否可以折叠，通过如下函数：<br>
+    <div class="code">bool isCollapsible(int index) const</div>
+    对于单个控件，分裂器会优先考虑 setCollapsible() 设置的折叠特性，如果没调用 setCollapsible() ，再去使用
+    childrenCollapsible 属性的数值。<br>
+    <br>
+    对于可能的特殊情况，如果是程序员通过代码调用某个控件的 hide()
+    函数设置分裂器内该控件隐藏，那么该控件原本占用的空间会分配给分裂器内其他控件。只有程序员通过代码调用该控件的 show()
+    函数，才能使该控件重新出现。这种情况下不是用户通过手柄能操控的，一般是通过一些菜单项或工具按钮实现，本节暂时不考虑这种情况。<br>
+    <br>
+    如果窗口变化时，分裂器自己占用的矩形区域也是跟着变化的，那么分裂器会跟着窗口的一步步变化，也一步步地重新调整各个控件的大小。如果程序员只希望在窗口变化过
+    程结束的一瞬间，一次性地调整分裂器，而不希望分裂器随时与窗口同步变化（这样能节省计算资源），可以用如下函数设置：<br>
+    <div class="code">void setOpaqueResize(bool opaque = true) </div>
+    默认值是 true，如果改成 false，那么就不是随时同步，而是窗口大小变化过程结束的一瞬间，一次性调整分裂器的排布。<br>
+    <br>
+    程序员是可以通过代码来设置分裂器的各个控件尺寸的（比如重置一下分裂器排布），对于水平分裂器可以指定各个控件的宽度列表（这时控件高度与分裂器本身高度一
+    样），对于垂直分裂器可以指定各个控件的高度列表（这时控件宽度与分裂器宽度一样），都是用如下函数设置：<br>
+    <div class="code">void setSizes(const QList&lt;int&gt; &amp; list)</div>
+    对于水平分裂器，list 指定从左到右各个控件的宽度；对于垂直分裂器，list 指定从上到下的各个控件高度。如果 list 内指定某个控件的宽度或高度为
+    0，那么就会隐藏该控件，如果设置的正数数值比尺寸下限的小，那么控件会按尺寸下限来显示。<br>
+    如果要获取分裂器内部控件实时的排布情况，可以用如下函数：<br>
+    <div class="code">QList&lt;int&gt; sizes() const</div>
+    sizes() 与 setSizes() 正好是是一对获取和设置函数，注意这里的 sizes 都是英文复数形式，不要和单数形式的函数搞混了。<br>
+    <br>
+    分裂器还带有一个特殊功能，就是保存当前的控件尺寸状态，以便下次程序启动时，加载这些状态。这样用户一次调整界面后，程序下次启动还能自动变成用户习惯的界面状
+    态。获取分裂器内当前控件尺寸状态的函数为：<br>
+    <div class="code">QByteArray saveState() const</div>
+    该函数返回值是一个二进制字节数组，返回的字节数组可以用 QSettings 类对象写入注册表或配置文件，下次可以用加载函数恢复上次保存的状态：
+    <div class="code">bool restoreState(const QByteArray &amp; state)</div>
+    恢复成功就返回 true，如果恢复之前状态失败就返回 false。<br>
+    在 Qt 助手的 QSplitter 类帮助文档可以看到关于保存和恢复分裂器状态的代码，保存状态的代码一般放在程序结束之前的位置：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QSettings settings;<br>
+      &nbsp;&nbsp;&nbsp; settings.setValue("splitterSizes",
+      splitter-&gt;saveState());</div>
+    恢复分裂器状态的代码一般放在程序刚开始显示的位置：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QSettings settings;<br>
+      &nbsp;&nbsp;&nbsp;
+      splitter-&gt;restoreState(settings.value("splitterSizes").toByteArray());</div>
+    关于分裂器的主要功能介绍这么多，下面看看例子。<br>
+    <br>
+    <div class="os2">6.6.2 使用分裂器排布简易 HTML 查看器</div>
+    <br>
+    上一章 5.3.4 简易 HTML 查看器示例里面有两个比较大的控件，一个 QTextBrowser 和一个
+    QPlainTextEdit，如果用户可以拖动二者之间的手柄，那么可以隐藏其中一个控件，腾出更多的显示空间供另一个控件使用，这样对查看 HTML
+    网页比较方便。<br>
+    <br>
+    上面正好讲到 QSettings 可以保存用户上次使用程序的界面状态，我们分三个步骤介绍保存和读取配置的相关操作。<br>
+    （1）我们首先看看简易 HTML 查看器可以保存哪些界面状态：<br>
+    ① 分裂器排布的状态：用 QSplitter::​saveState() 函数保存分裂器排布状态，用
+    QSplitter::​restoreState() 还原状态。<br>
+    ② 主窗口的尺寸，其实所有控件和窗口都可以用&nbsp; QWidget::​saveGeometry() 保存占用矩形，使用
+    QWidget::​restoreGeometry() 还原窗口占用的矩形。<br>
+    ③ 当前打开的 HTML 文件 URL，可以用 QTextBrowser::source() 函数获取源文件的 QUrl 对象，使用
+    QTextBrowser::setSource() 函数打开该文件。<br>
+    <br>
+    （2）其次是 QSettings 类怎么使用的问题：<br>
+    可以直接查询 QSettings 类的文档，我们这里简要介绍本节用到的功能。<br>
+    以常规的 QSettings 构造函数为例：<br>
+    <div class="code"> QSettings(const QString &amp; organization, const QString
+      &amp; application = QString(), QObject * parent = 0)</div>
+    organization 是组织机构或公司名称，application 是应用程序名称，parent 是父对象指针。<br>
+    <br>
+    如果要保存某个配置数值，使用函数：<br>
+    <div class="code">void QSettings::​setValue(const QString &amp; key, const
+      QVariant &amp; value)</div>
+    key 是配置项的名称，或叫键名（键名可以随便取，尽量用英文名），value 是配置项的数值，或叫键值。键值可以是任意 Qt 能识别的变量类型，无论是
+    C++ 基本类型还是 QString、QByteArray 、QRect、QUrl 等数据。<br>
+    <br>
+    在读取配置时，可以先判断键名是否存在：<br>
+    <div class="code">bool QSettings::​contains(const QString &amp; key) const</div>
+    然后根据键名读取键值：<br>
+    <div class="code">QVariant QSettings::​value(const QString &amp; key, const
+      QVariant &amp; defaultValue = QVariant()) const</div>
+    如果配置文件或注册表里面有 key 键的值，那么返回值就是之前保存的键值；如果出现找不到叫 key 的配置项，那么才会返回由 defaultValue
+    指定的默认返回值。<br>
+    <br>
+    这些配置项的读写都是交给 QSettings 自动处理，在默认情况下，不同的操作系统 存储配置项的方式不一样，如果组织机构或公司名字是
+    organization，应用程序名字是 application，那么：<br>
+    ● 如果是 Unix/Linux 系统，一般保存在文件 $HOME/.config/organization/application.conf ；<br>
+    ● 如果是苹果操作系统，一般保存在文件
+    $HOME/Library/Preferences/com.organization.application.plist ；<br>
+    ● 如果是 Windows 系统，一般保存在注册表
+    HKEY_CURRENT_USER\Software\organization\application&nbsp; 树形目录里面。<br>
+    上面列举的是常见的三个，配置文件或注册表路径也可能是其他目录路径，具体的请看 QSettings 帮助文档。<br>
+    至于具体的配置项键名和键值是怎么保存的，程序员可以不用操心，QSettings 自动根据不同操作系统风格进行处理。<br>
+    <br>
+    （3）保存和加载配置的代码放在哪里：<br>
+    程序主界面关闭时，会调用重载的虚函数 closeEvent() ，我们重载基类的 closeEvent()
+    函数，在该虚函数里添加保存配置的代码即可。而在程序启动时，可以在主界面的构造函数里添加 读取配置项并还原上次界面状态的相关代码。<br>
+    因为应用程序可保存的界面状态通常不止一项，可以编写专门的函数如 SaveSettings() 和 LoadSettings() 用于保存和加载状态。<br>
+    <br>
+    下面我们开始对上一章 5.3.4 简易 HTML 查看器示例的改写，不仅用分裂器排布 QTextBrowser 和 QPlainTextEdit
+    控件，并且在程序关闭时自动保存状态，而在程序开始时自动加载以前保存的状态。<br>
+    我们复制 D:\QtProjects\ch05\ 目录里的 simplebrowser 文件夹，到第 6 章的示例目录
+    D:\QtProjects\ch06\ ，然后进行下面操作：<br>
+    ① 把新的 simplebrowser 文件夹重命名为 simplebrowserspl，并删除里面的 simplebrowser.pro.user
+    文件。<br>
+    ② 在新的 simplebrowserspl 文件夹里，把 simplebrowser.pro 重命名为 simplebrowserspl.pro 。<br>
+    ③ 用记事本打开 simplebrowserspl.pro 文件，修改里面的 TARGET 一行，变成下面这句：<br>
+    <div class="code">TARGET = simplebrowserspl</div>
+    这样就得到了新项目 simplebrowserspl，我们用 QtCreator 打开这个项目，在配置项目界面选择所有套件并点击 "Configure
+    Project" ，配置好项目后，打开 widget.ui 界面文件，进入 QtCreator 设计模式：<br>
+    <center><img src="images/ch06/ch06-06-02.png" alt="ui" width="800"></center>
+    我们选中主窗体里 textBrowser 和 plainTextEdit 控件，点击上面的水平分裂器的按钮，得到如下图效果：<br>
+    <center><img src="images/ch06/ch06-06-03.png" alt="spl" width="800"></center>
+    对于界面下方三个按钮，我们可以用常规的水平布局器进行排布，为了使按钮不被拉伸，我们在第二个和第三个按钮中间放一个水平空白条，这样在进行水平布局后，头两个
+    按钮靠左，第三个按钮会靠右放置。我们按照这个思路，拖一个水平空白条，并选中三个按钮和该空白条，进行水平布局：<br>
+    <center><img src="images/ch06/ch06-06-04.png" alt="lay1" width="800"></center>
+    布局器不能直接添加到分裂器里面，但反过来是可以的，我们要把窗体上面的分裂器和下面的水平布局器制作成一个垂直布局器，作为窗体的主布局器。另外窗体和控件的基
+    类 QWidget 有设置主布局器的函数 setLayout() ，但是分裂器本身是不能作为布局器设置给主窗体的。因此在布局的最后，依然要用主布局器包裹
+    所有的东西，将主布局器设置给窗口。<br>
+    <br>
+    我们点击主窗体的空白区域，不选中任何控件、布局器、分裂器，直接点击上面的垂直布局按钮，这样新的垂直布局器自动成为窗体的主布局器，如下图所示：<br>
+    <center><img src="images/ch06/ch06-06-05.png" alt="lay2" width="800"></center>
+    对于主布局器，我们希望第一行的分裂器占据最大空间，而第二行的按钮布局器固定高度就行了，可以通过主布局器的伸展因子来设置。我们先点击任意一个控件，然后再点
+    击主窗体空白区域，这样刷新一下主窗体的属性编辑栏，可以看到主布局器属性，把主布局器的 layoutStretch 属性设置为：<br>
+    1,0<br>
+    这样就表明新增的空闲区域全部分给上面第一行的分裂器，而第二行的水平布局器保持固定高度不变。实际效果就如下所示：<br>
+    <center><img src="images/ch06/ch06-06-06.png" alt="layoutStretch" width="800"></center>
+    界面里既使用了分裂器，也是用了布局器，并调整了主布局器的伸展因子，这些知识在实际程序界面排布时比较常用，希望大家以后遇到例子都进行类似的布局练习，通常正
+    式的程序界面设计都会用到本章的知识。<br>
+    <br>
+    在 QtCreator
+    设计模式还需要做最后一件事，就是修改分裂器的手柄颜色。我们凸显一下分裂器的手柄，这样等会程序运行时就可以看到手柄位置变化对程序界面的影响。修改分裂器的手柄颜色，
+    也是通过 Qt Style Sheet（QSS）来实现，但是手柄颜色比较特殊。QSS
+    在处理控件显示的时候，会把一个完整控件拆成一些控件子单元（SubControl），QSS 可以对每个细小的 SubControl 进行定制，这是 QSS
+    的丰富特性。在 Qt 帮助文档 Qt Style Sheets Reference 主题页面，可以看到每个 Qt 控件的 QSS
+    参考设置，自然也有分裂器的。设置分裂器手柄颜色的 QSS 代码如下：<br>
+    <div class="code">QSplitter::handle {&nbsp;&nbsp;&nbsp; <br>
+      &nbsp;&nbsp;&nbsp; background-color: rgb(0, 255, 127);<br>
+      }</div>
+    QSplitter::handle 就是指分裂器的手柄，将普通的 QSS 代码放在该控件子单元大括号 { } 内部 ，就是设置分裂器手柄的 QSS
+    样式表。对于大括号内部的代码与普通 QSS 样式表写法没区别，color 是前景色，background-color
+    是背景色。我们本节例子用背景色填充手柄就足够了。<br>
+    <br>
+    我们在 QtCreator 设计模式，右击右上角布局树里面的 splitter 分裂器，在右键菜单选择 "改变样式表 ..." ，会弹出如下的样式表编辑
+    框，在里面输入刚才的分裂器手柄定制代码：<br>
+    <center><img src="images/ch06/ch06-06-07.png" alt="qss" width="800"></center>
+    编辑好样式表之后，点击 "OK" 按钮，就可以看到分裂器的手柄变成浅绿色了：<br>
+    <center><img src="images/ch06/ch06-06-08.png" alt="qss2"></center>
+    这样界面文件的编辑就完成了，我们保存界面文件，回到代码编辑模式，开始编写功能代码。<br>
+    之前说到加载配置的代码放在主窗体的构造函数里，保存配置的代码放在 closeEvent() 重载函数里。我们打开 widget.h
+    文件，右击主窗体的类名 Widget，在右键菜单选择 "Refactor" --&gt; "Insert Virtual Functions of
+    Base Classes"：<br>
+    <center><img src="images/ch06/ch06-06-09.png" alt="Refactor" width="800"></center>
+    然后在弹出的添加基类重载函数对话框里选中 QWidget 类的 closeEvent() 进行重载：
+    <center><img src="images/ch06/ch06-06-10.png" alt="Reimplement" width="800"></center>
+    添加好 closeEvent() 重载函数后，我们继续编辑 widget.h 头文件，添加两个私有函数用于保存配置和加载配置，完整的 widget.h
+    文件内容如下所示：<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>WIDGET_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">WIDGET_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonOpen_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_textBrowser_backwardAvailable</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">bool</span><span style=" color:#c0c0c0;"> </span>arg1<span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_textBrowser_forwardAvailable</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">bool</span><span style=" color:#c0c0c0;"> </span>arg1<span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_textBrowser_textChanged</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//保存配置</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">SaveSettings</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//加载配置</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">LoadSettings</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">interface</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">protected</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">virtual</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span
+style=" font-style:italic; color:#000000;">closeEvent</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QCloseEvent</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre>
+    </div>
+    Widget 类声明末尾就是重载的 closeEvent() 函数声明，在私有声明部分的 SaveSettings() 和 LoadSettings()
+    就是我们自己添加的保存配置函数和加载配置函数。<br>
+    <br>
+    接下来我们需要编辑 widget.cpp 文件，添加我们需要的功能代码，首先是头文件包含和构造函数：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QFileDialog&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QUrl&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QSettings&gt;</span><span style=" color:#c0c0c0;">    </span><span
+style=" color:#008000;">//保存和加载配置的类</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">QPlainTextEdit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">只读模式</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">plainTextEdit</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setReadOnly</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">true</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">QTextBrowser</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">能自动用系统浏览器打开外站链接</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textBrowser</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setOpenExternalLinks</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">true</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//将</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"后退"、"前进"按钮设置为不可用状态</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonBackward</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setEnabled</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">false</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonForeward</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setEnabled</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">false</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//关联</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"后退"</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">按钮的信号到对应槽函数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">connect</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">pushButtonBackward</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SIGNAL</span><span
+style=" color:#000000;">(</span>clicked<span style=" color:#000000;">()),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textBrowser</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SLOT</span><span
+style=" color:#000000;">(</span>backward<span style=" color:#000000;">()));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//关联</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"前进"</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">按钮的信号到对应槽函数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">connect</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">pushButtonForeward</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SIGNAL</span><span
+style=" color:#000000;">(</span>clicked<span style=" color:#000000;">()),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textBrowser</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SLOT</span><span
+style=" color:#000000;">(</span>forward<span style=" color:#000000;">()));</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//调用加载配置项的函数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">LoadSettings</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    &lt;QSettings&gt; 头文件就是用于加载和保存程序配置项的。我们在构造函数末尾添加了一句 LoadSettings() 函数调用，其他的代
+    码都没有修改。<br>
+    <br>
+    构造函数和析构函数之后，是我们在 5.3.4 节编写的四个槽函数代码，我们这里仅仅顺路贴一下，不做任何修改：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_pushButtonOpen_clicked</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QUrl</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">urlFile</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QFileDialog</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">getOpenFileUrl</span><span style=" color:#000000;">(</span><span
+style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"open</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">HTML"</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QUrl</span><span style=" color:#000000;">(),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"HTML</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">files(*.htm</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">*.html)"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//URL</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">非空，才进行打开操作</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">urlFile</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">())</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//打印文件链接</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">urlFile</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//设置浏览的源文件</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textBrowser</span><span
+style=" color:#000000;">-&gt;</span><span style=" font-style:italic; color:#000000;">setSource</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">urlFile</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//根据能否后退，设置</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"后退"</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">按钮可用状态</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_textBrowser_backwardAvailable</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">bool</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">arg1</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonBackward</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setEnabled</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">arg1</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//根据能否前进，设置</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"前进"</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">按钮可用状态</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_textBrowser_forwardAvailable</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">bool</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">arg1</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">pushButtonForeward</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setEnabled</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">arg1</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//当</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">QTextBrowser</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">控件内容变化时，QPlainTextEdit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">跟着变化</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_textBrowser_textChanged</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">html</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">字符串，设置给</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">plainTextEdit</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strHtml</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">textBrowser</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">toHtml</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">plainTextEdit</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setPlainText</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strHtml</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    然后就到我们本小节重载的 closeEvent() 函数，这个函数非常简单：<br>
+    <div class="code"><span style=" color:#008000;">//关闭之前执行这个虚函数</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" font-style:italic; color:#000000;">closeEvent</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QCloseEvent</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//保存配置</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">SaveSettings</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    就只调用了 SaveSettings() 函数保存程序界面状态。<br>
+    <br>
+    接下来是我们本小节的重点内容，就是保存程序界面状态的函数：<br>
+    <div class="code"><span style=" color:#008000;">//负责保存配置的函数</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">SaveSettings</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//机构或公司名设为</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">QtGuide，应用程序名设为</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">SimpleBrowser</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QSettings</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">settings</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"QtGuide"</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"SimpleBrowser"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//主窗口状态信息</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QByteArray</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">baMainWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">this</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">saveGeometry</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//分裂器状态信息</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QByteArray</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">baSplitter</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">splitter</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">saveState</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//源文件</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">URL</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QUrl</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">urlSrc</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">textBrowser</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">source</span><span style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//保存为配置项，键名自己随便取</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">settings</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setValue</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"MainWidget"</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">baMainWidget</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">settings</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setValue</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"Splitter"</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">baSplitter</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">settings</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setValue</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"URL"</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">urlSrc</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//搞定，settings</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">对象在栈里面，该对象析构时自动存储所有配置</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    SaveSettings() 函数在栈上定义了 settings 对象，然后<br>
+    把主窗体的矩形信息打包存到 baMainWidget 字节数组；<br>
+    把分裂器的状态信息打包存到 baSplitter 字节数组；<br>
+    把 textBrowser 控件的源文件 URL 存到 urlSrc 。<br>
+    然后开始写入配置项的操作：<br>
+    主窗体的 baMainWidget 数值写到 "MainWidget" 键里面；<br>
+    分裂器的 baSplitter 数值写到 "Splitter" 键里面；<br>
+    浏览器控件的 urlSrc 数值存到 "URL" 键里面。<br>
+    <br>
+    这里需要说明两点，机构或公司名字、应用程序名字都是自己取的，一般尽量用英文名字，键值名字也是自己取的，也都用英文名字。故意用的全英文名字，所以不需要
+    tr() 函数封装字符串，因为我们不翻译程序用到的组织名、程序名、键名。<br>
+    第二点是在栈上定义 settings 对象，这样当 SaveSettings() 函数结束时，这个 settings 对象会被销毁，在执行
+    settings 对象析构函数时，会自动把各个配置项都写到配置文件或注册表中，就不要手动去同步了。<br>
+    <br>
+    widget.cpp 最后的部分是我们加载配置的函数代码：<br>
+    <div class="code"><span style=" color:#008000;">//负责加载配置的函数</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">LoadSettings</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//机构或公司名设为</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">QtGuide，应用程序名设为</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">SimpleBrowser</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//settings</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">的构造函数自己会去读取上次保存的注册表或配置文件信息</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QSettings</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">settings</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"QtGuide"</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"SimpleBrowser"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//判断键名是否存在，然后取出各个键名对应的键值，还原以前保存的状态</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//主窗口</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">settings</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">contains</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"MainWidget"</span><span
+style=" color:#000000;">))</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QByteArray</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">baMainWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">settings</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">value</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"MainWidget"</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">toByteArray</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">this</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">restoreGeometry</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">baMainWidget</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//分裂器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">settings</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">contains</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"Splitter"</span><span
+style=" color:#000000;">))</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QByteArray</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">baSplitter</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">settings</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">value</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"Splitter"</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">toByteArray</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">splitter</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">restoreState</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">baSplitter</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//源文件URL</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">settings</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">contains</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"URL"</span><span
+style=" color:#000000;">))</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QUrl</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">urlSrc</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">settings</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">value</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"URL"</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">toUrl</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textBrowser</span><span
+style=" color:#000000;">-&gt;</span><span style=" font-style:italic; color:#000000;">setSource</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">urlSrc</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    LoadSettings() 函数里定义的 settings 对象与之前保存配置函数里的一模一样。<br>
+    其实 settings 对象构造函数会自动加载之前保存的配置文件或注册表项，定好这个对象，程序需要的配置项内容就可以读取了。<br>
+    settings 对象的组织或公司名、应用程序名、键名要与&nbsp; SaveSettings() 函数里的一样，才能正确读取各个配置项。<br>
+    <br>
+    对应主窗体的矩形信息，我们先判断 "MainWidget" 是不是存在的，然后读取这个键值，value() 函数返回的是 QVariant
+    对象，需要用各种 to***() 函数转成我们需要的数据类型，比如 toByteArray() 。读取的键值存到 baMainWidget
+    之后，就可以调用主窗体的 restoreGeometry() 函数还原之前的状态了。<br>
+    <br>
+    分裂器信息的加载也是类似的，先判断键名 "Splitter" ，然后获取键值存到 baSplitter ，再用分裂器的 restoreState()
+    函数还原状态。textBrowser 控件源文件 URL 的加载过程也是类似的，就不赘述了。<br>
+    <br>
+    例子的代码就是上面那么多，我们生成并运行例子看看：<br>
+    <center><img src="images/ch06/ch06-06-11.png" alt="run1"></center>
+    我们可以把窗口拉大，然后把手柄往右边拖动，右边控件压缩到尺寸下限 （因为没有设置最小尺寸，默认下限是最小建议尺寸），会变成下图所示界面：
+    <center><img src="images/ch06/ch06-06-12.png" alt="run2"></center>
+    在右边控件尺寸压缩到下限后，如果继续往右边拖动手柄，那么右边的控件自动隐藏，只留下手柄：
+    <center><img src="images/ch06/ch06-06-13.png" alt="run3"></center>
+    右边的控件虽然隐藏，但是手柄会一直都显示。我们现在把手柄往左边拖动，右边的控件可以再次出现：
+    <center><img src="images/ch06/ch06-06-14.png" alt="run4"></center>
+    关于分裂器手柄拖动的示范就到这，之前设置手柄为浅绿色就是方便程序运行的时候拖动。如果手柄颜色和主窗体背景色一样，那么右边控件折叠隐藏之后，就看不清楚手柄
+    了。<br>
+    <br>
+    现在还需要测试的是程序关闭时，自动保存界面的状态到注册表或配置文件。我们就以上图的状态关闭例子程序，然后去注册表或者 Linux
+    系统的配置文件夹里面找找，对于 Windows 系统我们可以找到注册表项：<br>
+    HKEY_CURRENT_USER\Software\QtGuide\SimpleBrowser<br>
+    <center><img src="images/ch06/ch06-06-15.png" alt="reg" width="800"></center>
+    <br>
+    然后我们重新运行例子，看看效果是不是和上次关闭程序前的状态一致，本人这里测试时，不仅窗口大小、分裂器状态是对的，上次打开的文件也自动加载了，正是我们需要
+    的 效果：<br>
+    <center><img src="images/ch06/ch06-06-16.png" alt="rerun"></center>
+    本小节的分裂器和程序状态自动保存、加载的示范就到这里。下面我们新建一个在分裂器内部间接添加布局器的例子，并讲讲相关代码。<br>
+    <br>
+    <div class="os2">6.6.3 分裂器内间接添加布局器的示例</div>
+    <br>
+    本小节的示例仅仅是讲解 UI，不编写功能代码，主要是讲解在布局器和分裂器混搭的情况下 ui_*.h 文件的代码。<br>
+    我们重新打开 QtCreator，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>
+    ①项目名称 splittermulti，创建路径 D:\QtProjects\ch06，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    建好项目之后，打开窗体 widget.ui 文件，进入设计模式，把主窗体大小设置为 600*480，按照下图拖入控件：<br>
+    <center><img src="images/ch06/ch06-06-17.png" alt="ui" width="800"></center>
+    图上左上角的是 QTextEdit 控件作为编辑器，对象名为 textEdit，双击该控件可以编辑文本为 "编辑器"。<br>
+    右上角部分是三个按压按钮，对象名分别为：pushButton1、pushButton2、pushButton3，按钮文本分别为："功能1"、"功能
+    2"、"功能3"。<br>
+    最下面的是一个 QTextBrowser 控件作为提示栏，对象名为 textBrowser，双击该控件可编辑文本为 "提示信息" 。<br>
+    这个界面只是简单模范一下比如代码编辑器的功能，textEdit 是编辑区，textBrowser
+    是提示信息显示的区域，而右边三个按钮是用于一些功能操作。本小节是学习分裂器和布局器的混搭排布方式，对于这个界面，直观的布局思路为：<br>
+    把三个按钮作为一个垂直布局器，然后垂直布局器与上面的编辑器以第一个分裂器来排布，这样可以方便控制右边的工具按钮是否折叠隐藏。<br>
+    然后上方的分裂器与下方的 textBrowser 再作为第二个大分裂器进行排布。这样程序运行时用户可以灵活控制编辑器 textEdit 和提示栏
+    textBrowser 高度分配，甚至折叠隐藏下方的提示栏。也就是说，分裂器与布局器类似，可以嵌套排布。<br>
+    <br>
+    我们下面按照布局思路进行操作，在 QtCreator 设计模式，选中右边三个按压按钮，点击上面的垂直布局工具按钮，得到下图所示的垂直布局器：<br>
+    <center><img src="images/ch06/ch06-06-18.png" alt="ui2"></center>
+    然后我们选中 textEdit 编辑器和垂直布局器，点击上面的水平分裂器按钮，得到下图效果：<br>
+    <center><img src="images/ch06/ch06-06-19.png" alt="ui3" width="800"></center>
+    注意这里的操作，我们看起来是“直接”把编辑器和布局器一起塞进了水平分裂器里。<br>
+    我们之前讲过，布局器不能直接放入分裂器，这里是 QtCreator 设计模式和设计师的独特功能，它们会自动用 QWidget
+    部件对象封装布局器，然后再塞到分裂器里面。这部分工作是隐藏的，程序员目前看不到。<br>
+    <span style="font-weight: bold;">就 QtCreator 设计模式和 Qt
+      设计师的界面操作而言，分裂器可以与布局器任意混搭，背后的封装工作都交给设计师和 uic 工具来做。</span><br>
+    <br>
+    排好第一行的分裂器之后，我们再选中第一行的分裂器与下方第二行的 textBrowser 提示栏，点击上面的垂直分裂器按钮，得到如下图所示的效果：<br>
+    <center><img src="images/ch06/ch06-06-20.png" alt="ui4" width="800"></center>
+    这时候所有控件和布局器都塞到第二个分裂器 splitter_2 里面，那么问题也来了，窗口的主布局器只能是布局器，不能是分裂器。<br>
+    怎么让分裂器 splitter_2 占满整个窗口呢？<br>
+    答案是继续用布局器包裹一下 splitter_2
+    。我们点击主窗体的空白区域，不选中任何控件、分裂器、布局器，这时候上面的水平布局器和垂直布局器的工具按钮都是可用的，随便点击一下水平布局器或垂直布局器按钮，就能
+    把 splitter_2 封装成主布局器，并自动设置给窗口。我们下图示范的是垂直布局器封装 splitter_2 作为主布局器：<br>
+    <center><img src="images/ch06/ch06-06-21.png" alt="ui5" width="800"></center>
+    接下来我们对界面做一些细节调整，我们要让上面的分裂器高一些，下面的提示栏矮一些，比如 4:1 。<br>
+    我们前面几节的布局器可以直接设置 layoutStretch 属性决定各个子控件的伸展因子。<br>
+    分裂器不一样，因为分裂器本身就是功能控件，它没有 layoutStretch 属性，但是有普通控件的 sizePolicy 属性。<br>
+    我们直接设置上面分裂器和下面提示栏的 sizePolicy 属性就行了。<br>
+    <br>
+    我们从 QtCreator 设计模式右上角布局树可以快速选中 splitter 分裂器，设置它的 sizePolicy 属性的垂直伸展为
+    4，并且把垂直策略设置为 Expanding，这样垂直策略会与 textBrowser 的垂直策略一致：<br>
+    <center><img src="images/ch06/ch06-06-22.png" alt="ui6" width="800"></center>
+    然后选中 textBrowser 提示栏，把它的 sizePolicy 属性的垂直伸展为 1，这样得到如下所示的界面：<br>
+    <center><img src="images/ch06/ch06-06-23.png" alt="ui7" width="800"></center>
+    看到这里，界面好像回到当初了，第一行和第二行等高的。其实这只是设计师或 QtCreator
+    设计模式对分裂器显示效果的不完善，我们设置了第一行和第二行的伸展因子，一定是有效果的，这里暂时没有正确显示而已。（注：保存界面文件后重新打开就会显示正确
+    了。）<br>
+    <br>
+    我们可以点击 QtCreator 菜单 【工具--&gt; Form Editor--&gt; 预览 ...】，或者直接按快捷键
+    Alt+Shift+R，看到实际的预览效果如下：<br>
+    <center><img src="images/ch06/ch06-06-24.png" alt="preview"></center>
+    我们上面的设置是没问题的，实际效果就是 4:1 。以后如果出现类似的问题，设计模式看到的与程序运行看到的不一样，那可以提前在设计模式按 快捷键
+    Alt+Shift+R 预览一下效果，再判断有没有问题。（注：或者把界面文件保存一下，关闭界面文件再重新打开，看看效果有没有变化。）<br>
+    <br>
+    接下来我们关闭预览窗口，回到设计模式，我们仿造上一个例子为两个分裂器都设置样式表，把分裂器的手柄都设置为浅绿色：<br>
+    <center><img src="images/ch06/ch06-06-25.png" alt="QSS"></center>
+    设置好分裂器手柄之后，我们保存界面文件，不编写代码，直接生成并运行例子看看效果：<br>
+    <center><img src="images/ch06/ch06-06-26.png" alt="run"></center>
+    图上所示的两个手柄都可以拖动，用于控制界面，读者可以自己拖动试试，这里不示范了。<br>
+    程序跑完了，下面才是本小节重点要学习的内容，我们进入项目的影子构建文件夹：<br>
+    D:\QtProjects\ch06\build-splittermulti-Desktop_Qt_5_4_0_MinGW_32bit-Debug<br>
+    打开 ui_widget.h 文件，我们下面分块讲解一下 Ui_Widget 类的代码，下面代码注释是手动加的，原本没有。<br>
+    首先是成员变量：<br>
+    <div class="code"><span style=" color:#808000;">class</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Ui_Widget</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>QVBoxLayout<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#800000;">verticalLayout_2</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//主布局器，封装</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">splitter_2</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>QSplitter<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#800000;">splitter_2</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">          </span><span
+style=" color:#008000;">//大分裂器，包含界面所有控件</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>QSplitter<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#800000;">splitter</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//第一行的分裂器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>QTextEdit<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#800000;">textEdit</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//第一行的编辑器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>QWidget<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#800000;">widget</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">        </span><span
+style=" color:#008000;">//封装按钮布局器的部件对象</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>QVBoxLayout<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#800000;">verticalLayout</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//按钮布局器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>QPushButton<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#800000;">pushButton1</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>QPushButton<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#800000;">pushButton2</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>QPushButton<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#800000;">pushButton3</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span>QTextBrowser<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#800000;">textBrowser</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//第二行的提示栏</span></pre>
+    </div>
+    我们在该项目的布局树里面是看不到 widget 对象的：<br>
+    <center><img src="images/ch06/ch06-06-27.png" alt="tree"></center>
+    这个隐藏部件对象 widget 专门用于封装按钮布局器，然后把这个 widget 对象添加给第一行的分裂器。<br>
+    接下来是 setupUi() 函数开头部分：<br>
+    <div class="code"><span style=" color:#c0c0c0;">&nbsp;&nbsp;&nbsp; </span><span
+        style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span
+        style=" color:#000000;">setupUi</span><span style=" color:#000000;">(</span>QWidget<span
+        style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span
+        style=" color:#000000;">Widget</span><span style=" color:#000000;">)</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//窗口的对象名称</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">if</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">(</span><span style=" color:#000000;">Widget</span><span
+style=" color:#000000;">-&gt;</span>objectName<span style=" color:#000000;">().</span>isEmpty<span
+style=" color:#000000;">())</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#000000;">Widget</span><span
+style=" color:#000000;">-&gt;</span>setObjectName<span style=" color:#000000;">(</span>QStringLiteral<span
+style=" color:#000000;">(</span><span style=" color:#008000;">"Widget"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">Widget</span><span
+style=" color:#000000;">-&gt;</span>resize<span style=" color:#000000;">(</span><span
+style=" color:#000080;">600</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">480</span><span style=" color:#000000;">);</span><span style=" color:#c0c0c0;">   </span><span
+style=" color:#008000;">//窗口尺寸</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//主布局器，用于封装</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">splitter_2</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">verticalLayout_2</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span>QVBoxLayout<span
+style=" color:#000000;">(</span><span style=" color:#000000;">Widget</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">verticalLayout_2</span><span
+style=" color:#000000;">-&gt;</span>setSpacing<span style=" color:#000000;">(</span><span
+style=" color:#000080;">6</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">verticalLayout_2</span><span
+style=" color:#000000;">-&gt;</span>setContentsMargins<span style=" color:#000000;">(</span><span
+style=" color:#000080;">11</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">11</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">11</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">11</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">verticalLayout_2</span><span
+style=" color:#000000;">-&gt;</span>setObjectName<span style=" color:#000000;">(</span>QStringLiteral<span
+style=" color:#000000;">(</span><span style=" color:#008000;">"verticalLayout_2"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//大分裂器，包含所有控件</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">splitter_2</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span>QSplitter<span
+style=" color:#000000;">(</span><span style=" color:#000000;">Widget</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">splitter_2</span><span
+style=" color:#000000;">-&gt;</span>setObjectName<span style=" color:#000000;">(</span>QStringLiteral<span
+style=" color:#000000;">(</span><span style=" color:#008000;">"splitter_2"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//样式表，设置手柄颜色</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">splitter_2</span><span
+style=" color:#000000;">-&gt;</span>setStyleSheet<span style=" color:#000000;">(</span>QLatin1String<span
+style=" color:#000000;">(</span><span style=" color:#008000;">"QSplitter::handle</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">{</span><span style=" color:#c0c0c0;">    </span><span
+style=" color:#008000;">\n"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">"</span><span style=" color:#c0c0c0;">    </span><span style=" color:#008000;">background-color:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">rgb(0,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">255,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">127);\n"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">"}"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">splitter_2</span><span
+style=" color:#000000;">-&gt;</span>setOrientation<span style=" color:#000000;">(</span>Qt<span
+style=" color:#000000;">::</span>Vertical<span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+    </div>
+    开头部分先设置了窗口的对象名，并把窗口尺寸设置为 600*480；<br>
+    然后新建了 verticalLayout_2 作为主布局器， verticalLayout_2
+    的父窗口就是主界面，并且主界面只有这一个直属的布局器，因此 verticalLayout_2 自动成为窗口的主布局器，而不需要调用
+    setLayout() 。<br>
+    接着新建了包含所有控件的大分裂器 splitter_2，设置了分裂器的属性和样式表，setOrientation() 函数把这个大分裂器设置为垂直的。<br>
+    <br>
+    接下来也是 setupUi() 函数里，设置界面第一行分裂器的代码：<br>
+    <div class="code"><span style=" color:#c0c0c0;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </span><span style=" color:#008000;">//第一行的分裂器</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">splitter</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span>QSplitter<span
+style=" color:#000000;">(</span><span style=" color:#800000;">splitter_2</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">splitter</span><span
+style=" color:#000000;">-&gt;</span>setObjectName<span style=" color:#000000;">(</span>QStringLiteral<span
+style=" color:#000000;">(</span><span style=" color:#008000;">"splitter"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//设置分裂器的尺寸策略</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>QSizePolicy<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">sizePolicy</span><span style=" color:#000000;">(</span>QSizePolicy<span
+style=" color:#000000;">::</span>Expanding<span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span>QSizePolicy<span style=" color:#000000;">::</span>Expanding<span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">sizePolicy</span><span
+style=" color:#000000;">.</span>setHorizontalStretch<span style=" color:#000000;">(</span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">sizePolicy</span><span
+style=" color:#000000;">.</span>setVerticalStretch<span style=" color:#000000;">(</span><span
+style=" color:#000080;">4</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">sizePolicy</span><span
+style=" color:#000000;">.</span>setHeightForWidth<span style=" color:#000000;">(</span><span
+style=" color:#800000;">splitter</span><span style=" color:#000000;">-&gt;</span>sizePolicy<span
+style=" color:#000000;">().</span>hasHeightForWidth<span style=" color:#000000;">());</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">splitter</span><span
+style=" color:#000000;">-&gt;</span>setSizePolicy<span style=" color:#000000;">(</span><span
+style=" color:#000000;">sizePolicy</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//样式表，设置手柄颜色</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">splitter</span><span
+style=" color:#000000;">-&gt;</span>setStyleSheet<span style=" color:#000000;">(</span>QLatin1String<span
+style=" color:#000000;">(</span><span style=" color:#008000;">"QSplitter::handle</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">{</span><span style=" color:#c0c0c0;">    </span><span
+style=" color:#008000;">\n"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">"</span><span style=" color:#c0c0c0;">    </span><span style=" color:#008000;">background-color:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">rgb(0,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">255,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">127);\n"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">"}"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">splitter</span><span
+style=" color:#000000;">-&gt;</span>setOrientation<span style=" color:#000000;">(</span>Qt<span
+style=" color:#000000;">::</span>Horizontal<span style=" color:#000000;">);</span></pre>
+    </div>
+    对于界面第一行的分裂器 splitter ，设置了水平策略、垂直策略、水平伸展因子、垂直伸展因子，而 setHeightForWidth()
+    函数一般不做修改，就用原来的数值，较少情况才会影响界面布局。然后设置了样式表，使该分裂器的手柄也为浅绿色的。<br>
+    <br>
+    接下来也是 setupUi() 函数里，设置界面第一行编辑器的代码：<br>
+    <div class="code"><span style=" color:#c0c0c0;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </span><span style=" color:#008000;">//新建编辑器</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">textEdit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span>QTextEdit<span
+style=" color:#000000;">(</span><span style=" color:#800000;">splitter</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">textEdit</span><span
+style=" color:#000000;">-&gt;</span>setObjectName<span style=" color:#000000;">(</span>QStringLiteral<span
+style=" color:#000000;">(</span><span style=" color:#008000;">"textEdit"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>QSizePolicy<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">sizePolicy1</span><span style=" color:#000000;">(</span>QSizePolicy<span
+style=" color:#000000;">::</span>Expanding<span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span>QSizePolicy<span style=" color:#000000;">::</span>Expanding<span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">sizePolicy1</span><span
+style=" color:#000000;">.</span>setHorizontalStretch<span style=" color:#000000;">(</span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">sizePolicy1</span><span
+style=" color:#000000;">.</span>setVerticalStretch<span style=" color:#000000;">(</span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">sizePolicy1</span><span
+style=" color:#000000;">.</span>setHeightForWidth<span style=" color:#000000;">(</span><span
+style=" color:#800000;">textEdit</span><span style=" color:#000000;">-&gt;</span>sizePolicy<span
+style=" color:#000000;">().</span>hasHeightForWidth<span style=" color:#000000;">());</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">textEdit</span><span
+style=" color:#000000;">-&gt;</span>setSizePolicy<span style=" color:#000000;">(</span><span
+style=" color:#000000;">sizePolicy1</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//把编辑器添加到第一行的分裂器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">splitter</span><span
+style=" color:#000000;">-&gt;</span>addWidget<span style=" color:#000000;">(</span><span
+style=" color:#800000;">textEdit</span><span style=" color:#000000;">);</span></pre>
+    </div>
+    新建编辑器后，也是类似的设置了尺寸策略，然后把 textEdit 直接添加给了界面第一行的分裂器。<br>
+    <br>
+    接下来也是 setupUi() 函数里，设置界面第一行三个按钮布局器和 widget 部件对象的代码：<br>
+    <div class="code"><span style=" color:#c0c0c0;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </span><span style=" color:#008000;">//新建一个</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">widget</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">用于包裹按钮的布局器verticalLayout</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span>QWidget<span
+style=" color:#000000;">(</span><span style=" color:#800000;">splitter</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">widget</span><span
+style=" color:#000000;">-&gt;</span>setObjectName<span style=" color:#000000;">(</span>QStringLiteral<span
+style=" color:#000000;">(</span><span style=" color:#008000;">"widget"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//按钮的垂直布局器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//verticalLayout</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">是部件对象</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">唯一的布局器，自动成为部件对象</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">的主布局器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">verticalLayout</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span>QVBoxLayout<span
+style=" color:#000000;">(</span><span style=" color:#800000;">widget</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">verticalLayout</span><span
+style=" color:#000000;">-&gt;</span>setSpacing<span style=" color:#000000;">(</span><span
+style=" color:#000080;">6</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">verticalLayout</span><span
+style=" color:#000000;">-&gt;</span>setContentsMargins<span style=" color:#000000;">(</span><span
+style=" color:#000080;">11</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">11</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">11</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">11</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">verticalLayout</span><span
+style=" color:#000000;">-&gt;</span>setObjectName<span style=" color:#000000;">(</span>QStringLiteral<span
+style=" color:#000000;">(</span><span style=" color:#008000;">"verticalLayout"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">verticalLayout</span><span
+style=" color:#000000;">-&gt;</span>setContentsMargins<span style=" color:#000000;">(</span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//新建按钮1，添加到</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">verticalLayout</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">pushButton1</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span>QPushButton<span
+style=" color:#000000;">(</span><span style=" color:#800000;">widget</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">pushButton1</span><span
+style=" color:#000000;">-&gt;</span>setObjectName<span style=" color:#000000;">(</span>QStringLiteral<span
+style=" color:#000000;">(</span><span style=" color:#008000;">"pushButton1"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">verticalLayout</span><span
+style=" color:#000000;">-&gt;</span>addWidget<span style=" color:#000000;">(</span><span
+style=" color:#800000;">pushButton1</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//新建按钮2，添加到</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">verticalLayout</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">pushButton2</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span>QPushButton<span
+style=" color:#000000;">(</span><span style=" color:#800000;">widget</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">pushButton2</span><span
+style=" color:#000000;">-&gt;</span>setObjectName<span style=" color:#000000;">(</span>QStringLiteral<span
+style=" color:#000000;">(</span><span style=" color:#008000;">"pushButton2"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">verticalLayout</span><span
+style=" color:#000000;">-&gt;</span>addWidget<span style=" color:#000000;">(</span><span
+style=" color:#800000;">pushButton2</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//新建按钮3，添加到</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">verticalLayout</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">pushButton3</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span>QPushButton<span
+style=" color:#000000;">(</span><span style=" color:#800000;">widget</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">pushButton3</span><span
+style=" color:#000000;">-&gt;</span>setObjectName<span style=" color:#000000;">(</span>QStringLiteral<span
+style=" color:#000000;">(</span><span style=" color:#008000;">"pushButton3"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">verticalLayout</span><span
+style=" color:#000000;">-&gt;</span>addWidget<span style=" color:#000000;">(</span><span
+style=" color:#800000;">pushButton3</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//添加包裹布局器</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">verticalLayout</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">的部件对象</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">到第一行分裂器里</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">splitter</span><span
+style=" color:#000000;">-&gt;</span>addWidget<span style=" color:#000000;">(</span><span
+style=" color:#800000;">widget</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//把第一行的分裂器添加给整体的大分裂器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">splitter_2</span><span
+style=" color:#000000;">-&gt;</span>addWidget<span style=" color:#000000;">(</span><span
+style=" color:#800000;">splitter</span><span style=" color:#000000;">);</span></pre>
+    </div>
+    这三个按钮的布局器、封装部件的代码复杂一些。先建立了 widget 部件对象，预备用于封装按钮的布局器。<br>
+    然后才建立三个按钮的垂直布局器 verticalLayout，有点意外的是 verticalLayout 调用了两次
+    setContentsMargins() 设置边距，第一次是作为 widget 的主布局器设置边距，第二次应该是判断 widget 并不是主界面窗口，重
+    新把布局器边距设置为 0 了。<br>
+    然后依次新建三个按钮添加给 verticalLayout。<br>
+    <br>
+    因为 verticalLayout 是部件对象 widget 唯一的布局器，因此自动成为了 widget 的主布局器，而不需要调用
+    setLayout() 。<br>
+    widget 对象自动包裹住内部的布局器和按钮，然后把这个 widget 对象添加给第一行的分裂器 splitter，<br>
+    再把第一行的分裂器 splitter 添加给大分裂器 splitter_2。<br>
+    因为分裂器本身就是实际的功能控件，可以直接在分裂器内部嵌套分裂器。<br>
+    <br>
+    setupUi() 函数里最后是关于第二行 textBrowser 提示栏的代码等：<br>
+    <div class="code"><span style=" color:#c0c0c0;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </span><span style=" color:#008000;">//新建第二行的提示栏</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">textBrowser</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">textBrowser</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span>QTextBrowser<span
+style=" color:#000000;">(</span><span style=" color:#800000;">splitter_2</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">textBrowser</span><span
+style=" color:#000000;">-&gt;</span>setObjectName<span style=" color:#000000;">(</span>QStringLiteral<span
+style=" color:#000000;">(</span><span style=" color:#008000;">"textBrowser"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>QSizePolicy<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">sizePolicy2</span><span style=" color:#000000;">(</span>QSizePolicy<span
+style=" color:#000000;">::</span>Expanding<span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span>QSizePolicy<span style=" color:#000000;">::</span>Expanding<span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">sizePolicy2</span><span
+style=" color:#000000;">.</span>setHorizontalStretch<span style=" color:#000000;">(</span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">sizePolicy2</span><span
+style=" color:#000000;">.</span>setVerticalStretch<span style=" color:#000000;">(</span><span
+style=" color:#000080;">1</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">sizePolicy2</span><span
+style=" color:#000000;">.</span>setHeightForWidth<span style=" color:#000000;">(</span><span
+style=" color:#800000;">textBrowser</span><span style=" color:#000000;">-&gt;</span>sizePolicy<span
+style=" color:#000000;">().</span>hasHeightForWidth<span style=" color:#000000;">());</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">textBrowser</span><span
+style=" color:#000000;">-&gt;</span>setSizePolicy<span style=" color:#000000;">(</span><span
+style=" color:#000000;">sizePolicy2</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//把第二行的</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">textBrowser</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">添加到整体的大分裂器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">splitter_2</span><span
+style=" color:#000000;">-&gt;</span>addWidget<span style=" color:#000000;">(</span><span
+style=" color:#800000;">textBrowser</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//用</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">verticalLayout_2</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">包裹整体的大分裂器</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">splitter_2</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">verticalLayout_2</span><span
+style=" color:#000000;">-&gt;</span>addWidget<span style=" color:#000000;">(</span><span
+style=" color:#800000;">splitter_2</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">retranslateUi</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">Widget</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span>QMetaObject<span style=" color:#000000;">::</span>connectSlotsByName<span
+style=" color:#000000;">(</span><span style=" color:#000000;">Widget</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">setupUi</span></pre>
+    </div>
+    新建了 textBrowser 对象之后，也是设置它的尺寸策略，然后直接把第二行的 textBrowser 对象添加给整体的大分裂器
+    verticalLayout_2。setupUi() 函数最后两行代码是关于界面翻译和自动关联槽函数的函数调用。<br>
+    <br>
+    ui_widget.h 其他代码不讲解了，主要是学习构造界面的函数代码，因为实际编程过程中，可能会遇到需要手动编写布局器和分裂器的代码，所以专门在
+    6.2.5 小节和本小节讲解关于布局器和分裂器的构造代码。<br>
+    <br>
+    本章关于布局器和分裂器的知识就介绍这么多，前面几章和本章都是图形编程的基础知识，实际中都用得多，一定要打好基础。我们下章开始本教程第二部分 GUI
+    常规知识的学习，会先介绍 Qt 的文件、数据流、常用数据结构，然后讲解稍微复杂一些的控件，这些复杂控件应用广泛而且通常就是以较复杂的数据为基础的。<br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch06-05.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch07-00.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

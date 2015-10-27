@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="content-type">
+    <title>ch07-01</title>
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
+
+/***********************************************
+* Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
+* This notice must stay intact for legal use.
+* Visit http://www.dynamicdrive.com/ for full source code
+***********************************************/
+
+</script> </head>
+  <body>
+    <div class="os1">7.1 文件系统概览</div>
+    <br>
+    本节介绍文件系统相关知识，先大致讲解一下 Windows、Unix/Linux 的文件系统概貌，然后介绍 Qt 中目录浏览类 QDir 和文件信息类
+    QFileInfo。通过 QDir 和 QFileInfo 类协作，能够浏览文件系统中可访问的目录和文件，并且这些操作对 Qt
+    程序运行时的内部资源系统也是通用的，操作 Qt 程序内部资源系统中的目录和文件与真实文件系统是很类似的，唯一区别是 Qt
+    程序运行时的内部资源系统是只读的。本节最后学习两个示例，第一个示例获取程序运行时的环境相关的路径，并判断文件夹或文件是否存在；第二个综合示例展示文件系统的浏览和
+    文件信息显示，运用简单的列表控件列出系统中的目录和文件。<br>
+    <br>
+    <div class="os2">7.1.1 文件系统介绍</div>
+    <br>
+    操作系统所有的程序都离不开文件系统，整个操作系统其实就是各种文件夹和文件组成的，各种文件功能不同。Windows 操作系统磁盘分区格式常见为 NTFS
+    和 FAT32，Linux 常见的分区格式是 Ext3、Ext4、BTRFS
+    等。磁盘分区格式是对物理磁盘的逻辑划分，不同的操作系统划分分区的方式不同，文件系统的根目录也有区别。我们本小节先介绍 Windows
+    的文件系统，然后介绍 Unix/Linux 的文件系统。<br>
+    （1）Windows 文件系统<br>
+    Windows 通过“我的电脑”或者“资源管理器”都可以看到文件系统划分情况：<br>
+    <center><img src="images/ch07/ch07-01-01.png" alt="winroots"></center>
+    Windows 系统通常一个磁盘分区对应一个盘符，比如 C:\ ，D:\ 等等，注意每一个盘符就是一个文件系统根！<br>
+    “我的电脑”只是虚拟的称呼，它不是文件系统，真正的文件系统就是各个盘符管辖的分区范围，多个磁盘分区就是多个文件系统。<br>
+    对于某一个盘符下的文件系统，里面可以存放各种文件夹和文件，以 Qt 开发环境的文件夹为例：<br>
+    <center><img src="images/ch07/ch07-01-02.png" alt="winfiles"></center>
+    在上图地址栏里面显示的是完整的文件夹路径：C:\Qt\Qt5.4.0
+    ，该文件夹里面有各种子文件夹和文件，子文件夹或文件都有各自的详细信息，一般有四个基本的信息：名称、大小、类型、修改日期，并且可以根据这四个基本信息对子文件夹和文
+    件进行排序。Qt 对文件系统的访问是通过 QDir 和 QFileInfo 的协同，QDir
+    负责切换目录、枚举子文件夹和文件，并且可以对子文件夹、文件进行排序和过滤；而 QFileInfo
+    用于获取单个子文件夹或单个文件的详细信息，比如四个基本信息以及其他信息，比如读写权限等等。接下来我们看看 Unix/Linux
+    文件系统的情况，并对比一下二者的区别。<br>
+    <br>
+    （2）Unix/Linux 文件系统<br>
+    这里示范的是 openSUSE 操作系统，磁盘分区是 Ext4 格式，打开文件管理器，进入根分区可以看到下图所示：<br>
+    <center><img src="images/ch07/ch07-01-03.png" alt="linuxroot"></center>
+    Unix/Linux 文件系统根是唯一的，只有 / 。文件系统根 / 对应一个磁盘分区，这是肯定的，但是其他磁盘分区跑哪里去了？对于
+    Unix/Linux ，其他所有磁盘分区都是挂载到某个文件夹，而没有其他文件系统根。比如还有一个磁盘分区挂载到了 /home
+    文件夹，就是说这个文件夹本身就是一个磁盘分区。Unix/Linux 的逻辑磁盘分区都是挂载到某个文件夹的，而不是一个磁盘分区对应一个文件系统根。<br>
+    对于 Unix/Linux 新手而言，一定要注意权限问题，根分区里面绝大多数的文件夹、文件对于普通用户都是只读的，一般只有 /home/***/
+    里面的普通用户目录是可写的，因此普通用户能写入的文件夹很少，遇到写文件问题一定要考虑是不是没有写入权限。通常 Unix/Linux 系统中只有 root
+    用户能够读写所有的文件夹和文件，可以在命令行用 su 命令切换到 root 用户，然后再进行写入操作。<br>
+    我们示范安装 Qt5.4.0 是装到用户可写的 /home/***/ 目录里的，比如下面截图：<br>
+    <center><img src="images/ch07/ch07-01-04.png" alt="linuxfiles"></center>
+    Unix/Linux 系统的文件路径分隔符是 '/' ，而 Windows 系统的文件路径分隔符是 '\' 。<br>
+    对于 Qt 而言，内部路径字符串统一用 Unix/Linux 系统风格，都是 '/' ，所以 Qt 程序代码里面建议都用 '/'
+    作为文件路径分隔符，Qt 在不同的操作系统里面自动会把 '/' 换成本地化的文件路径分隔符来访问本地文件系统，而不需要程序员操心。<br>
+    Qt 类库对不同操作系统里面的文件系统的建模是一样的，都是利用 QDir 进行切换目录、枚举子文件夹和文件，并且可以对子文件夹、文件进行排序和过滤；而
+    QFileInfo 用于获取单个子文件夹或单个文件的详细信息，比如名称、大小、类型、修改日期等等。<br>
+    我们对 Windows 和 Unix/Linux 的文件系统作一下简单的对比：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 100px;" align="center"><b>对比项</b></td>
+          <td style="width: 200px;" align="center"><b>Windows</b></td>
+          <td style="width: 200px;" align="center"><b> Unix/Linux </b></td>
+          <td align="center"><b> Qt类或函数 </b></td>
+        </tr>
+        <tr>
+          <td>路径分隔符</td>
+          <td> '\' </td>
+          <td> '/' </td>
+          <td> QDir::​separator() 获取该分隔符 </td>
+        </tr>
+        <tr class="d1">
+          <td>文件系统根</td>
+          <td> 多个根，C:\，D:\ 等等 </td>
+          <td> 唯一的 / </td>
+          <td>QDir::​drives() 枚举文件系统根</td>
+        </tr>
+        <tr>
+          <td>目录操作</td>
+          <td> 命令行 cd 切换目录，dir 枚举 </td>
+          <td> 命令行 cd 切换目录，ls 枚举 </td>
+          <td> QDir 负责切换目录，枚举文件夹和文件 </td>
+        </tr>
+        <tr class="d1">
+          <td>文件信息</td>
+          <td> 命令行 dir 文件名 </td>
+          <td> 命令行 ls 文件名 </td>
+          <td> QFileInfo 负责查询单个文件夹或文件详细信息 </td>
+        </tr>
+        <tr>
+          <td>磁盘逻辑分区</td>
+          <td> NTFS、FAT32 </td>
+          <td> Ext3、Ext4、BTRFS等 </td>
+          <td> QStorageInfo 可以查询分区的信息（Qt 5.4 以上版本才有这个类） </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    在对文件系统有了基本的认识之后，我们来详细学习一下 QDir 和 QFileInfo
+    类的内容，最后通过一个文件浏览的例子运用这些知识。QStorageInfo 类比较新，运用的也比较少，与文件操作几乎无关，我们放到 7.5
+    节顺便提一下。<br>
+    <br>
+    <div class="os2">7.1.2 目录浏览类 QDir</div>
+    <br>
+    本小节内容主要来自 QDir 类的帮助文档，Qir 类用于访问文件系统中的目录结构和文件等。QDir
+    类的静态函数通常用于获取程序运行时系统相关的一些路径信息等，而对于具体某一个目录的操作，需要新建 QDir 对象来实现。<br>
+    QDir 用于操作路径文件名，访问关于目录路径、文件等信息，操作真实的底层文件系统。同时，QDir 的功能对 Qt
+    程序运行时的内部资源系统也是通用的，内部资源系统以 ":/" 为根目录。<br>
+    Qt 都是以 '/' 作为统一的路径分隔符，互联网上也是用 '/' 作为 URL 分隔符的。Qt 程序员应当总是使用 '/'
+    作为路径分隔符，而不用管操作系统原本的路径分隔符是什么。Qt 会自动把自己的路径文件名转换为底层文件系统可接受的形式，从而操作底层文件系统。<br>
+    QDir 既可以接受相对文件路径，也可以接受绝对文件路径。相对文件路径通常不以文件系统根打头，而绝对路径总是以文件系统根打头，比如 C:/、D:/ 、/
+    等等（从这里开始都使用 Qt 默认的路径分隔符）。相对路径的基准目录通常是应用程序的工作路径，比如 QtCreator
+    调试运行程序时，就以影子构建目录作为基准目录，其他情况通常是以可执行程序所在的目录为准。<br>
+    绝对路径举例：<br>
+    <div class="code">QDir("/home/user/Documents")<br>
+      QDir("C:/Documents and Settings")</div>
+    第一个绝对路径是 Unix/Linux 系统里的形式，第二个绝对路径是 Windows 里的形式。Qt 代码里面都是使用 '/'
+    ，作为路径分隔符，底层文件系统的本地路径分隔符不用操心，交给 Qt 自己处理就行了。<br>
+    相对路径举例：<br>
+    <div class="code">QDir("images/landscape.png")</div>
+    QDir 对象可以通过函数 isRelative() 判断自己包含的路径是否为相对路径，通过函数 isAbsolute()
+    判断自己包含的路径是否为绝对路径形式。另外可以通过 makeAbsolute() 函数<br>
+    <div class="code">bool QDir::​makeAbsolute()</div>
+    把自己的路径确切地转换为绝对路径，这样后续操作的意义更为明确。<br>
+    下面将 QDir 类的接口函数按照功能进行大致的分类讲解：<br>
+    （1）导航和目录操作<br>
+    QDir 构造函数可以指定该对象的起始浏览目录：<br>
+    <div class="code">QDir(const QDir &amp; dir)</div>
+    <div class="code">QDir(const QString &amp; path = QString())</div>
+    <div class="code"> QDir(const QString &amp; path, const QString &amp;
+      nameFilter, SortFlags sort = SortFlags( Name | IgnoreCase ), Filters
+      filters = AllEntries)</div>
+    第一个构造函数是复制另一个 QDir 对象。第二个是以路径字符串构造 QDir
+    对象，这也是最常用的构造函数，如果参数里字符串是空的，那么就以应用程序当前工作目录 "." 作为起始目录。第三个构造函数可以指定文件名过滤字符串
+    nameFilter、排序方式 sort ，以及文件类型过滤枚举 filters 。<br>
+    构造好 QDir 对象之后，就可以获取该对象当前处于的目录：<br>
+    <div class="code">QString QDir::​path() const&nbsp;&nbsp;&nbsp;
+      //可能是相对路径，也可能是绝对路径</div>
+    <div class="code">QString QDir::​absolutePath() const&nbsp;&nbsp;&nbsp;
+      //一定返回绝对路径</div>
+    如果要重新设置 QDir 对象的路径，那么可以通过如下函数设置：<br>
+    <div class="code">void QDir::​setPath(const QString &amp; path)</div>
+    注意 ​setPath() 函数是不检查参数 path 是否存在，也不管是不是有 "./../.."
+    之类复杂的相对路径形式，所以调用该函数可能进入一个不存在的目录，如果进一步操作可能导致出错，需要在调用该函数之前用 ​exists()
+    判断参数里的路径是否存在：
+    <div class="code">bool QDir::​exists(const QString &amp; name) const</div>
+    QDir 对象可以用&nbsp; dirName() 返回该层级目录的简短名字，不包含路径，通常就是绝对路径的最后一个子串：<br>
+    <div class="code">QDir("Documents/Letters/Applications").dirName()&nbsp;&nbsp;
+      //返回 "Applications"</div>
+    如果 QDir 构造函数里字符串为空，那么 dirName() 返回当前目录 "." ：<br>
+    <div class="code">QDir().dirName()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //返回&nbsp; "."</div>
+    除了 QDir 构造函数和 setPath() 函数，更常用的修改 QDir 对象当前目录位置的函数是 cd()：<br>
+    <div class="code">bool QDir::​cd(const QString &amp; dirName)</div>
+    cd() 函数比 setPath() 函数更智能，应该尽量用 cd() 函数，因为 cd()
+    函数会自动检查参数里的目录是否存在，如果参数里路径不存在，那么该函数返回 false，QDir 对象原本的路径不变；如果切换目录成功就返回
+    true，并进 入新目录。<br>
+    QDir 对象有切换到父目录的快捷函数：<br>
+    <div class="code">bool QDir::​cdUp()</div>
+    切换成功就返回 true（有父目录）；切换失败就返回 false（没父目录，原本已经到根了）。<br>
+    <br>
+    QDir对象不仅能访问文件夹，还能在自己当前的目录里面进行创建、重命名和删除的操作：<br>
+    <div class="code">bool QDir::​mkdir(const QString &amp; dirName)
+      const&nbsp;&nbsp;&nbsp; //创建新目录</div>
+    <div class="code">bool QDir::​rename(const QString &amp; oldName, const
+      QString &amp; newName) //重命名旧的目录</div>
+    <div class="code">bool QDir::​rmdir(const QString &amp; dirName)
+      const&nbsp;&nbsp;&nbsp; //删除一个空目录</div>
+    这些操作如果成功就返回 true，失败就返回 false。注意：<br>
+    ​mkdir() 参数里的文件路径不能是已经有的（创建已有的会返回失败），必须是新的；<br>
+    ​rename() 参数里，旧的目录名 oldName 必须存在，新的目录名 newName 不能与已有的重名；<br>
+    rmdir() 函数只能删除空文件夹，如果文件夹里面有其他文件或子文件夹就不能删除。<br>
+    操作失败的原因，还有可能是没有权限，因为 Unix/Linux 普通用户经常没有写权限，这些操作就容易失败。对于 Unix/Linux
+    普通用户，应该只操作自己有写入权限的 /home/***/ 路径里面的文件夹和文件。<br>
+    <br>
+    对于递归创建新的长路径，QDir 提供了快捷函数：<br>
+    <div class="code">bool QDir::​mkpath(const QString &amp; dirPath) const</div>
+    dirPath 可以是长路径，比如 "/home/suse132/Projects/a/b/c"
+    ，对于路径上已有的文件夹"/home/suse132/"，不会构造新的，而后半部不存在的 "Projects/a/b/c"
+    ，该函数会逐级递归创建新文件夹，直到 "/home/suse132/Projects/a/b/c" 每一个层级文件夹都存在。如果创建成功或者
+    dirPath 已经存在，都会返回 true，创建失败就返回 false。<br>
+    ​mkpath() 函数的逆操作函数是：<br>
+    <div class="code">bool QDir::​rmpath(const QString &amp; dirPath) const</div>
+    注意 ​rmpath() 只能删除空的文件夹，如果参数里是
+    "Projects/a/b/c"，只要其中有一层的文件夹里面有其他子文件夹或文件，都会操作失败。 <span style="font-weight: bold;">而
+      且不要以绝对路径为参数调用</span> <span style="font-weight: bold;"> rmpath()
+      函数，因为文件系统根总是存在的，不能删除，不要这么干！</span><br>
+    <br>
+    QDir对象可以对自己目录里的一些属性进行判断，比如：<br>
+    <div class="code">bool QDir::​exists(const QString &amp; name)
+      const&nbsp;&nbsp;&nbsp; //子文件夹或文件是否存在</div>
+    <div class="code">bool QDir::​isReadable() const&nbsp;&nbsp;&nbsp;
+      //QDir对象当前目录是否有读权限，Linux系统有些目录普通用户不能读取</div>
+    <div class="code">bool QDir::​isAbsolute() const&nbsp;&nbsp;&nbsp;
+      //QDir对象当前目录是否为绝对路径</div>
+    <div class="code">bool QDir::​isRelative() const&nbsp;&nbsp;&nbsp;
+      //QDir对象当前目录是否为相对路径</div>
+    <div class="code">bool QDir::​isRoot() const&nbsp;&nbsp;&nbsp;
+      //QDir对象当前目录是否为文件系统根</div>
+    一般 QDir 对象会对先前的文件系统状态有个缓存，如果在程序运行时文件系统改变了，可以通过如下函数刷新一下缓存，重新访问文件系统：<br>
+    <div class="code">void QDir::​refresh() const</div>
+    <br>
+    （2）文件和目录内容枚举<br>
+    目录里面可以包含一大堆条目，每个条目可以是文件、子文件夹、符号链接（快捷方式）等，目录里面的条目计数为：<br>
+    <div class="code">uint QDir::​count() const</div>
+    如果要获取 QDir 对象当前目录所有子条目名称字符串列表，使用函数：<br>
+    <div class="code">QStringList QDir::​entryList(Filters filters = NoFilter,
+      SortFlags sort = NoSort) const</div>
+    <div class="code">QStringList QDir::​entryList(const QStringList &amp;
+      nameFilters, Filters filters = NoFilter, SortFlags sort = NoSort) const</div>
+    函数参数里的 filters 是指条目类型的过滤枚举类型，sort 是指返回的条目列表的排序方式；第二个 ​entryList() 函数里的
+    nameFilters 是指条目名称的过滤字符串列表 。这几个参数都有专门对应的设置函数，等会再讲。entryList()
+    函数返回的字符串列表打印出来就是得到的文件、子文件夹、符号链接（快捷方式）名字。<br>
+    当前目录里的子条目当然不仅仅有名字，还有其他很多属性，比如文件类型、大小、修改日期、读写属性等等，单个文件或文件夹的详细信息是用 QFileInfo
+    对象表示的，从 QDir 对象的目录枚举出所有子条目详细信息的函数为：<br>
+    <div class="code">QFileInfoList QDir::​entryInfoList(Filters filters =
+      NoFilter, SortFlags sort = NoSort) const</div>
+    <div class="code">QFileInfoList QDir::​entryInfoList(const QStringList &amp;
+      nameFilters, Filters filters = NoFilter, SortFlags sort = NoSort) const</div>
+    ​entryInfoList() 函数的参数同上面 ​entryList() 的参数，只是返回结果为 QFileInfo 的列表
+    QFileInfoList 。QFileInfoList 列表当作数组来用就行了，序号从 0 到 count()-1
+    ，每个条目对应一个文件或子文件夹或符号链接。<br>
+    在不过滤的情况下，entryList() 和 entryInfoList() 返回的列表包含 "." 和 ".."
+    目录，一个点代表当前目录自己，两个点代表父目录。<br>
+    <br>
+    <span style="font-weight: bold;">注意 QDir
+      对象内部存储的当前目录，可以是真实存在的路径，也可以是虚假的不存在路径：</span><br>
+    ◆ 实际存在的路径通常用于枚举或访问真实子文件夹、文件等，可以用 ​exists() 函数判断目录或文件是否存在。<br>
+    ◆ 对于不存在的当前目录，QDir 对象也可以照常工作，但因为不存在，所以枚举子条目肯定是空的。如果 QDir
+    对象里面存储的是不存在的当前目录，那么通常用于构造路径字符串，用于下一步构建路径，比如用于 mkpath() 函数。<br>
+    <br>
+    根据 QDir 对象里的当前目录，配合 filePath() 和 absoluteFilePath()
+    函数可以构造出文件的路径，这些路径可以是都不存在的，也可以是真实的，也是用 ​exists() 函数判断存在性，以下面代码为例：<br>
+    <div class="code"><span style=" color:#c0c0c0;">&nbsp;&nbsp;&nbsp; </span><span
+        style=" color:#800080;">QDir</span><span style=" color:#c0c0c0;"> </span><span
+        style=" color:#000000;">directory</span><span style=" color:#000000;">(</span><span
+        style=" color:#008000;">"Documents/Letters"</span><span style=" color:#000000;">);</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">path</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">directory</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">filePath</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"contents.txt"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">absolutePath</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">directory</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">absoluteFilePath</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"contents.txt"</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">directory</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">exists</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">path</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">absolutePath</span><span
+style=" color:#000000;">;</span></pre>
+    </div>
+    如果程序的工作路径（QtCreator调试运行程序时为影子构建目录）为<br>
+    D:\QtProjects\ch02\build-hellocreator-Desktop_Qt_5_4_0_MinGW_32bit-Debug<br>
+    实际上在这个路径里，根本没有 "Documents/Letters" 这两级子目录，上面代码还会正常工作，它就是分别计算文件
+    "contents.txt" 的相对于 QDir 对象的相对路径，以及 "contents.txt" 文件的绝对路径，上面一段代码的结果就是：<br>
+    <div class="code">false<br>
+      "Documents/Letters/contents.txt"<br>
+"D:/QtProjects/ch02/build-hellocreator-Desktop_Qt_5_4_0_MinGW_32bit-Debug/Documents/Letters/contents.txt"</div>
+    这些路径其实都不存在，filePath() 和 absoluteFilePath() 函数仅仅是拼接出文件的完整路径，而不管它存在或不存在。<br>
+    <br>
+    <span style="font-weight: bold;">在使用 QDir 对象时，一定要用 exists() 函数谨慎判断路径是否真实存在！</span><br>
+    <br>
+    如果要删除一个已存在的文件，使用如下函数：<br>
+    <div class="code">bool QDir::​remove(const QString &amp; fileName)</div>
+    删除成功就返回 true，如果没有该文件或者没有删除权限等，删除失败返回 false。<br>
+    删除一个空目录用之前说过的 ​rmdir() 函数。<br>
+    <br>
+    下面讲讲枚举子条目时的过滤和排序，除了可以直接在 ​entryList() 和 ​entryInfoList()
+    指定各个参数，还可以用专门的函数设置这两个函数用到的参数：<br>
+    ①名称字符串过滤设置<br>
+    <div class="code">void QDir::​setNameFilters(const QStringList &amp;
+      nameFilters)</div>
+    nameFilters 是针对子条目名称的过滤串，参考帮助文档主题&nbsp; QRegExp wildcard matching 的内容，常用的就是
+    *，匹配任意个数字符，比如<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QStringList filters;<br>
+      &nbsp;&nbsp;&nbsp; filters &lt;&lt; "*.cpp" &lt;&lt; "*.cxx" &lt;&lt;
+      "*.cc";<br>
+      &nbsp;&nbsp;&nbsp; dir.setNameFilters(filters);</div>
+    这段代码就是过滤后得到 "*.cpp" 、 "*.cxx" 、 "*.cc" 三个扩展名的源代码文件。<br>
+    QDir 类另外提供了一个静态函数，用于判断某个文件名是否匹配某个名称过滤串：<br>
+    <div class="code">bool QDir::​match(const QString &amp; filter, const
+      QString &amp; fileName)&nbsp;&nbsp; //静态函数</div>
+    <br>
+    ②类型权限等过滤设置<br>
+    <div class="code">void QDir::​setFilter(Filters filters)</div>
+    这个 filters 与条目名称无关，它判断的是条目类型，Filters 枚举常量很多，根据 QDir 的帮助文档列举如下：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 200px;" align="center"><b>Filters 枚举常量</b></td>
+          <td style="width: 200px;" align="center"><b>数值</b></td>
+          <td align="center"><b> 描述 </b></td>
+        </tr>
+        <tr>
+          <td>QDir::Dirs</td>
+          <td> 0x001 </td>
+          <td> 列出匹配名称过滤串的目录 </td>
+        </tr>
+        <tr class="d1">
+          <td>QDir::AllDirs</td>
+          <td> 0x400 </td>
+          <td> 列出所有目录，不管名称过滤串 </td>
+        </tr>
+        <tr>
+          <td>QDir::Files</td>
+          <td> 0x002 </td>
+          <td> 列出文件 </td>
+        </tr>
+        <tr class="d1">
+          <td>QDir::Drives</td>
+          <td> 0x004 </td>
+          <td> 列出磁盘分区盘符（Unix/Linux 忽略这个值） </td>
+        </tr>
+        <tr>
+          <td>QDir::NoSymLinks</td>
+          <td> 0x008 </td>
+          <td> 不列举符号链接 </td>
+        </tr>
+        <tr class="d1">
+          <td>QDir::AllEntries</td>
+          <td> Dirs | Files | Drives </td>
+          <td> 列出目录、文件、磁盘分区盘符、符号链接 </td>
+        </tr>
+        <tr>
+          <td>QDir::NoDot</td>
+          <td> 0x2000 </td>
+          <td> 不列举 "." </td>
+        </tr>
+        <tr class="d1">
+          <td>QDir::NoDotDot</td>
+          <td> 0x4000 </td>
+          <td> 不列举 ".."，当前的父目录 </td>
+        </tr>
+        <tr>
+          <td>QDir::NoDotAndDotDot</td>
+          <td> NoDot | NoDotDot </td>
+          <td> 不列举 "." 和 ".." </td>
+        </tr>
+        <tr class="d1">
+          <td>QDir::NoFilter</td>
+          <td> -1 </td>
+          <td> 条目类型不做任何过滤，默认是这个 </td>
+        </tr>
+        <tr>
+          <td>空行 </td>
+          <td>空行 </td>
+          <td> 上面的常量比较常用，下面的枚举常量基本与文件系统权限有关： </td>
+        </tr>
+        <tr class="d1">
+          <td>QDir::Readable</td>
+          <td> 0x010 </td>
+          <td> 列出本应用程序可以读取的文件，注意 Readable 枚举值需要与 Dirs 或 Files 结合使用。 </td>
+        </tr>
+        <tr>
+          <td>QDir::Writable </td>
+          <td>0x020 </td>
+          <td> 列出本应用程序可以写入的文件，注意 Writable 枚举值需要与 Dirs 或 Files 结合使用。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QDir::Executable</td>
+          <td> 0x040 </td>
+          <td> 列出本应用程序具有执行权限的文件，注意 Executable 枚举值需要与 Dirs 或 Files 结合使用。</td>
+        </tr>
+        <tr>
+          <td>QDir::Modified </td>
+          <td>0x080 </td>
+          <td> 只列出曾经被修改过的文件（Unix系统忽略这个值） </td>
+        </tr>
+        <tr class="d1">
+          <td>QDir::Hidden</td>
+          <td> 0x100 </td>
+          <td> 列出隐藏文件（Unix系统以 '.' 打头的文件名）。</td>
+        </tr>
+        <tr>
+          <td>QDir::System </td>
+          <td>0x200 </td>
+          <td> 列出系统文件（Unix系统中包含 FIFOs、套接字、设备文件等，Windows系统中包含 .lnk 文件） </td>
+        </tr>
+        <tr class="d1">
+          <td>QDir::CaseSensitive</td>
+          <td> 0x800 </td>
+          <td> 名称过滤字符串中字母是大小写敏感的。</td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    一般对于条目类型，使用默认的不过滤即可，如果确定要过滤为仅文件或仅文件夹，可以用上面的枚举常量进行筛选。QDir::Readable、
+    QDir::Writable 、QDir::Executable 是 Unix/Linux 系统里常见的权限划分，需要与 QDir::Dirs 或者
+    QDir::Files 做按位或 | ，结合使用。<br>
+    <br>
+    ③排序设置<br>
+    <div class="code">void QDir::​setSorting(SortFlags sort)</div>
+    这个参数决定 ​entryList() 和 ​entryInfoList() 返回列表的排序方式，SortFlags 排序的枚举常量如下：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 200px;" align="center"><b>SortFlags 枚举常量</b></td>
+          <td style="width: 200px;" align="center"><b>数值</b></td>
+          <td align="center"><b> 描述 </b></td>
+        </tr>
+        <tr>
+          <td><b>QDir::Name</b></td>
+          <td> 0x00 </td>
+          <td> 按名称排序 </td>
+        </tr>
+        <tr class="d1">
+          <td><b>QDir::Time</b></td>
+          <td> 0x01 </td>
+          <td> 按时间排序（修改时间） </td>
+        </tr>
+        <tr>
+          <td><b>QDir::Size</b></td>
+          <td> 0x02 </td>
+          <td> 按大小排序 </td>
+        </tr>
+        <tr class="d1">
+          <td><b>QDir::Type</b></td>
+          <td> 0x80 </td>
+          <td> 按类型排序（扩展名） </td>
+        </tr>
+        <tr>
+          <td>QDir::Unsorted</td>
+          <td> 0x03 </td>
+          <td> 不排序 </td>
+        </tr>
+        <tr class="d1">
+          <td>QDir::NoSort</td>
+          <td> -1 </td>
+          <td> 不排序，默认是这个值 </td>
+        </tr>
+        <tr>
+          <td>QDir::DirsFirst</td>
+          <td> 0x04 </td>
+          <td> 文件夹排在前面，文件排在后面 </td>
+        </tr>
+        <tr class="d1">
+          <td>QDir::DirsLast</td>
+          <td> 0x20 </td>
+          <td> 文件夹排在后面，文件排在前面 </td>
+        </tr>
+        <tr>
+          <td>QDir::Reversed</td>
+          <td> 0x08 </td>
+          <td> 逆序排列 </td>
+        </tr>
+        <tr class="d1">
+          <td>QDir::IgnoreCase</td>
+          <td> 0x10 </td>
+          <td> 排序时大小写不敏感 </td>
+        </tr>
+        <tr>
+          <td>QDir::LocaleAware</td>
+          <td> 0x40 </td>
+          <td> 根据当前本地化的设置进行恰当地排序（有些本地化语言从右往左读） </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    注意前四个排序常量只能四选一，不能同时运用。一般在前四个选一个作为排序标准，后面的枚举常量与前面四选一的做 | 运算，后面的枚举常量就可以同时生效。<br>
+    <br>
+    无论是通过上面三个设置函数专门设置，还是直接在 ​entryList() 和 ​entryInfoList() 指定各个参数，都是可行的，效果是等价的。<br>
+    <br>
+    （3）应用程序工作路径和其他特殊路径<br>
+    这部分都是 QDir 类的静态函数，属于该应用程序自己的全局设置，这些静态函数返回 QDir 对象或 QString 字符串，列举如下：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 200px;" align="center"><b>返回QDir对象</b></td>
+          <td style="width: 200px;" align="center"><b>返回QString</b></td>
+          <td align="center"><b> 静态函数描述 </b></td>
+        </tr>
+        <tr>
+          <td> current() </td>
+          <td> currentPath() </td>
+          <td> 应用程序的工作目录（这个可以更改） </td>
+        </tr>
+        <tr class="d1">
+          <td> home() </td>
+          <td> homePath() </td>
+          <td> 用户的主文件夹，或叫家目录 </td>
+        </tr>
+        <tr>
+          <td> root() </td>
+          <td> rootPath() </td>
+          <td> 应用程序所在文件系统的根分区 </td>
+        </tr>
+        <tr class="d1">
+          <td> temp() </td>
+          <td> tempPath() </td>
+          <td> 操作系统里默认的临时文件目录 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    其中应用程序自己的工作路径是可以改的：
+    <div class="code">bool QDir::​setCurrent(const QString &amp; path)</div>
+    其他的路径一般都是系统定死的，Qt 是不修改其他三个路径的。<br>
+    应用程序的工作路径不等于可执行程序所在的目录，比如 QtCreator
+    调试运行程序时，工作路径是影子构建目录。获取可执行程序所在的目录使用另一个类的静态函数：<br>
+    <div class="code">QString
+      QCoreApplication::​applicationDirPath()&nbsp;&nbsp;&nbsp; //静态函数</div>
+    联合 QDir::​setCurrent() 和 QCoreApplication::​applicationDirPath()
+    就可以把程序的工作路径设置为与可执行文件相同的路径：<br>
+    <div class="code"><span style=" color:#c0c0c0;">&nbsp;&nbsp;&nbsp; </span><span
+        style=" color:#800080;">QDir</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">setCurrent</span><span style=" color:#000000;">(</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QCoreApplication</span><span
+        style=" color:#000000;">::</span><span style=" color:#000000;">applicationDirPath</span><span
+        style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span
+        style=" color:#000000;">);</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#800080;">QDir</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">currentPath</span><span
+style=" color:#000000;">();</span></pre>
+    </div>
+    把上面代码放到主界面的构造函数里就能在程序运行时自动修改工作路径。<br>
+    <br>
+    如果要获取文件系统根的列表，使用 QDir::​drives() 静态函数，之前 Windows 和 Linux 文件系统截图都提到这个函数：<br>
+    <div class="code">QFileInfoList QDir::​drives()&nbsp;&nbsp;&nbsp; //静态函数</div>
+    对于 Windows 系统，一般有多个文件系统根，如 C:/ ，D:/ 等等，对于 Unix 和 Linux 系统，只有一个根 / 。<br>
+    <br>
+    （4）路径操作和字符串<br>
+    相对路径中经常包含一些 "." 代表当前目录，".." 代表父目录，还有一些符号链接（快捷方式）指向其他真实文件。<br>
+    Qt 提供了如下函数对这些进行处理规约，得到绝对权威路径：<br>
+    <div class="code">QString QDir::​canonicalPath() const&nbsp;&nbsp;&nbsp;
+      //会自动判断路径是否真实存在</div>
+    如果规约后的当前路径是不存在的，那么该函数返回空串，如果规约后的当前路径是真实存在的，就返回最简化的绝对权威路径。<br>
+    <br>
+    另一个弱化版的静态规约函数是 cleanPath()，它不检查路径是否真实存在，也不管是不是符号链接（快捷方式），它只对 "." 、
+    ".."&nbsp; "/" 等做规约处理，去掉冗余的点号和斜杠：<br>
+    <div class="code">QString QDir::​cleanPath(const QString &amp;
+      path)&nbsp;&nbsp;&nbsp; //静态函数</div>
+    <br>
+    在特殊场合，可能需要将 Qt 统一的路径字符串形式与操作系统本地化的文件路径形式进行互相转换，QDir 提供一对静态函数实现这个转换：<br>
+    <div class="code">QString QDir::​fromNativeSeparators(const QString &amp;
+      pathName)&nbsp;&nbsp;&nbsp; //静态函数，从本地化路径串转为 Qt 风格路径串</div>
+    <div class="code">QString QDir::​toNativeSeparators(const QString &amp;
+      pathName)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //静态函数，将 Qt 风格路径串转为本地化路径串</div>
+    <br>
+    关于 QDir
+    类的内容介绍就到这，最后小节的文件浏览示例是用最简单的接口，也不排序和过滤，就按照默认的参数列举文件夹和文件，等到下一章学到表格控件时再做排序和过滤方面的功能。<br>
+    <br>
+    <div class="os2">7.1.3 文件信息类 QFileInfo</div>
+    <br>
+    <br>
+    <br>
+    <div class="os2">7.1.4 路径查看和判断示例</div>
+    <br>
+    <br>
+    <br>
+    <div class="os2">7.1.5 文件系统浏览示例</div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch07-00.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch07-02.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>

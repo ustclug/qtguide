@@ -3,11 +3,9 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <title>ch07-02</title>
-    
-<link href="css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-
-<script src="thumbnailviewer.js" type="text/javascript">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -15,32 +13,2062 @@
 * Visit http://www.dynamicdrive.com/ for full source code
 ***********************************************/
 
-</script>
-
-
-  </head>
-  
-  
-<div class="os1">7.2 基本文件读写QFile</div>
-<br />
-7.2 节开始介绍基本的文件读取写入，即通过 QFile 类操作指定文件。<br />
-
-
-
-
-
-
-<br />
-<br />
-<br />
-
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch07-01.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch07-03.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+</script> </head>
+  <body>
+    <div class="os1">7.2 基本文件读写QFile</div>
+    <br>
+    Qt 常见的文件读写类有三个 QFile、QTextStream 和 QDataStream，本节先概要介绍这三个文件读写类，然后详细介绍 QFile
+    类的内容，从 QFile 的基类讲起，介绍 QFile 关于文件属性、权限方面的函数和实际中常用的读写函数，最后通过两个例子展示 QFile
+    类的用法，第一个例子是读写 Unix/Linux 常见配置文件，解析文本形式的配置项和数值；第二个例子是读取 BMP
+    图片文件头，解析字节数组（结构体）形式的文件。<br>
+    <br>
+    <div class="os2">7.2.1 三个常用文件读写类概览</div>
+    <br>
+    QFile、QTextStream 和 QDataStream 三个类的关系可以用下图来说明：<br>
+    <center><img src="images/ch07/ch07-02-01.png" alt="fileIO"></center>
+    QFile 是基本的文件读写类，它的主要功能其实就是负责打开文件，虽然它自己有读写文件中字节、字节数组的函数，但是直接用 QFile
+    类的接口函数读写文件的情况是相对少见的，因为 QFile 的读写函数功能比较简单，就是面向字节数据进行读写。<br>
+    C++ 和 Qt 常用的类型比如 int、double、QString、QRect等，都不是简单 char * 和 char 类型，如果用 QFile
+    读写这些常用数据类型，要手动转成 char * 来读写，比较麻烦。<br>
+    <br>
+    Qt 更为常用的文件读写类是 QTextStream 和 QDataStream ，这两个类都有类似的构造函数，构造函数是以 QFile *
+    指针为参数，它们为 C++ 和 Qt 常用的数据类型读写操作做了封装，类似标准 C++ 的 iostream 和 fstream。使用
+    QTextStream 和 QDataStream 之前，要先定义 QFile 对象，打开指定文件，然后根据 QFile 对象指针构造高级的读写类
+    QTextStream 和 QDataStream 对象，然后就可以用输入输出流的操作符 &gt;&gt; 和 &lt;&lt; 读写变量。<br>
+    <br>
+    QTextStream 专门用于读写文本形式的文件，并且自动对文本字符的本地化编码做转换，在简体中文 Windows 系统它默认按照 GBK
+    的中文编码读写文本文件，在 Unix/Linux 系统自动以 UTF-8 编码读写文本文件，所以几乎不需要操心文本字符编码的问题。<br>
+    <br>
+    QDataStream 是 Qt
+    独有的“串行化数据流”，可以用于文件读写和网络数据流读写。对于文件或网络数据的读写，可以自己定义数据结构体封装不同基本类型的数据，然后作为一个整体数据块读写，但
+    这种方式不通用，因为数据类型一旦变化，就得重新定义结构体，读写代码也要大幅度变动，效率很低。串行化数据流，就是对所有已知数据类型全部做格式封装，相当于全
+    自动打包成结构体（不需要人为定义）收发，只要在发送（写入）和接收（读取）时按照相同顺序填充即可，其他的都交给 Qt
+    库处理，程序员就不用管数据是如何打包解包的，如果数据类型变了，只需要修改写入和读取的两句代码，其他的都不需要调整。<br>
+    <br>
+    本节先介绍 QFile 类的功能，后面两大节介绍 QTextStream 和 QDataStream ，下面先看 QFile 类的继承关系，因为
+    QFile 的读写函数其实都封装在基类 QIODevice 里面。<br>
+    <br>
+    <div class="os2">7.2.2 QFile 类继承关系</div>
+    <br>
+    在 Qt 帮助文档里面，如果直接查询 QFile 帮助文档，看不到几个关于文件读写的函数，因为 Qt 将读写操作都封装在基类 QIODevice 里面：<br>
+    <center><img src="images/ch07/ch07-02-02.png" alt="QFile"></center>
+    QIODevice 类是对输入输入设备的抽象建模，涉及到读写的文件类 QFile 、网络收发QTcpSocket/QUdpSocket、进程输入输出
+    QProcess，都是从 QIODevice 类派生的。QIODevice
+    是非常重要的基类，以后讲到网络收发和进程类时还会再讲，本节主要关注与文件读写相关的接口函数。<br>
+    QFileDevice 是对文件设备的抽象，其实在 Unix 和 Linux 系统中所有东西都是文件设备，就连硬件设备也抽象成文件设备，比如
+    /dev/usb0 是代表 USB 设备的文件，QFileDevice 就是描述文件设备的类，QFileDevice 这一层基类的接口函数比较少，可以不
+    用管的。<br>
+    QFile 类就是本节的学习重点，随后慢慢讲解。一同从 QFileDevice 派生的还有个 QSaveFile ，这个保存文件类，就为了安全地保存文件
+    而设计的，因为程序运行时可能有 bug
+    导致崩溃，如果崩溃时正在写入文件，那么文件被改写了一部分，但又没修改完全，会导致原始文件的损坏。QSaveFile
+    就是为了解决文件的不安全读写，避免出现半吊子问题，QSaveFile 有两个重要函数：cancelWriting() 函数取消写入操作，commit()
+    提交所有写入操作，知道 QSaveFile 有这两个函数就差不多了，因为也没其他重要功能。QSaveFile
+    类不单独讲了，因为就那两个重要函数而已。下面开始学习 QFile 类。<br>
+    <br>
+    <div class="os2">7.2.3 QFile功能函数</div>
+    <br>
+    在多数情况下，QFile 都是配合 QTextStream 和 QDataStream 使用，当然也可以使用 QFile
+    自带的读写函数处理文件。QFile 不仅适合于普通的文件系统，而且对 Qt 程序内嵌的资源文件也是通用的，区别只是内嵌资源文件全是只读的。下面大致分几块
+    来介绍 QFile 的功能函数：<br>
+    <br>
+    （1）构造函数和打开函数<br>
+    QFile 通常在构造函数里指定需要打开的文件名：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QFile(const QString &amp; name)</div>
+    <div class="code">&nbsp;&nbsp;&nbsp; QFile(QObject * parent)</div>
+    <div class="code">&nbsp;&nbsp;&nbsp; QFile(const QString &amp; name, QObject
+      * parent)</div>
+    参数 name 就是需要打开的文件名，注意必须是实际的文件路径，不能是只有文件夹路径。parent
+    是父对象指针。对于第二个构造函数，没有指定文件名，必须在之后的代码里用如下函数设置文件名：<br>
+    <div class="code">void QFile::​setFileName(const QString &amp; name)</div>
+    设置了文件名之后才能打开文件进行读写。获取文件名就用 fileName() 函数，不单独列了。<br>
+    <br>
+    可以使用多种模式打开文件，比如只读模式、只写模式、读写模式等，最常用的打开函数为：<br>
+    <div class="code">bool QFile::​open(OpenMode mode)</div>
+    OpenMode 枚举类型是在基类&nbsp; QIODevice 定义的，有如下打开模式：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 200px;" align="center"><b>OpenMode 枚举常量</b></td>
+          <td style="width: 200px;" align="center"><b>数值</b></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>QIODevice::NotOpen</td>
+          <td> 0x0000 </td>
+          <td> 用于表示设备或文件尚未打开。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QIODevice::ReadOnly</td>
+          <td> 0x0001 </td>
+          <td> 按读取模式打开。 </td>
+        </tr>
+        <tr>
+          <td>QIODevice::WriteOnly</td>
+          <td> 0x0002 </td>
+          <td> 按写入模式打开，注意单独用这个模式会暗含Truncate。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QIODevice::ReadWrite</td>
+          <td> ReadOnly | WriteOnly </td>
+          <td> 按读取和写入模式打开，既能读也能写。 </td>
+        </tr>
+        <tr>
+          <td>QIODevice::Append</td>
+          <td> 0x0004 </td>
+          <td> 按追加模式打开，文件以前存在的内容不会被覆盖，新数据从文件末尾开始写入。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QIODevice::Truncate</td>
+          <td> 0x0008 </td>
+          <td> 强制清空文件里以前存的旧数据，新数据从零开始写入。 </td>
+        </tr>
+        <tr>
+          <td>QIODevice::Text</td>
+          <td> 0x0010 </td>
+          <td> 在读取时，把行尾结束符修改为 '\n'； 在写入时，把行尾结束符修改为本地系统换行风格，比如Windows文本换行是 "\r\n"
+          </td>
+        </tr>
+        <tr class="d1">
+          <td>QIODevice::Unbuffered</td>
+          <td> 0x0020 </td>
+          <td> 忽略缓冲区，直接读写设备或文件。除非是实时性很强的程序，否则用不到。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    文件读取时，常见组合如下面两句：<br>
+    <div class="code">file.open(QIODevice::ReadOnly);&nbsp;&nbsp;&nbsp; //以只读方式打
+      开文件</div>
+    <div class="code">file.open(QIODevice::ReadOnly |
+      QIODevice::Text);&nbsp;&nbsp;&nbsp; //确定是读取文本文件，并且自动把换行符修改为 '\n'</div>
+    注意以 QIODevice::Text 模式打开文件时，读写的数据不一定是原始数据，因为 QFile
+    自动把换行符做了转换，读取得到的缓冲区数据与原始文件是可能不一样的，比如 Windows 文本，换行符是 "\r\n" 两个字符，用
+    QIODevice::Text 读取时只会看到 '\n' 一个字符；写入时就反过来，代码写入一个 '\n'，实际文件就是两个连续字符
+    "\r\n"，所以要注意 QIODevice::Text 模式读写的不一定是原始数据。<br>
+    <br>
+    对于文件写入时，其常用打开模式如下：<br>
+    <div class="code">file.open(QIODevice::WriteOnly);&nbsp;&nbsp;&nbsp;
+      //以只写模式打开，这个模式暗含 Truncate，会清空旧数据</div>
+    <div class="code">file.open(QIODevice::WriteOnly |
+      QIODevice::Truncate);&nbsp;&nbsp;&nbsp; //只写模式，清空旧数据</div>
+    <div class="code">file.open(QIODevice::WriteOnly | QIODevice::Append);
+      &nbsp;&nbsp;&nbsp; //只写和追加模式，不会清空旧数据</div>
+    <br>
+    如果文件打开时既要读，又要写，那么建议用如下模式：<br>
+    <div class="code">file.open(QIODevice::ReadWrite);&nbsp;&nbsp;&nbsp;
+      //读写模式，旧数据不会清空，可以读出来</div>
+    <br>
+    文件打开之后，可以用从 QIODevice 继承来的读写函数操作文件，或者用 QFile 对象指针构造 QTextStream 或
+    QDataStream 来读写文件。<br>
+    <br>
+    除了上面最常用的打开函数，另外还有两个不太常用的打开函数：<br>
+    <div class="code">bool QFile::​open(FILE * fh, OpenMode mode,
+      FileHandleFlags handleFlags = DontCloseHandle)</div>
+    <div class="code">bool QFile::​open(int fd, OpenMode mode, FileHandleFlags
+      handleFlags = DontCloseHandle)</div>
+    上面第一个不常用打开函数可以打开标准输入流 stdin、标准输出流 stdout、标准错误流 stderr
+    ，或者其他文件句柄（Windows系统中参数里的 fh 句柄必须以二进制模式打开，打开句柄时要带 'b' 模式）。最后的参数 handleFlags
+    一般就用不关闭的 DontCloseHandle 就可以了，如果希望 QFile 对象析构时自动关闭文件或流，那么可以用
+    QFileDevice::AutoCloseHandle 。<br>
+    <br>
+    对于 Windows 平台，如果希望在图形界面程序里面用标准的输入输出和错误流，那么必须在项目文件加一句：<br>
+    <div class="code">CONFIG += console</div>
+    <br>
+    上面第二个不常用 open() 函数是以 fd 文件描述符参数，与 C 语言里面的文件读写用到的文件描述符类似，如果 fd 为 0 是标准输入流，为 1
+    是标准输出流，为 2 是标准错误流。<br>
+    <br>
+    <span style="font-weight: bold;">open() 函数打开正确就返回 true，否则返回
+      fasle，注意判断该函数的返回值，然后再进行文件读写操作！</span><br>
+    <br>
+    （2）读写函数<br>
+    本小节主要介绍从 QIODevice 继承而来的读写函数，这些函数要在 QIODevice 类帮助文档才能找到。<br>
+    首先是简单的字节读写函数：<br>
+    <div class="code">bool QIODevice::​getChar(char * c)</div>
+    参数指针 c 就是读取的一个字节将要存到的变量指针，程序员需要自己先定义一个 char 变量，把这个变量地址传递给 ​getChar()
+    函数，如果读取一字节成功就返回 true；如果之前已经到了文件末尾，没有字节可以读了，就返回 false。 ​getChar() 函数有一个逆操作函数：<br>
+    <div class="code">void QIODevice::​ungetChar(char c)</div>
+    这个函数就是把之前读取的字节 c （这次是变量，不是指针）放回去，并且当前读取游标减一，还原到读取之前状态。注意，如果 c
+    字节不等于之前读取的字节数值，那么 ​ungetChar() 函数操作结果无法预知，<span style="font-weight: bold;">所
+      以不要使用 ​ungetChar() 函数修改文件！</span><br>
+    <br>
+    写入一个字节到文件中，应该使用函数：<br>
+    <div class="code">bool QIODevice::​putChar(char c)</div>
+    这个函数会把字节 c 写入文件，并将文件游标加一。<br>
+    <br>
+    这里我们专门讲一下文件游标，文件在读写时，共同使用一个唯一的游标（QFile内部有），我们这里随便取个名字叫 pos（Position），这个 pos
+    在文件刚打开时一般处于文件开头位置：<br>
+    <center><img src="images/ch07/ch07-02-03.png" alt="pos0"></center>
+    说明一下，文件的大小是用 size() 函数获取的：<br>
+    <div class="code">qint64 QFile::​size() const</div>
+    文件大小使用 qint64 类型变量保存的，也就是说 QFile 最大支持 2^63 - 1 == 9,223,372,036,854,775,807
+    字节的文件，所以不用操心 QFile 对大文件的支持特性。<br>
+    <br>
+    QFile 当前游标可以用函数获取：<br>
+    <div class="code">qint64 QFileDevice::​pos() const</div>
+    <br>
+    对于按字节读取的函数 ​getChar() ，每调用一次，文件游标就加 1，如果连续调用了 N 次，游标 pos 就会移动到下图所示位置：<br>
+    <center><img src="images/ch07/ch07-02-04.png" alt="posN"></center>
+    之前介绍的 ​getChar()、​putChar() ，如果读写正确都会使 pos 自动加 1，ungetChar() 函数如果操作正确，那么会使
+    pos 自动减一，这个游标都是 QFile 自动控制，一般不需要手动移动游标。<br>
+    <br>
+    我们对文件读取到一定程度，就会读到文件末尾位置，到达末尾之后就无法再读数据了，因为游标已经超出范围：<br>
+    <center><img src="images/ch07/ch07-02-05.png" alt="posEnd"></center>
+    QFile 基类有快捷函数判断文件游标是否已到达文件末尾：
+    <div class="code">bool QFileDevice::​atEnd() const</div>
+    <br>
+    对于字节读取函数，文件游标是按一字节移动的，如果要读取大段数据块，那么可以使用下面的函数：<br>
+    <div class="code">qint64 QIODevice::​read(char * data, qint64 maxSize)</div>
+    data 通常是程序员手动分配的缓冲区，比如 char *buff =&nbsp; new char[256];<br>
+    maxSize 就是最多读取的字节数目，一般是手动分配的缓冲区大小，比如 256。<br>
+    该函数返回值一般就是正确读取的字节数目，因为如果文件后面如果没有 256 字节，那么有几个字节读几个字节。<br>
+    如果 read() 函数在读取之前就到了文件末尾或者读取错误，那么返回值是 -1 。对于使用 QIODevice::WriteOnly
+    只写模式打开的文件，通常文件游标总是指向文件末尾，这时候调用 read() 没意义，所以 read() 返回值就是 -1。<br>
+    <br>
+    手动分配缓冲区其实是比较麻烦的事情，我们 Qt 原生态的读取函数应该用下面这个：<br>
+    <div class="code">QByteArray QIODevice::​read(qint64 maxSize)</div>
+    这里的 read() 函数会把读取的字节数组存到 QByteArray 对象并返回，参数里的 maxSize 就是最多读取的字节数目。返回的
+    QByteArray 对象里面，可以用 QByteArray 自己的 QByteArray::​size()
+    函数判断读了多少字节，如果文件后面没字节可读或读取错误，那么 QByteArray 尺寸就是 0 。<br>
+    <div class="code">QByteArray QIODevice::​readAll()</div>
+    readAll() 函数看名字就知道，把文件的全部内容直接读取到 QByteArray 对象然后返回。<br>
+    另外还有两个更实用的读取行的函数：<br>
+    <div class="code">qint64 QIODevice::​readLine(char * data, qint64 maxSize)</div>
+    <div class="code">QByteArray QIODevice::​readLine(qint64 maxSize = 0)</div>
+    第一个 ​readLine() 是程序员手动分配缓冲区，第二个不需要手动分配缓冲区。<br>
+    readLine()&nbsp; 函数工作特性比较特殊，它是从文件或设备里面读取一行 ASCII 字符，最多读取 maxSize-1
+    字节，因为最后一个字节预留给字符串结尾NULL字符 。<br>
+    该函数返回值是真实读取的字节数目，如果读取出错或无数据可读就返回 -1。<br>
+    ​readLine() 总会在实际读取的字符串末尾会自动添加一个字符串终结符 0 。<br>
+    <br>
+    ​readLine() 会一直读取数据直到如下三个条件之一满足：<br>
+    ① 第一个 '\n' 字符读取到缓冲区。<br>
+    ② maxSize - 1 字节数已读取，最后一个字节预留给 0 。<br>
+    ③ 文件或设备读取已经到末尾。<br>
+    对于第一个终止条件，真实读取到了 '\n' 字符，那么这个换行字符会填充到缓冲区里面；<br>
+    对于第二个和第三个终止条件，是没有读到 '\n' 字符，那么该函数不会自动添加换行符到末尾。<br>
+    还有一个特殊情况要注意，readLine() 函数会把 Windows 的文件换行风格 "\r\n" 自动替换改为 '\n' 。<br>
+    <br>
+    ​read() 和 readAll() 、​readLine() 函数都会移动文件游标，具体是看真实读了多少字节。<br>
+    <br>
+    以上主要是读操作，写操作除了 putChar() ，还有如下三个写函数：<br>
+    <div class="code">qint64 QIODevice::​write(const char * data, qint64
+      maxSize)</div>
+    data 就是缓冲区数据指针，maxSize 是最多写入的字节数。 返回值是真实写入的字节数，因为可能出现磁盘不够的情况。 如果返回值是
+    -1，那么可能是写入出错或者无写入权限。这个写函数不区分 data 缓冲区里面的 '\0' 字符和普通字符串字符，都一股脑写进去。
+    <div class="code">qint64 QIODevice::​write(const char * data)</div>
+    这第二个函数参数没指定缓冲区大小，会将参数里的 data 当作 '\0' 结尾的普通字符串，写入该字符串。这个函数等价于下面这句代码：
+    <div class="code">... <br>
+      QIODevice::write(data, qstrlen(data));<br>
+      ...</div>
+    第三个写函数其实更常用：
+    <div class="code">qint64 QIODevice::​write(const QByteArray &amp; byteArray)</div>
+    byteArray 里面有多少字节就写入多少，这个也是不区分 '\0' 字符和普通字符串字符，都一股脑写进去。<br>
+    写操作函数也都会移动文件游标 pos，具体是看实际写入了多少字节。<br>
+    <br>
+    一般我们都不需要手动控制文件游标 pos，但是如果有特殊情况，需要手动移游标，那么通过下面函数：<br>
+    <div class="code">bool QFileDevice::​seek(qint64 pos)</div>
+    ​seek 函数如果成功移动游标，那么会返回 true，否则返回 false。最好不要用 seek 函数移动游标到超出文件尺寸的位置，这样会导致无法预料
+    的结果。<br>
+    <br>
+    如果希望设置文件尺寸，提前在磁盘上分配空间，可以用如下函数：<br>
+    <div class="code">bool QFile::​resize(qint64 sz)</div>
+    参数 sz 就是新的文件大小，如果新大小比旧的大，那么新增空间内容是随机的，需要程序员以后手动填充数据。重置大小成功就返回 true，否则返回
+    false。<br>
+    <br>
+    文件打开和读写操作结束之后，就可以关闭文件：<br>
+    <div class="code">void QFileDevice::​close()</div>
+    在写操作过程中，如果需要立即把 Qt 内部写缓冲区的数据写入磁盘，可以调用：<br>
+    <div class="code">bool QFileDevice::​flush()&nbsp;&nbsp;&nbsp; //这个函数很少用到，文件
+      关闭时自动会执行 flush</div>
+    <br>
+    （3）文件属性和权限等函数<br>
+    QFile 有部分函数其实与 QFileInfo 类功能差不多，这里大致讲解一下，对于这部分操作，其实更建议用 QFileInfo 或 QDir
+    类来实现。<br>
+    <div class="code">bool QFile::​copy(const QString &amp; newName)</div>
+    把当前文件复制到新文件 newName，复制成功就返回 true，否咋返回 false。<br>
+    注意如果 newName 新文件之前已经存在，那么 copy() 函数返回 false，它不会覆盖旧文件。<br>
+    当复制文件时，源文件自动会被关闭，以后使用源文件最好再重新打开。<br>
+    <div class="code">bool QFile::​exists() const</div>
+    判断当前文件是否存在。<br>
+    <div class="code">bool QFile::​link(const QString &amp; linkName)</div>
+    为当前文件创建一个新的快捷方式 linkName ，创建成功返回 true，创建失败返回 false。​link()
+    函数也不会覆盖之前已存在的快捷方式。对于 Windows 系统，快捷方式名必须以 .lnk 结尾，否则会出错。<br>
+    <div class="code">bool QFile::​remove()</div>
+    删除当前文件，删除之前文件会自动被关闭，然后删除。<br>
+    <div class="code">bool QFile::​rename(const QString &amp; newName)</div>
+    把当前文件重命名为新名字 newName，如果成功返回 true，失败返回 false。如果 newName
+    文件之前已存在，那么重命名会失败，旧文件不会被覆盖。文件重命名之前，该文件也会自动关闭。<br>
+    <div class="code">QString QFile::​symLinkTarget() const</div>
+    如果当前文件是快捷方式文件，那么​ symLinkTarget() 返回原始文件的完整路径文件名，否则返回空字符串。<br>
+    <br>
+    <div class="code">Permissions QFile::​permissions() const</div>
+    <div class="code">bool QFile::​setPermissions(Permissions permissions)</div>
+    获取和设置文件权限的函数，Permissions 枚举变量与 7.1.3 QFileInfo 类的权限枚举是一样的。<br>
+    <br>
+    （4）QFile 类静态函数<br>
+    有好几个静态函数与上面（3）里的函数重名，只是参数通常比上面同名函数多一个，多的参数是源文件名，这里就不列举了。<br>
+    静态函数里面，有三个与上面内容不重复的：<br>
+    <div class="code">QString QFile::​decodeName(const QByteArray &amp;
+      localFileName)</div>
+    <div class="code">QString QFile::​decodeName(const char * localFileName)</div>
+    这两个文件名解码函数把操作系统本地化的路径文件名转为 Qt 标准的 QString 路径文件名（路径分隔符是 '/'）。<br>
+    当然也有文件名编码函数：<br>
+    <div class="code">QByteArray QFile::​encodeName(const QString &amp;
+      fileName)</div>
+    这个函数把 Qt 标准的 QString 文件名编码称为操作系统本地化的路径文件名。<br>
+    关于 QFile 类的功能函数介绍到这，下面来看看示例。<br>
+    <br>
+    <div class="os2">7.2.4 Unix风格配置文件读写示例</div>
+    <br>
+    Unix 风格配置文件大概如下面这样：<br>
+    <div class="code">#Address<br>
+      ip = 192.168.100.100<br>
+      port = 1234<br>
+      hostname = mypc<br>
+      workgroup = ustc</div>
+    以井号 '#'
+    打头的行都是注释，可以忽略掉。对于正常的配置行，等号左边的配置项名称，右边是配置项的数值。本示例中，我们要做的事就是读取有效的配置行，并且在图形界面可以修
+    改配置并保存为新的配置文件。<br>
+    上面配置文件是比较简单的，就四个配置项，我们用相应的控件实现配置项的显示和修改，并提供“保存”按钮，将修改后配置存到新文件。<br>
+    <br>
+    我们打开 QtCreator，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>
+    ①项目名称 unixconfig，创建路径 D:\QtProjects\ch07，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    建好项目之后，先在项目文件夹里新建一个记事本文件，命名为 testconf.txt，把上面示范的五行文本保存到testconf.txt
+    里面，程序运行时会 用到。<br>
+    <br>
+    现在回到 QtCreator，打开窗体 widget.ui 文件，进入设计模式，按照下图排布，拖入控件：<br>
+    <center><img src="images/ch07/ch07-02-06.png" alt="ui" width="800"></center>
+    注意图上是七行控件：<br>
+    第一行是：标签控件，文本为 "源文件"；单行编辑器，对象名 lineEditSrcFile；按钮控件，文本 "浏览源"，对象名
+    pushButtonBrowseSrc；按钮控件，文本 "加载配置"，对象名 pushButtonLoad。<br>
+    第二行是：标签控件，文本为 "目的文件"；单行编辑器，对象名 lineEditDstFile；按钮控件，文本 "浏览目的"，对象名
+    pushButtonBrowseDst；按钮控件，文本 "保存配置"，对象名 pushButtonSave。<br>
+    第三行，是一个水平线条控件，对象名 line。<br>
+    第四行，标签控件，文本为 "IP"；单行编辑器，对象名 lineEditIP。<br>
+    第五行，标签控件，文本为 "Port"；单行编辑器，对象名 lineEditPort。<br>
+    第六行，标签控件，文本为 "HostName"；单行编辑器，对象名 lineEditHostName。<br>
+    第七行，标签控件，文本为 "WorkGroup"；单行编辑器，对象名 lineEditWorkGroup。<br>
+    <br>
+    界面控件布局很简单，头两行按照水平布局器布局，末尾四行也是水平布局器，窗体的主布局器是垂直布局，得到如下图效果：<br>
+    <center><img src="images/ch07/ch07-02-07.png" alt="lay1" width="800"></center>
+    现在界面虽然布局好了，但是打头的标签控件宽度不一样，导致界面不太整齐。<br>
+    我们选中较宽的 "目的文件" 标签，宽度为 48，选中 "WorkGroup" 标签，宽度是 54，为了让界面更整齐，<span style="font-weight: bold;">我
+      们把打头的标签控件全部设置最小宽度为 60，留点余量，</span>这样就会得到下图效果：<br>
+    <center><img src="images/ch07/ch07-02-08.png" alt="lay2" width="800"></center>
+    这样控件和布局器就设置好了。下面分四次右击为四个按钮，右键菜单选择 "转到槽..." ，都添加 clicked() 信号对应的槽函数：<br>
+    <center><img src="images/ch07/ch07-02-09.png" alt="lay3"></center>
+    添加好槽函数之后，保存界面文件，关闭界面文件，回到 QtCreator 代码编辑模式。<br>
+    首先打开 widget.h 头文件，向里面添加一个新的私有函数，用于解析文本文件里的一行配置项：<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>WIDGET_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">WIDGET_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonBrowseSrc_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonLoad_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonBrowseDst_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonSave_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//分析一行配置文本，设置到对应的控件里</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">AnalyzeOneLine</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QByteArray</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span>baLine<span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre>
+    </div>
+    最后的 AnalyzeOneLine() 就是新增的函数，其他代码都是 QtCreator 自动生成的。<br>
+    然后编辑 widget.cpp 文件，添加例子功能代码，先来看看头文件包含和构造函数：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QMessageBox&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QRegExp&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QRegExpValidator&gt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//正则表达式验证器，检验IP</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QIntValidator&gt;</span><span style=" color:#c0c0c0;">    </span><span
+style=" color:#008000;">//整数验证器，检验端口</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QFileDialog&gt;</span><span style=" color:#c0c0c0;">      </span><span
+style=" color:#008000;">//打开和保存文件对话框</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QFile&gt;</span><span style=" color:#c0c0c0;">            </span><span
+style=" color:#008000;">//读写文件</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//定义</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">IPv4</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">正则表达式，注意</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"\\"</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">就是一个反斜杠</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QRegExp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">re</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">               </span><span style=" color:#008000;">"(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//新建正则表达式验证器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QRegExpValidator</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">reVali</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QRegExpValidator</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">re</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置给</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">lineEditIP</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditIP</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setValidator</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">reVali</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//新建整数验证器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QIntValidator</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">intVali</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QIntValidator</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">0</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">65535</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置给</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">lineEditPort</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditPort</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setValidator</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">intVali</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    包含的头文件里面，&lt;QRegExp&gt;和&lt;QRegExpValidator&gt; 是正则表达式和正则表达式验证器，用于校验 IPv4
+    输入，&lt;QIntValidator&gt; 是整数验证器，用于校验端口范围。&lt;QFileDialog&gt;
+    是文件对话框，用于获取打开或保存的文件名，&lt;QFile&gt; 是文件类。<br>
+    在构造函数里面，定义了一个 IPv4 正则表达式 re，注意之前 5.2.4 节 netparas
+    例子也用过这个表达式，当时编的正则表达式代码有点问题，因为其他脚本语言 "\" 不是转义字符，是原始的反斜杠，在 C++ 代码中的字符串，需要用
+    "\\" 替换 "\" 来表示字符串中的一个反斜杠字符。目前把正则表达式都矫正了，这回是对的了。<br>
+    <br>
+    在定义 re 之后，新建正则表达式验证器 reVali，并把验证器设置给 lineEditIP。<br>
+    接着新建整数验证器 intVali ，设置给 lineEditPort。<br>
+    构造函数新增的代码就是为了验证 IPv4 格式和端口范围。<br>
+    <br>
+    在我们要打开文件时，需要在文件系统里浏览找到这个文件，可以用类似下面的代码实现，就是 "浏览源" 按钮的槽函数：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_pushButtonBrowseSrc_clicked</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取将要打开的文件名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strSrcName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QFileDialog</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">getOpenFileName</span><span style=" color:#000000;">(</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#808000;">this</span><span
+style=" color:#000000;">,</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"打开配置文件"</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"."</span><span style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"Text</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">files(*.txt);;All</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">files(*)"</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strSrcName</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//空字符串不处理，返回</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">else</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//设置源文件名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditSrcFile</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strSrcName</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    这个函数里最关键的就是 QFileDialog::getOpenFileName() 静态函数，一般只需要设置该静态函数的四个参数：<br>
+    第一个参数是父窗口指针；第二个是弹出对话框的标题；第三个是弹出对话框默认的开始路径；第四个是文件扩展名过滤字符串。过滤字符串格式就如代码里显示的，多个过
+    滤器用双分号分隔，扩展名格式放在圆括号内部。<br>
+    如果找到文件名成功，该函数就会返回正常的文件名字符串，如果用户取消了对话框，那么返回空字符串。<br>
+    因此需要判断一下对话框的返回字符串是否为空，然后把非空字符串设置到界面的控件显示出来。<br>
+    <br>
+    接下来是 "加载配置" 按钮对应的槽函数代码：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_pushButtonLoad_clicked</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取源文件名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strSrc</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditSrcFile</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strSrc</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">())</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//没设置文件名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//定义文件对象</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QFile</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">fileIn</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strSrc</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//判断是否正确打开</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">fileIn</span><span
+style=" color:#000000;">.</span><span style=" font-style:italic; color:#000000;">open</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QIODevice</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">ReadOnly</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//打开错误</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">warning</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"打开错误"</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                             </span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"打开文件错误："</span><span style=" color:#000000;">)</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">fileIn</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">errorString</span><span style=" color:#000000;">());</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//不处理文件</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//读取并解析文件</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">while</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">fileIn</span><span
+style=" color:#000000;">.</span><span style=" font-style:italic; color:#000000;">atEnd</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//读取一行</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QByteArray</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">baLine</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">fileIn</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">readLine</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">baLine</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">baLine</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">trimmed</span><span style=" color:#000000;">();</span><span
+style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//剔除字符串两端空白</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//判断是否为注释行</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">baLine</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">startsWith</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">'#'</span><span style=" color:#000000;">)</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#808000;">continue</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//不处理注释行</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//正常的设置行，分析这一行的配置项</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">AnalyzeOneLine</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">baLine</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//提示加载完毕</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">information</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"加载配置"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"加载配置项完毕！"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    这个槽函数先获取源文件名，判断是否为空，没有文件名就不处理。<br>
+    有文件名，就根据文件名定义文件类对象 fileIn，<br>
+    以 QIODevice::ReadOnly 模式打开文件，如果打开失败就报错并返回，<br>
+    错误信息可以用 fileIn.<span style="font-weight: bold;">errorString()</span> 函数获取。<br>
+    <br>
+    如果打开正确，就用 while 循环加载文件的每一行，直到文件结束。<br>
+    因为配置文件里面的文本行，两端可能有空白字符，先剔除掉两端空白字符，然后判断打头的字符是否为井号，<br>
+    如果是井号就跳过这个注释行。<br>
+    如果打头的不是井号，说明是有用的配置行，就调用 AnalyzeOneLine() 分析这一行配置。<br>
+    <br>
+    分析完配置文件所有行之后，我们用 QMessageBox::information() 提示已经加载完毕。<br>
+    <br>
+    在文本处理时，要注意用户可能输入的空白字符，通常需要把文本两端的空白字符剔除掉再进行后续的判断，QString 类和 QByteArray 类都有
+    trimmed() 函数实现剔除两端空白字符的功能。<br>
+    <br>
+    接着我们看看私有函数 AnalyzeOneLine() 的代码：<br>
+    <div class="code"><span style=" color:#008000;">//分析一行配置文本，设置到对应的控件里</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">AnalyzeOneLine</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QByteArray</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#000000;">baLine</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//按等号分隔</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QList</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#800080;">QByteArray</span><span
+style=" color:#000000;">&gt;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">list</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">baLine</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">split</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">'='</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">list</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">count</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&lt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">2</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//分隔之后没有配置值，无法设置</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//配置项名，剔除空格，变为统一的小写名称</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QByteArray</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">optionName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">list</span><span style=" color:#000000;">[</span><span style=" color:#000080;">0</span><span
+style=" color:#000000;">].</span><span style=" color:#000000;">trimmed</span><span
+style=" color:#000000;">().</span><span style=" color:#000000;">toLower</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//配置项的值，只需要剔除空格</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QByteArray</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">optionValue</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">list</span><span style=" color:#000000;">[</span><span style=" color:#000080;">1</span><span
+style=" color:#000000;">].</span><span style=" color:#000000;">trimmed</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strValue</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QString</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">fromLocal8Bit</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">optionValue</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//判断哪个配置项</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"ip"</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">==</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">optionName</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditIP</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strValue</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"port"</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">==</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">optionName</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditPort</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strValue</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"hostname"</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">==</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">optionName</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditHostName</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strValue</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"workgroup"</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">==</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">optionName</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditWorkGroup</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strValue</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//如果有其他不相关的配置项名不处理</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    配置文本的每一行都是等号分隔的，左边为配置项名，右边为配置项的数值。<br>
+    我们直接用 split() 函数切分就行了，切分之后得到列表 list。<br>
+    判断 list 是否把文本行切成了两段以上，如果少于两端，说明配置行内容不完整，配置项名或数值少了，就不处理。<br>
+    如果切分后，至少有两端文本，那么把 list[0] 剔除空白，并转为全小写字母，作为配置项名称，转成小写防止用户把配置项名写成大写字母导致与后面的判断不
+    匹配。<br>
+    再把 list[1] 剔除两端空白，并构造新的数值字符串 strValue ，用于界面显示。<br>
+    我们对配置项的名称进行判断，对于 "ip" 、"port"、"hostname"、"workgroup" 四个配置项名，匹配哪个就将数值字符串设置到对应
+    的控件里面。<br>
+    如果有不匹配的配置项名，这里没有处理，我们只处理想要的配置项。<br>
+    <br>
+    文件打开和加载的代码就是上面那么多。下面来看看如何保存新的配置文件。<br>
+    获取保存文件名的代码如下所示，就是 "浏览目的" 按钮的槽函数：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_pushButtonBrowseDst_clicked</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取要保存的文件名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strDstName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QFileDialog</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">getSaveFileName</span><span style=" color:#000000;">(</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#808000;">this</span><span
+style=" color:#000000;">,</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"保存配置文件"</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"."</span><span style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"Text</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">files(*.txt);;All</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">files(*)"</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strDstName</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">())</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//空字符串不处理</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">else</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//设置要保存的文件名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditDstFile</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strDstName</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    获取保存文件名就用 QFileDialog::getSaveFileName()
+    静态函数，也是设置四个参数，与打开文件对话框非常类似。注意保存文件对话框会提示是否覆盖已存在的文件，而打开文件对话框总是选择已存在文件进行打开。一般保存文件对话
+    框都是用 户自己设置不存在的新文件名用于保存文件。<br>
+    获取到非空的保存文件名字符串之后，设置给 lineEditDstFile 控件显示。<br>
+    <br>
+    最后是实际保存各个配置项的函数，就是 "保存配置" 按钮对应的槽函数：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_pushButtonSave_clicked</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取保存文件名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strSaveName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditDstFile</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取设置值</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strIP</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditIP</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strPort</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditPort</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strHostName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditHostName</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strWorkGroup</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditWorkGroup</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//如果字符串有空串就不写入</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strSaveName</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">||</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strIP</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">||</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strPort</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#000000;">||</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strHostName</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">||</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strWorkGroup</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">warning</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"保存配置"</span><span style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                                 </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"需要设置好保存文件名和所有配置项数值。"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//定义文件对象</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QFile</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">fileOut</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strSaveName</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//打开</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">fileOut</span><span
+style=" color:#000000;">.</span><span style=" font-style:italic; color:#000000;">open</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QIODevice</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">WriteOnly</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">|</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QIODevice</span><span style=" color:#000000;">::</span><span
+style=" color:#800080;">Truncate</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">|</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QIODevice</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Text</span><span
+style=" color:#000000;">))</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">warning</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"打开文件"</span><span style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                             </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"打开目的文件失败："</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">fileOut</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">errorString</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//构造字节数组写入</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//ip</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">行</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QByteArray</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">baTemp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ip</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">=</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">baTemp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strIP</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">toLocal8Bit</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"\n"</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">fileOut</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">write</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">baTemp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//port</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">行</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">baTemp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"port</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">baTemp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strPort</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">toLocal8Bit</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"\n"</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">fileOut</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">write</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">baTemp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//hostname</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">行</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">baTemp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"hostname</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">baTemp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strHostName</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">toLocal8Bit</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"\n"</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">fileOut</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">write</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">baTemp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//workgroup</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">行</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">baTemp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"workgroup</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">baTemp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strWorkGroup</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">toLocal8Bit</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"\n"</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">fileOut</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">write</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">baTemp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//提示保存成功</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">information</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"保存配置"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"保存配置项成功！"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    这个槽函数先获取保存文件名和四个配置项的数值字符串，如果有空字符串就不保存，必须填好保存文件名和所有配置项才进行后面操作。<br>
+    根据保存文件名定义一个 文具类对象 fileOut，<br>
+    然后以 “写入、清空旧数据、文本” 三个模式同时打开文件，如果打开失败就提示错误消息 fileOut.errorString()。<br>
+    如果打开成功，就开始写入，定义临时字节数组 baTemp ，<br>
+    先构造 ip 配置行的前半截，然后把 strIP 转为本地化字符串，并附加上换行符，这样构造了一行配置文本，写入到新配置文件中。<br>
+    其他三个配置项的行类似构造，然后都写入到新配置文件中。<br>
+    写入时，换行符要自己添加，因为 write() 函数是不会自动添加换行符的。<br>
+    写完四行配置文本之后，用 QMessageBox::information() 提示保存配置成功。<br>
+    <br>
+    我们生成并运行例子，选择项目文件夹中的 testconf.txt 加载，得到如下图效果：
+    <center><img src="images/ch07/ch07-02-10.png" alt="run"></center>
+    保存配置功能这里不截图了，读者可以自己试试看。<br>
+    这第一个示例是按行读取文本文件，并分析配置项内容。下面第二个例子学习如何按字节块读取结构体形式的文件头。<br>
+    <br>
+    <div class="os2">7.2.5 BMP文件头解析示例</div>
+    <br>
+    BMP 是比较简单的图片文件，Windows 画图板默认就是以这种格式保存图片。在 MFC 和 Windows 编程的书籍里面有不少关于 BMP
+    文件头的介绍，这里简单介绍一下。BMP 文件的大致框架如下图所示：<br>
+    <center><img src="images/ch07/ch07-02-11.png" alt="bmp"></center>
+    我们本小节关注的就是打头的两个结构体 BMPFileHeader 和 BMPInfoHeader，后面颜色表和像素点数据就不读取了。<br>
+    其实所有的文件格式都是由各种各样的结构体组成，BMP 也是这样。BMP 文件首先以一个 BMPFileHeader 开始，共14字节，我们按照 Qt
+    风格，把 BMPFileHeader 定义如下：<br>
+    <div class="code">//定义文件头 BMPFileHeader，长度14字节<br>
+      struct BMPFileHeader<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp; quint16 bfType; //文件类型，原始两字节 'BM'<br>
+      &nbsp;&nbsp;&nbsp; quint32 bfSize; //BMP图片文件大小<br>
+      &nbsp;&nbsp;&nbsp; quint16 bfReserved1;&nbsp;&nbsp;&nbsp; //保留字段1，数值为 0<br>
+      &nbsp;&nbsp;&nbsp; quint16 bfReserved2;&nbsp;&nbsp;&nbsp; //保留字段2，数值为 0<br>
+      &nbsp;&nbsp;&nbsp; quint32 bfOffBits;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //像素点数据起始位置，相对于 BMPFileHeader 的偏移量，以字节为单位<br>
+      };</div>
+    文件头两个字节就是 'B' 和 'M' ，对应的 bfType 短整形数值为 0x4D42
+    ，读取文件的时候前面的字节会填充到低位字节，所以倒了一下。bfSize 就是图片文件的大小，其他三个字段我们本小节不关心。<br>
+    <br>
+    BMP文件第二个部分是图片信息头 BMPInfoHeader，我们把该结构体按 Qt 风格定义如下：<br>
+    <div class="code">//定义信息头 BMPInfoHeader，长度40字节<br>
+      struct BMPInfoHeader<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp; quint32 biSize; //本结构体长度，占用字节数<br>
+      &nbsp;&nbsp;&nbsp; quint32 biWidth;&nbsp;&nbsp;&nbsp; //图片宽度，像素点数<br>
+      &nbsp;&nbsp;&nbsp; quint32 biHeight;&nbsp;&nbsp; //图片高度，像素点数<br>
+      &nbsp;&nbsp;&nbsp; quint16 biPlanes;&nbsp;&nbsp; //目标设备级别，数值为 1 (图层数或叫帧数)<br>
+      &nbsp;&nbsp;&nbsp; quint16 biBitCount; //每个像素点占用的位数，就是颜色深度 (位深度)<br>
+      &nbsp;&nbsp;&nbsp; quint32 biCompression; //是否压缩，一般为 0 不压缩<br>
+      &nbsp;&nbsp;&nbsp; quint32 biSizeImage;&nbsp;&nbsp;
+      //像素点数据总共占用的字节数，因为每行像素点数据末尾会按4字节对齐，对齐需要的字节数也算在内<br>
+      &nbsp;&nbsp;&nbsp; quint32 biXPelsPerMeter;//水平分辨率，像素点数每米(== 水平DPI *
+      39.3701)<br>
+      &nbsp;&nbsp;&nbsp; quint32 biYPelsPerMeter;//垂直分辨率，像素点数每米(== 垂直DPI *
+      39.3701)<br>
+      &nbsp;&nbsp;&nbsp; quint32 biClrUsed;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //颜色表中实际用到的颜色数目<br>
+      &nbsp;&nbsp;&nbsp; quint32 biClrImportant;//图片显示中重要颜色数目<br>
+      };</div>
+    这里面大部分字段比较专业，如果没学图像处理课程可能不太好理解，本小节主要关心图片宽度 biWidth、高度 biHeight、帧数
+    biPlanes、颜色深度 biBitCount、水平分辨率 biXPelsPerMeter、垂直分辨率
+    biYPelsPerMeter。我们例子程序解析之后的 BMP 头部信息大致与 Windows 系统对 BMP 文件属性的描述类似：<br>
+    <center><img src="images/ch07/ch07-02-12.png" alt="bmpattr"></center>
+    示例图片 logo.bmp 可以到网站目录里下载：<br>
+    <a href="https://lug.ustc.edu.cn/sites/qtguide/QtProjects/ch07/bmpheader/" target="new">
+      https://lug.ustc.edu.cn/sites/qtguide/QtProjects/ch07/bmpheader/ </a> <br>
+    <br>
+    下面开始这个例子，我们重新打开 QtCreator，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>
+    ①项目名称 bmpheader，创建路径 D:\QtProjects\ch07，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    建好项目之后，打开窗体 widget.ui 文件，进入设计模式，把主窗体大小设置为 480*360 。<br>
+    然后按照下图排布，拖入三大行控件：<br>
+    <center><img src="images/ch07/ch07-02-13.png" alt="ui" width="800"></center>
+    第一行控件：标签控件，文本为 "文件名"；单行编辑器，对象名为 lineEditName；按钮控件，文本为 "浏览"，对象名为
+    pushButtonBrowse。第一行按照水平布局器布局。<br>
+    第二行控件：按钮控件，文本为 "显示图片"，对象名为 pushButtonShowPic；水平弹簧条，对象名
+    horizontalSpacer；按钮控件，文本为 "读取头部"，对象名为 pushButtonReadHeader。第二行控件也是按水平布局器布局。<br>
+    <br>
+    第三行控件按如下步骤拖动：<br>
+    ① 拖一个 Scroll Area 滚动区域控件到左边，对象名默认为 scrollArea，把它拉大，占据左边大部分区域；<br>
+    ② 拖一个标签控件到 scrollArea 控件内部，标签文本为 "显示图片区域"，对象名为 labelShowPic；<br>
+    ③ 拖一个 Text Browser 控件到右边空白区域，这个丰富文本浏览控件对象名默认为
+    textBrowser，这个文本浏览控件用于显示我们程序解析的 BMP 头部信息。<br>
+    <br>
+    第三行的控件就是这些，关于第三行布局，按下面来操作：<br>
+    ● 点击选中 labelShowPic 标签，设置它的 sizePolicy 属性中水平策略和垂直策略都为 <span style="font-weight: bold;">Expanding</span>，
+    设置它的 alignment 属性为 水平的 <span style="font-weight: bold;">AlignHCenter </span>和
+    垂直的 <span style="font-weight: bold;">AlignVCenter</span>：<br>
+    <center><img src="images/ch07/ch07-02-14.png" alt="label" width="800"></center>
+    ● 点击选中 scrollArea 控件，点击上面的水平布局按钮，这样是为滚动区域内部设置主布局器，滚动区域内的主布局器只有一个标签控件
+    labelShowPic，这个标签控件会填充满整个滚动区域。<br>
+    设置滚动区域内部主布局器之后，滚动区域会自动缩小，我们把滚动区域重新拉大，大概拉大成下图的样子，然后设置scrollArea 控件 sizePolicy
+    属性里面的水平伸展为 3，如下图所示：<br>
+    <center><img src="images/ch07/ch07-02-15.png" alt="scrollarea" width="800"></center>
+    ● 点击选中右边的 textBrowser 控件，然后设置它的 sizePolicy 属性里面的水平伸展为 1 ，如下图所示：<br>
+    <center><img src="images/ch07/ch07-02-16.png" alt="textbrowser" width="800"></center>
+    ● 按照上面的设置后，第三行的控件细节就配置好了，我们选中第三行的 scrollArea 和 textBrowser
+    ，点击上面的水平布局按钮，进行水平布局，这时候滚动区域控件和文本浏览控件自动按照 3:1 比例分配水平空间：<br>
+    <center><img src="images/ch07/ch07-02-17.png" alt="lay3" width="800"></center>
+    ● 我们点击主窗体的空白区域，只选中主窗体，而不选中任何控件，点击上面的垂直布局按钮，为主窗体设置主布局器：<br>
+    <center><img src="images/ch07/ch07-02-18.png" alt="mainlayout" width="800"></center>
+    <br>
+    按照上面设计好界面之后，为三个按钮都添加 clicked() 信号对应的槽函数：<br>
+    <center><img src="images/ch07/ch07-02-19.png" alt="slot"></center>
+    添加好三个槽函数之后，我们保存界面文件，关闭界面文件，回到 QtCreator 编辑模式。<br>
+    <br>
+    我们打开 widget.h 头文件，向其中添加结构体声明代码：<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>WIDGET_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">WIDGET_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//结构体都按</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">1</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">字节补齐，因为编译器默认按</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">4</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">字节补齐，导致</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">BMPFileHeader</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">长度</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">16，16是错的</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#pragma</span><span style=" color:#c0c0c0;"> </span>pack(1)</pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//定义文件头</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">BMPFileHeader，长度14字节</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">struct</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">BMPFileHeader</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">quint16</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">bfType</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//文件类型，原始两字节</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">'BM'</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">quint32</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">bfSize</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//BMP图片文件大小</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">quint16</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">bfReserved1</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//保留字段1，数值为</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">0</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">quint16</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">bfReserved2</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//保留字段2，数值为</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">0</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">quint32</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">bfOffBits</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">      </span><span
+style=" color:#008000;">//像素点数据起始位置，相对于</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">BMPFileHeader</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">的偏移量，以字节为单位</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//定义信息头</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">BMPInfoHeader，长度40字节</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">struct</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">BMPInfoHeader</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">quint32</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">biSize</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//本结构体长度，占用字节数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">quint32</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">biWidth</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//图片宽度，像素点数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">quint32</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">biHeight</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//图片高度，像素点数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">quint16</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">biPlanes</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//目标设备级别，数值为</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">1</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">(图层数或叫帧数)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">quint16</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">biBitCount</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//每个像素点占用的位数，就是颜色深度</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">(位深度)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">quint32</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">biCompression</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//是否压缩，一般为</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">0</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">不压缩</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">quint32</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">biSizeImage</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//像素点数据总共占用的字节数，因为每行像素点数据末尾会按4字节对齐，对齐需要的字节数也算在内</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">quint32</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">biXPelsPerMeter</span><span
+style=" color:#000000;">;</span><span style=" color:#008000;">//水平分辨率，像素点数每米(==</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">水平DPI</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">*</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">39.3701)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">quint32</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">biYPelsPerMeter</span><span
+style=" color:#000000;">;</span><span style=" color:#008000;">//垂直分辨率，像素点数每米(==</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">垂直DPI</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">*</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">39.3701)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">quint32</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">biClrUsed</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">      </span><span
+style=" color:#008000;">//颜色表中实际用到的颜色数目</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">quint32</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">biClrImportant</span><span
+style=" color:#000000;">;</span><span style=" color:#008000;">//图片显示中重要颜色数目</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonBrowse_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonShowPic_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonReadHeader_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre>
+    </div>
+    头文件后半部分是 Widget 类的代码，是自动生成的。我们主要看看前半截的结构体声明。在声明结构体之前，有一句代码：<br>
+    <div class="code">#pragma&nbsp; pack(1)</div>
+    这句代码的意思就是告知编译器对结构体里面的变量按 1 字节对齐，一般编译器默认是 4 字节对齐。4字节对齐导致 BMPFileHeader 里面的
+    bfType 占用 4 字节，然后这个结构体就变成 16 字节长度。16字节长度是错误的设定，因为真正的头部只有 14
+    字节，必须引入上面一句对齐调整代码，后面的文件头读写才会正常。<br>
+    <br>
+    BMPFileHeader 和 BMPInfoHeader 结构体声明照着上面代码抄就行了，具体含义不讲了，一般也就图像处理方面的课程才用到，这里就当它
+    们是一堆变量就行了。这两个结构体在 BMP 文件是顺序存放的，所以 BMP
+    文件结构是比较简单的，读者以后编程有可能遇到其他复杂文件格式，可能出现结构体嵌套、链接之类的，就比较麻烦了。<br>
+    <br>
+    接下来我们编辑 widget.cpp，添加功能代码，首先是头文件包含和构造函数：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QMessageBox&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QFileDialog&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QFile&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QPixmap&gt;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//打印结构体大小</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"BFH:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%1</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">B"</span><span style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">sizeof</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">BMPFileHeader</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"BIH:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%1</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">B"</span><span style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">sizeof</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">BMPInfoHeader</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    头文件 &lt;QFileDialog&gt; 是文件打开或保存的对话框，&lt;QFile&gt; 是文件类，&lt;QPixmap&gt;
+    是像素图的类，用于加载图片显示到标签控件。<br>
+    在构造函数里添加了的调试打印代码，打印两个结构体的字节数，程序运行时 BMPFileHeader 应该为 14 字节，BMPInfoHeader 应该为
+    40 字节。<br>
+    <br>
+    然后我们来看看 "浏览" 按钮对应的槽函数代码：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_pushButtonBrowse_clicked</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取要打开的图片文件名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QFileDialog</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">getOpenFileName</span><span style=" color:#000000;">(</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#808000;">this</span><span
+style=" color:#000000;">,</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"打开BMP"</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"."</span><span style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"BMP</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">Files(*.bmp);;All</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">Files(*)"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strName</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">())</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">else</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//显示文件名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditName</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    这个槽函数代码比较简单，就调用 QFileDialog::getOpenFileName() 获取将要打开的文件名，获取到了非空文件名之后显示到
+    lineEditName 控件里面。<br>
+    <br>
+    接下来是 "显示图片" 按钮对应的槽函数代码：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_pushButtonShowPic_clicked</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取图片文件名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditName</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strName</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">else</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//在</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">labelShowPic</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">标签控件显示图片</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">labelShowPic</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setPixmap</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QPixmap</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strName</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    这个槽函数先获取图片文件名 strName，如果文件名非空，那就把文件加载为 QPixmap 像素图，然后设置给 labelShowPic
+    标签控件，显示该图片。<br>
+    <br>
+    最后是 "读取头部" 按钮对应的槽函数代码：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_pushButtonReadHeader_clicked</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取图片文件名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditName</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strName</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//没文件名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//现在有文件名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QFile</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">fileIn</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strName</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//只读模式打开</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">fileIn</span><span
+style=" color:#000000;">.</span><span style=" font-style:italic; color:#000000;">open</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QIODevice</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">ReadOnly</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">warning</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"打开文件"</span><span style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                             </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"打开文件失败："</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">fileIn</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">errorString</span><span
+style=" color:#000000;">());</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//现在正确打开了</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//定义</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">BMP</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">文件头</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">BMPFileHeader</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">bfh</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//定义</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">BMP</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">信息头</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">BMPInfoHeader</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">bih</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//读取</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">BMP</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">文件头和信息头</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">qint64</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nReadBFH</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">fileIn</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">read</span><span style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">char</span><span style=" color:#000000;">*)&amp;</span><span
+style=" color:#000000;">bfh</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">sizeof</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">bfh</span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">qint64</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nReadBIH</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">fileIn</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">read</span><span style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">char</span><span style=" color:#000000;">*)&amp;</span><span
+style=" color:#000000;">bih</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">sizeof</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">bih</span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//判断读取字节数对不对</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">nReadBFH</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">&lt;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">sizeof</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">bfh</span><span style=" color:#000000;">))</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">||</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">(</span><span style=" color:#000000;">nReadBIH</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&lt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">sizeof</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">bih</span><span style=" color:#000000;">))</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">warning</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"读取</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">BMP"</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                             </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"读取</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">BMP</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">头部失败，头部字节数不够！"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//字节数目够了，构造信息字符串</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"文件名：%1\r\n\r\n"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">strName</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strTemp</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//开始判断</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">bfh</span><span
+style=" color:#000000;">.</span><span style=" color:#800000;">bfType</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0x4D42</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">strTemp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"类型：不是</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">BMP</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">图片\r\n"</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strTemp</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">else</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//是正常的</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">BMP</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">图片</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">strTemp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"类型：是</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">BMP</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">图片\r\n"</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strTemp</span><span style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//读取</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">bih</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">里面的信息</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">strTemp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"宽度：%1\r\n"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">bih</span><span style=" color:#000000;">.</span><span
+style=" color:#800000;">biWidth</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strTemp</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">strTemp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"高度：%1\r\n"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">bih</span><span style=" color:#000000;">.</span><span
+style=" color:#800000;">biHeight</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strTemp</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">strTemp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"水平分辨率：%1</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">DPI\r\n"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span
+style=" color:#000000;">)(</span><span style=" color:#000000;">bih</span><span style=" color:#000000;">.</span><span
+style=" color:#800000;">biXPelsPerMeter</span><span style=" color:#000000;">/</span><span
+style=" color:#000080;">39.3701</span><span style=" color:#000000;">)</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strTemp</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">strTemp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"垂直分辨率：%1</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">DPI\r\n"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span
+style=" color:#000000;">)(</span><span style=" color:#000000;">bih</span><span style=" color:#000000;">.</span><span
+style=" color:#800000;">biYPelsPerMeter</span><span style=" color:#000000;">/</span><span
+style=" color:#000080;">39.3701</span><span style=" color:#000000;">)</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strTemp</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">strTemp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"颜色深度：%1</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">位\r\n"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">bih</span><span style=" color:#000000;">.</span><span
+style=" color:#800000;">biBitCount</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strTemp</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">strTemp</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"帧数：%1\r\n"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">bih</span><span style=" color:#000000;">.</span><span style=" color:#800000;">biPlanes</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strTemp</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//显示信息串到</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">textBrowser</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textBrowser</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    这个槽函数首先获取文件名，判断文件名是否为空。<br>
+    对于非空文件名，定义文件对象 fileIn，并以只读模式打开文件，如果打开失败就报错返回。<br>
+    在打开成功之后，定义 BMP 文件头 bfh 和信息头 bih，从文件中依次读取数据填充到这两个结构体中。<br>
+    然后判断读取的字节数目够不够，如果读取的字节数不够，说明文件格式出错，就报错返回。<br>
+    <br>
+    读取两个结构体对象 bfh 和 bih 字节数目够了，那进行下一步的判断：<br>
+    先判断 bfh.bfType 是否为 0x4D42，如果不是这个数值说明不是 BMP 图片文件，填充信息到 strInfo 。<br>
+    如果 bfh.bfType 是 0x4D42，说明这个文件是 BMP 格式的，我们开始逐个读取信息头 bih 里面的字段，<br>
+    对于宽度、高度、颜色深度、帧数直接用对应字段数值即可；<br>
+    水平和垂直分辨率比较特殊，BMP 里面单位是 像素点数每米，而操作系统里常见的是 DPI，是每英尺的点数。<br>
+    通常这两个单位转换就是把 BMP 里的分辨率数值除以 39.3701 ，就得到 DPI，代码里可以看到简单转换的过程。<br>
+    <br>
+    第二个例子的代码就是上面那么多，我们生成并运行例子，打开 logo.bmp ，点击 "显示图片" 和 "读取头部" 按钮，可以看到程序解析 BMP
+    头部结果：<br>
+    <center><img src="images/ch07/ch07-02-20.png" alt="run"></center>
+    读者可以把例子程序结果与 Windows 系统里面的 BMP 文件属性做对比。<br>
+    <br>
+    本节示例代码中 QFile 对象都没有调用过 close() 函数，因为这些 QFile
+    对象是在函数栈上分配的，函数调用结束时，文件对象会自动销毁，就在对象销毁时文件自动被关闭，不需要手动调用 close() 函数。<br>
+    关于 QFile 类的功能示范就到这里，我们下一节学习文本流 QTextStream 的用法。<br>
+    <br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch07-01.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch07-03.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

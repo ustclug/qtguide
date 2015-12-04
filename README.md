@@ -3,6 +3,10 @@ Qt编程指南
 #qtguide
 
 ###
+本教程主页：      
+https://lug.ustc.edu.cn/sites/qtguide/       
+
+###
 准备写一本关于Qt编程的书，读者需要C++基础，推荐《C++ Primer Plus》。
 打算写成良心之作，慢慢写吧。
 主要是讲传统C++/Qt编程，因为QML我也不会用，而且QML和C++混合编程应该能独立出书的。

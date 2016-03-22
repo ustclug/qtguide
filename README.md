@@ -15,7 +15,7 @@ https://lug.ustc.edu.cn/sites/qtguide/
 所用的开发环境可以去Qt官网下载:      
 http://download.qt.io/official_releases/qt/5.4/5.4.0/       
 也可以从百度网盘下载:       
-http://pan.baidu.com/s/1nt3d0jZ     
+http://pan.baidu.com/s/1nuk5Lbz     
 
 ### 
 采用Qt 5.4.0版本开发环境，安装和配置教程上面百度网盘链接里面有，

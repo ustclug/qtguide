@@ -586,6 +586,134 @@ style=" color:#008000;">//显示复选框</span></pre>
     在 7.1.5
     文件系统浏览示例，我们就已经使用到列表控件了，并且条目既有图标也有文本显示，读者可以复习一下前面的示例。本小节示例是一个可编辑的游戏装备列表，学习
     QtCreator 设计模式和 Qt 设计师里面列表控件的可视化编辑，而程序运行时也可以自己选择装备图标、设置游戏装备名称，并支持条目数据的保存和加载。<br>
+    在开始例子之前，先下载一个游戏装备图标压缩包： <br>
+    <a href="https://lug.ustc.edu.cn/sites/qtguide/QtProjects/ch08/dotaitems/dotasytb.zip"
+      target="new">
+      https://lug.ustc.edu.cn/sites/qtguide/QtProjects/ch08/dotaitems/dotasytb.zip
+    </a> <br>
+    压缩包解压之后，有个 DOTA-ITEM
+    文件夹，里面是游戏装备图标，我们抽取蝴蝶（fgfh.jpg）、金箍棒（odef.jpg）、大炮（rman.jpg）
+    三个图标备用，例子内嵌资源使用这三个图标，然后我们开始这个例子的学习。<br>
+    打开 QtCreator，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>
+    ①项目名称 dotaitems，创建路径 D:\QtProjects\ch08，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    <br>
+    在开始图形界面编辑之前，我们先添加图标和资源文件：<br>
+    在源码文件夹 D:\QtProjects\ch08\dotaitems 里新建一个叫 icons 的子文件夹，然后把三个图标文件
+    fgfh.jpg、odef.jpg、rman.jpg 放到 icons 子文件夹。<br>
+    然后在 QtCreator 左边项目管理面板，右击 dotaitems 项目名称，右键菜单选中 "添加新文件" ，弹出新建文件对话框，<br>
+    <center><img src="images/ch08/ch08-01-02.png" alt="rc1" width="800"></center>
+    选择新建 Qt Resource File，点击 "Choose..." 按钮，进入如下界面，<br>
+    <center><img src="images/ch08/ch08-01-03.png" alt="rc2" width="800"></center>
+    名称填写 icons，路径用当前项目文件夹，点击 "下一步"，<br>
+    <center><img src="images/ch08/ch08-01-04.png" alt="rc3" width="800"></center>
+    项目管理界面不用修改，点击完成。进入 QtCreator 资源文件编辑界面，我们在左边项目管理面板右击 icons.qrc 文件名，<br>
+    <center><img src="images/ch08/ch08-01-05.png" alt="rc4" width="800"></center>
+    右键菜单选择 "添加现有文件"，在弹出的文件对话框，选择 icons 子文件夹里三个图标文件添加，添加好之后如下图所示：<br>
+    <center><img src="images/ch08/ch08-01-06.png" alt="rc5" width="800"></center>
+    这样图标和资源文件就编辑好了，保存该资源文件，关闭该文件。接下来我们编辑 ui 界面文件。<br>
+    <br>
+    我们打开 widget.ui 界面文件，按照下图拖入控件：<br>
+    <center><img src="images/ch08/ch08-01-07.png" alt="ui" width="800"></center>
+    界面分为左边和右边两个大部分：<br>
+    左边上方是列表控件，对象名为 listWidget；左下是单行编辑器，对象名为 lineEditToolTip，左边两个控件按照垂直布局排布。<br>
+    右边是六个按钮，第一个按钮文本是 "添加"，对象名 pushButtonAdd；第二个按钮文本是 "删除"，对象名
+    pushButtonDel；第三个按钮文本是 "切换显示模式"，对象名 pushButtonViewMode；第四个按钮文本为 "加载"，对象名
+    pushButtonLoad；第五个按钮文本为 "保存"，对象名为 pushButtonSave；在 "保存"
+    按钮下面是一个垂直的空白条，用默认的对象名即可；第六个按钮文本为 "编辑工具提示"，对象名为
+    pushButtonEditToolTip。右边的控件也是按照垂直布局器排布，主界面是按照水平布局器排布。<br>
+    <br>
+    这里解释一下这些控件的用途：<br>
+    列表控件显示游戏装备的图标和名称列表，初始时显示资源文件内嵌的三个游戏装备；<br>
+    "添加" 按钮可以从磁盘添加新的游戏装备图标和装备名；"删除" 按钮是从列表删除一个条目；<br>
+    "切换显示模式" 按钮用于控制列表控件的显示方式，是小图标文字模式，还是大图标模式；<br>
+    "保存" 按钮是将当前列表控件条目保存为自定义的 *.item 数据流文件，"加载" 按钮是加载之前存的文件；<br>
+    单行编辑器和 "编辑工具提示" 按钮，是设置列表当前选中条目的工具提示信息，相当于游戏装备描述信息。<br>
+    <br>
+    我们现在来学一下让列表控件初始时显示三个装备条目，在 QtCreator 和 Qt 设计师里面，可以直接为列表控件、表格控件、树形控件（都是
+    Item-Based）添加条目，这些条目可以自动在程序启动时显示。我们右击列表控件，在右键菜单看到 "编辑项目..." 菜单项：<br>
+    <center><img src="images/ch08/ch08-01-08.png" alt="item1" width="800"></center>
+    "编辑项目..." 这个菜单项的用途就是编辑条目的意思，点击之后看到如下条目编辑对话框：<br>
+    <center><img src="images/ch08/ch08-01-09.png" alt="item2"></center>
+    绿色加号图标按钮就是添加新的条目，我们添加三个条目，条目文本为 "蝴蝶"、"金箍棒"、"大炮" ：<br>
+    <center><img src="images/ch08/ch08-01-10.png" alt="item3"></center>
+    条目不仅有文字，还可以编辑条目的 "属性"，就是上面小节介绍的 QListWidgetItem 通用数据和非通用数据，点击 "属性"
+    按钮，可以看到条目的详细编辑内容：<br>
+    <center><img src="images/ch08/ch08-01-11.png" alt="item4"></center>
+    对于第一个条目 "蝴蝶" ，我们点击属性 icon，再点击 icon 右边一栏的小按钮，在菜单里点击 "选择资源" ：<br>
+    <center><img src="images/ch08/ch08-01-12.png" alt="item5"></center>
+    然后我们选择蝴蝶的图标给该条目：<br>
+    <center><img src="images/ch08/ch08-01-13.png" alt="item6"></center>
+    添加之后，可以看到第一个条目有蝴蝶图标了：<br>
+    <center><img src="images/ch08/ch08-01-14.png" alt="item7"></center>
+    然后我们编辑蝴蝶条目的 toolTip ，可以自己在网上找点蝴蝶的描述信息填到该工具提示里面：<br>
+    <center><img src="images/ch08/ch08-01-15.png" alt="item8"></center>
+    上图设置的就是HTML丰富文本的工具提示信息，原本是从网页复制到 "多文本" 编辑模式里的，如果点击 "源" 编辑模式，可以看到 HTML 的源码：<br>
+    <div class="code">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span
+      style=" font-family:'宋体,arial,sans-serif'; font-size:12px; color:#0090ff;
+      background-color:#121212;"&gt;+30点攻击力&lt;br/&gt;+30%攻速&lt;br/&gt;+30点敏
+      捷&lt;br/&gt;&lt;/span&gt;&lt;span style="
+      font-family:'宋体,arial,sans-serif'; font-size:12px; color:#66ffff;
+      background-color:#121212;"&gt;+35%的物理攻击闪避&lt;/span&gt;&lt;/p&gt;&lt;
+      /body&gt;&lt;/html&gt;</div>
+    编辑后点击确定，回到条目编辑界面，关于蝴蝶条目，还有其他的数据信息可以编辑，读者可以自己试试看，上文提到的条目数据几乎都可以在右边的属性编辑栏里面找到。<br>
+    <br>
+    然后我们如法炮制，为列表控件第二个、第三个条目添加图标和工具提示：<br>
+    <center><img src="images/ch08/ch08-01-16.png" alt="item9"></center>
+    <br>
+    金箍棒的描述信息也是丰富文本，HTML源码如下：
+    <div class="code">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span
+      style=" font-family:'宋体,arial,sans-serif'; font-size:12px; color:#0090ff;
+      background-color:#121212;"&gt;+88点攻击力&lt;br/&gt;+15%攻速&lt;br/&gt;&lt;
+      /span&gt;&lt;span style=" font-family:'宋体,arial,sans-serif';
+      font-size:12px; color:#66ffff;
+      background-color:#121212;"&gt;被动：攻击不会落空（与某些法球冲突，可关闭该效果），攻击中有35%的机率造成0.01秒的晕眩并
+      且+100点附加伤害&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</div>
+    大炮的描述信息 HTML 源码如下：
+    <div class="code">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span
+      style=" font-family:'宋体,arial,sans-serif'; font-size:12px; color:#0090ff;
+      background-color:#121212;"&gt;+81点攻击力&lt;br/&gt;25%机率造成2.4倍伤害&lt;br
+      /&gt;&lt;/span&gt;&lt;span style=" font-family:'宋体,arial,sans-serif';
+      font-size:12px; color:#ffff00;
+      background-color:#121212;"&gt;通俗称呼：大炮&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;
+      /html&gt;</div>
+    这些描述信息是从如下网站复制的，可以直接粘贴到丰富文本编辑对话框里面（在多文本模式粘贴）：<br>
+    <a href="http://db.pcgames.com.cn/dota/item_864.html" target="new">
+      http://db.pcgames.com.cn/dota/item_864.html </a> <br>
+    <br>
+    由于支持丰富文本的工具提示，Qt
+    的其他控件或控件条目可以展示非常棒的工具提示效果，不仅仅是丰富文本，我们还可以为工具提示添加资源里的图片，以第三个大炮的工 具提示编辑框为例：<br>
+    <center><img src="images/ch08/ch08-01-17.png" alt="item10"></center>
+    我们在多文本编辑模式，先在文字前按回车键，在文字之前新加空白行，然后点击上面 "插入图像" 按钮，看到选择资源图片的对话框：<br>
+    <center><img src="images/ch08/ch08-01-18.png" alt="item11"></center>
+    我们选中第三个大炮的图片添加到工具提示里面，可以看到如下效果：<br>
+    <center><img src="images/ch08/ch08-01-19.png" alt="item12"></center>
+    这是大炮的工具提示信息预览，等程序编译运行后我们再看看实际效果。<br>
+    在工具提示添加大炮图片之后，可以看看工具提示 HTML 源码的变化：<br>
+    <div class="code">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img
+      src=":/icons/rman.jpg"/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style="
+      font-family:'宋体,arial,sans-serif'; font-size:12px; color:#0090ff;
+      background-color:#121212;"&gt;+81点攻击力&lt;br/&gt;25%机率造成2.4倍伤害&lt;br/&gt;&lt;
+      /span&gt;&lt;span style=" font-family:'宋体,arial,sans-serif';
+      font-size:12px; color:#ffff00;
+      background-color:#121212;"&gt;通俗称呼：大炮&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;
+      /html&gt;</div>
+    Qt编程中，一般支持丰富文本的控件，都可以显示内嵌资源文件里的图片，内嵌资源里的图片供 HTML 引用的方式如下：<br>
+    <div class="code">&lt;img src=":/icons/rman.jpg"/&gt;</div>
+    除了以冒号打头的图片路径，其他与标准的 HTML 图片引用没区别。<br>
+    <br>
+    关于条目属性编辑的内容还有很多：<br>
+    <center><img src="images/ch08/ch08-01-20.png" alt="item13"></center>
+    除了条目的文本、图标、工具提示，还可以设置状态栏信息、帮助信息、字体、文本对齐、背景色、前景色、条目特性标志以及复选框勾选状态等等。无论是通过
+    QtCreator 设计模式或 Qt 设计师的可视化编辑设置条目，还是通过编写代码调整条目的数据，都是可行的，等会我们再学习一些关于设置条目数据的代码。<br>
+    关于列表控件条目的可视化编辑就介绍这些，读者可以自己试试，尤其是条目的特性标志，可以把条目设置为可编辑的 Editable
+    标志，等会我们通过代码来修改。<br>
+    <br>
+    编辑好列表控件的条目之后，我们回到原来的界面编辑，为各个控件添加槽函数。<br>
+    列表控件：一个<br>
+    按钮：六个<br>
     <br>
     <br>
     <br>

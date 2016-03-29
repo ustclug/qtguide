@@ -229,9 +229,10 @@
     这个函数名是打开条目的持续编辑器，持续的意思是如果不调用关闭函数，该条目的编辑器会一直开启，关闭这个持续编辑器使用如下函数：<br>
     <div class="code">void QListWidget::​closePersistentEditor(QListWidgetItem *
       item)</div>
-    一般可以在检测到条目激活信号（itemActivated）时调用打开函数 ​openPersistentEditor()
-    ，在当前条目变化（&nbsp;&nbsp;&nbsp; currentItemChanged）时调用关闭函数
-    ​closePersistentEditor() 。<br>
+    一般可以在检测到条目激活信号（itemActivated）时调用打开函数 ​openPersistentEditor() ，在当前条目变化（
+    currentItemChanged）时调用关闭函数 ​closePersistentEditor() 。
+    使用这一对开关持续编辑器函数涉及到编写多个信号的槽函数，使用比较麻烦，建议用后面第二小节介绍的条目标 志位和
+    QListWidget::​editItem(QListWidgetItem * item) 实现条目的可编辑功能。<br>
     <br>
     （7）其他信号和槽函数<br>
     除了上面关于当前条目变化和选中条目变化的信号，条目还有激活、单击、双击等信号，罗列如下：<br>
@@ -570,6 +571,9 @@ style=" color:#008000;">//显示复选框</span></pre>
     因为可以设置条目的 Qt::ItemIsEditable 标志位，所以列表控件 QListWidget 的一对持续编辑器函数&nbsp;
     openPersistentEditor() 和 closePersistentEditor()
     一般不需要手动调用，直接设置条目自身的可编辑标志位就行了。<br>
+    对于启用可编辑标志位的条目，如果希望通过代码开启条目的编辑，可以调用列表控件的 ​editItem()
+    函数来实现，而不需要使用一对开关持续编辑器函数那么麻烦：<br>
+    <div class="code">void QListWidget::​editItem(QListWidgetItem * item)</div>
     <br>
     这里说明一下：<span style="font-weight: bold;">列表条目本身是可以存储复选框的勾选状态数值，而条目显示的复选框是由列表控
       件绘制并提供，列表条目自身不是控件，也不包含子控件。类似地，列表控件根据 Qt::ItemIsEditable
@@ -700,7 +704,7 @@ style=" color:#008000;">//显示复选框</span></pre>
       font-size:12px; color:#ffff00;
       background-color:#121212;"&gt;通俗称呼：大炮&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;
       /html&gt;</div>
-    Qt编程中，一般支持丰富文本的控件，都可以显示内嵌资源文件里的图片，内嵌资源里的图片供 HTML 引用的方式如下：<br>
+    Qt编程中，一般支持丰富文本的控件或条目，都可以显示内嵌资源文件里的图片，内嵌资源里的图片供 HTML 引用的方式如下：<br>
     <div class="code">&lt;img src=":/icons/rman.jpg"/&gt;</div>
     除了以冒号打头的图片路径，其他与标准的 HTML 图片引用没区别。<br>
     <br>
@@ -712,14 +716,1088 @@ style=" color:#008000;">//显示复选框</span></pre>
     标志，等会我们通过代码来修改。<br>
     <br>
     编辑好列表控件的条目之后，我们回到原来的界面编辑，为各个控件添加槽函数。<br>
-    列表控件：一个<br>
-    按钮：六个<br>
+    右击列表控件，在右键菜单选择 "转到槽..." ，添加 currentItemChanged(QListWidgetItem *,
+    QListWidgetItem *) 信号对应的槽函数：<br>
+    <center><img src="images/ch08/ch08-01-21.png" alt="slot1"></center>
+    然后再类似操作一遍，还是为列表控件添加槽函数，再添加 itemChanged(QListWidgetItem * )
+    信号对应的槽函数。列表控件对应的两个槽函数功能等会再详解。<br>
     <br>
+    主界面右边还有六个按钮控件，为每个按钮都添加 clicked() 信号对应的槽函数：<br>
+    <center><img src="images/ch08/ch08-01-22.png" alt="slot3"></center>
+    槽函数添加完成后，保存界面文件，关闭界面文件，回到 QtCreator 代码编辑模式，开始编写例子的代码。<br>
     <br>
+    我们首先编辑头文件 widget.h，主要添加两句头文件包含，其他的不修改：<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>WIDGET_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">WIDGET_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QListWidget&gt;</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#008000;">//列表控件</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QListWidgetItem&gt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//列表控件条目</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_listWidget_currentItemChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QListWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>current<span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QListWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>previous<span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_listWidget_itemChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QListWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>item<span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonAdd_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonDel_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonViewMode_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonLoad_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonSave_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonEditToolTip_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre>
+    </div>
+    列表控件对应的槽函数在头文件声明中用到了列表条目，所以提前包含了 &lt;QListWidget&gt; 和
+    &lt;QListWidgetItem&gt; 两个类头文件，其他的代码都是自动生成的，不用修改。<br>
+    下面编辑源文件 widget.cpp ，添加实际的功能代码，这个文件代码比较多，我们逐个函数来看。<br>
+    首先是头文件包含和构造函数代码：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QIcon&gt;</span><span style=" color:#c0c0c0;">        </span><span
+style=" color:#008000;">//图标类</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QFileDialog&gt;</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#008000;">//程序运行时可打开新图标文件</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QMessageBox&gt;</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#008000;">//消息框</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QFile&gt;</span><span style=" color:#c0c0c0;">        </span><span
+style=" color:#008000;">//文件类</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDataStream&gt;</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#008000;">//数据流，加载和保存条目数据</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//先把所有条目设置为可编辑特性，并且显示条目的复选框状态</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nCount</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">listWidget</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">count</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">for</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">i</span><span style=" color:#000000;">=</span><span style=" color:#000080;">0</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#000000;">nCount</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span
+style=" color:#000000;">++)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QListWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">item</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">listWidget</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">item</span><span style=" color:#000000;">(</span><span style=" color:#000000;">i</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//启用可编辑特性标志位</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">item</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setFlags</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">item</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">flags</span><span style=" color:#000000;">())</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">|</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Qt</span><span style=" color:#000000;">::</span><span style=" color:#800080;">ItemIsEditable</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//显示复选框</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">item</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setCheckState</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">Qt</span><span style=" color:#000000;">::</span><span
+style=" color:#800080;">Unchecked</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//DOTA最多携带六个装备，有复选框之后，勾选表示携带，不勾选是不携带</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//后面代码检查只能带六个的限制条件</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//程序运行时新增的装备条目也要开启编辑标志位、复选框，等会实现</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//装备名称可以直接双击修改</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    头文件包含的图标类 &lt;QIcon&gt;，用于打开新增装备的图标文件。&lt;QFileDialog&gt;
+    是打开和保存文件时用的文件对话框。&lt;QMessageBox&gt; 用于显示消息框。&lt;QFile&gt; 和
+    &lt;QDataStream&gt; 用于保存装备条目文件和加载装备条目文件。<br>
+    在构造函数里面新增了一段 for
+    循环代码，先获取列表控件条目的计数，然修改每个条目的特性标志位，开启可编辑特性，然后把复选状态设置为非选中状态，这样会显示出复选框。本例子列表条目大部分的数据都
+    是条目的通用数据，代码中可编辑特性标志位是属于非通用数据。<br>
+    开启条目的可编辑特性，是方便用户双击条目修改装备名称，比如大炮是暴雪弩炮的俗称。<br>
+    显示的复选框，主要是用于显示装备的携带状态，勾选状态是携带的，非勾选状态是不携带的，DOTA 最多可以带 6 个装备，我们在后面代码会检查携带 6
+    个的数目限制。<br>
+    我们之前在列表控件预置了 3 个装备，程序运行时还可以选择装备图标文件，添加新的装备，这样列表里的装备可以有很多。<br>
+    <br>
+    接着我们来编写条目选中序号变化时调用发的槽函数：<br>
+    <div class="code"><span style=" color:#008000;">//当前高亮选中的条目序号变化</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_listWidget_currentItemChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QListWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">current</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QListWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">previous</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">NULL</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">==</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">current</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//空指针不处理</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取新选中条目的工具提示信息显示到单行编辑器</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strToolTip</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">current</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">toolTip</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditToolTip</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strToolTip</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//在</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"编辑工具提示"</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">按钮对应的槽函数实现修改条目的工具提示</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    当前选中条目的序号变化时，该槽函数第一个参数是现在新选中的条目指针，第二个参数是旧的选中条目指针。注意指针有可能是
+    NULL，如果要用到哪个指针，一定要判断指针是否为空值。这个槽函数主要是根据高亮选中条目的变化，在单行编辑器里同步显示当前条目的工具提示信息。<br>
+    与这个条目选中变化槽函数紧密相关的是 "编辑工具提示" 按钮对应的槽函数，我们把这个按钮槽函数提到前面来讲解：<br>
+    <div class="code"><span style=" color:#008000;">//修改条目的工具提示信息，相当于修改装备描述</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonEditToolTip_clicked</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//新的工具提示信息</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strNew</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditToolTip</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取当前选中条目</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QListWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">curItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">listWidget</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">currentItem</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">curItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">NULL</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span><span
+style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//检查是否为空指针</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//设置新的工具提示信息</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">curItem</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setToolTip</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strNew</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    当用户点击 "编辑工具提示" 按钮时，这个槽函数会先获取单行编辑器的文本，然后获取当前高亮选中的条目 curItem ，判断 curItem
+    指针非空之后，将新的工具提示信息设置给该条目。凡是涉及到指针的，都要注意判断指针是否为 NULL。<br>
+    涉及到工具提示信息的编辑的，就是上面两个槽函数。<br>
+    <br>
+    然后我们来看看装备条目复选框的勾选检查，我们要保证勾选的装备不超过 6
+    个。列表控件的条目内部数据发生变化时，无论是文本、图标、工具提示、复选状态等等，都只触发列表控件的
+    itemChanged(QListWidgetItem *) 信号，所以我们要自己筛选需要的复选框状态信息：<br>
+    <div class="code"><span style=" color:#008000;">//限定</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">DOTA</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">装备只能携带</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">6</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">个</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_listWidget_itemChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QListWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">item</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//空指针不处理</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">NULL</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">==</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">item</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//实际存在的条目变化</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">item</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">checkState</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Qt</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Checked</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//复选框没选中，没携带的不检查</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//如果复选框处于选中状态，检查装备携带是否超过</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">6</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">个</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nCount</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">listWidget</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">count</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nUsingItemsCount</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">for</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">i</span><span style=" color:#000000;">=</span><span style=" color:#000080;">0</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#000000;">nCount</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span
+style=" color:#000000;">++)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QListWidgetItem</span><span
+style=" color:#000000;">*</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">theItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">listWidget</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">item</span><span style=" color:#000000;">(</span><span style=" color:#000000;">i</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">theItem</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">checkState</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">==</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Qt</span><span style=" color:#000000;">::</span><span
+style=" color:#800080;">Checked</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#008000;">//携带数加一</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#000000;">nUsingItemsCount</span><span
+style=" color:#000000;">++;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//判断是否超过</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">6</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">个</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nUsingItemsCount</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&gt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">6</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">warning</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"携带数目检查"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"DOTA</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">装备最多带</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">6</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">个！"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//把当前变化的</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">item</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">设置为非选中状态</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">item</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setCheckState</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Qt</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Unchecked</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    该槽函数先判断参数里的 item 是否为空指针，如果为空指针就不处理。<br>
+    接着判断 item 条目里的复选框状态，如果处于非选中状态，说明没携带该装备，就不用后续的判断，直接返回。<br>
+    如果携带了该装备，那我们要枚举所有的列表条目，如果列表条目复选框处于勾选状态，那就增加携带计数 nUsingItemsCount。<br>
+    统计好 nUsingItemsCount 之后，判断携带数量是否大于 6，大于 6 就把 item 条目的勾选状态取消，回到不携带的状态。<br>
+    <br>
+    这个函数工作原理比较简单：如果用户取消勾选装备，那么不用判断，如果用户选中携带装备，那么每次携带都会让上面槽函数执行一次检查，直到超过 6
+    个就不会再携带超额的装备了。<br>
+    <br>
+    因为我们例子初始时只有 3 个装备，当然不够，我们下面来看看添加新装备的槽函数：<br>
+    <div class="code"><span style=" color:#008000;">//用户选择装备图标文件，添加新装备条目</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonAdd_clicked</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取新装备图标的文件路径</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strItemFileName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QFileDialog</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">getOpenFileName</span><span style=" color:#000000;">(</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#808000;">this</span><span
+style=" color:#000000;">,</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"选择装备图标文件"</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"."</span><span style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"Image</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">files(*.jpg</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">*.png</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">*.bmp);;All</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">files(*)"</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strItemFileName</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">())</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//没有文件名，返回</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//打开装备图标文件</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QIcon</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">iconNew</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strItemFileName</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//新建条目，文本初始是默认的，自动添加到列表控件</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QListWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">itemNew</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QListWidgetItem</span><span
+style=" color:#000000;">(</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">iconNew</span><span
+style=" color:#000000;">,</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"新装备名称"</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">listWidget</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//开启条目编辑特性</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">itemNew</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setFlags</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">itemNew</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">flags</span><span style=" color:#000000;">())</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">|</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Qt</span><span style=" color:#000000;">::</span><span style=" color:#800080;">ItemIsEditable</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//显示复选框</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">itemNew</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setCheckState</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Qt</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Unchecked</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置新的当前条目</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">listWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setCurrentItem</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">itemNew</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//新增条目自动启用编辑功能，让用户可以立即修改新装备名称</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">listWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">editItem</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">itemNew</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    该槽函数先获取要打开的图标文件名称 strItemFileName，并判断是否非空。<br>
+    然后根据文件名定义图标对象 iconNew，并新建一个列表条目，新增条目初始时文本都是
+    "新装备名称"，条目图标就是刚定义的图标对象，而且条目会自动添加到列表控件；<br>
+    接着开启该条目的可编辑标志位，并设置条目的复选状态，显示条目配套的复选框；<br>
+    最后将列表当前高亮选中的条目设置为刚刚新增的条目，并且调用 editItem() 函数，自动进入该条目文本的编辑框，方便用户立即修改这个新装备名称。<br>
+    <br>
+    与增加装备相反的是删除条目的槽函数：<br>
+    <div class="code"><span style=" color:#008000;">//删除当前选中的装备条目</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonDel_clicked</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nCurRow</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">listWidget</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">currentRow</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nCurRow</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&lt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//没有选中的条目</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//从列表控制移除选中的条目</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QListWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">itemDel</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">listWidget</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">takeItem</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nCurRow</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//彻底删除移除的条目</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">itemDel</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">itemDel</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">NULL</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    删除条目的槽函数先获取当前选中条目的行号，判断行号是否合法；对于合法的行号，使用 takeItem()
+    函数从列表控件移除该条目，移除条目并不是从内存彻底删除，要彻底删除条目还得手动 delete 已经移除的条目。<br>
+    注意列表控件的 takeItem() 函数只是根据行号解除该行条目的隶属关系，而不会从内存消掉该条目内容，因此需要手动 delete。<br>
+    <br>
+    然后我们来看看列表控件切换显示模式的槽函数：<br>
+    <div class="code"><span style=" color:#008000;">//切换小图标文本模式和大图标模式</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonViewMode_clicked</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QListView</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">ViewMode</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">vm</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">listWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">viewMode</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QListView</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">ListMode</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">==</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">vm</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//切换到大图标显示，大图标可以拖动，但是不会改变内部真实的条目序号</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">listWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setViewMode</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QListView</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">IconMode</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">else</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//切换到小图标文字显示，条目不可拖动</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">listWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setViewMode</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QListView</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">ListMode</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    之前没介绍列表空间的显示模式属性 viewMode，这个属性是从基类 QListView 继承来的，显示模式目前只有两种：<br>
+    QListView::ListMode，默认值是这个小图标文本列表模式，重点是显示条目的文本，所有条目是静态的，不可拖动；<br>
+    QListView::IconMode，大图标显示模式，重点显示大图标，大图标可以拖动位置，但拖动位置不改变条目实际的排序。<br>
+    条目是否可以拖动的特性是可以通过修改 movement 属性实现，这些等到讲解基类 QListView 再详细说，这里只是点一下。<br>
+    <br>
+    最后我们来看看 "保存" 和 "加载" 两个按钮的槽函数，这两个槽函数稍微有点复杂，先看 "保存" 按钮的槽函数：<br>
+    <div class="code"><span style=" color:#008000;">//保存所有条目到文件</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonSave_clicked</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取保存文件名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strSaveName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QFileDialog</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">getSaveFileName</span><span style=" color:#000000;">(</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#808000;">this</span><span
+style=" color:#000000;">,</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"保存items文件"</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"."</span><span style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"Items</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">files(*.items)"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//判断文件名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strSaveName</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//打开要写入的文件</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QFile</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">fileSave</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strSaveName</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">fileSave</span><span
+style=" color:#000000;">.</span><span style=" font-style:italic; color:#000000;">open</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QIODevice</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">WriteOnly</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">))</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//无法打开要写入的文件</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">warning</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"打开写入文件"</span><span style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                             </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"打开要写入的文件失败，请检查文件名和是否具有写入权限！"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//创建数据流</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QDataStream</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">dsOut</span><span
+style=" color:#000000;">(&amp;</span><span style=" color:#000000;">fileSave</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//先写入列表条目计数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">qint32</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nCount</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">listWidget</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">count</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">dsOut</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">nCount</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//逐个写入条目</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">for</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">qint32</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span style=" color:#000000;">=</span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">i</span><span style=" color:#000000;">&lt;</span><span style=" color:#000000;">nCount</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span
+style=" color:#000000;">++)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QListWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">theItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">listWidget</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">item</span><span style=" color:#000000;">(</span><span style=" color:#000000;">i</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">dsOut</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">theItem</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//把条目对象写入数据流，不是写指针数值</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//数据流仅写入条目通用数据，条目的非通用数据不写入，比如条目的标志位不写</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//写入完毕</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    我们保存的文件是自定义的数据流文件，先写入条目计数，然后依次写入各个条目，文件扩展名为 *.items。<br>
+    该槽函数先获取要保存的文件名，并判断文件名非空。<br>
+    然后根据文件名定义文件对象 fileSave，以只写模式打开文件，如果打开出错就提示并返回。<br>
+    如果文件打开成功，就根据文件对象定义数据流对象 dsOut；<br>
+    获取列表控件的条目计数 nCount，写入到数据流；<br>
+    然后枚举各个条目，将所有条目对象都写入数据流。<br>
+    <br>
+    注意是将条目对象 *theItem 写入数据流，theItem
+    是指针，不能直接把指针值写入数据流，指针值本身是没用的，要存储条目对象的本体。数据流会自动把条目的通用数据（包括文本、图标、工具提示、复选框状态等等一大堆）存入
+    文件，但是非通用的数据，比如可编辑特性标志，是不写文件的。 QListWidgetItem::​flags() 的标志位都不会写入文件，等会加载
+    *.items 文件的时候，我们需要自己动手修改标志位。<br>
+    <br>
+    再来看看 "加载" 按钮对应的槽函数：<br>
+    <div class="code"><span style=" color:#008000;">//加载之前保存的文件</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonLoad_clicked</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取要加载的文件名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strOpenName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QFileDialog</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">getOpenFileName</span><span style=" color:#000000;">(</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#808000;">this</span><span
+style=" color:#000000;">,</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"打开items文件"</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"."</span><span style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"Items</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">files(*.items)"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//判断文件名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strOpenName</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">())</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//打开文件</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QFile</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">fileOpen</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strOpenName</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">fileOpen</span><span
+style=" color:#000000;">.</span><span style=" font-style:italic; color:#000000;">open</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QIODevice</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">ReadOnly</span><span
+style=" color:#000000;">))</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//打开出错</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">warning</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"打开文件"</span><span style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                             </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"打开指定文件失败，请检查文件是否存在和读取权限！"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//创建读取数据流</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QDataStream</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">dsIn</span><span style=" color:#000000;">(&amp;</span><span
+style=" color:#000000;">fileOpen</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//读取条目计数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">qint32</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nCount</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">dsIn</span><span
+style=" color:#000000;">&gt;&gt;</span><span style=" color:#000000;">nCount</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//判断计数数值</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">nCount</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&lt;=</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">warning</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"文件加载"</span><span style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                             </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"文件中无条目数据可以加载！"</span><span
+style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//新建各个条目，并加载文件中的条目数据</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">for</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">qint32</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span style=" color:#000000;">=</span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">i</span><span style=" color:#000000;">&lt;</span><span style=" color:#000000;">nCount</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span
+style=" color:#000000;">++)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//新建条目，条目自动添加到列表控件</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QListWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">theItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QListWidgetItem</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">listWidget</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//加载条目通用数据，文字、图标、工具提示、复选状态等是通用数据，在数据流里面有保存</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">dsIn</span><span
+style=" color:#000000;">&gt;&gt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">theItem</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//条目的非通用数据是不保存到数据流的</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//这里需要手动把条目设置为可编辑的特性标志位</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">theItem</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setFlags</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">theItem</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">flags</span><span style=" color:#000000;">())</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">|</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Qt</span><span style=" color:#000000;">::</span><span style=" color:#800080;">ItemIsEditable</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//加载完毕</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    这个槽函数先获取要加载的文件名，并检查文件名是否非空。<br>
+    然后根据文件名定义文件对象 fileOpen，并用只读模式打开，如果打开失败就报错并返回。<br>
+    如果文件打开正确，就定义数据流对象 dsIn；<br>
+    先从数据流读取条目计数 nCount，判断 nCount 数值，如果不是正数，就提示没有条目数据，直接返回。<br>
+    如果有正确的条目计数，那就用 for 循环逐个新建列表条目对象，新建的对象指针为 theItem ；<br>
+    把数据流中的条目数据读取到对象本体 *theItem；<br>
+    最后要注意的就是条目的非通用数据是不保存的，标志位需要自己手动设置，我们加了一句条目的 setFlags() 函数调用，为条目设置为可编辑的特性标志位。<br>
+    <br>
+    这个游戏装备列表示例的代码就是上面那些，我们现在生成运行例子看看：<br>
+    <center><img src="images/ch08/ch08-01-23.png" alt="run1"></center>
+    当鼠标悬停在第三个大炮（暴雪弩炮）的图标上时，可以看到工具提示信息，有图有真相，就是装备的描述信息。<br>
+    我们可以再添加多个装备条目，并测试 6 个装备限制条件：<br>
+    <center><img src="images/ch08/ch08-01-24.png" alt="run2"></center>
+    当勾选第 7 个装备的时候，弹出消息框提示只能带 6 个，点击消息框 OK 按钮之后，第 7 个装备会自动取消勾选，回到只勾选 6
+    个的状态。示例程序其他功能这里就不截图了，这个例子的代码较多，涉及的知识点也比较多，读者最好把每个槽函数的代码都吃透，并测试每个槽函数代码在程序运行时的实际效
+    果。<br>
     <br>
     <div class="os2">8.1.4 歌曲列表示例</div>
     <br>
-    图标、列表显示的模式 <br>
+    添加多个音乐文件，简单用 mp3、wav、wma 三种格式；<br>
+    条目查找功能，条目多选模式，条目自身能设置选中状态，<br>
+    滚动到指定条目；<br>
+    条目排序；<br>
+    导出为简单的 m3u 音乐列表文件。<br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    -------------------<br>
+    第一个例子遗留两个练习：<br>
+    一是加载文件时，for循环末尾一句如果注释掉，不设置可编辑特性，效果如何？<br>
+    二是加载文件时，没有调用clear() 函数清除旧的列表，这样是否出 bug，如果勾选 6 个装备，导出为文件，立即加载这个文件，会出现什么现象？<br>
+    <br>
+    <br>
     <br>
     <br>
     <br>

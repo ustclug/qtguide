@@ -15,20 +15,439 @@
 
 </script> </head>
   <body>
-    <div class="os1">8.2 表格控件--抱歉，硬盘坏了，待更新</div>
+    <div class="os1">8.2 表格控件</div>
     <br>
-    8.2 节介绍表格控件 QTableWidget 和它的单元格 QTableWidgetItem，
-    表格控件一般有多行多列，可以设置表头。<br>
+    本节先介绍表格控件 QTableWidget 的功能特性，表格控件一般有多行多列，它的单元格条目为
+    QTableWidgetItem，单元格条目可以有丰富的图标、文字、工具提示，支持设置显示的字体、字体颜色、背景色等。另外表格控件拥有水平表头和垂直表头，可以设
+    置表头的丰富特性，表头设置通常会影响表格控件整体外观。由于表格控件的具有多行多列，它的选中区域和选中行为也变得复杂起来，本节会依次讲述这些内容，最后通过
+    两个示例展示表格控件相关知识运用。<br>
     <br>
     <div class="os2">8.2.1 QTableWidget</div>
     <br>
+    在 Qt 设计师可以拖动表格控件到界面窗口，下图可以直观看到表格控件的大致组成：<br>
+    <center> <img src="images/ch08/ch08-02-01.png" alt="tablewidget" width="800"></center>
+    表格控件最上面一排是只读的水平表头，最左边一列是只读的垂直表头。表头又可以细分为多个分段（section），水平表头的分段就是表格各个列的列首，垂直表头
+    分段就是表格各个行的行首。表格控件的实体区域是按行、列排布的单元格，单元格内容一般用 QTableWidgetItem
+    条目填充，单元格如果不填充任何东西，那么默认是 NULL。本小节先介绍表格控件基本的内容，并且讲解基类中比较实用的内容；后面 8.2.2
+    小节介绍单元格条目 QTableWidgetItem；控件表头的内容也比较丰富，单独放在 8.2.3
+    小节介绍；然后详细介绍关于表格控件的选中区域、选中行为、选中模式、单次选中命令等内容，选中区域是表格控件独有的特性，而选中行为、选中模式、单次选中命令是本章所有
+    基于条目的控件都具有的特性，放在 8.2.4 节一块讲解了。<br>
+    <br>
+    先来看看表格控件的构造函数：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QTableWidget(QWidget * parent = 0)</div>
+    <div class="code">&nbsp;&nbsp;&nbsp; QTableWidget(int rows, int columns,
+      QWidget * parent = 0)</div>
+    构造函数里最重要的参数是行数 rows 和列数 columns，表格控件必须指定行数、列数，才能进行后续操作。第一个构造函数没指定行数、列数，必须用下面
+    两个函数设置行数和列数：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;setRowCount(int rows) //设置行数</div>
+    <div class="code">void&nbsp;&nbsp; &nbsp;setColumnCount(int columns) //设置列数</div>
+    行数、列数对应的获取函数为：<br>
+    <div class="code">int&nbsp;&nbsp; &nbsp;rowCount() const //获取行数</div>
+    <div class="code">int&nbsp;&nbsp; &nbsp;columnCount() const //获取列数</div>
+    设置好行数、列数之后就可以进行后续的操作。表格控件在设置行数、列数之后，就有排布好的单元格，默认这些单元格是空的，即 NULL。程序员可以通过
+    setItem()
+    函数可以设置各个单元格条目；程序运行时，表格控件默认所有单元格都可以双击编辑，用户的编辑操作会使表格控件自动生成条目存储用户输入的内容。setItem()
+    函数和用户编辑都可以填充单元格。<br>
+    <br>
+    这里提前说明一下，表格控件的有很多名字相似的两套函数或信号，比如设置当前高亮单元格函数 setCurrentCell(int row, int
+    column) 和设置当前高亮条目 ​setCurrentItem(QTableWidgetItem *
+    item)，这两个函数名字很类似，二者最主要的区别就是：名字带 Cell 的函数是基于单元格的，对 NULL 空单元格也可以使用；而名字带 Item
+    的函数，必须是填充了实体条目的单元格，针对实际存在的单元格条目操作。下面大致按函数功能介绍表格控件的相关内容。<br>
+    <br>
+    （1）设置条目<br>
+    之前 8.1 节 QListWidget 有很多添加条目或设置条目的函数，但是本节表格控件因为设置单元格必须同时知道行号、列号，所以没有 Add** 和
+    Insert** 之类的添加函数，表格只有如下设置条目函数：<br>
+    <div class="code">void QTableWidget::​setItem(int row, int column,
+      QTableWidgetItem * item)</div>
+    一般用 new 新建条目，然后设置到指定行号、列号的单元格里面，比如下面一段示范代码：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QTableWidgetItem *newItem = new
+      QTableWidgetItem(tr("newitem");<br>
+      &nbsp;&nbsp;&nbsp; tableWidget-&gt;setItem(row, column, newItem);</div>
+    从代码而言，就只有 setItem()
+    函数设置单元格条目；当然，程序运行时用户可以双击编辑单元格，表格控件可以自动新建条目保存用户编辑的内容存到单元格里面。单元格条目不仅支持文本，还能设置图标、丰富
+    字体、字体颜色、工具提示等信息，后面还会介绍 QTableWidgetItem 类。<br>
+    <br>
+    （2）移除条目<br>
+    <div class="code">QTableWidgetItem * QTableWidget::​takeItem(int row, int
+      column)</div>
+    ​takeItem() 函数会把指定行号、列号的条目从表格控件卸载下来，但不会完全删除。返回的指针如果非空，那么该指针会指向内存中的条目，如果希望把条目
+    彻底删除，还需要自己手动 delete 删掉内存空间。如果不彻底删除，那么还可以把非空指针重新设置给表格控件。<br>
+    表格控件还有关于整行删除、整列删除、清空表格的几个槽函数，等会再介绍。<br>
+    <br>
+    （3）条目访问函数<br>
+    表格控件可以根据行号、列号获取条目对象指针：<br>
+    <div class="code">QTableWidgetItem * QTableWidget::​item(int row, int
+      column) const</div>
+    注意判断返回的指针是否为空，非空指针才能进行后续操作。<br>
+    另外还能根据表格控件内部的坐标点位来获取位于该坐标位置的条目：<br>
+    <div class="code">QTableWidgetItem * QTableWidget::​itemAt(const QPoint
+      &amp; point) const</div>
+    <div class="code">QTableWidgetItem * QTableWidget::​itemAt(int ax, int ay)
+      const</div>
+    这两个 itemAt() 函数等价的，坐标是指表格控件内部的相对坐标，表格控件内部左上角是 (0,0) 原点。itemAt()
+    函数也是可能返回空指针的，一定要判断返回值是否为 NULL。<br>
+    如果知道了条目 item 非空指针，可以用条目的函数获取行号、列号，如 item-&gt;row() 是行号，item-&gt;column()
+    是列号。根据条目的非空指针，也可以获取条目的可视矩形（条目在表格可见范围内的显示矩形）：<br>
+    <div class="code">QRect QTableWidget::​visualItemRect(const QTableWidgetItem
+      * item) const</div>
+    <br>
+    （4）当前选中条目的操作<br>
+    表格控件一般是多行多列的，实际的选中操作是比较复杂的，我们在这里先介绍最简单的内容，就是不按键盘，只用鼠标左边点击选中当前条目的情况，就是简单的单选操
+    作。<br>
+    获取当前选中条目的函数为：<br>
+    <div class="code">QTableWidgetItem * QTableWidget::​currentItem() const</div>
+    返回的值如果非空那就是实际存在的条目，如果返回了 NULL，说明单元格是空的。<br>
+    不管选中的单元格内部是否为空，都可以获取当前选中单元格的行号、列号：<br>
+    <div class="code">int QTableWidget::​currentRow() const //当前选中行号</div>
+    <div class="code">int QTableWidget::​currentColumn() const //当前选中列号</div>
+    除了鼠标点击选中当前高亮的单元格，也可以用函数设置当前单元格：<br>
+    <div class="code">void QTableWidget::​setCurrentCell(int row, int column)</div>
+    <div class="code">void QTableWidget::​setCurrentCell(int row, int column,
+      QItemSelectionModel::SelectionFlags command)</div>
+    单元格不管是不是空的，上面两个函数都可以设置当前高亮选中状态，第二个 ​setCurrentCell() 多了个单次选中命令的参数，等到 8.4.4
+    节再 详细说。<br>
+    如果知道了非空条目指针，可以设置该条目为当前选中条目：<br>
+    <div class="code">void QTableWidget::​setCurrentItem(QTableWidgetItem *
+      item)</div>
+    <div class="code">void QTableWidget::​setCurrentItem(QTableWidgetItem *
+      item, QItemSelectionModel::SelectionFlags command)</div>
+    第二个函数的 command 参数等到 8.4.4 节再 详细说。<br>
+    <br>
+    无论是通过代码改变当前选中条目还是用户点击操作改变当前选中条目，都会触发当前单元格变化的信号：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;currentCellChanged(int currentRow,
+      int currentColumn, int previousRow, int previousColumn)<br>
+      //单元格无论是否为空都起作用，当前选中单元格的变化信号，参数指出了新当前单元格行列号和旧单元格的行列号</div>
+    <div class="code">void&nbsp;&nbsp; &nbsp;currentItemChanged(QTableWidgetItem
+      * current, QTableWidgetItem * previous)<br>
+      //当前选中条目变化信号，新、旧当前选中单元格至少有一个非空才会触发这个信号</div>
+    <br>
+    （5）条目查找和排序<br>
+    表格控件也可以根据模版字符串查找匹配的条目：<br>
+    <div class="code">QList&lt;QTableWidgetItem *&gt;
+      QTableWidget::​findItems(const QString &amp; text, Qt::MatchFlags flags)
+      const</div>
+    参数里的 text 是模板字符串，第二个 flags 是匹配标志，匹配标志 Qt::​MatchFlags 在 8.1.1 节列举过了，一模一样，比如
+    Qt::MatchContains 是包含子串，Qt::MatchWildcard 是通配符（*、?）匹配，Qt::MatchRegExp
+    是正则表达式匹配，等等。<br>
+    <br>
+    表格控件的排序操作复杂一些，因为有很多列，开启自动排序后需要指定按照哪一列来排序。开启自动排序函数为：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;setSortingEnabled(bool enable)
+      //设置是否自动排序</div>
+    <div class="code">bool&nbsp;&nbsp; &nbsp;isSortingEnabled() const
+      //判断是否开启了自动排序</div>
+    开启自动排序之后，需要指定按照哪一列来排序：<br>
+    <div class="code">void QTableView::​sortByColumn(int column, Qt::SortOrder
+      order)</div>
+    排序的函数是从基类 QTableView 继承的，指定自动排序的列 column 和 order （升序 Qt::AscendingOrder 或降序
+    Qt::DescendingOrder）。<br>
+    除了上面自动排序的函数，还有一个手动排序函数，可以在不开启自动排序时手动调整排序：<br>
+    <div class="code">void QTableWidget::​sortItems(int column, Qt::SortOrder
+      order = Qt::AscendingOrder)</div>
+    <br>
+    开启自动排序之后，会对 ​setItem(int row, int column, QTableWidgetItem * item)
+    函数产生重要影响：新设置的条目如果正好在指定的自动排序列，那么新条目会自动排序，被挪到按序排列好的行号，​setItem() 函数指定的行号不一定有效。<br>
+    如果用代码设置某一行的条目，该行的条目是联系在一起的，比如是某人的个人信息，那么就需要特别注意自动排序的问题：比如预期一行条目的行号是
+    therow，自动排序列为 sortcol，对于前几个列的条目，使用 therow 设置条目给表格，该行位置不变；当设置到 therow
+    行、sortcol 列的条目时，问题来了，自动排序列会根据新条目内容调整该行序号，很有可能把该行移动到了新的行号 newrow，那么如果后面代码继续用
+    旧的 therow 行号设置后面几列的条目，后面几列条目就会错位。这是很严重的问题。<br>
+    <span style="color: red; font-weight: bold;">因此在调用 setItem()
+      函数设置整行的多列条目时，一定要提前关闭自动排序，把新条目都设置完毕后再考虑开启自动排序！</span><br>
+    <br>
+    （6）单元格控件和运行时条目编辑<br>
+    单元格除了设置条目，还可以设置独立的单元格控件：<br>
+    <div class="code">void QTableWidget::​setCellWidget(int row, int column,
+      QWidget * widget)</div>
+    需要注意的问题是单元格控件 widget 会完全覆盖住单元格条目 item，默认情况下单元格条目 item 与单元格控件 widget
+    是完全没关联的，比如设置给单元格一个组合框，组合框显示的东西与单元格原本条目没关系，修改了组合框内容不会影响单元格条目内容。如果希望单元格控件与单元格条
+    目有关，需要自己编代码。<br>
+    获取单元格控件使用如下函数：<br>
+    <div class="code">QWidget * QTableWidget::​cellWidget(int row, int column)
+      const</div>
+    注意返回的指针可能为空。<br>
+    单元格控件也可以被删除掉：<br>
+    <div class="code">void QTableWidget::​removeCellWidget(int row, int column)</div>
+    删除单元格控件后，单元格就会显示原来的条目内容（如果条目原本是 NULL ，就剩下空单元格）。<br>
+    <br>
+    表格控件的单元格也可以开启持续编辑器和关闭持续编辑器（必须配对使用）：<br>
+    <div class="code">void QTableWidget::​openPersistentEditor(QTableWidgetItem
+      * item) //开启持续编辑器</div>
+    <div class="code">void QTableWidget::​closePersistentEditor(QTableWidgetItem
+      * item) //关闭持续编辑器</div>
+    因为表格控件默认的条目全都带了可以编辑标志，所以一般用不到持续编辑器，如果想用代码让单元格进行编辑状态，可以用更简单的函数：<br>
+    <div class="code">void QTableWidget::​editItem(QTableWidgetItem * item)</div>
+    对于可编辑的条目，都可以用 ​editItem() 开启编辑器，这个临时编辑器可以自动关闭的，不需要调用其他函数。<br>
+    <br>
+    程序运行时，表格控件默认所有单元格都可以双击编辑，但如果希望表格全部是只读的，那么可以用下面函数关闭表格控件的整体编辑触发器：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;setEditTriggers(EditTriggers
+      triggers) //设置编辑触发器</div>
+    <div class="code">EditTriggers&nbsp;&nbsp; &nbsp;editTriggers() const
+      //获取编辑触发器</div>
+    默认的编辑器触发器是双击、回车键等可以编辑单元格，修改为 QAbstractItemView::NoEditTriggers
+    就不会开启任何编辑器了，相当于整个表格只读了。如果不希望整个表格只读，而只是希望某部分的单元格只读，那么只有设置单元格条目自身的标志
+    位，item-&gt;setFlags(Qt::ItemFlags flags)，把 flags 设置为不带可编辑标志的：<br>
+    (item-&gt;flags())&nbsp; &amp; (~Qt::ItemIsEditable) 。<br>
+    <br>
+    （7）信号<br>
+    除了之前介绍的 currentCellChanged() 和 currentItemChanged()
+    信号，还有多个关于单元格和条目操作的信号，按照基于单元格操作触发还是实体条目操作触发，大致分为两类：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;cellActivated(int row, int column)
+      //单元格被激活</div>
+    <div class="code">void&nbsp;&nbsp; &nbsp;cellChanged(int row, int column)
+      //单元格内部发生变化，如从NULL变成有条目，或者条目内部数据发生变化</div>
+    <div class="code">void&nbsp;&nbsp; &nbsp;cellClicked(int row, int column)
+      //单元格被点击</div>
+    <div class="code">void&nbsp;&nbsp; &nbsp;cellDoubleClicked(int row, int
+      column) //单元格被双击</div>
+    <div class="code">void&nbsp;&nbsp; &nbsp;cellEntered(int row, int column) <br>
+      //鼠标进入单元格，只有在 mouseTracking 开启时或鼠标移动时点击了单元格，才触发该信号</div>
+    <div class="code">void&nbsp;&nbsp; &nbsp;cellPressed(int row, int column)
+      //单元格被鼠标点击按下</div>
+    第二类是基于实体条目触发的：
+    <div class="code">void&nbsp;&nbsp; &nbsp;itemActivated(QTableWidgetItem *
+      item) //条目被激活</div>
+    <div class="code">void&nbsp;&nbsp; &nbsp;itemChanged(QTableWidgetItem *
+      item) //条目内部数据发生变化，如文本修改、图标变化、复选状态变化等</div>
+    <div class="code">void&nbsp;&nbsp; &nbsp;itemClicked(QTableWidgetItem *
+      item) //条目被点击</div>
+    <div class="code">void&nbsp;&nbsp; &nbsp;itemDoubleClicked(QTableWidgetItem
+      * item) //条目被双击</div>
+    <div class="code">void&nbsp;&nbsp; &nbsp;itemEntered(QTableWidgetItem *
+      item)<br>
+      //鼠标进入条目，只有在 mouseTracking 开启时或鼠标移动时点击了条目，才触发该信号</div>
+    <div class="code">void&nbsp;&nbsp; &nbsp;itemPressed(QTableWidgetItem *
+      item) //条目被鼠标点击按下</div>
+    因为表格条目是多选的，可以有很多高亮选中条目，高亮选中的状态发生变化时，会触发如下信号：
+    <div class="code">void&nbsp;&nbsp; &nbsp;itemSelectionChanged()</div>
+    上面信号参数没有指明哪些条目被选中，要获取所有选中的条目，可以用如下函数：
+    <div class="code">QList&lt;QTableWidgetItem *&gt;
+      QTableWidget::​selectedItems() const</div>
+    更多关于表格选中操作的内容后面再介绍。<br>
+    <br>
+    （8）槽函数<br>
+    表格有两个清空内容的槽函数，首先是 clear() 槽函数：<br>
+    <div class="code">void QTableWidget::​clear()</div>
+    ​clear() 函数删除表格内所有条目内容，单元格全为 NULL，清除选中状态，水平表头和垂直表头的设置内容清空，但是会保留表格的行数、列数，表头清掉
+    之后，会使用默认的数字行号、列号。<br>
+    第二个清除内容的槽函数：<br>
+    <div class="code">void QTableWidget::​clearContents()</div>
+    这个函数删除所有条目内容，单元格全为 NULL，清除选中状态，但是表头的设置内容都保留，表头文本等照旧显示，表格行数、列数也不变。<br>
+    还有关于整行、整列插入删除操作的槽函数：<br>
+    <div class="code">void QTableWidget::​insertColumn(int column) //插入新的一列，新列序号
+      column，新列的单元格默认 NULL</div>
+    <div class="code">void QTableWidget::​insertRow(int row) //插入新的一行，新行序号
+      row，新行的单元格默认 NULL</div>
+    <div class="code">void QTableWidget::​removeColumn(int column) //删除第 column
+      整列条目</div>
+    <div class="code">void QTableWidget::​removeRow(int row) //删除第 row 整行条目</div>
+    最后是关于条目滚动显示的函数，表格的行、列很多时，只有一部分的单元格显示在表格控件可视矩形里，如果希望滚动表格，让指定的条目显示出来，使用如下函数：<br>
+    <div class="code">void QTableWidget::​scrollToItem(const QTableWidgetItem *
+      item, QAbstractItemView::ScrollHint hint = EnsureVisible)</div>
+    QAbstractItemView::ScrollHint 枚举常量在 8.1.1 节列举过，这里不重复介绍了。<br>
+    <br>
+    （9）基类 QTableView 的函数<br>
+    表格控件还从基类 QTableView 继承了很多函数，这里介绍一些比较实用的，更多关于 QTableView 视图的内容会等到模型/视图章节再详解。<br>
+    表头控件的表头分段有分隔线，拖动分隔线可以调整各列的宽度，各行高度也可以拖动分隔线调整。如果通过函数代码调整列宽、行高，可以用下面的函数：<br>
+    <div class="code">void QTableView::​setColumnWidth(int column, int width)
+      //设置列宽</div>
+    <div class="code">int QTableView::​columnWidth(int column) const //获取列宽</div>
+    <div class="code">void QTableView::​setRowHeight(int row, int height) //设置行高</div>
+    <div class="code">int QTableView::​rowHeight(int row) const //获取行高</div>
+    用户在程序运行时可以双击表头分段的分隔线，那样表格控件会自动根据该列单元格内容最宽的条目，调整列宽，让该列条目内容都显示出来，这个操作也有对应的函数：
+    （下面四个都是槽函数）<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;resizeColumnToContents(int column)
+      //自动调整第 column 列列宽，将该列条目显示完整</div>
+    <div class="code">void&nbsp;&nbsp; &nbsp;resizeColumnsToContents()
+      //自动调整所有列宽</div>
+    <div class="code">void&nbsp;&nbsp; &nbsp;resizeRowToContents(int row)
+      //自动调整第 row 行行高，将该行条目显示完整</div>
+    <div class="code">void&nbsp;&nbsp; &nbsp;resizeRowsToContents() //自动调整所有行高</div>
+    如果希望隐藏或显示指定列的所有条目或指定行的条目，可以用如下函数：<br>
+    <div class="code">void QTableView::​setColumnHidden(int column, bool hide)
+      //设置指定列隐藏或显示</div>
+    <div class="code">bool QTableView::​isColumnHidden(int column) const
+      //判断指定列是否被隐藏</div>
+    <div class="code">void QTableView::​setRowHidden(int row, bool hide)
+      //设置指定行隐 藏或显示</div>
+    <div class="code">bool QTableView::​isRowHidden(int row) const //判断指定行是否被隐藏</div>
+    关于显示或隐藏行列，还有四个快捷槽函数：hideColumn(int column)，hideRow(int row)，showColumn(int
+    column)，showRow(int row)，这些函数都可以灵活使用，效果与 ​setColumnHidden() 和
+    ​setRowHidden() 函数是一样的。基类 QTableView 的内容暂时介绍的到这，下面来学学单元格条目的知识。<br>
     <br>
     <div class="os2">8.2.2 QTableWidgetItem</div>
     <br>
+    表格控件条目 QTableWidgetItem 与 8.1.2 节 QListWidgetItem 有很多相似的地方，<br>
+    QTableWidgetItem 也是一个纯数据类，不是控件，没有基类，也就没有信号和槽函数。QTableWidgetItem 可以直接用数据流
+    QDataStream 读写，表格条目不单单有文本，还可以有自己的图标、复选框等特性，表格控件会根据条目对象的丰富特性来呈现数据并进行交互操作。<br>
+    （1）首先来看看条目的构造函数：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QTableWidgetItem(int type = Type)</div>
+    <div class="code">&nbsp;&nbsp;&nbsp; QTableWidgetItem(const QString &amp;
+      text, int type = Type)</div>
+    <div class="code">&nbsp;&nbsp;&nbsp; QTableWidgetItem(const QIcon &amp;
+      icon, const QString &amp; text, int type = Type)</div>
+    <div class="code">&nbsp;&nbsp;&nbsp; QTableWidgetItem(const QTableWidgetItem
+      &amp; other) //复制构造函数</div>
+    参数里的 type 一般用于派生类，指定条目独特的分类，对于普通的表格控件条目，通常用默认的数值即可。第二个构造函数是指定了条目的文本，第三个构造函数同
+    时指定了条目图标和文本。<br>
+    在构造函数里不能直接指定所属的表格控件，因为表格控件有行号、列号所以不能简单追加到表格里，而只能用表格控件的
+    QTableWidget::​setItem() 函数把条目设置到指定单元格里。<br>
+    复制构造函数不会复制旧条目的 type() 类型值和tableWidget() 所属表格控件指针，条目其他的内部数据和条目标志都会复制。<br>
     <br>
-    <div class="os2">8.2.3 示例</div>
+    （2）复制函数和运算符函数<br>
+    除了复制构造函数，还有专门的克隆函数：<br>
+    <div class="code">QTableWidgetItem * QTableWidgetItem::​clone() const</div>
+    克隆函数会新建一个当前条目的复制体，然后返回新复制体条目的指针，如果要构造并添加大量重复内容的条目，这个函数就比较实用。clone()
+    函数内部会调用复制构造函数创建新条目并返回。<br>
+    条目复制还可以用等于号函数：<br>
+    <div class="code">QTableWidgetItem &amp; QTableWidgetItem::​operator=(const
+      QTableWidgetItem &amp; other)</div>
+    等于号函数复制的内容与复制构造函数差不多，type() 类型值和 tableWidget() 所属表格控件指针也不复制。<br>
+    还有个小于号函数，可以比较条目文本的字典序：<br>
+    <div class="code">QTableWidgetItem &amp; QTableWidgetItem::​operator=(const
+      QTableWidgetItem &amp; other)</div>
+    如果希望使用更多的比较函数，可以直接用 QString 的比较函数。<br>
+    <br>
+    （3）QTableWidgetItem 的功能函数与内部数据<br>
+    QTableWidgetItem 内部的数据也大致分为两类：第一类是以数据角色形式管理的通用数据，这些数据自动参与 QDataStream
+    数据流的读写；第二类是非通用数据，不参与数据流读写，与 QListWidgetItem 和 QListWidget
+    自身特性有关。QTableWidgetItem 主要的功能函数也是围绕这两类内部数据展开的。<br>
+    <br>
+    ● 第一类：通用数据及其处理函数<br>
+    通用数据是以数据角色与数据变量一一对应的形式存储管理，比如设置文本 setText()、设置图标 setIcon()
+    等函数，其本质都是根据各自的角色调用通用设置数据的函数：<br>
+    <div class="code">virtual void setData(int role, const QVariant &amp; value)</div>
+    也可以根据角色来获取各个数据变量：<br>
+    <div class="code">virtual QVariant data(int role) const</div>
+    查看表格控件的源代码文件可以看到关于图标操作函数的源码：<br>
+    <div class="code">inline QIcon icon() const<br>
+      &nbsp;&nbsp; { return
+      qvariant_cast&lt;QIcon&gt;(data(Qt::DecorationRole)); }</div>
+    <div class="code">inline void QTableWidgetItem::setIcon(const QIcon
+      &amp;aicon)<br>
+      &nbsp;&nbsp; { setData(Qt::DecorationRole, aicon); }</div>
+    QTableWidgetItem 的通用数据与 QListWidgetItem 的通用数据一模一样，函数名也一样，列表如下：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 110px;" align="center"><b>获取函数</b></td>
+          <td style="width: 280px;" align="center"><b>设置函数</b></td>
+          <td style="width: 150px;" align="center"><b>数据角色</b></td>
+          <td align="center"><b> 描述 </b></td>
+        </tr>
+        <tr>
+          <td>text()</td>
+          <td> setText(const QString &amp;text) </td>
+          <td> Qt::DisplayRole </td>
+          <td> 条目显示的文本。 </td>
+        </tr>
+        <tr class="d1">
+          <td>icon()</td>
+          <td> setIcon(const QIcon &amp;icon) </td>
+          <td> Qt::DecorationRole </td>
+          <td> 条目显示的图标。 </td>
+        </tr>
+        <tr>
+          <td>statusTip()</td>
+          <td> setStatusTip(const QString &amp;statusTip) </td>
+          <td> Qt::StatusTipRole </td>
+          <td> 如果主界面有状态栏，鼠标悬停在该条目上时显示该状态信息到状态栏。 </td>
+        </tr>
+        <tr class="d1">
+          <td>toolTip()</td>
+          <td> setToolTip(const QString &amp;toolTip) </td>
+          <td> Qt::ToolTipRole </td>
+          <td> 鼠标悬停在该条目上时显示的工具提示信息。 </td>
+        </tr>
+        <tr>
+          <td>whatsThis()</td>
+          <td> setWhatsThis(const QString &amp;whatsThis) </td>
+          <td> Qt::WhatsThisRole </td>
+          <td> 如果主界面窗口标题栏有？帮助按钮，点击帮助按钮再点击该条目会显示该帮助信息。 </td>
+        </tr>
+        <tr class="d1">
+          <td>font()</td>
+          <td> setFont(const QFont &amp;font) </td>
+          <td> Qt::FontRole </td>
+          <td> 显示条目文本用的字体。 </td>
+        </tr>
+        <tr>
+          <td>textAlignment()</td>
+          <td> setTextAlignment(int alignment) </td>
+          <td> Qt::TextAlignmentRole </td>
+          <td> 文本的对齐方式。 </td>
+        </tr>
+        <tr class="d1">
+          <td>backgroundColor()</td>
+          <td> setBackgroundColor(const QColor &amp;color)</td>
+          <td> Qt::BackgroundColorRole </td>
+          <td> 文本背景色。 </td>
+        </tr>
+        <tr>
+          <td>textColor()</td>
+          <td> setTextColor(const QColor &amp;color)</td>
+          <td> Qt::TextColorRole </td>
+          <td> 文字颜色。 </td>
+        </tr>
+        <tr class="d1">
+          <td>background()</td>
+          <td> setBackground(const QBrush &amp;brush) </td>
+          <td> Qt::BackgroundRole </td>
+          <td> 条目的背景画刷。 </td>
+        </tr>
+        <tr>
+          <td>foreground()</td>
+          <td> setForeground(const QBrush &amp;brush) </td>
+          <td> Qt::ForegroundRole </td>
+          <td> 条目的前景画刷。 </td>
+        </tr>
+        <tr class="d1">
+          <td>checkState()</td>
+          <td> setCheckState(Qt::CheckState state)</td>
+          <td> Qt::CheckStateRole </td>
+          <td> 条目自带的复选框选中状态，可以是三态复选框。 </td>
+        </tr>
+        <tr>
+          <td>sizeHint()</td>
+          <td> setSizeHint(const QSize &amp;size) </td>
+          <td> Qt::SizeHintRole </td>
+          <td> 条目显示的建议尺寸。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    表格条目 QTableWidgetItem 可以直接用数据流 QDataStream 读写，是通过下面运算符重载函数实现的：<br>
+    <div class="code">QDataStream &amp;&nbsp;&nbsp;
+      &nbsp;operator&lt;&lt;(QDataStream &amp; out, const QTableWidgetItem &amp;
+      item)</div>
+    <div class="code">QDataStream &amp;&nbsp;&nbsp;
+      &nbsp;operator&gt;&gt;(QDataStream &amp; in, QTableWidgetItem &amp; item)</div>
+    使用 &gt;&gt; 和 &lt;&lt; 运算符进行流输入输出比较常见，当然也可以用 QTableWidgetItem
+    类内部的读写函数进行输入输出：<br>
+    <div class="code">void QTableWidgetItem::​read(QDataStream &amp; in)</div>
+    <div class="code">void QTableWidgetItem::​write(QDataStream &amp; out) const</div>
+    <br>
+    ● 第二类：非通用数据及其操作函数<br>
     <br>
     <br>
+    <br>
+    <div class="os2">8.2.3 表头设置</div>
+    <br>
+    <br>
+    <br>
+    <div class="os2">8.2.4 选中区域和选中行为</div>
+    <br>
+    选中区域<br>
+    <br>
+    选中行为<br>
+    <br>
+    选中模式<br>
+    <br>
+    单次选中命令<br>
+    <br>
+    <br>
+    <div class="os2">8.2.5 示例</div>
+    <br>
+    StyleSheet 定制的例子放到 8.4 节。<br>
     <br>
     <br>
     <br>

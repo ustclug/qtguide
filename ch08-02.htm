@@ -19,7 +19,7 @@
     <br>
     本节先介绍表格控件 QTableWidget 的功能特性，表格控件一般有多行多列，它的单元格条目为
     QTableWidgetItem，单元格条目可以有丰富的图标、文字、工具提示，支持设置显示的字体、字体颜色、背景色等。另外表格控件拥有水平表头和垂直表头，可以设
-    置表头的丰富特性，表头设置通常会影响表格控件整体外观。由于表格控件的具有多行多列，它的选中区域和选中行为也变得复杂起来，本节会依次讲述这些内容，最后通过
+    置表头的丰富特性，表头设置通常会影响表格控件整体外观。由于表格控件的具有多行多列，它的选择区域和选择行为也变得复杂起来，本节会依次讲述这些内容，最后通过
     两个示例展示表格控件相关知识运用。<br>
     <br>
     <div class="os2">8.2.1 QTableWidget</div>
@@ -66,6 +66,9 @@
     从代码而言，就只有 setItem()
     函数设置单元格条目；当然，程序运行时用户可以双击编辑单元格，表格控件可以自动新建条目保存用户编辑的内容存到单元格里面。单元格条目不仅支持文本，还能设置图标、丰富
     字体、字体颜色、工具提示等信息，后面还会介绍 QTableWidgetItem 类。<br>
+    <span style="font-weight: bold; color: red;">关于 setItem()
+      函数需要注意的问题是：一个条目只能设置给唯一的一个单元格，不能重复设置给多个单元格！</span>如果希望把条目换一个单元格放置，必须用下面移除条目
+    函数把条目从表格控件卸载下来，再重新设置给新的单元格。<br>
     <br>
     （2）移除条目<br>
     <div class="code">QTableWidgetItem * QTableWidget::​takeItem(int row, int
@@ -271,7 +274,14 @@
     <div class="code">bool QTableView::​isRowHidden(int row) const //判断指定行是否被隐藏</div>
     关于显示或隐藏行列，还有四个快捷槽函数：hideColumn(int column)，hideRow(int row)，showColumn(int
     column)，showRow(int row)，这些函数都可以灵活使用，效果与 ​setColumnHidden() 和
-    ​setRowHidden() 函数是一样的。基类 QTableView 的内容暂时介绍的到这，下面来学学单元格条目的知识。<br>
+    ​setRowHidden() 函数是一样的。<br>
+    <br>
+    QTableView 也有更抽象的基类 QAbstractItemView ，QAbstractItemView
+    里面也有一些实用函数，这里先介绍一个设置条目显示图标大小的函数：<br>
+    <div class="code">void QAbstractItemView::setIconSize(const QSize &amp;
+      size)</div>
+    单元格里图标默认显示为 16*16 的，可以用该函数设置图标显示尺寸为 24*24 或 32*32 。 QAbstractItemView
+    类还有关于条目选中模式、选中行为等重要函数，后面再介绍。基类的内容暂时介绍的到这，下面来学学单元格条目的知识。<br>
     <br>
     <div class="os2">8.2.2 QTableWidgetItem</div>
     <br>
@@ -289,7 +299,9 @@
     参数里的 type 一般用于派生类，指定条目独特的分类，对于普通的表格控件条目，通常用默认的数值即可。第二个构造函数是指定了条目的文本，第三个构造函数同
     时指定了条目图标和文本。<br>
     在构造函数里不能直接指定所属的表格控件，因为表格控件有行号、列号所以不能简单追加到表格里，而只能用表格控件的
-    QTableWidget::​setItem() 函数把条目设置到指定单元格里。<br>
+    QTableWidget::​setItem()
+    函数把条目设置到指定单元格里。注意一个条目只能设置给表格控件唯一的一个单元格，不能把一个条目设置给多个单元格。如果希望为多个单元格设置相似的条目数据内容，那么可
+    以用后面介绍的 clone() 函数制造大量新的复制体条目。<br>
     复制构造函数不会复制旧条目的 type() 类型值和tableWidget() 所属表格控件指针，条目其他的内部数据和条目标志都会复制。<br>
     <br>
     （2）复制函数和运算符函数<br>
@@ -427,22 +439,376 @@
     <div class="code">void QTableWidgetItem::​write(QDataStream &amp; out) const</div>
     <br>
     ● 第二类：非通用数据及其操作函数<br>
+    表格控件的条目也是在构造函数一次性指定条目类型，然后这个类型是只读的：<br>
+    <div class="code">int QTableWidgetItem::​type() const</div>
+    类型值一般用于派生类区分不同的条目类型，自定义的条目类型值需要大于等于 QTableWidgetItem::UserType 。<br>
+    新条目通过表格控件 QTableWidget::​setItem() 函数设置给表格控件之后，条目会自动保存所属的表格控件指针，可以用如下函数获取：<br>
+    <div class="code">QTableWidget * QTableWidgetItem::​tableWidget() const</div>
     <br>
+    程序运行时，除了可以通过表格控件的 QTableWidget::​selectedItems() 获取用户选中的条目列表，每个单元格条目自身也会记录是否
+    被用户选中，并且能设置自身是否被选中：<br>
+    <div class="code">bool QTableWidgetItem::​isSelected() const //判断条目自身是否高亮选中</div>
+    <div class="code">void QTableWidgetItem::​setSelected(bool select) //设置条目自身是
+      否被选中</div>
     <br>
+    表格控件条目初始化时也有默认的标志位，并且运行时可以修改条目的特性标志：<br>
+    <div class="code">Qt::ItemFlags QTableWidgetItem::​flags() const //获取特性标志位</div>
+    <div class="code">void QTableWidgetItem::​setFlags(Qt::ItemFlags flags)
+      //设置特性标志位</div>
+    QTableWidgetItem 构造时默认的标志位为：<br>
+    &nbsp;&nbsp;&nbsp; Qt::ItemIsEditable<br>
+    &nbsp;&nbsp;&nbsp; |Qt::ItemIsSelectable<br>
+    &nbsp;&nbsp;&nbsp; |Qt::ItemIsUserCheckable<br>
+    &nbsp;&nbsp;&nbsp; |Qt::ItemIsEnabled<br>
+    &nbsp;&nbsp;&nbsp; |Qt::ItemIsDragEnabled<br>
+    &nbsp;&nbsp;&nbsp; |Qt::ItemIsDropEnabled<br>
+    因此程序代码生成的所有表格条目默认都是可编辑的，程序运行时用户双击空的单元格时，表格控件会自动创建新条目保存用户编辑内容，这些自动创建的条目也都是可编辑
+    的。如果希望条目是只读的，那么把标志位设置不带Qt::ItemIsEditable 的新标志位即可。<br>
+    <br>
+    Qt::ItemFlags 所有的枚举常量在 8.1.2
+    节末尾有详细的表格描述，这里不重复贴了。表格条目默认就是支持复选状态的，只是默认没有显示出来，要让表格控件显示条目对应的复选框，可以用下面一句代码实现：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; item-&gt;setCheckState( Qt::Unchecked
+      );&nbsp; //显示复选框</div>
+    对于表格控件和表格条目，自带单行编辑器和复选框功能，因此不需要为单元格添加自定义的单行编辑器或复选框，如果要用到其他更多的输入控件，那才需要定制单元格。<br>
+    <br>
+    表格控件条目与 QListWidgetItem 最大的一个区别就是表格条目既有行号，也有列号：<br>
+    <div class="code">int QTableWidgetItem::​row() const //获取行号</div>
+    <div class="code">int QTableWidgetItem::​column() const //获取列号</div>
+    行号和列号也是在 QTableWidget::​setItem() 函数里指定的，条目自身并不能修改行号或列号。表格控件条目与
+    QListWidgetItem 另一个区别是，表格控件条目没有隐藏函数，所有表格条目都是显示的（只要不被单元格控件QTableWidget::​
+    cellWidget() 遮挡）。<br>
+    <br>
+    在 QtCreator 设计模式和 Qt 设计师界面，表格控件 QTableWidget 和其条目 QTableWidgetItem&nbsp;
+    都是可以可视化编辑的，上面介绍的通用数据和非通用数据都是可以在属性栏设置的，后面会介绍表格控件及其条目的可视化编辑。<br>
     <br>
     <div class="os2">8.2.3 表头设置</div>
     <br>
+    表格控件在指定了行号和列号之后，就会自动生成水平表头和垂直表头，默认的表头都是从数字 1 开始递增编号，如下图所示：<br>
+    <center> <img src="images/ch08/ch08-02-02.png" alt="autoheader"></center>
+    虽然默认的表头文本看起来从 1 开始编号，但是内部的表头分段（section）都是从 0 开始编号的，代码里设置表头分段时，需要从 0 编号。<br>
+    表格控件的既可以简单地设置表头分段文本，也可以利用 QTableWidgetItem 为表头分段设置功能更丰富的表头条目，设置表头文本的函数如下：<br>
+    <div class="code">void QTableWidget::​setHorizontalHeaderLabels(const
+      QStringList &amp; labels) //设置水平表头文本</div>
+    <div class="code">void QTableWidget::​setVerticalHeaderLabels(const
+      QStringList &amp; labels) //设置垂直表头文本</div>
+    QStringList 内字符串列表，第 0 个字符串就是第 0 号表头分段的文本，一般要求 QStringList
+    字符串个数与表头分段数目一样，这样不会有漏的，也不会有多的。通常比较多的是设置水平表头（就是每列的列首），垂直表头一般可以不设置，用自动编号。<br>
     <br>
+    ​setHorizontalHeaderLabels() 和 ​setVerticalHeaderLabels()&nbsp;
+    其实是两个快捷函数，本质是循环构建表头分段条目并设置给表头分段：<br>
+    <div class="code">void QTableWidget::​setHorizontalHeaderItem(int column,
+      QTableWidgetItem * item) //设置指定列的水平表头分段条目</div>
+    <div class="code">QTableWidgetItem * QTableWidget::​horizontalHeaderItem(int
+      column) const //获取指定列的水平表头分段条目</div>
+    <div class="code">void QTableWidget::​setVerticalHeaderItem(int row,
+      QTableWidgetItem * item) //设置指定行的垂直表头分段条目</div>
+    <div class="code">QTableWidgetItem * QTableWidget::​verticalHeaderItem(int
+      row) const //获取指定行的垂直表头分段条目</div>
+    这里可以发现 QTableWidgetItem 既可以作为表格控件普通单元格的条目，也可以用来设置表头分段。<br>
+    QTableWidgetItem
+    作为表头分段条目使用时，肯定是只读的，程序运行时不能双击编辑表头，而且也不能有复选框。表头分段条目支持显示文本、图标、工具提示信息，并能设置文本对齐、字体、前景
+    画刷和背景画刷等等，这样表头显示的功能就比较丰富，而不是单纯的文本。<br>
+    使用 ​setHorizontalHeaderItem() 和 ​setVerticalHeaderItem() 函数时，一个
+    QTableWidgetItem 只能设置给唯一的一个表头分段，并且设置给表头分段之后，也不要把表头分段条目设置给表格控件普通的单元格。<br>
+    表头分段的条目也可以从表格控件卸载卸载下来：<br>
+    <div class="code">QTableWidgetItem *
+      QTableWidget::​takeHorizontalHeaderItem(int column) //卸下指定列的水平表头条目</div>
+    <div class="code">QTableWidgetItem *
+      QTableWidget::​takeVerticalHeaderItem(int row) //卸下指定行的垂直表头条目</div>
+    卸载下来的条目并不会自动删除，还存在内存中，如果希望彻底删除需要手动 delete，或者不删除的话，卸载下来的条目可以重新设置给另一个表头分段。<br>
+    <br>
+    表头分段的条目与普通的单元格条目有重要的区别，普通单元格条目可编辑、可以有复选状态，但是表头分段的条目只有显示功能，不能双击编辑或复选。把
+    QTableWidgetItem 设置给表头分段后，QTableWidgetItem 条目会有额外的内部特性标志：<br>
+    <div class="code"><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">&nbsp;&nbsp;&nbsp;
+        if</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">(</span><span
+        style=" color:#000000;">item</span><span style=" color:#000000;">)</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">item</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">view</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">view</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">item</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">itemFlags</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Qt</span><span style=" color:#000000;">::</span><span style=" color:#800080;">ItemFlags</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">item</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">itemFlags</span><span style=" color:#000000;">)|</span><span
+style=" color:#800080;">ItemIsHeaderItem</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+    </div>
+    上面小段代码是从 QTableWidget 源代码里截取的，设置表头分段条目时，item 的标志位会额外设置 ItemIsHeaderItem
+    标志位（ItemIsHeaderItem 是内部专用标志位，并不公开），因此设置给表头的条目是不能再设置给普通单元格的。条目 item
+    设置给一个表头分段后，也不能设置给其他的表头分段，因为表格控件销毁时会 delete
+    每个表头条目，一个条目指针如果设置给多个表头分段，那么同一个条目指针最后会被 delete 多次，删除野指针会导致程序崩溃。<br>
+    <br>
+    表格控件并不要求必须设置表头文本或表头条目，在不设置表头文本和表头条目的情况下，默认是所有的表头分段条目是 NULL
+    ，所以要注意表头条目获取和卸载函数返回的指针可能是 NULL。不设置任何表头文本和表头条目时，表格控件依然是有表头的，默认的表头是按照前面截图的从 1
+    开始自动编号，自动编号表头是没有实体表头条目的，这些自动编号表头是从基类 QTableView 视图类继承而来的。<br>
+    <br>
+    QTableWidget 本层类带有前面介绍 8 个表头分段操作的函数，各个表头分段设置从微观角度展示表头的功能，而基类 QTableView
+    有从宏观描述的整体表头，即：<br>
+    <div class="code">QHeaderView * QTableView::​horizontalHeader() const
+      //获取整个的水平表头</div>
+    <div class="code">void QTableView::​setHorizontalHeader(QHeaderView *
+      header) //设置整个的水平表头</div>
+    <div class="code">QHeaderView * QTableView::​verticalHeader() const
+      //获取整个的垂直表头</div>
+    <div class="code">void QTableView::​setVerticalHeader(QHeaderView * header)
+      //设置整个的垂直表头</div>
+    因为表格控件自己就会带有水平表头和垂直表头，所以一般不需要调用 ​setHorizontalHeader() 和
+    ​setVerticalHeader() 函数，直接获取原本的表头对象指针，然后调用表头类 QHeaderView 的函数修改特性即可。<br>
+    水平表头和垂直表头都是同一个类 QHeaderView ，水平表头和垂直表头可以通过如下函数判断： <br>
+    <div class="code">Qt::Orientation QHeaderView::​orientation() const</div>
+    返回值如果是 Qt::Horizontal 表示水平表头，Qt::Vertical 是垂直表头，这个方向特性是在构造函数时指定的，之后不能进行修改。<br>
+    QHeaderView 功能是非常丰富的，这里介绍一些比较实用的，以后到模型视图章节还会介绍更多的。<br>
+    获取当前表头的分段数目，使用函数：<br>
+    <div class="code">int QHeaderView::​count() const</div>
+    显示整个表头显示的像素点长度（水平表头是表头整体宽度，垂直表头是表头整体高度）：<br>
+    <div class="code">int QHeaderView::​length() const</div>
+    <br>
+    在 Qt 设计师界面，选中表格控件，可以看到水平表头和垂直表头的属性，这里以水平表头的属性举例：<br>
+    <center> <img src="images/ch08/ch08-02-03.png" alt="header2" width="800"></center>
+    当表格控件开启自动排序属性 sortingEnabled 之后，水平表头就会自动设置 horizontalHeaderShowSortIndicator
+    为勾选状态，这样程序运行时根据一个列自动排序时，该列水平表头分段显示三角形排序指示符。如果勾选水平表头的
+    horizontalHeaderStretchLastSection
+    属性，那么表格最后一列会自动拉伸占据剩下的空间。水平表头和垂直表头这些属性都有对应的 QHeaderView 类的函数，罗列描述如下：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 180px;" align="center"><b>属性</b></td>
+          <td style="width: 280px;" align="center"><b>QHeaderView类设置 函数</b></td>
+          <td style="width: 180px;" align="center"><b>QHeaderView类获取 函数</b></td>
+          <td align="center"><b> 描述 </b></td>
+        </tr>
+        <tr>
+          <td>**visible</td>
+          <td> setVisible(bool v) </td>
+          <td>isVisible()</td>
+          <td> 是否显示表头。</td>
+        </tr>
+        <tr class="d1">
+          <td>**cascadingSectionResizes</td>
+          <td>setCascadingSectionResizes(bool enable) </td>
+          <td> cascadingSectionResizes()</td>
+          <td> 调整分段尺寸时是否仅相邻分段调整。 </td>
+        </tr>
+        <tr>
+          <td>**defaultSectionSize</td>
+          <td>setDefaultSectionSize(int size) </td>
+          <td> defaultSectionSize()</td>
+          <td> 分段默认尺寸，水平表头是指分段宽度（默认100），垂直表头指分段高度（默认30）。 </td>
+        </tr>
+        <tr class="d1">
+          <td>**highlightSections</td>
+          <td> setHighlightSections(bool highlight)</td>
+          <td> highlightSections()</td>
+          <td> 条目高亮选中时，其行首、列首是否也有高亮效果。一般不需要手动设置。 </td>
+        </tr>
+        <tr>
+          <td>**minimumSectionSize</td>
+          <td> setMinimumSectionSize(int size) </td>
+          <td> minimumSectionSize() </td>
+          <td> 分段尺寸下限。水平表头分段默认最小宽度 21，垂直表头分段默认最小高度 21。 </td>
+        </tr>
+        <tr class="d1">
+          <td>**showSortIndicator</td>
+          <td> setSortIndicatorShown(bool show) </td>
+          <td> isSortIndicatorShown() </td>
+          <td> 表头是否显示排序指示符。开启自动排序后通常自动显示排序指示符，一般不需要手动设置。 </td>
+        </tr>
+        <tr>
+          <td>**stretchLastSection</td>
+          <td> setStretchLastSection(bool stretch) </td>
+          <td> stretchLastSection() </td>
+          <td> 是否自动拉伸末尾分段。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    按照上表描述，如果希望隐藏垂直表头，那么就可以执行如下代码：<br>
+    <div class="code"><span style=" color:#c0c0c0;">&nbsp;</span><span style=" color:#800000;">ui</span><span
+        style=" color:#000000;">-&gt;</span><span style=" color:#800000;">tableWidget</span><span
+        style=" color:#000000;">-&gt;</span><span style=" color:#000000;">verticalHeader</span><span
+        style=" color:#000000;">()-&gt;</span><span style=" font-style:italic; color:#000000;">setVisible</span><span
+        style=" color:#000000;">(</span><span style=" color:#808000;">false</span><span
+        style=" color:#000000;">);</span></div>
+    如果修改默认的列宽，让每列显示出更长的文本，可以把默认值 100 修改为 160 像素：<br>
+    <div class="code"><span style=" color:#800000;">&nbsp;ui</span><span style=" color:#000000;">-&gt;</span><span
+        style=" color:#800000;">tableWidget</span><span style=" color:#000000;">-&gt;</span><span
+        style=" color:#000000;">horizontalHeader</span><span style=" color:#000000;">()-&gt;</span><span
+        style=" color:#000000;">setDefaultSectionSize</span><span style=" color:#000000;">(</span><span
+        style=" color:#000080;">160</span><span style=" color:#000000;">);</span></div>
+    其他属性的意义比较明确，关于 cascadingSectionResizes 属性是指用户拖动表头分段的分隔线调整列宽或行高时，是否仅相邻分段调整：<br>
+    如果 cascadingSectionResizes 为
+    true，那么调整尺寸操作仅涉及分隔线相邻的两个分段，比如左边列变宽，那么右边一列就会变窄。如果 cascadingSectionResizes 为
+    false，就是默认的递推调整右侧所有列，左边一列变宽时，右边所有列列宽固定，并且右边所有列整体右移，表格整体拉大。<br>
+    <br>
+    除了 Qt 设计师里能看到的属性，QHeaderView 还有 defaultAlignment
+    属性决定表头文本的对齐方式，maximumSectionSize 属性决定分段的尺寸上限。<br>
+    <br>
+    表头的特性设置通常会影响表格控件整体的外观，之前介绍过表格控件基类 QTableView 调整列宽和隐藏/显示整列的函数，其实 QTableView
+    很多关于整行或整列调整的函数都是在内部调用表头 QHeaderView 的函数来实现，比如设置列宽的：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">QTableView</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">setColumnWidth</span><span style=" color:#000000;">(</span><span
+        style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+        style=" color:#000000;">column</span><span style=" color:#000000;">,</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#808000;">int</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#000000;">width</span><span
+        style=" color:#000000;">)</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_D</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QTableView</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">d</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">horizontalHeader</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">resizeSection</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">column</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">width</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    QHeaderView::resizeSection(int logicalIndex, int size)，就是调整分段尺寸，对于水平表头是调整列宽，
+    对于垂直表头是调整行高。<br>
+    QTableView 设置某列隐藏或显示的函数，内部代码为：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">QTableView</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">setColumnHidden</span><span style=" color:#000000;">(</span><span
+        style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+        style=" color:#000000;">column</span><span style=" color:#000000;">,</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#808000;">bool</span><span
+        style=" color:#c0c0c0;"> </span><span style=" color:#000000;">hide</span><span
+        style=" color:#000000;">)</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_D</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QTableView</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">(</span><span style=" color:#000000;">column</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&lt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">||</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">column</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&gt;=</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">d</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">horizontalHeader</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">count</span><span style=" color:#000000;">())</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">d</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">horizontalHeader</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">setSectionHidden</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">column</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">hide</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    <span style="font-weight: bold;">QTableView 很多功能都是通过表头 QHeaderView
+      的函数实现的，如果表格控件需要设置特定的功能找不到直接的设置或获取函数，那么在 QHeaderView 类里面找函数是比较有效的方法。</span>比
+    如 QHeaderView 类可以查询隐藏的分段计数：<br>
+    <div class="code">int QHeaderView::​hiddenSectionCount() const</div>
+    如果表格控件隐藏了一些列，水平表头的 ​hiddenSectionCount() 就是隐藏的列数目。<br>
+    默认情况下，表格控件所有的列显示顺序是固定的，如果用户希望可以自己调整列的顺序，那么可以设置表头的分段是可移动的：<br>
+    <div class="code">void QHeaderView::​setSectionsMovable(bool movable)</div>
+    <br>
+    利用表头类的函数，我们可以通过调整水平表头和垂直表头的默认分段尺寸设置单元格默认尺寸：<br>
+    <div class="code"><span style=" color:#c0c0c0;">&nbsp;&nbsp;&nbsp; </span><span
+        style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+        style=" color:#800000;">tableWidget</span><span style=" color:#000000;">-&gt;</span><span
+        style=" color:#000000;">horizontalHeader</span><span style=" color:#000000;">()-&gt;</span><span
+        style=" color:#000000;">setDefaultSectionSize</span><span style=" color:#000000;">(</span><span
+        style=" color:#000080;">150</span><span style=" color:#000000;">);</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">tableWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">verticalHeader</span><span
+style=" color:#000000;">()-&gt;</span><span style=" color:#000000;">setDefaultSectionSize</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">50</span><span style=" color:#000000;">);</span></pre>
+    </div>
+    这样表格的单元格尺寸就会变大很多：<br>
+    <center> <img src="images/ch08/ch08-02-04.png" alt="cellsize"></center>
+    现在单元格的尺寸是可以按自己意愿调整的，但是如果希望调整上面水平表头的高度或调整左侧垂直表头的宽度，那怎么办呢？<br>
+    **SectionSize 只能指定表头分段延伸的一维尺寸，不会影响水平表头高度，也不影响垂直表头的宽度。 QHeaderView
+    表头类其实也是通用控件和窗口类 QWidget 的派生类，QWidget 设置控件或窗口最小尺寸的函数对 QHeaderView 也适用，表头
+    QHeaderView 相当于是表格控件内嵌的子控件，表头 QHeaderView 还可以有自己独立的 QSS 样式表。我们使用表头类的基类
+    QWidget 的函数可以设置水平表头的最小高度和垂直表头的最小宽度，这样可以调整表头自身尺寸：<br>
+    <div class="code"><span style=" color:#008000;">&nbsp;&nbsp;&nbsp;
+        //水平表头高度设置</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">tableWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">horizontalHeader</span><span
+style=" color:#000000;">()-&gt;</span><span style=" color:#000000;">setMinimumHeight</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">50</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//垂直表头宽度设置</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">tableWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">verticalHeader</span><span
+style=" color:#000000;">()-&gt;</span><span style=" color:#000000;">setMinimumWidth</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">100</span><span style=" color:#000000;">);</span></pre>
+    </div>
+    设置效果如下：<br>
+    <center> <img src="images/ch08/ch08-02-05.png" alt="headersize"></center>
+    <br>
+    关于表头的内容大致介绍到这，QtCreator 设计模式和 Qt 设计师可以编辑表格控件的表头和单元格，后面再介绍。提前说一下，Qt 5.4.*
+    开发环境里的 QtCreator 设计模式和 Qt 设计师在添加表格控件表头时有 bug，需要第二次编辑并调整顺序，表头才能正常显示，因此更推荐用代码来
+    设置水平表头和垂直表头。<br>
     <br>
     <div class="os2">8.2.4 选中区域和选中行为</div>
     <br>
-    选中区域<br>
+    （1）选中区域<br>
+    之前介绍过，获取选中的条目可以如下函数：<br>
+    <div class="code">QList&lt;QTableWidgetItem *&gt;
+      QTableWidget::​selectedItems() const</div>
+    选中的单元格如果有实体条目，会记录在 ​selectedItems() 返回的条目列表里，但是如果选中了内部为 NULL
+    的单元格，那是无法存到选中条目列表的。为了能更完整地描述选中的单元格区域， Qt 专门提供了一个 QTableWidgetSelectionRange
+    类，记录表格控件的选中区 域，不管单元格有没有条目，都可以描述选中单元格范围。<br>
+    表格控件可以同时有多个选中区域，获取表格当前选中区域列表的函数如下：<br>
+    <div class="code">QList&lt;QTableWidgetSelectionRange&gt;
+      QTableWidget::​selectedRanges() const</div>
+    一般用 Shift 键选中的连续矩形区域对应一个选中区域，而使用 Ctrl 键多次点击选中的多个离散单元格对应多个选中区域。<br>
+    QTableWidget 也能通过代码设置某个矩形区域是否为高亮选中：<br>
+    <div class="code">void QTableWidget::​setRangeSelected(const
+      QTableWidgetSelectionRange &amp; range, bool select)</div>
     <br>
-    选中行为<br>
+    QTableWidgetSelectionRange 类的构造函数可以指定矩形区域，是以单元格的行列号标出矩形区域：<br>
+    <div class="code">QTableWidgetSelectionRange(int top, int left, int bottom,
+      int right)</div>
+    <div class="code">QTableWidgetSelectionRange(const
+      QTableWidgetSelectionRange &amp; other) //复制构造函数</div>
+    参数里的 top 是矩形区域最上面的行号，bottom 是最下面的行号；left 是矩形选择区域最左边的列号，right 是矩形最右边的列号。如果
+    top 和 bottom 数值一样，同时 left 与 right 数值一样，那么矩形区域就退化为一个单元格了。<br>
+    QTableWidgetSelectionRange 的功能函数也比较简单，就是获取上下行号、左右列号、行列计数：<br>
+    <div class="code">int&nbsp;&nbsp; &nbsp;topRow() const //最上面的行号</div>
+    <div class="code">int&nbsp;&nbsp; &nbsp;bottomRow() const //最下面的行号</div>
+    <div class="code">int&nbsp;&nbsp; &nbsp;leftColumn() const //最左边的列号</div>
+    <div class="code">int&nbsp;&nbsp; &nbsp;rightColumn() const //最右边的列号</div>
+    <div class="code">int&nbsp;&nbsp; &nbsp;rowCount() const //区域内行计数</div>
+    <div class="code">int&nbsp;&nbsp; &nbsp;columnCount() const //区域内列计数</div>
+    QTableWidgetSelectionRange 比较简单，只能在构造函数设置矩形范围，没有其他修改矩形范围的函数。如果要修改矩形选中区域，可以直接
+    新创建一个矩形选中区域。<br>
     <br>
-    选中模式<br>
+    （2）选中行为<br>
     <br>
-    单次选中命令<br>
+    （3）选中模式<br>
+    <br>
+    （4）单次选中命令<br>
     <br>
     <br>
     <div class="os2">8.2.5 示例</div>

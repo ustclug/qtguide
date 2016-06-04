@@ -118,6 +118,7 @@ void Widget::on_pushButtonCalcAll_clicked()
         if( ! fileCur.open( QIODevice::WriteOnly ) )
         {
             QMessageBox::warning(this, tr("新建文件"), tr("新建存储PI的文件失败！"));
+            return; //出错直接返回，感谢 XT A (wangweilong1996@gmail.com) 纠正。
         }
         //写入到文件
         m_calcPI.WriteToFile(fileCur);

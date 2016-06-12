@@ -804,12 +804,210 @@ style=" color:#000000;">(</span><span style=" color:#000080;">100</span><span st
     QTableWidgetSelectionRange 比较简单，只能在构造函数设置矩形范围，没有其他修改矩形范围的函数。如果要修改矩形选中区域，可以直接
     新创建一个矩形选中区域。<br>
     <br>
+    QTableWidgetSelectionRange 是表格控件 QTableWidget
+    独有的东西，接下来介绍选中行为、选中模式和单次选中命令，后面三项内容对本章所有基于条目控件都适用的，在这里统一介绍。<br>
+    <br>
     （2）选中行为<br>
+    表格控件默认情况下，点击一个单元格只会选中该单元格本身，如果表格的行内部数据关联性很紧密，比如是同一个人的各种身份信息（姓名、性别、住址等），这时候用户
+    可能希望点击一次选中整行的单元格，这就是选中行为决定的特性。表格控件从祖辈基类 QAbstractItemView 继承了
+    selectionBehavior 属性，其获取和设置函数如下：<br>
+    <div class="code">QAbstractItemView::SelectionBehavior&nbsp;&nbsp;
+      &nbsp;selectionBehavior() const</div>
+    <div class="code">void&nbsp;&nbsp;
+      &nbsp;setSelectionBehavior(QAbstractItemView::SelectionBehavior behavior)</div>
+    调用设置函数就可以改变选中行为，具体的选中行为枚举常量如下表所示：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 360px;" align="center"><b>QAbstractItemView::SelectionBehavior
+              枚举常量</b></td>
+          <td style="width: 140px;" align="center"><b>数值</b></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>QAbstractItemView::SelectItems</td>
+          <td> 0 </td>
+          <td> 鼠标点击时只选中该条目，这个是默认值。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QAbstractItemView::SelectRows</td>
+          <td> 1 </td>
+          <td> 鼠标点击时选中整行的条目。 </td>
+        </tr>
+        <tr>
+          <td>QAbstractItemView::SelectColumns </td>
+          <td> 2 </td>
+          <td> 鼠标点击时选中整列的条目。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    如果我们希望用户点击时自动选中整行，那么把选中行为设置为 QAbstractItemView::SelectRows 即可。<br>
+    对于 8.1 节列表控件和 8.3 节树形控件，它们也有选中行为属性，但是它们每行只有一个条目，所以一般用不到选中行为属性。<br>
     <br>
     （3）选中模式<br>
+    对于表格控件，默认就支持使用 Ctrl 和 Shift 键进行多选操作，而 8.1
+    节的列表控件默认是单选模式，决定到底是单选还是多选，就是选中模式决定的特性。表格控件、列表控件以及后文的属性控件都从祖辈基类
+    QAbstractItemView 继承了 selectionMode 属性，其获取和设置函数如下：<br>
+    <div class="code">QAbstractItemView::SelectionMode&nbsp;&nbsp;
+      &nbsp;selectionMode() const</div>
+    <div class="code">void&nbsp;&nbsp;
+      &nbsp;setSelectionMode(QAbstractItemView::SelectionMode mode)</div>
+    选中模式的枚举常量比较多，列举描述如下：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 360px;" align="center"><b>QAbstractItemView::SelectionMode
+              枚举常量</b></td>
+          <td style="width: 140px;" align="center"><b>数值</b></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>QAbstractItemView::SingleSelection</td>
+          <td> 1 </td>
+          <td> 单选模式。用户点击选中新条目时，旧的选中条目取消选中状态。只用鼠标点击不能取消选中当前条目，鼠标点击总有一个条目是高亮选中的。</td>
+        </tr>
+        <tr class="d1">
+          <td>QAbstractItemView::ContiguousSelection</td>
+          <td> 4 </td>
+          <td> 连续多选模式。平常点击与单选模式特性一样；但如果用户按下 Shift 键同时点击条目，可以进行连续区域的选中或取消选中。以按下
+            Shift键之前的当前条目为基准条目，基准条目与Shift键按下后最后一次点击的条目之间的连续区域会被选中，其他条目取消选中。 </td>
+        </tr>
+        <tr>
+          <td>QAbstractItemView::ExtendedSelection </td>
+          <td> 3 </td>
+          <td> 扩展多选模式。平常点击与单选模式特性一样；但如果用户按下Shift键同时点击条目可以选中连续区域；如果用户按下Ctrl键可以选中或
+            取消选中离散条目的高亮选中状态。另外，鼠标左键按下后连续拖动也可以选中连续的区域。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QAbstractItemView::MultiSelection</td>
+          <td> 2 </td>
+          <td> 普通多选模式。用户点击某个条目时，该条目的选中状态取反：如果之前是选中就变为非选中，如果之前是非选中就变为选中。鼠标左键按下后连续
+            拖动可以选中或取消选中连续区域。</td>
+        </tr>
+        <tr>
+          <td>QAbstractItemView::NoSelection </td>
+          <td> 0 </td>
+          <td> 无选模式。不能选中条目，这个很少用到。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    对于 8.1 列表控件和 8.3 树形控件，默认选中模式为单选模式 SingleSelection ，本节的表格控件默认是扩展多选模式
+    ExtendedSelection ，操作系统的文件资源管理器一般都是扩展多选模式。程序中常用的就是单选模式、扩展多选模式。<br>
     <br>
     （4）单次选中命令<br>
+    通常使用上面介绍的选中行为和选中模式就能满足绝大多数情况下的选中特性需求，但也有少数例外的情况，比如我们不希望修改控件默认的选中行为和选中模式，但又想使
+    用默认选中行为和选中模式规定之外的选中操作，那就涉及到单次选中命令这一特性了。对于列表控件、表格控件以及后面的树形控件，都有类似下面的函数：<br>
+    <div class="code">void setCurrentItem(QTableWidgetItem * item,
+      QItemSelectionModel::SelectionFlags command)</div>
+    setCurrentItem() 函数第一个参数是条目指针，第二个参数就是单次选中命令（可以是一个标志位或者多个选中标志位的或值），通过
+    setCurrentItem() 函数可以在控件默认的选中行为和选中模式之外进行一些特定的选中或取消选中的操作。<br>
     <br>
+    在解释单次选中命令之前，我们先明确一下“当前条目”和“选中条目”的区别：<br>
+    ①
+    当前条目通常是指鼠标最后一次点击的条目，这个条目是唯一的，在图形上用虚线框标记，当前条目可以处于非选中状态，也可以处于选中状态，如下面两个图所示（假定下面两个图
+    的所有单元格都有条目，非 NULL）：<br>
+    <center> <img src="images/ch08/ch08-02-06.png" alt="curItem1"> </center>
+    <center> <img src="images/ch08/ch08-02-07.png" alt="curItem2"> </center>
+    当前条目通常情况下都是用户鼠标最后一次点击的条目，但 setCurrentItem()
+    函数也可以把当前条目设置为参数里指定的非空条目。获取当前条目的函数是 currentItem() 。<br>
+    <br>
+    ②选中条目就是从图形界面上看到的有高亮背景的条目，选中条目可以没有，可以有一个，也可以有多个。对于没有选中、选中一个的情况，看上面两个图即可。<br>
+    高亮选中的多个条目可以与当前条目有重叠，也可以不重叠，如下面两个图示范（假定下面两个图的所有单元格都有条目，非 NULL）：<br>
+    <center> <img src="images/ch08/ch08-02-08.png" alt="selected1"> </center>
+    <center> <img src="images/ch08/ch08-02-09.png" alt="selected2"> </center>
+    获取高亮选中的条目函数为 selectedItems()，设置某个条目选中或非选中，可以直接用条目自身的函数 item-&gt;setSelected(
+    bool ) 。<br>
+    <br>
+    归纳一下就是：<span style="font-weight: bold;">图形界面上虚线框包裹的唯一条目，是当前条目；拥有高亮选中背景的是选中条
+      目，选中条目可以没有，也可以有一个或多个。当前条目与选中条目可以有重叠，也可以无重叠。</span><br>
+    <br>
+    解释完当前条目和选中条目，下面介绍具体的选中标志位。一个选中标志位或者多个选中标志位的或值 构成单次选中命令，选中标志位的枚举常量如下表描述：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 360px;" align="center"><b>QItemSelectionModel::​
+              SelectionFlag 枚举常量</b></td>
+          <td style="width: 140px;" align="center"><b>数值</b></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>QItemSelectionModel::NoUpdate</td>
+          <td> 0x0000</td>
+          <td> 保持旧的选中状态，不更新选中条目。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QItemSelectionModel::Clear</td>
+          <td> 0x0001 </td>
+          <td> 清除所有选中状态，没有选中条目了。 </td>
+        </tr>
+        <tr>
+          <td>QItemSelectionModel::Select </td>
+          <td> 0x0002 </td>
+          <td style="height: 16px;"> 选中指定的条目。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QItemSelectionModel::Deselect</td>
+          <td> 0x0004 </td>
+          <td style="height: 16px;"> 指定的条目取消选中状态。 </td>
+        </tr>
+        <tr>
+          <td>QItemSelectionModel::Toggle </td>
+          <td> 0x0008 </td>
+          <td> 指定条目的选中状态取反，原先选中就不选中，原先不选中就选中。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QItemSelectionModel::Current</td>
+          <td> 0x0010 </td>
+          <td> 将指定的条目设为当前条目。 </td>
+        </tr>
+        <tr>
+          <td>QItemSelectionModel::Rows </td>
+          <td> 0x0020 </td>
+          <td> 对指定条目所在的整行进行选中或非选中。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QItemSelectionModel::Columns</td>
+          <td> 0x0040 </td>
+          <td> 对指定条目所在的整列进行选中或非选中。 </td>
+        </tr>
+        <tr>
+          <td>QItemSelectionModel::SelectCurrent </td>
+          <td> Select | Current </td>
+          <td> 选中指定条目，并且将其设置为当前条目。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QItemSelectionModel::ToggleCurrent</td>
+          <td> Toggle | Current </td>
+          <td> 指定条目的选中状态取反，并将其设置为当前条目。 </td>
+        </tr>
+        <tr>
+          <td>QItemSelectionModel::ClearAndSelect </td>
+          <td> Clear | Select </td>
+          <td> 先清除旧的选中状态，然后设置指定条目为选中状态。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    选中标志位的按位或值，一般要考虑实际意义会不会冲突，比如 Select、Deselect、Toggle
+    三者是冲突的，不应该同时用。意义不冲突的标志位就可以进行位或，比如 Select | Rows 就是整行选中。<br>
+    在不修改选中行为和选中模式的时候，下面一句代码就会选中指定条目所在的整行：<br>
+    <div class="code">ui-&gt;tableWidget-&gt;setCurrentItem(pItem ,
+      QItemSelectionModel::Select | QItemSelectionModel::Rows);</div>
+    setCurrentItem() 会自动把当前条目设置为参数里指定的非空条目。<br>
+    如果需要清空所有旧的选中状态，可以用下面这句：<br>
+    <div class="code">ui-&gt;tableWidget-&gt;setCurrentItem(NULL,
+      QItemSelectionModel::Clear);</div>
+    setCurrentItem() 参数里指定的条目是 NULL 时，控件自动把当前条目设置为打头的第 0 个条目，对应到表格就是第 0 行 0
+    列的单元格。<br>
+    <br>
+    本小节的选中行为、选中模式、单次选中命令对列表控件、表格控件和树形控件都是通用的，而且以后讲到模型和视图章节时，这三小块内容对列表视图、表格视图、树形视
+    图也是通用的。<br>
+    关于表格控件的知识点介绍就到这里，下面来通过两个例子操练一下。<br>
     <br>
     <div class="os2">8.2.5 示例</div>
     <br>

@@ -1009,9 +1009,680 @@ style=" color:#000000;">(</span><span style=" color:#000080;">100</span><span st
     图也是通用的。<br>
     关于表格控件的知识点介绍就到这里，下面来通过两个例子操练一下。<br>
     <br>
-    <div class="os2">8.2.5 示例</div>
+    <div class="os2">8.2.5 个人信息表格示例</div>
     <br>
-    StyleSheet 定制的例子放到 8.4 节。<br>
+    本小节展示利用表格控件显示个人信息，表格共有姓名、性别、生日、婚否和住址五列内容，可以对表格按行增加或删除个人信息记录。在开始例子之前，先下载如下网络文
+    件夹里的五个图片文件，作为个人信息里的头像使用：<br>
+    <a href="https://lug.ustc.edu.cn/sites/qtguide/QtProjects/ch08/personinfo/images/"
+      target="new">
+      https://lug.ustc.edu.cn/sites/qtguide/QtProjects/ch08/personinfo/images/ </a>
+    <br>
+    <br>
+    我们打开 QtCreator，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>
+    ①项目名称 personinfo，创建路径 D:\QtProjects\ch08，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    在编辑界面之前，我们在项目文件夹 D:\QtProjects\ch08\personinfo\ 里新建一个 images
+    子文件夹，把下载的五个图片文件放到 images 子文件夹里面。然后在 QtCreator 里，右击左边栏里的 personinfo
+    项目名，在右键菜单选择“添加新文件”：<br>
+    <center> <img src="images/ch08/ch08-02-10.png" alt="qrc01" width="800"> </center>
+    在新建文件对话框，左边选择“Qt”，中间选择“Qt Resource File”，点击右下角 Choose 按钮，进入下面界面：<br>
+    <center> <img src="images/ch08/ch08-02-11.png" alt="qrc02" width="800"> </center>
+    编辑文件名为 photos，点击“下一步”，进入如下界面：
+    <center> <img src="images/ch08/ch08-02-12.png" alt="qrc03" width="800"> </center>
+    点击“完成”，然后左边栏 personinfo 项目管理的资源子文件夹里找到 photos.qrc 文件，右击 photos.qrc
+    文件名，右键菜单选择“添加现有文件”，把文件系统里 D:\QtProjects\ch08\personinfo\images\
+    目录里五个图片文件都添加到资源里：<br>
+    <center> <img src="images/ch08/ch08-02-13.png" alt="qrc04" width="800"> </center>
+    这样图片都添加到资源文件 photos.qrc 里了。以后章节示例遇到需要添加 *.qrc 和添加图片到 *.qrc 里的时候，就简单描述，不再逐个步骤
+    截图示范了。<br>
+    我们按 Ctrl+S 快捷键保存 photos.qrc 文件，并关闭该资源文件。<br>
+    双击打开 widget.ui 界面文件，把主界面的窗口大小调整为 400*360，然后按照下图拖入控件：<br>
+    <center> <img src="images/ch08/ch08-02-14.png" alt="ui" width="800"> </center>
+    界面共五行控件，第一行是表格控件，对象名 tableWidget。<br>
+    第二行，标签控件，文本为 "姓名"；单行编辑器，对象名 lineEditName；标签控件，文本为 "头像"；组合框，对象名
+    comboBoxPhotos 。第二行按照水平布局器布局。<br>
+    第三行，标签控件，文本为 "性别"；单行编辑器，对象名 lineEditGender；标签控件，文本为 "生日"；日期编辑器控件，对象名为
+    dateEdit；复选框，文本为 "婚否"，对象名为 checkBoxIsMarried，复选框勾选代表已婚，没勾选代表未婚。第三行也按水平布局器布局。<br>
+    第四行，标签控件，文本为 "住址"；单行编辑器，对象名为 lineEditAddress。第四行也按照水平布局器布局。<br>
+    第五行两边的是水平空白条，中间是两个按钮，第一个按钮文本 "添加"，对象名 pushButtonAdd，第二个按钮文本 "删除" ，对象名
+    pushButtonDel。第五行也是按照水平布局器布局。<br>
+    最后对于主界面，点击空白位置，只选中主界面的窗口本身，然后点击上面的垂直布局按钮，为主界面设置主布局器，布局好之后的界面如下：<br>
+    <center> <img src="images/ch08/ch08-02-15.png" alt="ui2" width="800"> </center>
+    我们首先右击头像组合框，右键菜单选择“编辑项目”，为组合框添加五个条目，条目的文本为空格字符 " "，条目的图标就是资源里面的五个图片，如下图所示：<br>
+    <center> <img src="images/ch08/ch08-02-16.png" alt="combo"> </center>
+    设置好组合框的条目后，点击“OK”按钮回到主界面。<br>
+    然后我们在主界面右击表格控件 tableWidget，右键菜单选择“编辑项目”，弹出表格控件的编辑界面：<br>
+    <center> <img src="images/ch08/ch08-02-17.png" alt="table1"> </center>
+    表格控件的编辑对话框上方是标签页选择，可以编辑列（列首，即水平表头）、行（行首，即垂直表头）、项目（单元格条目）。对话框下方，左边是增加条目、删除条目按
+    钮，中间是控制条目上移或下移，右边“属性”按钮点开后看到条目的详细内容设置界面。<br>
+    这个示例中，我们只设置列首（水平表头），行首不设置（用自动行号），按照如下操作，先编辑列首，添加五个列：<br>
+    <center> <img src="images/ch08/ch08-02-18.png" alt="table2"> </center>
+    添加"姓名"、"性别"、"生日"、"婚否"、"住址" 五个列后，点击对话框右下角 OK 按钮，回到主界面，看到如下效果：<br>
+    <center> <img src="images/ch08/ch08-02-19.png" alt="table3" width="800"> </center>
+    我们刚才添加的五个列首，现在变成了 "新建列"、"姓名"、"性别"、"生日"、"住址" ，有一个列首被
+    QtCreator设计模式弄丢了，顺序也错位了，这是 QtCreator设计模式也就是 Qt 设计师的 bug 。<span style="font-weight: bold;">所
+      以更推荐用代码设置表格控件的列首和行首，使用代码设置列首和行首是没问题的，只有 QtCreator设计模式和 Qt 设计师有这样的 bug。</span><br>
+    <br>
+    为了修正表头，我们重新右击表格控件，在右键菜单选择“编辑项目”，再弹出表格控件的编辑界面。这次把错误的 "新建列" 文字修改为
+    "婚否"，然后选中"婚否"，点击下方中间向下按钮调整 "婚否" 列首的顺序，调整后如下图所示：<br>
+    <center> <img src="images/ch08/ch08-02-20.png" alt="table4"> </center>
+    经过第二次编辑后，点击对话框右下角 OK 按钮，然后我们回到主界面，可以看到正确的列首：<br>
+    <center> <img src="images/ch08/ch08-02-21.png" alt="table5" width="800"> </center>
+    表头设置正确之后，我们选中表格控件，在 QtCreator 右下角的属性栏可以看到这时候的 rowCount 为 0，columnCount 为 5。<br>
+    对于 QtCreator 设计模式和 Qt 设计师，如果希望使用自动编号的数字表头，那么就修改 rowCount 或 columnCount
+    数值，自动生成垂直表头或水平表头。如果不希望使用自动编码的表头，那么就右击表格控件选择 “编辑项目”，然后手动编辑列首或行首。<br>
+    <br>
+    注意，对于水平表头，如果决定使用自动编号，那么就不要在编辑表格控件的对话框里额外添加列首；如果决定在编辑表格控件的对话框里手动编辑列首（即水平表头），那
+    么就不要再修改列计数 columnCount 。<span style="font-weight: bold;">对于同一方向表头，不要既使用自动编号，
+      又手动编辑表头，那样导致表头混乱而又无法修改自动表头文本</span>，因为QtCreator设计模式和Qt设计师对自动表头和手动表头编辑二者不兼
+    容，也有 bug，就如下图错误示范：<br>
+    <center> <img src="images/ch08/ch08-02-22.png" alt="tableerror" width="800">
+    </center>
+    如上图示范的三个步骤，先设置手动列首，再增加自动列首，然后就发现自动增加的两个列首 "3"、"4"
+    根本无法编辑，表格编辑对话框是看不到自动编号表头文本的。（表格编辑对话框只能编辑 QTableWidget 的手动表头条目
+    QTableWidgetItem 对象，自动表头有文本但没有表头条目 QTableWidgetItem 对象，因为自动编号表头是从基类
+    QTableView 继承的，无法在设计师里编辑。）<br>
+    <span style="font-weight: bold; color: red;">最好的办法还是用代码设置表头，这样不会有这些莫名其妙的问题。</span><br>
+    <br>
+    现在回到这个例子，我们的水平表头，也就是行首设置好之后，我们把表格控件的垂直表头设置自动的编号，就是修改 rowCount 属性为
+    2。这时候水平表头是手动编辑的，垂直表头是全自动编号的，二者不在一个维度，因此不会有冲突：<br>
+    <center> <img src="images/ch08/ch08-02-23.png" alt="table6" width="800"> </center>
+    这时候表格为 2 行 5 列的，既有行计数，也有列计数，就能编辑单元格条目了。我们右击表格控件，右键菜单选择“编辑项目”，第三次进入表格编辑对话框，在表
+    格编辑对话框点击“项目”标签页，就可以编辑单元格了：<br>
+    <center> <img src="images/ch08/ch08-02-24.png" alt="table7" width="800"> </center>
+    我们把姓名一列的单元格既设置文本，也设置图标作为头像，其他列的单元格如下图所示设置：<br>
+    <center> <img src="images/ch08/ch08-02-25.png" alt="table8" width="800"> </center>
+    婚否一列的单元格，文本是空的，然后把单元格 checkState 属性设置成 Checked，就会如上图所示，勾选代表已婚的。<br>
+    设置好单元格之后，点击 OK 按钮，回到主界面：<br>
+    <center> <img src="images/ch08/ch08-02-26.png" alt="table9" width="800"> </center>
+    关于控件的编辑就是上面描述的，下面我们为控件添加信号对应的槽函数。<br>
+    右击表格控件，右键菜单选择“转到槽”，为表格控件添加 currentItemChanged 信号对应的槽函数：<br>
+    <center> <img src="images/ch08/ch08-02-27.png" alt="slot1"> </center>
+    然后我们为 "添加"、"删除" 两个按钮都添加 clicked 信号对应的槽函数：<br>
+    <center> <img src="images/ch08/ch08-02-28.png" alt="slot2-3"> </center>
+    添加如上三个槽函数后，保存 widget.ui 界面文件，然后关闭该文件，回到代码编辑模式。<br>
+    在代码编辑模式，我们先编辑头文件 widget.h，添加一行头文件包含：<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>WIDGET_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">WIDGET_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QTableWidgetItem&gt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//头文件槽函数使用到了</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_tableWidget_currentItemChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QTableWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>current<span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QTableWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>previous<span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonAdd_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonDel_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre>
+    </div>
+    表格控件信号对应的槽函数里使用到了条目类，因此需要增加头文件包含 &lt;QTableWidgetItem&gt;，其他代码都是自动生成的，不需要修改。<br>
+    接下来编辑源文件 widget.cpp，首先来看头文件包含和构造函数的内容：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QMessageBox&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QHeaderView&gt;</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#008000;">//表头视图类</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置日期编辑控件可以弹出日历</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">dateEdit</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setCalendarPopup</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">true</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置表格控件特性</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//每次选中整行</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">tableWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setSelectionBehavior</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QAbstractItemView</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">SelectRows</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//为方便删除按钮操作，把选中模式设为单选，即每次只选中一行，而不能选中多行</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">tableWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setSelectionMode</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QAbstractItemView</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">SingleSelection</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//开启自动排序</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">tableWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setSortingEnabled</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">true</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">tableWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">sortByColumn</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">0</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Qt</span><span style=" color:#000000;">::</span><span
+style=" color:#800080;">AscendingOrder</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置末尾一列自动拉伸</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">tableWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">horizontalHeader</span><span
+style=" color:#000000;">()-&gt;</span><span style=" color:#000000;">setStretchLastSection</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">true</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置默认行高，把图标设置更大一些</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">tableWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">verticalHeader</span><span
+style=" color:#000000;">()-&gt;</span><span style=" color:#000000;">setDefaultSectionSize</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">36</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">tableWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setIconSize</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QSize</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">32</span><span style=" color:#000000;">,</span><span
+style=" color:#000080;">32</span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//修改主界面窗口宽度，让表格末尾列自动拉伸的效果显示出来</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QSize</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">sz</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">this</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">size</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">sz</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setWidth</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">640</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">this</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">resize</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">sz</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    头文件包含增加了调试类、消息框类和表格控件的表头视图类。<br>
+    构造函数先设置日期编辑器可以弹出日历 setCalendarPopup(true)，方便用户选择日子。<br>
+    然后对表格控件进行了如下设置：<br>
+    设置选择行为 QAbstractItemView::SelectRows，每次点击都是按照整行选择；<br>
+    设置选择模式为 QAbstractItemView::SingleSelection，即单选模式（方便删除按钮操作），单选与整行选择行为不冲突，单选加整
+    行选中的意思，就是每次点击只能选中一行，而不能用 Shift 或 Ctr l键选中多行；<br>
+    开启自动排序，并且按照第 0 行升序排序；<br>
+    设置表格末尾列自动拉伸，这样表格控件比较宽时，最后一列自动占据表格控件剩余水平空间；<br>
+    设置默认的行高为 36 像素，然后把单元格的默认图标尺寸设置为 32*32 。<br>
+    对表格控件进行如上设置后，我们把主界面的窗口宽度拉伸至640，方便显示拉伸表格末尾列的效果。<br>
+    <br>
+    然后我们编辑监视表格控件当前条目的槽函数：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_tableWidget_currentItemChanged</span><span style=" color:#000000;">(</span><span
+        style=" color:#800080;">QTableWidgetItem</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#000000;">*</span><span style=" color:#000000;">current</span><span
+        style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+        style=" color:#800080;">QTableWidgetItem</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#000000;">*</span><span style=" color:#000000;">previous</span><span
+        style=" color:#000000;">)</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">current</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">NULL</span><span style=" color:#000000;">)</span><span style=" color:#008000;">//如果条目非空，打印信息</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"当前条目行号：%1，列号：%2，文本：%3"</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                  </span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#000000;">current</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">row</span><span
+style=" color:#000000;">())</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                  </span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#000000;">current</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">column</span><span
+style=" color:#000000;">())</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                  </span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#000000;">current</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">text</span><span
+style=" color:#000000;">());</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    这个槽函数就是打印非空的当前条目信息，对于涉及到指针的操作，一定要先判断指针非空。<br>
+    对于非空的当前条目，打印它的行号、列号文本。<br>
+    <br>
+    接下来我们编辑 "添加" 按钮对应的槽函数：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_pushButtonAdd_clicked</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditName</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">().</span><span
+style=" color:#000000;">trimmed</span><span style=" color:#000000;">();</span><span
+style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//剔除名字两端空格</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//判断姓名是否非空</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strName</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">())</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">warning</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"添加行"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"姓名不能为空！"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//先把自动排序关掉，才能正确添加整行的条目</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">tableWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setSortingEnabled</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">false</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取旧的行计数，表格末尾加入一个新空行，有新的空行才能设置新行条目</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nOldRowCount</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">tableWidget</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">rowCount</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">tableWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">insertRow</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">nOldRowCount</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取其他数据项，并逐个单元格添加</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//头像</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QIcon</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">iconHead</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">comboBoxPhotos</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">itemIcon</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">comboBoxPhotos</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">currentIndex</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//添加姓名和头像的单元格条目</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QTableWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">itemName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QTableWidgetItem</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">iconHead</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strName</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">tableWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setItem</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">nOldRowCount</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">itemName</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//性别条目</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strGender</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditGender</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QTableWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">itemGender</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QTableWidgetItem</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strGender</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">tableWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setItem</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">nOldRowCount</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">1</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">itemGender</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//生日条目</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strBirthday</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">dateEdit</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">date</span><span style=" color:#000000;">().</span><span
+style=" color:#000000;">toString</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"yyyy/MM/dd"</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QTableWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">itemBirthday</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QTableWidgetItem</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strBirthday</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">tableWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setItem</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">nOldRowCount</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">2</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">itemBirthday</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//婚否条目</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Qt</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">CheckState</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">cks</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">checkBoxIsMarried</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">checkState</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QTableWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">itemIsMarried</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QTableWidgetItem</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">itemIsMarried</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setCheckState</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">cks</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">tableWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setItem</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">nOldRowCount</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">3</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">itemIsMarried</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//住址条目</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strAddress</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditAddress</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QTableWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">itemAddress</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QTableWidgetItem</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strAddress</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">tableWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setItem</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">nOldRowCount</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">4</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">itemAddress</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//添加条目完毕后，重新开启排序</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">tableWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setSortingEnabled</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">true</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">tableWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">sortByColumn</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">0</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Qt</span><span style=" color:#000000;">::</span><span
+style=" color:#800080;">AscendingOrder</span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置新的当前条目并滚动显示</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">tableWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setCurrentItem</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">itemName</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">tableWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">scrollToItem</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">itemName</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    添加" 按钮对应的槽函数先对姓名字符串进行了判断，只有姓名非空才会进行后续操作。<br>
+    在进行任何的设置条目操作之前，我们先把表格控件的自动排序关闭了，因为自动排序会影响整行条目的正确输入，关闭自动排序才能让多列条目正确地添加到同一行里。<br>
+    然后我们获取表格控件的行计数 nOldRowCount ，然后在表格末尾插入一行，新的末尾行号就成了 nOldRowCount ，末尾行默认是全
+    NULL 的条目，有了新的空行才能进行后续的设置新条目操作。<br>
+    接下来我们获取头像图标，并与姓名字符串一起构建姓名条目，添加到末尾行第 0 列；<br>
+    获取性别文本，新建条目并添加到末尾行第 1 列；<br>
+    获取生日文本，新建条目并添加到末尾行第 2 列；<br>
+    获取婚否复选框的状态，新建条目并设置选状态，添加到末尾行第 3 列；<br>
+    获取住址文本，新建条目并添加到末尾行第 4 列。<br>
+    添加该行的所有条目之后，就可以开启自动排序，设置按照第 0 列升序排列。<br>
+    最后设置新的当前条目为刚才新增的姓名条目，并且滚动显示出该姓名条目，在表格的行很多时，自动滚动到设定的条目就很有用了。<br>
+    <br>
+    最后我们来看看删除 "按钮" 的代码：<br>
+    <div class="code"><span style=" color:#808000;">void</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+        style=" color:#000000;">on_pushButtonDel_clicked</span><span style=" color:#000000;">()</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//目前仅支持删除选中的当前行</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取当前条目</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QTableWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">curItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">tableWidget</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">currentItem</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">curItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">NULL</span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//当前条目非空</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">curItem</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">isSelected</span><span
+style=" color:#000000;">())</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#008000;">//当前条目被选中，那么确定是删除该行</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">tableWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">removeRow</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">curItem</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">row</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;">  </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    "删除" 按钮首先获取了当前条目，然后判断当前条目是否非空。<br>
+    对于非空的当前条目，如果当前条目处于高亮选中状态，就删除该行全部内容。<br>
+    因为之前在主窗体构造函数设置了单选模式，所以只需要删除一行，而且单选模式的选中行默认都是和当前条目重叠的。<br>
+    <br>
+    例子代码介绍完了，下面运行例子看看：<br>
+    <center> <img src="images/ch08/ch08-02-29.png" alt="run1"></center>
+    如果我们新加一个行，会变成下面这样，自动排序是生效的：
+    <center> <img src="images/ch08/ch08-02-30.png" alt="run2"></center>
+    "删除" 按钮读者可以自行测试，另外鼠标点击某个单元格时，当前单元格的信息会打印到应用程序输出面板。关于本小节的例子介绍到这，下面来看看第二个例子。<br>
+    <br>
+    <div class="os2">8.2.6 示例</div>
+    <br>
+    <br>
     <br>
     <br>
     <br>

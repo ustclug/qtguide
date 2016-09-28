@@ -3,11 +3,9 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <title>ch08-03</title>
-    
-<link href="css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-
-<script src="thumbnailviewer.js" type="text/javascript">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -15,44 +13,113 @@
 * Visit http://www.dynamicdrive.com/ for full source code
 ***********************************************/
 
-</script>
-
-
-  </head>
-  
-  
-<div class="os1">8.3 树形控件</div>
-<br />
-8.3 节介绍树形控件 QTreeWidget 和它的树形节点 QTreeWidgetItem，
-树形控件节点可以有多层、多个子节点，
-如果将子节点全部展开，那么一行就是一个数据条目。<br />
-<br />
-
-
-<div class="os2">8.3.1 QTreeWidget</div>
-
-<br />
-<br />
-<div class="os2">8.3.2 QTreeWidgetItem</div>
-
-<br />
-<br />
-<div class="os2">8.3.3 示例</div>
-
-<br />
-<br />
-
-<br />
-<br />
-<br />
-
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch08-02.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch09-00.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+</script> </head>
+  <body>
+    <div class="os1">8.3 树形控件</div>
+    <br>
+    本节首先介绍树形控件 QTreeWidget 的内容，然后介绍它的树形节点条目 QTreeWidgetItem。 树形控件的节点可以有多层、多个子节点，
+    如果将子节点全部展开，那么每一行都是一个数据条目。QTreeWidgetItem
+    比较特殊，一个条目内部可以有多列数据信息，相当于表格控件一整行的表格单元集成为一个条目，所以树形条目要比前面两节的列表条目和表格条目都复杂。第三小节介绍迭代器和
+    递归遍历算法，因为树形控件每行的条目之间可以是兄弟关系或父子关系，含有子节点的条目可以折叠也可以展开，进行遍历时有专门的迭代器
+    QTreeWidgetItemIterator 实现，也可以自行编写递归算法遍历所有条目。<br>
+    本节介绍完 QTreeWidget 、QTreeWidgetItem、QTreeWidgetItemIterator
+    等内容之后，通过两个例子展示树形控件的用法，如果读者提前学习一下树形遍历的递归算法，对本节的内容理解会有帮助。<br>
+    <br>
+    <div class="os2">8.3.1 QTreeWidget</div>
+    <br>
+    在 Qt 设计师界面可以直接拖动树形控件到窗口里，下图展示树形控件的外观和构成：<br>
+    <center> <img src="images/ch08/ch08-03-01.png" alt="treewidget" width="800"></center>
+    默认情况下，树形控件最上面是一个树头条目，树头条目也是 QTreeWidgetItem 对象，可以有多列内容。<br>
+    树头下面是真正的树形控件所有条目，在折叠的情况下，如上图所示，每行一个顶级条目，顶级条目也是 QTreeWidgetItem 对象，顶级条目的父节点指针
+    QTreeWidgetItem::​parent() 为 NULL。<br>
+    将所有节点展开之后，可以看到每个节点可以有多个子节点：<br>
+    <center> <img src="images/ch08/ch08-03-02.png" alt="treewidget2" width="800"></center>
+    对于包含子节点的父节点，左边会有小的三角形指示器，用于控制折叠或展开父节点。子节点也可以拥有更低级别的子节点（孙节点），以此类推，树形控件没有限定子节点
+    的层数。顶级节点和其子孙节点的数据结构一样，都可以有多列数据，只是添加的函数、父节点指针不一样。下面介绍树形控件的函数和功能，在 8.3.2
+    节介绍树形节点条目 QTreeWidgetItem，8.3.3 节介绍树形条目迭代器 QTreeWidgetItemIterator
+    和递归遍历算法，最后两个小节是示例程序的实践。<br>
+    <br>
+    树形控件的构造函数很简单：<br>
+    <div class="code"> QTreeWidget(QWidget * parent = 0)</div>
+    参数里只有指定父窗口或父控件的指针 parent 。树形控件在添加条目之前，必须要先设置列数：<br>
+    <div class="code">void setColumnCount(int columns) //设置列数</div>
+    <div class="code">int columnCount() const //获取列数</div>
+    默认的列数是 1 列，如果涉及到多列数据，比如文件浏览树，有文件名、文件类型、大小、修改时间等等，就需要设置为多列数据的树。<br>
+    树形控件设置好列数就可以添加相应的顶级条目，添加顶级条目是由树形控件自身的函数实现，而子条目则由 QTreeWidgetItem
+    的函数实现。本小节主要围绕树形控件和其基类的函数来讲，树形控件也可以设置和表格控件类似的表头，这里称为树头条目，放在本小节末尾再讲。<br>
+    <br>
+    （1）添加和访问顶级条目<br>
+    新建条目之后，可以用如下函数把条目添加到树形控件的顶级条目列表末尾：
+    <div class="code">void QTreeWidget::​addTopLevelItem(QTreeWidgetItem * item)
+      //添加一个顶级条目到末尾</div>
+    <div class="code">void QTreeWidget::​addTopLevelItems(const
+      QList&lt;QTreeWidgetItem *&gt; &amp; items) //添加多个顶级条目到末尾</div>
+    如果希望将条目插入到指定顶级条目列表的 index 序号位置，使用如下函数：<br>
+    <div class="code">void QTreeWidget::​insertTopLevelItem(int index,
+      QTreeWidgetItem * item)</div>
+    <div class="code">void QTreeWidget::​insertTopLevelItems(int index, const
+      QList&lt;QTreeWidgetItem *&gt; &amp; items)</div>
+    树形控件所有的顶级条目父节点指针都为 NULL （父节点是指树形层次中的节点关系，而条目的父控件依然是树形控件本身）。<br>
+    添加了顶级条目之后，可以对顶级条目进行计数：<br>
+    <div class="code">int QTreeWidget::​topLevelItemCount() const</div>
+    <br>
+    <br>
+    （2）移除顶级条目<br>
+    <br>
+    （3）条目访问函数<br>
+    <br>
+    （4）当前条目的操作<br>
+    <br>
+    （5）条目查找和排序<br>
+    <br>
+    （6）条目显示的运行时条目编辑<br>
+    <br>
+    （7）信号<br>
+    <br>
+    <br>
+    （8）槽函数<br>
+    <br>
+    （9）基类 QTreeView 的函数<br>
+    <br>
+    （10）树头条目<br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <div class="os2">8.3.2 QTreeWidgetItem</div>
+    <br>
+    <br>
+    <div class="os2">8.3.3 迭代器和递归遍历</div>
+    <br>
+    <br>
+    <div class="os2">8.3.4 示例1</div>
+    <br>
+    使用设计师编辑树形条目。 <br>
+    <br>
+    <div class="os2">8.3.5 示例2</div>
+    <br>
+    使用代码生成条目。*.tree 文件打开和保存。 <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch08-02.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch08-04.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

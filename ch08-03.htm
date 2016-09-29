@@ -49,7 +49,7 @@
     的函数实现。本小节主要围绕树形控件和其基类的函数来讲，树形控件也可以设置和表格控件类似的表头，这里称为树头条目，放在本小节末尾再讲。<br>
     <br>
     （1）添加和访问顶级条目<br>
-    新建条目之后，可以用如下函数把条目添加到树形控件的顶级条目列表末尾：
+    树形控件顶级条目的操作比较类似 QListWidget 的列表条目操作函数。新建条目之后，可以用如下函数把条目添加到树形控件的顶级条目列表末尾：
     <div class="code">void QTreeWidget::​addTopLevelItem(QTreeWidgetItem * item)
       //添加一个顶级条目到末尾</div>
     <div class="code">void QTreeWidget::​addTopLevelItems(const
@@ -63,30 +63,223 @@
     添加了顶级条目之后，可以对顶级条目进行计数：<br>
     <div class="code">int QTreeWidget::​topLevelItemCount() const</div>
     <br>
-    <br>
     （2）移除顶级条目<br>
+    移除顶级条目的函数也是take*打头：<br>
+    <div class="code">QTreeWidgetItem * QTreeWidget::​takeTopLevelItem(int
+      index)</div>
+    index是顶级条目的序号，该函数只是从树形控件卸下顶级条目，但不会删除条目的内存空间，如果希望彻底删除，那么手动 delete 该函数返回的条目。<br>
+    如果要清空所有的顶级条目和子条目，使用槽函数：<br>
+    <div class="code">void QTreeWidget::​clear()</div>
     <br>
     （3）条目访问函数<br>
+    对于顶级条目，如果知道顶级条目的序号获取对应的条目：<br>
+    <div class="code">QTreeWidgetItem * QTreeWidget::​topLevelItem(int index)
+      const</div>
+    反过来，对于已知顶级条目对象，查看其顶级序号：<br>
+    <div class="code">int QTreeWidget::​indexOfTopLevelItem(QTreeWidgetItem *
+      item) const</div>
+    如果条目不是顶级条目或者条目不属于该控件，那么会返回 -1。<br>
+    树形控件实际运行时，可能既有顶级条目，也有展开后的子孙条目同时显示，所以某个条目上面或下面的相邻条目不一定是同级别的兄弟条目，有可能是叔辈祖辈的条目，也
+    可能是子辈孙辈条目。获取某个条目的相邻条目函数为：<br>
+    <div class="code">QTreeWidgetItem * QTreeWidget::​itemAbove(const
+      QTreeWidgetItem * item) const //上面相邻条目</div>
+    <div class="code">QTreeWidgetItem * QTreeWidget::​itemBelow(const
+      QTreeWidgetItem * item) const //下面相邻条目</div>
+    <br>
+    从屏幕控件显示角度，如果根据树形控件内部相对坐标获取条目（树形控件显示区域的左上角为原点），使用下面函数：<br>
+    <div class="code">QTreeWidgetItem * QTreeWidget::​itemAt(const QPoint &amp;
+      p) const</div>
+    <div class="code">QTreeWidgetItem * QTreeWidget::​itemAt(int x, int y) const</div>
+    这两个函数是一个意思，一个用 QPoint 对象表示相对坐标，另一个直接用 x 和 y 数值表示坐标，​如果对应坐标没有条目，会返回 NULL，注意判断
+    返回值。<br>
+    树形控件也是自带滚动条的，如果条目特别多，自动显示滚动条，对于树形控件在屏幕可见的条目，可以根据条目对象获取它的可视矩形（树形控件显示区域的左上角为原
+    点）：<br>
+    <div class="code">QRect QTreeWidget::​visualItemRect(const QTreeWidgetItem *
+      item) const</div>
     <br>
     （4）当前条目的操作<br>
+    树形控件的选中操作默认比较像 QListWidget，如果不手动设置，只能选中一个高亮条目。<br>
+    获取当前高亮选中条目的函数为：<br>
+    <div class="code">QTreeWidgetItem * QTreeWidget::​currentItem() const</div>
+    树形控件可以有多列，当前条目被点击选中的列号为：<br>
+    <div class="code">int QTreeWidget::​currentColumn() const</div>
+    树形控件内的条目一般都没有固定行号，因为条目可以展开也可以折叠，行号是变化的，所以没有基于行号的操作函数。<br>
+    <br>
+    如果要设置某个条目为当前选中的状态：<br>
+    <div class="code">void QTreeWidget::​setCurrentItem(QTreeWidgetItem * item)</div>
+    <div class="code">void QTreeWidget::​setCurrentItem(QTreeWidgetItem * item,
+      int column)</div>
+    <div class="code">void QTreeWidget::​setCurrentItem(QTreeWidgetItem * item,
+      int column, QItemSelectionModel::SelectionFlags command)</div>
+    第一个 ​setCurrentItem() 函数相当于设置该条目整行高亮选中，第二个是设置该条目行的 column
+    列高亮选中，第三个函数是单次选中命令，参考“8.2.4 选中区域和选中行为”的单次选中命令内容，只是树形控件是一整行为一个条目，定位到条目的某列数据，就
+    类似指定表格控件的单元格。<br>
+    如果当前高亮选中的状态发生变化，会触发如下信号：<br>
+    <div class="code">void QTreeWidget::​currentItemChanged(QTreeWidgetItem *
+      current, QTreeWidgetItem * previous)</div>
+    参数里分别是当前高亮选中的条目，和之前高亮选中的条目，注意指针可能是 NULL，使用指针前一定要判断指针非空。<br>
     <br>
     （5）条目查找和排序<br>
+    如果要根据模板子串查找某列文本匹配的条目，使用如下函数：<br>
+    <div class="code">QList&lt;QTreeWidgetItem *&gt;
+      QTreeWidget::​findItems(const QString &amp; text, Qt::MatchFlags flags,
+      int column = 0) const</div>
+    &nbsp;参数里text是模板子串，flags是匹配标志（参看“8.1.1
+    QListWidget”中的字符串匹配标志表格），第三个参数是指定查找的列。该函数只查找一列的文本，其他列的文本是不查找的。如果需要查找所有列数据，那么要根据不
+    同列号逐列查询。<br>
     <br>
-    （6）条目显示的运行时条目编辑<br>
+    类似表格控件，树形控件也可以按照列的文本进行自动排序，自动排序的设置函数为：<br>
+    <div class="code">bool&nbsp;&nbsp; &nbsp;isSortingEnabled()
+      const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //设置是否自动排序</div>
+    <div class="code">void&nbsp;&nbsp; &nbsp;setSortingEnabled(bool
+      enable)&nbsp;&nbsp; //查看是否开启自动排序 </div>
+    指定排序的列号和升序降序，使用从基类继承的函数：<br>
+    <div class="code">void QTreeView::​sortByColumn(int column, Qt::SortOrder
+      order)</div>
+    在没有开启自动排序的情况下，也可以调用该函数进行一次性的条目排序。<br>
+    <br>
+    （6）条目显示和运行时条目编辑<br>
+    可以为条目的某列“单元格”设置单独的控件来静态显示（控件不具有编辑功能）：<br>
+    <div class="code">void QTreeWidget::​setItemWidget(QTreeWidgetItem * item,
+      int column, QWidget * widget) //设置条目列控件</div>
+    <div class="code">QWidget * QTreeWidget::​itemWidget(QTreeWidgetItem * item,
+      int column) const //获取条目列控件，不设置就是NULL</div>
+    注意该函数只能在条目添加到树形控件之后才能调用，否则无效，并且条目列控件只能用于显示，无法编辑，如果要定制可编辑的“单元格”控件，必须用基类
+    QTreeView 并继承 QItemDelegate 做代理，这些内容到后面模型视图章节讲解。<br>
+    <span style="font-weight: bold;">再次强调：itemWidget
+      条目控件，在默认情况下是与条目本身数据完全无关的，是条目数据的替换品，而不是协作模式。只有手动设置信号与槽，它们才可能关联上。</span><br>
+    QListWidget 和 QTreeWidget 的条目控件都是静态显示，不能编辑。<br>
+    QTreeWidget 控件的条目列控件 widget 还必须把 autoFillBackground 属性设置为
+    true，如果不是自动填充背景，那么默认是透明背景，这样控件的内容和内部模型数据（就是条目的列数据）同时显示，文本会重影，效果就糟糕了。<br>
+    删除条目的列控件使用如下函数：<br>
+    <div class="code">void QTreeWidget::​removeItemWidget(QTreeWidgetItem *
+      item, int column)</div>
+    这个函数没有返回值，会自动地彻底删除条目列控件。<br>
+    <br>
+    在大多数情况下都用不到 itemWidget ，因为能够为条目设置可编辑标志位，然后调用如下函数开启树形控件自带的文本编辑器：<br>
+    <div class="code">void QTreeWidget::​editItem(QTreeWidgetItem * item, int
+      column = 0)</div>
+    参数 item 是指定的条目，column
+    是条目的列（类似“单元格”）。在没有为条目设置可编辑标志位的情况下，可以调用下面一对函数进行持续编辑器的开启和关闭：<br>
+    <div class="code">void QTreeWidget::​openPersistentEditor(QTreeWidgetItem *
+      item, int column = 0)</div>
+    <div class="code">void QTreeWidget::​closePersistentEditor(QTreeWidgetItem *
+      item, int column = 0)</div>
+    注意这对函数一开一关，要成对调用，否则编辑完了不会自动关闭持续编辑器。<br>
     <br>
     （7）信号<br>
-    <br>
+    关于当前高亮选中变化的信号 currentItemChanged() 前面讲过了，这里先列几个常规的信号，然后再将树形控件独有的信号。常规信号就是下面这
+    几个：（条目列就类似表格控件的单元格）<br>
+    <div class="code">void itemActivated(QTreeWidgetItem * item, int column)
+      //条目列被激活</div>
+    <div class="code">void itemChanged(QTreeWidgetItem * item, int
+      column)&nbsp;&nbsp; //条目列的数据发生变化，比如文本或图标修改了</div>
+    <div class="code">void itemClicked(QTreeWidgetItem * item, int column)&nbsp;
+      //条目列被单击</div>
+    <div class="code">void itemDoubleClicked(QTreeWidgetItem * item, int column)
+      //条目列被双击</div>
+    <div class="code">void itemEntered(QTreeWidgetItem * item, int column)
+      //进入条目列</div>
+    <div class="code">void itemPressed(QTreeWidgetItem * item, int column)
+      //条目列被点 击按下</div>
+    树形控件最独特的就是展开和折叠信号：<br>
+    <div class="code">void QTreeWidget::​itemExpanded(QTreeWidgetItem *
+      item)&nbsp; //条目展开时发送信号</div>
+    <div class="code">void QTreeWidget::​itemCollapsed(QTreeWidgetItem * item)
+      //条目折叠时发送信号</div>
+    如果调用槽函数&nbsp; expandAll() 展开所有子孙条目，那么不会触发 ​itemExpanded() 信号，因为触发太多会非常影响性能。<br>
+    类似地，如果用槽函数 collapseAll() 折叠所有子孙条目，也不会触发 ​itemCollapsed() 信号，以免影响性能。<br>
+    举例来说，在文件夹浏览的时候，因为操作系统里的文件太多，没法一次性构建完整的文件树，那么就可以用展开和折叠信号实时枚举某一层次文件夹的内容，而不是一次性
+    枚举文件系统所有文件，因为一次性枚举所有文件的性能太糟糕。<br>
+    树形控件还有一个 itemSelectionChanged() 信号，一般在多选模式才会用到，稍后讲解。<br>
     <br>
     （8）槽函数<br>
+    树形控件的槽函数包括四个（基类的另算）：<br>
+    <div class="code">void clear() //清空整个树形控件</div>
+    <div class="code">void collapseItem(const QTreeWidgetItem * item) //折叠指定的条目</div>
+    <div class="code">void expandItem(const QTreeWidgetItem * item)&nbsp; //展开指定
+      条目</div>
+    <div class="code">void scrollToItem(const QTreeWidgetItem * item,
+      QAbstractItemView::ScrollHint hint = EnsureVisible) //滚动到指定条目</div>
+    滚动函数 scrollToItem() 第二个参数是滚到到该条目的显示方式，参考“8.1.1
+    QListWidget”QAbstractItemView:: ​ ScrollHint 枚举常量的表格。<br>
     <br>
     （9）基类 QTreeView 的函数<br>
+    QTreeView 的功能函数也很多，这里列举几个可能常用的，详细的内容等到模型视图章节讲解。关于列隐藏或显示、设置列宽的函数如下：<br>
+    <div class="code">void QTreeView::​setColumnHidden(int column, bool hide)
+      //设置列隐藏或显示</div>
+    <div class="code">bool QTreeView::​isColumnHidden(int column) const
+      //判断列是否隐藏 </div>
+    <div class="code">void QTreeView::hideColumn(int column) //槽函数，隐藏指定列</div>
+    <div class="code">void QTreeView::showColumn(int column) //槽函数，显示指定列</div>
+    <div class="code">void QTreeView::​setColumnWidth(int column, int width)
+      //设置列宽</div>
+    <div class="code">int QTreeView::​columnWidth(int column) const //获取指定列的宽度</div>
+    <div class="code">void QTreeView::​resizeColumnToContents(int column)
+      //槽函数，自动调整 指定列的宽度</div>
+    属性 indentation 控制显示父子节点的缩进宽度：<br>
+    <div class="code">int indentation() const&nbsp;&nbsp;&nbsp; //获取父子节点的缩进宽度</div>
+    <div class="code">void setIndentation(int i) //设置缩进宽度</div>
+    <div class="code">void resetIndentation()&nbsp;&nbsp;&nbsp; //重置缩进宽度为默认值</div>
+    基类还有几个常用的折叠和展开槽函数：<br>
+    <div class="code">void collapseAll() //折叠所有子孙节点，这样只能看到顶级节点</div>
+    <div class="code">void expandAll() //展开所有子孙节点，完全展开的树</div>
+    <div class="code">void expandToDepth(int depth) //展开 depth 层级的子节点</div>
+    expandToDepth() 函数是指一直展开，直到将第 depth 层级的字子节点都展开为止。以顶级条目为第 0 层级，顶级条目的直接子节点为第 1
+    层级，孙子节点为第 2 层级，依次类推。<br>
+    例如 expandToDepth(0) 的效果如下：<br>
+    <center> <img src="images/ch08/ch08-03-03.png" alt="expand0"></center>
+    如果调用 expandToDepth(1) 展开第1级的节点：<br>
+    <center> <img src="images/ch08/ch08-03-04.png" alt="expand1"></center>
+    如果把 expandToDepth() 参数设置成负数，那么相当于展开无穷大级别，就是展开所有的子孙节点。<br>
     <br>
     （10）树头条目<br>
+    树形控件只有一个表头，就是显示在上面的水平表头，本节也叫树头条目。设置树头条目的函数为：<br>
+    <div class="code">void QTreeWidget::​setHeaderItem(QTreeWidgetItem * item)
+      //设置树头条目，树头条目可以有多列数据，相当于多列的表头一次性设置了</div>
+    <div class="code">void QTreeWidget::​setHeaderLabel(const QString &amp;
+      label) //只设置第 0 列的表头</div>
+    <div class="code">void QTreeWidget::​setHeaderLabels(const QStringList &amp;
+      labels) //设置多列的表头</div>
+    <div class="code">QTreeWidgetItem * QTreeWidget::​headerItem() const
+      //获取树头条目</div>
+    树头条目本质其实也是由 QHeaderView 子控件来显示的，可以在基类找到相关函数：<br>
+    <div class="code">QHeaderView * QTreeView::​header() const //获取表头视图控件</div>
+    <div class="code">void QTreeView::​setHeader(QHeaderView * header) //设置表头视图，
+      一般树形控件不需要用这个函数</div>
+    <div class="code">void QTreeView::setHeaderHidden(bool hide) //设置表头是否隐藏</div>
+    <div class="code">bool QTreeView::isHeaderHidden() const //判断是否隐藏了表头</div>
+    无论是 QTableWidget 还是 QTreeWidget 的表头，都是 QHeaderView 子控件显示，QHeaderView
+    参考“8.2.3 表头设置”的内容。<br>
     <br>
+    （11）选中行为和选中模式<br>
+    与 QTableWidget 类似，QTreeWidget也从祖类 QAbstractItemView 继承了选中行为和选中模式的属性：<br>
+    <div class="code">QAbstractItemView::SelectionBehavior&nbsp;
+      selectionBehavior() const //获取选中行为，按条目选中、整行或整列选中</div>
+    <div class="code">void
+      setSelectionBehavior(QAbstractItemView::SelectionBehavior behavior)
+      //设置选中行为</div>
+    <div class="code">QAbstractItemView::SelectionMode&nbsp; selectionMode()
+      const //获取选中模式，比如单选、多选、扩展选择</div>
+    <div class="code">void setSelectionMode(QAbstractItemView::SelectionMode
+      mode) //设置选中模式</div>
+    关于选中模式和选中行为的枚举常量参看“8.2.4 选中区域和选中行为”小节中的枚举常量表格，单次选中命令的函数和枚举常量也参考该小节。<br>
     <br>
-    <br>
+    默认情况下，树形控件是按照整行选中，并且是单选模式，如果把选中模式改成多选的
+    QAbstractItemView::ExtendedSelection，那么树形控件也可以使多选的，这时候信号
+    itemSelectionChanged() 就能派上用场：<br>
+    <div class="code">void QTreeWidget::​itemSelectionChanged()</div>
+    多选状态变化时会触发该信号（单选模式也触发，只是不需要用这个信号），可以关联该信号，监视当前所有选中的条目：<br>
+    <div class="code">QList&lt;QTreeWidgetItem *&gt;
+      QTreeWidget::​selectedItems() const</div>
+    注意，这里的选中条目仅仅是指实际显示的直接选中的条目，不包括折叠隐藏的子孙条目计数，因为选中父节点与选中其子孙节点没关系，不会递归选中所有子孙：<br>
+    <center> <img src="images/ch08/ch08-03-05.png" alt="select"></center>
+    树形控件及其基类没有递归选中子条目的属性或函数，如果希望递归选中某个节点的所有子孙节点，那么需要自行编写递归函数。关于树形控件类本身的内容介绍到这，因为
+    涉及到父子节点隶属关系、节点展开和折叠，树形控件还有很大一部分功能都是由其条目类 QTreeWidgetItem 的函数实现的，下面来学习这个树形控件条
+    目类。<br>
     <br>
     <div class="os2">8.3.2 QTreeWidgetItem</div>
+    <br>
     <br>
     <br>
     <div class="os2">8.3.3 迭代器和递归遍历</div>

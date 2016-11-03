@@ -337,6 +337,7 @@
     <div class="code">virtual void setData(int role, const QVariant &amp; value)</div>
     也可以根据角色来获取各个数据变量：<br>
     <div class="code">virtual QVariant data(int role) const</div>
+    <br>
     查看列表控件源码文件：<br>
     &nbsp;C:\Qt\Qt5.4.0\5.4\Src\qtbase\src\widgets\itemviews\qlistwidget.h<br>
     可以看到关于文本变量的函数 text() 和 setText() 源代码：<br>
@@ -446,6 +447,67 @@
     使用运算符的形式比较方便，当然也可以用 QListWidgetItem 内部的读写函数：<br>
     <div class="code">void QListWidgetItem::​read(QDataStream &amp; in)</div>
     <div class="code">void QListWidgetItem::​write(QDataStream &amp; out) const</div>
+    &nbsp;<br>
+    QListWidgetItem 内部采用私有的 QVector 向量存储通用数据的 role 和 value 对：<br>
+    <div class="code"><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QVector</span><span
+        style=" color:#000000;">&lt;</span><span style=" color:#800080;">QWidgetItemData</span><span
+        style=" color:#000000;">&gt;</span><span style=" color:#c0c0c0;"> </span><span
+        style=" color:#800000;">values</span><span style=" color:#000000;">;</span></div>
+    条目通用数据的读写就是读写私有向量 values，其中 QWidgetItemData 内部包含 role 和 value 成员变量：<br>
+    <div class="code"><span style=" color:#808000;">class</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#800080;">QWidgetItemData</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">inline</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidgetItemData</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">role</span><span style=" color:#000000;">(-</span><span
+style=" color:#000080;">1</span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">{}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">inline</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidgetItemData</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">r</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QVariant</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">v</span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">role</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">r</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">value</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">v</span><span style=" color:#000000;">)</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">role</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QVariant</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">value</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">inline</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">bool</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">operator</span><span style=" color:#000000;">==(</span><span
+style=" color:#808000;">const</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QWidgetItemData</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">&amp;</span><span style=" color:#000000;">other</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">return</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">role</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">==</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">other</span><span
+style=" color:#000000;">.</span><span style=" color:#800000;">role</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">&amp;&amp;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">value</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">==</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">other</span><span
+style=" color:#000000;">.</span><span style=" color:#800000;">value</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+    </div>
+    在 8.2 节表格控件的单元格条目也是类似的私有向量存储 role 和 value 对。<br>
     <br>
     ● 第二类：QListWidgetItem 的非通用数据<br>
     条目自定义类型：<br>

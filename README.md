@@ -1,10 +1,9 @@
-Qt编程指南
+Qt编程指南  qtguide          
 ======================
-#qtguide
 
 ###
 本教程主页：      
-https://lug.ustc.edu.cn/sites/qtguide/       
+https://qtguide.ustclug.org/       
 
 ###
 准备写一本关于Qt编程的书，读者需要C++基础，推荐《C++ Primer Plus》。
@@ -13,12 +12,12 @@ https://lug.ustc.edu.cn/sites/qtguide/
 
 ###
 所用的开发环境可以去Qt官网下载:      
-http://download.qt.io/official_releases/qt/5.4/5.4.0/       
+http://download.qt.io/archive/qt/5.4/5.4.0/       
 也可以从百度网盘下载:       
 http://pan.baidu.com/s/1nuk5Lbz     
 
 ### 
-采用Qt 5.4.0版本开发环境，安装和配置教程上面百度网盘链接里面有，
+默认采用Qt 5.4.0版本开发环境，读者使用最新的Qt版本也可以，安装和配置教程上面百度网盘链接里面有，
 书籍里面以后也会讲。
 
 ###

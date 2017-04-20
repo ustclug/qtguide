@@ -225,7 +225,7 @@
     <div class="code">void collapseAll() //折叠所有子孙节点，这样只能看到顶级节点</div>
     <div class="code">void expandAll() //展开所有子孙节点，完全展开的树</div>
     <div class="code">void expandToDepth(int depth) //展开 depth 层级的子节点</div>
-    expandToDepth() 函数是指一直展开，直到将第 depth 层级的字子节点都展开为止。以顶级条目为第 0 层级，顶级条目的直接子节点为第 1
+    expandToDepth() 函数是指一直展开，直到将第 depth 层级的子节点都展开为止。以顶级条目为第 0 层级，顶级条目的直接子节点为第 1
     层级，孙子节点为第 2 层级，依次类推。<br>
     例如 expandToDepth(0) 的效果如下：<br>
     <center> <img src="images/ch08/ch08-03-03.png" alt="expand0"></center>
@@ -282,14 +282,112 @@
     <br>
     树形控件条目的内容是最复杂的，因为每一个条目涉及到内部多列数据的操作、父子节点操作，这些都是之前列表控件条目和表格控件条目不具备的特性。我们首先介绍树形
     控件条目的构造函数，然后按父子节点操作、通用数据操作和非通用数据操作三方面介绍树形控件条目。<br>
+    （1）构造函数和复制函数<br>
     QTreeWidgetItem 构造函数较多，首先看不带父对象指针的构造函数：<br>
     <div class="code">QTreeWidgetItem(int type = Type)</div>
     <div class="code">QTreeWidgetItem(const QStringList &amp; strings, int type
       = Type)</div>
     <div class="code">QTreeWidgetItem(const QTreeWidgetItem &amp; other)</div>
     类型 type 一般用于派生类的自定义条目类型，基本用不到。第二个构造函数字符串列表 strings
-    就是条目内多列的文本，类似把表格控件一整行的多列文本塞到一个条目内部了。第三个是复制构造函数，复制时除了 type()、treeWidget()、父对象
-    指针，其他的都复制。<br>
+    就是条目内多列的文本，类似把表格控件一整行的多列文本塞到一个条目内部了。第三个是复制构造函数，复制时除了
+    type()、treeWidget()、parent()，其他的都复制。<br>
+    克隆函数：<br>
+    <div class="code">QTreeWidgetItem * QTreeWidgetItem::​clone() const</div>
+    &nbsp;​clone()是按照本条目一模一样造出一个新的条目，是深拷贝，与本条目（包括子孙节点）不共享内存，函数返回的新条目也没有复制
+    type()、treeWidget()、​parent() ，新条目是自由的，没归属。<span style="font-weight: bold;">​
+      clone() 函数会克隆所有的子孙节点，并且新子孙节点之间的关系也一样</span>，QTreeWidgetItem&nbsp;源码中使用压栈出栈
+    方式实现了子孙节点的遍历复制。<br>
+    赋值=函数：<br>
+    <div class="code">QTreeWidgetItem &amp; operator=(const QTreeWidgetItem
+      &amp; other)</div>
+    &nbsp;等于号函数与克隆函数有本质区别，它只拷贝
+    other&nbsp;这一个节点内的数据到本节点里，包括显示的字符串和多列数据、标志位等，type() 和
+    treeWidget()、​parent()的内容不会修改。<span style="font-weight: bold;">等于号函数不涉及任何子孙节
+      点，也不改变隶属的父节点。</span><br>
+    顺便提一下小于号函数：<br>
+    <div class="code">virtual bool operator&lt;(const QTreeWidgetItem &amp;
+      other) const</div>
+    &nbsp;如果为树形控件指定了排序的列号sortColumn()，那么按该列的文本字典序比较大小，否则都按照第0列的文本比较。<br>
+    <br>
+    （2）父子节点操作<br>
+    在添加到树形控件之后，都可以用如下函数查看条目隶属的树形控件：<br>
+    <div class="code">QTreeWidget * QTreeWidgetItem::​treeWidget() const&nbsp;
+      //常量，节点不能自行更换隶属，要从树形控件增删节点</div>
+    条目查看父节点的指针使用函数：<br>
+    <div class="code">QTreeWidgetItem * QTreeWidgetItem::​parent() const&nbsp;
+      //常量，子节点不能改父节点指针</div>
+    注意子节点是不能修改父节点指针的，只能父节点换子节点，不能子节点换父节点。<br>
+    <br>
+    最常用的是节点控制自己的直接子节点，添加子节点使用函数：<br>
+    <div class="code">void addChild(QTreeWidgetItem * child) //添加一个子节点到末尾</div>
+    <div class="code">void addChildren(const QList&lt;QTreeWidgetItem *&gt;
+      &amp; children) //添加多个子节点末尾</div>
+    <div class="code">void insertChild(int index, QTreeWidgetItem * child)
+      //插入子节点序号&nbsp;index&nbsp;序号位置</div>
+    <div class="code">void insertChildren(int index, const
+      QList&lt;QTreeWidgetItem *&gt; &amp; children)//插入多个子节点到&nbsp;index 位置</div>
+    直接子节点的计数（与孙辈或更低辈分数目无关）用如下函数：
+    <div class="code">int childCount() const</div>
+    <br>
+    根据序号获取直接子节点的指针使用函数（如果序号超界返回NULL）：<br>
+    <div class="code">QTreeWidgetItem * child(int index) const&nbsp; //序号查子节点指针</div>
+    反过来，根据子节点指针查序号的函数如下（如果查不到序号返回-1）：
+    <div class="code">int indexOfChild(QTreeWidgetItem * child) const</div>
+    移除子节点使用如下函数：
+    <div class="code">void removeChild(QTreeWidgetItem * child)&nbsp;
+      //根据子节点指针解除父子关系</div>
+    <div class="code">QTreeWidgetItem * takeChild(int index)&nbsp; //根据子节点序号解除父子
+      关系，返回卸下后的自由节点指针</div>
+    <div class="code">QList&lt;QTreeWidgetItem *&gt; takeChildren()&nbsp;
+      //卸下所有子节点</div>
+    注意这几个函数只是解除父子关系，卸下的子节点还存在内存中，如果要完全删除需要手动&nbsp;delete&nbsp; 每个节点。<br>
+    当节点有隶属的树形控件时，可以使用下面函数对子节点排序：<br>
+    <div class="code">void sortChildren(int column, Qt::SortOrder order)&nbsp; //
+      根据指定列号column排序，升序或降序由order指定</div>
+    如果条目不属于任何树形控件，那么该排序函数无效。<br>
+    <br>
+    条目还可以控制自己的子节点指示器（条目显示时左边的加号 +）如何显示：<br>
+    <div class="code">QTreeWidgetItem::ChildIndicatorPolicy
+      childIndicatorPolicy() const //获取子节点指示器显示策略</div>
+    <div class="code">void
+      QTreeWidgetItem::​setChildIndicatorPolicy(QTreeWidgetItem::ChildIndicatorPolicy
+      policy) //设置子节点指示器显示策略</div>
+    子节点指示器显示策略 QTreeWidgetItem::ChildIndicatorPolicy 有三种：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 337px;" align="center"><b>ChildIndicatorPolicy 枚举常量</b></td>
+          <td style="width: 88px;" align="center"><b>数值</b></td>
+          <td style="width: 397px;" align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>QTreeWidgetItem::ShowIndicator</td>
+          <td> 0 </td>
+          <td>无论有无子节点都显示指示符。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QTreeWidgetItem::DontShowIndicator</td>
+          <td> 1 </td>
+          <td>始终不显示指示符。 </td>
+        </tr>
+        <tr>
+          <td>QTreeWidgetItem::DontShowIndicatorWhenChildless</td>
+          <td> 2</td>
+          <td> 条目有子节点就显示指示符，没子节点就不显示。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    默认值是最后一个，有子节点就显示指示符，没有子节点就不显示指示符，这种方式也最为科学，一般不需要改指示符显示策略。<br>
+    <br>
+    关于父子节点操作函数介绍到这，这些的特点就是只处理直接的子节点，与孙子辈、更低辈分节点无关，孙子辈由儿子辈去管理，以此类推，族谱树中各层节点只管理亲儿
+    子，其他辈分都不管。 递归操作 就是这样，只管处理儿子辈代码，孙子辈的由儿子辈去管，层层下推，就是递归的过程。<br>
+    <br>
+    （3）通用数据操作<br>
+    通用数据一般是用于 QDataStream 保存条目的信息到文件中，也可以从文件中加载通用数据生成以前的树。<br>
+    <br>
+    （4）非通用数据操作<br>
     <br>
     <br>
     <br>

@@ -310,9 +310,6 @@
     &nbsp;如果为树形控件指定了排序的列号sortColumn()，那么按该列的文本字典序比较大小，否则都按照第0列的文本比较。<br>
     <br>
     （2）父子节点操作<br>
-    在添加到树形控件之后，都可以用如下函数查看条目隶属的树形控件：<br>
-    <div class="code">QTreeWidget * QTreeWidgetItem::​treeWidget() const&nbsp;
-      //常量，节点不能自行更换隶属，要从树形控件增删节点</div>
     条目查看父节点的指针使用函数：<br>
     <div class="code">QTreeWidgetItem * QTreeWidgetItem::​parent() const&nbsp;
       //常量，子节点不能改父节点指针</div>
@@ -326,7 +323,7 @@
       //插入子节点序号&nbsp;index&nbsp;序号位置</div>
     <div class="code">void insertChildren(int index, const
       QList&lt;QTreeWidgetItem *&gt; &amp; children)//插入多个子节点到&nbsp;index 位置</div>
-    直接子节点的计数（与孙辈或更低辈分数目无关）用如下函数：
+    直接子节点的计数（与孙辈或更低辈分的节点数目无关）用如下函数：
     <div class="code">int childCount() const</div>
     <br>
     根据序号获取直接子节点的指针使用函数（如果序号超界返回NULL）：<br>
@@ -342,8 +339,8 @@
       //卸下所有子节点</div>
     注意这几个函数只是解除父子关系，卸下的子节点还存在内存中，如果要完全删除需要手动&nbsp;delete&nbsp; 每个节点。<br>
     当节点有隶属的树形控件时，可以使用下面函数对子节点排序：<br>
-    <div class="code">void sortChildren(int column, Qt::SortOrder order)&nbsp; //
-      根据指定列号column排序，升序或降序由order指定</div>
+    <div class="code">void sortChildren(int column, Qt::SortOrder order)&nbsp;
+      // 根据指定列号column排序，升序或降序由order指定</div>
     如果条目不属于任何树形控件，那么该排序函数无效。<br>
     <br>
     条目还可以控制自己的子节点指示器（条目显示时左边的加号 +）如何显示：<br>
@@ -381,17 +378,263 @@
     <br>
     默认值是最后一个，有子节点就显示指示符，没有子节点就不显示指示符，这种方式也最为科学，一般不需要改指示符显示策略。<br>
     <br>
-    关于父子节点操作函数介绍到这，这些的特点就是只处理直接的子节点，与孙子辈、更低辈分节点无关，孙子辈由儿子辈去管理，以此类推，族谱树中各层节点只管理亲儿
-    子，其他辈分都不管。 递归操作 就是这样，只管处理儿子辈代码，孙子辈的由儿子辈去管，层层下推，就是递归的过程。<br>
+    关于父子节点操作函数介绍到这，这些函数的特点就是只处理直接的子节点，与孙子辈、更低辈分节点无关，孙子辈由儿子辈去管理，以此类推，族谱树中各层节点只管理亲
+    儿 子，其他辈分都不管。 递归操作 就是这样，只管处理儿子辈代码，孙子辈的由儿子辈去管，层层下推，就是递归的过程。<br>
     <br>
     （3）通用数据操作<br>
-    通用数据一般是用于 QDataStream 保存条目的信息到文件中，也可以从文件中加载通用数据生成以前的树。<br>
+    通用数据一般是用于 QDataStream
+    保存条目的信息到文件中，也可以从文件中加载通用数据生成以前的树。树形控件条目的通用数据函数与前面章节列表条目、表格条目类似，但是多了指定列号的参数，因为每个属
+    性条目有多列数据，每列数据有分多种角色，因此属性条目使用二维向量存储通用数据：<br>
+    <div class="code"><span style=" color:#008000;">//</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">One</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">item</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">has</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">a</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">vector</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">of</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">column</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">entries.</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">Each</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">column</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">has</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">a</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">vector</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">of</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">(role,</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">value)</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">pairs.</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QVector</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QVector</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#800080;">QWidgetItemData</span><span
+style=" color:#000000;">&gt;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&gt;</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">values</span><span
+style=" color:#000000;">;</span></pre>
+    </div>
+    对于通用数据的设置和读取，也有 data() 和 setData() 函数，只是多了列号：<br>
+    <div class="code">QVariant QTreeWidgetItem::​data(int column, int role)
+      const</div>
+    <div class="code">void QTreeWidgetItem::​setData(int column, int role, const
+      QVariant &amp; value)</div>
+    其他针对各个角色的读写函数如下表所示：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 183.867px;" align="center"><b>获取函数</b></td>
+          <td style="width: 218.667px;" align="center"><b>设置函数</b></td>
+          <td style="width: 166.733px;" align="center"><b>数据角色</b></td>
+          <td style="width: 269.5px;" align="center"><b> 描述 </b></td>
+        </tr>
+        <tr>
+          <td>text(int column)</td>
+          <td> setText(int column, const QString &amp;text)</td>
+          <td> Qt::DisplayRole </td>
+          <td> 条目显示的文本。 </td>
+        </tr>
+        <tr class="d1">
+          <td>icon(int column)</td>
+          <td> setIcon(int column, const QIcon &amp;icon)</td>
+          <td> Qt::DecorationRole </td>
+          <td> 条目显示的图标。 </td>
+        </tr>
+        <tr>
+          <td>statusTip(int column)</td>
+          <td> setStatusTip(int column, const QString &amp;statusTip)</td>
+          <td> Qt::StatusTipRole </td>
+          <td> 如果主界面有状态栏，鼠标悬停在该条目上时显示该状态信息到状态栏。 </td>
+        </tr>
+        <tr class="d1">
+          <td>toolTip(int column)</td>
+          <td> setToolTip(int column, const QString &amp;toolTip) </td>
+          <td> Qt::ToolTipRole </td>
+          <td> 鼠标悬停在该条目上时显示的工具提示信息。 </td>
+        </tr>
+        <tr>
+          <td>whatsThis(int column)</td>
+          <td> setWhatsThis(int column, const QString &amp;whatsThis)</td>
+          <td> Qt::WhatsThisRole </td>
+          <td> 如果主界面窗口标题栏有？帮助按钮，点击帮助按钮再点击该条目会显示该帮助信息。 </td>
+        </tr>
+        <tr class="d1">
+          <td>font(int column)</td>
+          <td> setFont(int column, const QFont &amp;font)</td>
+          <td> Qt::FontRole </td>
+          <td> 显示条目文本用的字体。 </td>
+        </tr>
+        <tr>
+          <td>textAlignment(int column</td>
+          <td> setTextAlignment(int column, int alignment)</td>
+          <td> Qt::TextAlignmentRole </td>
+          <td> 文本的对齐方式。 </td>
+        </tr>
+        <tr class="d1">
+          <td>backgroundColor(int column)</td>
+          <td> setBackgroundColor(int column, const QColor &amp;color)</td>
+          <td> Qt::BackgroundColorRole </td>
+          <td> 文本背景色。 </td>
+        </tr>
+        <tr>
+          <td>textColor(int column)</td>
+          <td> setTextColor(int column, const QColor &amp;color)</td>
+          <td> Qt::TextColorRole </td>
+          <td> 文字颜色。 </td>
+        </tr>
+        <tr class="d1">
+          <td>background(int column)</td>
+          <td> setBackground(int column, const QBrush &amp;brush) </td>
+          <td> Qt::BackgroundRole </td>
+          <td> 条目的背景画刷。 </td>
+        </tr>
+        <tr>
+          <td>foreground(int column)</td>
+          <td> setForeground(int column, const QBrush &amp;brush) </td>
+          <td> Qt::ForegroundRole </td>
+          <td> 条目的前景画刷。 </td>
+        </tr>
+        <tr class="d1">
+          <td>checkState(int column)</td>
+          <td> setCheckState(int column, Qt::CheckState state)</td>
+          <td> Qt::CheckStateRole </td>
+          <td> 条目自带的复选框选中状态，可以是三态复选框。 </td>
+        </tr>
+        <tr>
+          <td>sizeHint(int column)</td>
+          <td> setSizeHint(int column, const QSize &amp;size) </td>
+          <td> Qt::SizeHintRole </td>
+          <td> 条目显示的建议尺寸。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    &nbsp;树形条目也有相应的数据流读写函数，就是用于读取或保存这些通用数据：<br>
+    <div class="code">QDataStream &amp;&nbsp;&nbsp;
+      &nbsp;operator&lt;&lt;(QDataStream &amp; out, const QTreeWidgetItem &amp;
+      item) //外部函数，将条目写入数据流</div>
+    <div class="code">QDataStream &amp;&nbsp;&nbsp;
+      &nbsp;operator&gt;&gt;(QDataStream &amp; in, QTreeWidgetItem &amp; item)
+      //外部函数，读取数据流中的条目数据</div>
+    <div class="code">void QTreeWidgetItem::​write(QDataStream &amp; out) const
+      //成员函数，将条目数据写入数据流</div>
+    <div class="code">void QTreeWidgetItem::​read(QDataStream &amp; in)
+      //成员函数，从数据流中读取条目数据</div>
+    &nbsp;运算符重载函数 operator&lt;&lt;() 和 operator&gt;&gt;() 本质就是调用上面的 ​write() 和
+    ​read()&nbsp;函数。<br>
     <br>
     （4）非通用数据操作<br>
+    条目在构造函数指定的类型可以用如下函数获取，这个类型是只读的：<br>
+    <div class="code">int QTreeWidgetItem::​type() const</div>
+    在添加到树形控件之后，都可以用如下函数查看条目隶属的树形控件：<br>
+    <div class="code">QTreeWidget * QTreeWidgetItem::​treeWidget() const&nbsp;
+      //常量，节点不能自行更换隶属，要从树形控件增删节点</div>
     <br>
+    &nbsp;程序运行时除了树形控件本身的
+    QTreeWidget::​selectedItems()&nbsp;可以判断选中条目，每个条目对象自己也有函数获取高亮选中状态或设置是否高亮选中：（默认情况
+    下，树形条目自身是否高亮选中与子孙条目的情况无关）<br>
+    <div class="code">bool QTreeWidgetItem::​isSelected() const</div>
+    <div class="code">void QTreeWidgetItem::​setSelected(bool select)</div>
     <br>
+    树形条目初始化时也有默认的标志位，并且运行时可以修改标志位：<br>
+    <div class="code">Qt::ItemFlags QTreeWidgetItem::​flags() const</div>
+    <div class="code">void QTreeWidgetItem::​setFlags(Qt::ItemFlags flags)</div>
+    树形条目构造时的默认标志位如下：&nbsp; <br>
+    &nbsp;Qt::ItemIsSelectable<br>
+    &nbsp;&nbsp; |Qt::ItemIsUserCheckable<br>
+    &nbsp;&nbsp; |Qt::ItemIsEnabled<br>
+    &nbsp;&nbsp; |Qt::ItemIsDragEnabled<br>
+    &nbsp;&nbsp; |Qt::ItemIsDropEnabled<br>
+    树形条目默认不能编辑，如果希望条目文本可以双击编辑，可以用下面一句代码：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; item-&gt;setFlags( (item-&gt;flags()) |
+      Qt::ItemIsEditable ); //双击条目会自动 开启文本编辑器</div>
+    这个标志会对树形条目所有列的文本编辑都生效，开启后该条目每个列的数据都能双击编辑。对于开启
+    Qt::ItemIsEditable&nbsp;标志位的条目，除了用户双击等操作启用编辑器，也可以用函数代码指定开启条目的某列数据编辑器：<br>
+    <div class="code">void QTreeWidget::​editItem(QTreeWidgetItem * item, int
+      column = 0)</div>
+    <br>
+    树形条目默认有 Qt::ItemIsUserCheckable&nbsp;标志，可以复选，但是复选框默认却看不到，可以用下面代码真正地显示复选框：<br>
+    <div class="code">item-&gt;setCheckState(0, Qt::Unchecked);&nbsp;
+      //显示第0列的复选框，要指定列号</div>
+    <br>
+    树形条目的复选框状态很特殊，如果不使用三态复选（默认情况），那么当前条目的复选状态与子孙条目复选状态无关。<br>
+    如果开启树形条目的三态复选，那么当前条目的复选状态与子孙有关：<br>
+    &nbsp;&nbsp;&nbsp; 如果所有子孙勾选，那么父节点勾选 Qt::Checked；<br>
+    &nbsp;&nbsp;&nbsp; 如果部分子孙勾选，那么父节点部分勾选 Qt::PartiallyChecked；<br>
+    &nbsp;&nbsp;&nbsp; 如果所有子孙不勾选，那么父节点不勾选 Qt::Unchecked。<br>
+    三态勾选其实是真正反映父子勾选关系的，如果用复选框，那么有子孙的节点应该用三态的，无子孙的叶子节点用二态的，并且应当将所有树形控件的条目都显示复选框：<br>
+    <div class="code"><span style=" color:#c0c0c0;">&nbsp;&nbsp; </span><span style=" color:#008000;">//
+        迭代器</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QTreeWidgetItemIterator</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span style=" color:#000000;">(</span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">treeWidget</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">while</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">(*</span><span style=" color:#000000;">it</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//取出当前条目</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QTreeWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">item</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">it</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">item</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">childCount</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&gt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span><span
+style=" color:#008000;">//有子节点开启三态复选，没子节点是二态复选</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#000000;">item</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setFlags</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">item</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">flags</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">|</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Qt</span><span style=" color:#000000;">::</span><span
+style=" color:#800080;">ItemIsTristate</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">item</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setCheckState</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">0</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Qt</span><span style=" color:#000000;">::</span><span
+style=" color:#800080;">Unchecked</span><span style=" color:#000000;">);</span><span
+style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//正常应该只用第0列的复选框，代表一整行条目</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//找下一个条目</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">++</span><span
+style=" color:#000000;">it</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+    </div>
+    迭代器 QTreeWidgetItemIterator
+    专门用于遍历树形控件或某个父节点的所有子孙条目，因为树形结构是分叉结构，不同于列表控件的一维遍历，也不同于表格控件的二维遍历，因此需要迭代器或递归算法来穷举子孙
+    条目，下面小节专门介绍这些内容。<br>
     <br>
     <div class="os2">8.3.3 迭代器和递归遍历</div>
+    <br>
+    我们拿一棵经典的二叉树做例子：<br>
+    <center> <img src="images/ch08/ch08-03-06.png" alt="tree"></center>
+    A是总树的根，总树有两棵子树，分别隶属B、C。没有子孙的是叶子节点：D、E、F、G。<br>
+    树的遍历分为多种方式：<br>
+    ①先序遍历（ pre-order traversal ）：根节点-&gt;左子树-&gt;右子树；对于每棵子树内的遍历顺序也一样类推。<br>
+    <br>
+    ②后序遍历（ post-order traversal ）：左子树-&gt;右子树-&gt;根节点；对于每棵子树内的遍历顺序也一样类推。<br>
+    <br>
+    ③中序遍历（ in-order traversal
+    ）：左子树-&gt;根节点-&gt;右子树；对于每棵子树内的遍历顺序也一样类推。这种遍历仅对二叉树有意义，多叉树没有中间的概念。<br>
+    <br>
+    ④按层遍历（ level-order traversal ）：第0层-&gt;第1层-&gt;第2层 ……。这种很直观，比如上面的树就是
+    A-&gt;B-&gt;C-&gt;D-&gt;E-&gt;F-&gt;G 。<br>
     <br>
     <br>
     <div class="os2">8.3.4 示例1</div>

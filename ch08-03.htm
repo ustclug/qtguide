@@ -624,22 +624,176 @@ style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
     <br>
     我们拿一棵经典的二叉树做例子：<br>
     <center> <img src="images/ch08/ch08-03-06.png" alt="tree"></center>
-    A是总树的根，总树有两棵子树，分别隶属B、C。没有子孙的是叶子节点：D、E、F、G。<br>
-    树的遍历分为多种方式：<br>
+    在上面树图中，A是总树的根，总树有两棵子树，分别隶属B、C。没有子孙的是叶子节点：D、E、F、G。<br>
+    对于树的遍历，存在多种方式：<br>
     ①先序遍历（ pre-order traversal ）：根节点-&gt;左子树-&gt;右子树；对于每棵子树内的遍历顺序也一样类推。<br>
+    以上图为例，先序遍历为：A&nbsp; -&gt;B-&gt;D-&gt;E&nbsp; -&gt;&nbsp; C-&gt;F-&gt;G。<br>
+    对于多叉树，先序遍历规则就是：根节点-&gt;第一棵子树-&gt;第二棵子树-&gt;第三棵子树&nbsp;等等。<br>
     <br>
-    ②后序遍历（ post-order traversal ）：左子树-&gt;右子树-&gt;根节点；对于每棵子树内的遍历顺序也一样类推。<br>
+    ②后序遍历（ post-order traversal
+    ）：左子树-&gt;右子树-&gt;根节点；对于每棵子树内的遍历顺序也一样类推。后序遍历时父节点和根节点一定是在后面出现的，所以遍历时打头的是叶子。<br>
+    以上图为例，后序遍历为：D-&gt;E-&gt;B&nbsp; -&gt;&nbsp; F-&gt;G-&gt;C&nbsp; -&gt;A。<br>
+    对于多叉树，后序遍历规则就是：第一棵子树-&gt;第二棵子树-&gt;第三棵子树....-&gt;根节点。<br>
     <br>
     ③中序遍历（ in-order traversal
-    ）：左子树-&gt;根节点-&gt;右子树；对于每棵子树内的遍历顺序也一样类推。这种遍历仅对二叉树有意义，多叉树没有中间的概念。<br>
+    ）：左子树-&gt;根节点-&gt;右子树；对于每棵子树内的遍历顺序也一样类推。这种遍历仅对二叉树有意义，二叉树的父节点正好在左右子树中间，但多叉树没有中间的概
+    念。<br>
+    以上图为例，中序遍历为：D-&gt;B-&gt;E&nbsp; -&gt;A&nbsp; -&gt;F-&gt;C-&gt;G。<br>
     <br>
     ④按层遍历（ level-order traversal ）：第0层-&gt;第1层-&gt;第2层 ……。这种很直观，比如上面的树就是
     A-&gt;B-&gt;C-&gt;D-&gt;E-&gt;F-&gt;G 。<br>
     <br>
+    通常遍历树的节点需要写较为复杂的递归代码或者用压栈出栈代码实现，这些代码都比较麻烦，因此 Qt 专门为树形控件提供了迭代器
+    QTreeWidgetItemIterator ，这个迭代器以先序遍历方式访问树形控件每个节点，大多数情况下就不需要我们自己去编写遍历算法了。我们可以将
+    QTreeWidgetItemIterator 想象成为一个保存节点指针的一维链表，链表每个元素指向树形控件一个节点，顺序是按照先序遍历。<br>
+    QTreeWidgetItemIterator&nbsp;构造函数如下：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QTreeWidgetItemIterator(const
+      QTreeWidgetItemIterator &amp; it) </div>
+    <div class="code">&nbsp;&nbsp;&nbsp; QTreeWidgetItemIterator(QTreeWidget *
+      widget, IteratorFlags flags = All)</div>
+    <div class="code">&nbsp;&nbsp;&nbsp; QTreeWidgetItemIterator(QTreeWidgetItem
+      * item, IteratorFlags flags = All)</div>
+    第一个是复制构造函数，按照参数&nbsp;it&nbsp;指定的迭代器一样构造新的迭代器，构造时新迭代器的当前条目也与 it&nbsp;的当前条目一样。<br>
+    第二个构造函数是根据树形控件指针，获取该控件内所有节点，形成遍历的链表，参数
+    flags&nbsp;是迭代器标志位，可以筛选节点类型，等会列举迭代器标志位。<br>
+    第三个构造函数是以某个节点作为根，遍历以这个节点为根的子树。参数 flags&nbsp;是迭代器标志位，用于筛选节点类型，如下表所示：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td align="center"><b>IteratorFlags 枚举常量</b></td>
+          <td align="center"><b>数值</b></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>QTreeWidgetItemIterator::All</td>
+          <td> 0x00000000 </td>
+          <td>&nbsp;默认值，枚举所有节点。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QTreeWidgetItemIterator::Hidden</td>
+          <td> 0x00000001 </td>
+          <td>&nbsp;枚举隐藏节点。 </td>
+        </tr>
+        <tr>
+          <td>QTreeWidgetItemIterator::NotHidden</td>
+          <td> 0x00000002 </td>
+          <td>&nbsp;枚举非隐藏节点。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QTreeWidgetItemIterator::Selected</td>
+          <td> 0x00000004</td>
+          <td>&nbsp;枚举高亮选中节点。 </td>
+        </tr>
+        <tr>
+          <td>QTreeWidgetItemIterator::Unselected</td>
+          <td> 0x00000008 </td>
+          <td>&nbsp;枚举未选中节点。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QTreeWidgetItemIterator::Selectable</td>
+          <td> 0x00000010 </td>
+          <td>&nbsp;枚举可以选中的节点。 </td>
+        </tr>
+        <tr>
+          <td>QTreeWidgetItemIterator::NotSelectable</td>
+          <td> 0x00000020 </td>
+          <td>&nbsp;枚举不可选中的节点。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QTreeWidgetItemIterator::DragEnabled</td>
+          <td> 0x00000040 </td>
+          <td>&nbsp;枚举能够拽出的节点。 </td>
+        </tr>
+        <tr>
+          <td style="width: 273px;">QTreeWidgetItemIterator::DragDisabled</td>
+          <td style="width: 193px;"> 0x00000080 </td>
+          <td>&nbsp;枚举不能拽出去的节点。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QTreeWidgetItemIterator::DropEnabled</td>
+          <td> 0x00000100</td>
+          <td>&nbsp;枚举可接收拖进来的节点。 </td>
+        </tr>
+        <tr>
+          <td style="width: 273px;">QTreeWidgetItemIterator::DropDisabled</td>
+          <td style="width: 193px;"> 0x00000200 </td>
+          <td>&nbsp;枚举不能接收拖进来的节点。 </td>
+        </tr>
+        <tr class="d1">
+          <td style="height: 16px;">QTreeWidgetItemIterator::HasChildren</td>
+          <td> 0x00000400</td>
+          <td>&nbsp;枚举所有父节点。 </td>
+        </tr>
+        <tr>
+          <td style="width: 273px;">QTreeWidgetItemIterator::NoChildren</td>
+          <td style="width: 193px;"> 0x00000800 </td>
+          <td>&nbsp;枚举所有叶子节点。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QTreeWidgetItemIterator::Checked</td>
+          <td> 0x00001000</td>
+          <td>&nbsp;枚举复选框勾选的节点。 </td>
+        </tr>
+        <tr>
+          <td style="width: 273px;">QTreeWidgetItemIterator::NotChecked</td>
+          <td style="width: 193px;"> 0x00002000 </td>
+          <td>&nbsp;枚举复选框没有勾选的节点。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QTreeWidgetItemIterator::Enabled</td>
+          <td> 0x00004000</td>
+          <td>&nbsp;枚举所有启用的节点。 </td>
+        </tr>
+        <tr>
+          <td style="width: 273px;">QTreeWidgetItemIterator::Disabled</td>
+          <td style="width: 193px;"> 0x00008000 </td>
+          <td>&nbsp;枚举所有禁用的节点。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QTreeWidgetItemIterator::Editable</td>
+          <td> 0x00010000</td>
+          <td>&nbsp;枚举可以编辑的节点。 </td>
+        </tr>
+        <tr>
+          <td style="width: 273px;">QTreeWidgetItemIterator::NotEditable</td>
+          <td style="width: 193px;"> 0x00020000 </td>
+          <td>&nbsp;枚举不能编辑的节点。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QTreeWidgetItemIterator::UserFlag</td>
+          <td> 0x01000000</td>
+          <td>&nbsp;枚举自定义的用户节点。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    这些枚举标志位大部分与节点条目自身的标志位 Qt::​ItemFlags
+    枚举常量相对应，比如是否可编辑，是否能选中，用于筛选指定标志位的节点；还有一部分标志位，如是否折叠隐藏，是否高亮选中，与用户实时的操作相关。<br>
+    <br>
+    QTreeWidgetItemIterator&nbsp;重载了多个运算符函数，方便程序员使用，比如&nbsp;Qt&nbsp;文档中的示例代码：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QTreeWidgetItemIterator it(treeWidget);<br>
+      &nbsp;&nbsp;&nbsp; while (*it) {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if ((*it)-&gt;text(0) ==
+      itemText)&nbsp; //查找匹配文本的条目<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      (*it)-&gt;setSelected(true);&nbsp; //文本找到了就高亮显示<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ++it;<br>
+      &nbsp;&nbsp;&nbsp; }</div>
+    &nbsp;这段代码根据树形控件
+    treeWidget&nbsp;构造了迭代器&nbsp;it，it内部有个游标，实时指向遍历的属性条目，在未遍历的时候，指向先序遍历第一个条目，运算符函数
+    operator*() 用于取出当前条目的指针，比如 *it&nbsp;就是遍历过程中的当前条目；<br>
+    迭代器支持 ++it&nbsp;和 it++，第一个前加加是在执行语句前移到下一条目，第二个后加加是执行语句之后移到下一个条目；<br>
+    还有 --it&nbsp;和&nbsp;it-- ，是逆向遍历，与加加的遍历顺序是反的；<br>
+    迭代器也支持跳跃式遍历，如即 it += 5，&nbsp;it-=5 ，这是跳到后面第 5 个或跳到前面第 5 个。<br>
+    QTreeWidgetItemIterator 类似链表，与数组不同，它没有 []
+    运算符函数，不能按照序号取节点指针，在穷举完所有节点之前也是不知道总数目多少。遍历过程中，*it
+    数值为&nbsp;NULL&nbsp;时，就是穷举完了，后面已经没有节点了。可以用&nbsp;while&nbsp;循环单独对节点数目计数，或者指定
+    IteratorFlags&nbsp;去穷举父节点多少个，叶子节点多少个等。关于迭代器的内容介绍到这，我们在下面小节专门用例子来解释递归算法。<br>
     <br>
     <div class="os2">8.3.4 示例1</div>
     <br>
-    使用设计师编辑树形条目。 <br>
+    使用设计师编辑树形条目。递归算法代码讲解。<br>
     <br>
     <div class="os2">8.3.5 示例2</div>
     <br>

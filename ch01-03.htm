@@ -17,16 +17,16 @@
   <body>
     <div class="os1">1.3 Qt在Windows下安装</div>
     <p> 本节先示范 Qt 开发环境在 Windows 系统里的安装，然后简要介绍 Qt 开发环境的目录结构和 Qt 命令行脚本内容。 </p>
-    
-    <p>2016.03.22 注：本节介绍的是 MinGW 版本的 Qt 开发环境，如果读者希望使用 Visual Studio 2015 版本的 Qt 开发环境，
-    请参考《Qt 5.6.0-VS2015 版本安装配置图文教程》和《Qt-VS2015问题梳理和C 2001 常量中有换行符的处理》：<br>
-    <a href="http://pan.baidu.com/s/1nuyQHzb" target="new">
-    http://pan.baidu.com/s/1nuyQHzb </a><br/>
-    <a href="https://lug.ustc.edu.cn/sites/qtguide/extradoc/Qt-VS2015.7z" target="new">
-    https://lug.ustc.edu.cn/sites/qtguide/extradoc/Qt-VS2015.7z </a>
-    
-    </p>
-    
+    <p><b>2018.09.12 注：最新版 Qt 5.11.1 安装过程请点击下面链接查看：<br>
+    <a href="inwin/inwin.htm" target="new">
+        Qt最新版在Windows下安装 </a> 
+    </b></p>
+    <p>2016.03.22 注：本节介绍的是 MinGW 版本的 Qt 开发环境，如果读者希望使用 Visual Studio 2015 版本的 Qt
+      开发环境， 请参考《Qt 5.6.0-VS2015 版本安装配置图文教程》和《Qt-VS2015问题梳理和C 2001 常量中有换行符的处理》：<br>
+      <a href="http://pan.baidu.com/s/1nuyQHzb" target="new">
+        http://pan.baidu.com/s/1nuyQHzb </a><br>
+      <a href="https://lug.ustc.edu.cn/sites/qtguide/extradoc/Qt-VS2015.7z" target="new">
+        https://lug.ustc.edu.cn/sites/qtguide/extradoc/Qt-VS2015.7z </a> </p>
     <div class="os2">1.3.1 安装 Qt 开发环境</div>
     <p> 在Windows系统里面安装Qt开发环境，需要按照上一节所述的，下载MinGW版本Qt， 安装文件名为
       qt-opensource-windows-x86-mingw491_opengl-5.4.0.exe 。 在Windows
@@ -76,8 +76,7 @@
         、ld、ar、mingw32-make 等等编译链接生成工具。 </li>
     </ul>
     另外如果安装了 Qt 源代码，则位于 C:\Qt\Qt5.4.0\5.4\Src 目录里面。我们将 Qt 开发环境安装后目录树绘图如下：<br>
-    <center> <img src="images/installwin/installdir.png" alt="INSTALLDIR" width="800">
-    </center>
+    <center> <img src="images/installwin/installdir.png" alt="INSTALLDIR"> </center>
     注意在 5.4 文件夹里的是 Qt 类库，而在 Tools 里的才是真的 MinGW 工具集。Qt 类库是使用 MinGW
     工具集编译而成的。QtCreator 是个例外，QtCreator 使用 MSVC2010 编译生成的，所以安装目录里有一个 vcredist
     文件夹存储 VC 运行库安装文件。最后的 MaintenanceTool.exe ，对于离线安装包，它只能用于删除软件包，如果 Qt
@@ -85,15 +84,14 @@
     工具才能查看。Examples 里是示例代码，可以用 QtCreator 集成开发环境打开各个示例。<br>
     <br>
     以 Qt 类库的目录 QTDIR 再细分查看，得到下图 Qt 类库根的目录树：<br>
-    <center> <img src="images/installwin/qtdir.png" alt="QTDIR" width="800"> </center>
+    <center> <img src="images/installwin/qtdir.png" alt="QTDIR"> </center>
     图上列的比较有限，主要是教大家熟悉一下 Qt 的开发环境，下面小节介绍 Qt 的命令行脚本。<br>
     <br>
     <div class="os2">1.3.3 Qt 命令行脚本</div>
     <br>
     在开始菜单里“Qt 5.4.0”就是 Qt 开发工具的菜单目录，如下图所示：<br>
     <br>
-    <center> <img src="images/installwin/startmenu.png" alt="startmenu" width="800">
-    </center>
+    <center> <img src="images/installwin/startmenu.png" alt="startmenu"> </center>
     图中“Qt Creator (Community)”就是集成开发环境，而进一步打开 “5.4”--&gt;“MinGW 4.9 (32-bit)”里面是
     Qt 类库特有的工具，“Assistant” （Qt助手）是帮助文档查看工具，“Designer”
     （Qt设计师）是图形界面可视化编辑工具，“Linguist”（Qt语言家）是多国语言翻译支持工具，最后的“Qt 5.4 for Desktop
@@ -116,6 +114,12 @@ PATH=C:\Qt\Qt5.4.0\5.4\mingw491_32\bin;C:\Qt\Qt5.4.0\Tools\mingw491_32\bin;%PATH
     里面，这个配置仅对当前窗口有效，不会修改系统启动里的 PATH。<br>
     第四句是进入 Qt 类库的根目录（QTDIR）。<br>
     配置 Qt 环境实际上就设置一下 PATH 而已，其他的都不用管，非常省事。如果有其他 MinGW 编译而成的 Qt 库，配置脚本是类似的。 <br>
+    <br>
+    另外，Qt 新手常遇到的一个问题就是双击编译生成的 exe 不能运行，报出如下错误：<br>
+    <center> <img src="inwin/env-01.png" alt="error"> <br>
+    </center>
+    这是由于操作系统里PATH环境变量没有添加 Qt 和 MinGW 的运行库路径，遇到这种情况， 我们打开开始菜单里的 “Qt 5.4 for
+    Desktop (MinGW 4.9 32bit)”命令行，然后将 exe 拖入 Qt 命令行后按回车键，在Qt 命令行里面运行exe就行了。 <br>
     <br>
     下一节讲解Qt开发环境在Linux系统里面的安装， 如果读者不使用Linux系统，可以跳过，直接进入 1.5 节。 <br>
     <br>

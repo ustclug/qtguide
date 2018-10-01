@@ -34,9 +34,9 @@
     QTreeWidgetItem::​parent() 为 NULL。<br>
     将所有节点展开之后，可以看到每个节点可以有多个子节点：<br>
     <center> <img src="images/ch08/ch08-03-02.png" alt="treewidget2" width="800"></center>
-    对于包含子节点的父节点，左边会有小的三角形指示器，用于控制折叠或展开父节点。子节点也可以拥有更低级别的子节点（孙节点），以此类推，树形控件没有限定子节点
-    的层数。顶级节点和其子孙节点的数据结构一样，都可以有多列数据，只是添加的函数、父节点指针不一样。下面介绍树形控件的函数和功能，在 8.3.2
-    节介绍树形节点条目 QTreeWidgetItem，8.3.3 节介绍树形条目迭代器 QTreeWidgetItemIterator
+    对于包含子节点的父节点，左边会有小的三角形指示器，用于控制折叠或展开父节点。子节点也可以拥有更低级别的子节点（孙节点），以此类推，树形控件没
+    有限定子节点 的层数。顶级节点和其子孙节点的数据结构一样，都可以有多列数据，只是添加的函数、父节点指针不一样。下面介绍树形控件的函数和功能，在
+    8.3.2 节介绍树形节点条目 QTreeWidgetItem，8.3.3 节介绍树形条目迭代器 QTreeWidgetItemIterator
     和递归遍历算法，最后两个小节是示例程序的实践。<br>
     <br>
     树形控件的构造函数很简单：<br>
@@ -79,8 +79,8 @@
     <div class="code">int QTreeWidget::​indexOfTopLevelItem(QTreeWidgetItem *
       item) const</div>
     如果条目不是顶级条目或者条目不属于该控件，那么会返回 -1。<br>
-    树形控件实际运行时，可能既有顶级条目，也有展开后的子孙条目同时显示，所以某个条目上面或下面的相邻条目不一定是同级别的兄弟条目，有可能是叔辈祖辈的条目，也
-    可能是子辈孙辈条目。获取某个条目的相邻条目函数为：<br>
+    树形控件实际运行时，可能既有顶级条目，也有展开后的子孙条目同时显示，所以某个条目上面或下面的相邻条目不一定是同级别的兄弟条目，有可能是叔辈祖
+    辈的条目，也 可能是子辈孙辈条目。获取某个条目的相邻条目函数为：<br>
     <div class="code">QTreeWidgetItem * QTreeWidget::​itemAbove(const
       QTreeWidgetItem * item) const //上面相邻条目</div>
     <div class="code">QTreeWidgetItem * QTreeWidget::​itemBelow(const
@@ -92,7 +92,7 @@
     <div class="code">QTreeWidgetItem * QTreeWidget::​itemAt(int x, int y) const</div>
     这两个函数是一个意思，一个用 QPoint 对象表示相对坐标，另一个直接用 x 和 y 数值表示坐标，​如果对应坐标没有条目，会返回 NULL，注意判断
     返回值。<br>
-    树形控件也是自带滚动条的，如果条目特别多，自动显示滚动条，对于树形控件在屏幕可见的条目，可以根据条目对象获取它的可视矩形（树形控件显示区域的左上角为原
+    树形控件也是自带滚动条的，如果条目特别多，自动显示滚动条，对于树形控件在屏幕可见的条目，可以根据条目对象获取它的可视矩形（树形控件显示区域的 左上角为原
     点）：<br>
     <div class="code">QRect QTreeWidget::​visualItemRect(const QTreeWidgetItem *
       item) const</div>
@@ -189,8 +189,8 @@
       //条目折叠时发送信号</div>
     如果调用槽函数&nbsp; expandAll() 展开所有子孙条目，那么不会触发 ​itemExpanded() 信号，因为触发太多会非常影响性能。<br>
     类似地，如果用槽函数 collapseAll() 折叠所有子孙条目，也不会触发 ​itemCollapsed() 信号，以免影响性能。<br>
-    举例来说，在文件夹浏览的时候，因为操作系统里的文件太多，没法一次性构建完整的文件树，那么就可以用展开和折叠信号实时枚举某一层次文件夹的内容，而不是一次性
-    枚举文件系统所有文件，因为一次性枚举所有文件的性能太糟糕。<br>
+    举例来说，在文件夹浏览的时候，因为操作系统里的文件太多，没法一次性构建完整的文件树，那么就可以用展开和折叠信号实时枚举某一层次文件夹的内容，
+    而不是一次性 枚举文件系统所有文件，因为一次性枚举所有文件的性能太糟糕。<br>
     树形控件还有一个 itemSelectionChanged() 信号，一般在多选模式才会用到，稍后讲解。<br>
     <br>
     （8）槽函数<br>
@@ -272,16 +272,16 @@
     多选状态变化时会触发该信号（单选模式也触发，只是不需要用这个信号），可以关联该信号，监视当前所有选中的条目：<br>
     <div class="code">QList&lt;QTreeWidgetItem *&gt;
       QTreeWidget::​selectedItems() const</div>
-    注意，这里的选中条目仅仅是指实际显示的直接选中的条目，不包括折叠隐藏的子孙条目计数，因为选中父节点与选中其子孙节点没关系，不会递归选中所有子孙：<br>
+    注意，这里的选中条目仅仅是指实际显示的直接选中的条目，不包括折叠隐藏的子孙条目计数，因为选中父节点与选中其子孙节点没关系，不会递归选中所有子 孙：<br>
     <center> <img src="images/ch08/ch08-03-05.png" alt="select"></center>
-    树形控件及其基类没有递归选中子条目的属性或函数，如果希望递归选中某个节点的所有子孙节点，那么需要自行编写递归函数。关于树形控件类本身的内容介绍到这，因为
-    涉及到父子节点隶属关系、节点展开和折叠，树形控件还有很大一部分功能都是由其条目类 QTreeWidgetItem 的函数实现的，下面来学习这个树形控件条
-    目类。<br>
+    树形控件及其基类没有递归选中子条目的属性或函数，如果希望递归选中某个节点的所有子孙节点，那么需要自行编写递归函数。关于树形控件类本身的内容介
+    绍到这，因为 涉及到父子节点隶属关系、节点展开和折叠，树形控件还有很大一部分功能都是由其条目类 QTreeWidgetItem
+    的函数实现的，下面来学习这个树形控件条 目类。<br>
     <br>
     <div class="os2">8.3.2 QTreeWidgetItem</div>
     <br>
-    树形控件条目的内容是最复杂的，因为每一个条目涉及到内部多列数据的操作、父子节点操作，这些都是之前列表控件条目和表格控件条目不具备的特性。我们首先介绍树形
-    控件条目的构造函数，然后按父子节点操作、通用数据操作和非通用数据操作三方面介绍树形控件条目。<br>
+    树形控件条目的内容是最复杂的，因为每一个条目涉及到内部多列数据的操作、父子节点操作，这些都是之前列表控件条目和表格控件条目不具备的特性。我们
+    首先介绍树形 控件条目的构造函数，然后按父子节点操作、通用数据操作和非通用数据操作三方面介绍树形控件条目。<br>
     （1）构造函数和复制函数<br>
     QTreeWidgetItem 构造函数较多，首先看不带父对象指针的构造函数：<br>
     <div class="code">QTreeWidgetItem(int type = Type)</div>
@@ -295,15 +295,15 @@
     <div class="code">QTreeWidgetItem * QTreeWidgetItem::​clone() const</div>
     &nbsp;​clone()是按照本条目一模一样造出一个新的条目，是深拷贝，与本条目（包括子孙节点）不共享内存，函数返回的新条目也没有复制
     type()、treeWidget()、​parent() ，新条目是自由的，没归属。<span style="font-weight: bold;">​
-      clone() 函数会克隆所有的子孙节点，并且新子孙节点之间的关系也一样</span>，QTreeWidgetItem&nbsp;源码中使用压栈出栈
-    方式实现了子孙节点的遍历复制。<br>
+      clone() 函数会克隆所有的子孙节点，并且新子孙节点之间的关系也一样</span>，QTreeWidgetItem&nbsp;源码中
+    使用压栈出栈 方式实现了子孙节点的遍历复制。<br>
     赋值=函数：<br>
     <div class="code">QTreeWidgetItem &amp; operator=(const QTreeWidgetItem
       &amp; other)</div>
     &nbsp;等于号函数与克隆函数有本质区别，它只拷贝
     other&nbsp;这一个节点内的数据到本节点里，包括显示的字符串和多列数据、标志位等，type() 和
-    treeWidget()、​parent()的内容不会修改。<span style="font-weight: bold;">等于号函数不涉及任何子孙节
-      点，也不改变隶属的父节点。</span><br>
+    treeWidget()、​parent()的内容不会修改。<span style="font-weight: bold;">等于号函数不涉
+      及任何子孙节 点，也不改变隶属的父节点。</span><br>
     顺便提一下小于号函数：<br>
     <div class="code">virtual bool operator&lt;(const QTreeWidgetItem &amp;
       other) const</div>
@@ -378,8 +378,8 @@
     <br>
     默认值是最后一个，有子节点就显示指示符，没有子节点就不显示指示符，这种方式也最为科学，一般不需要改指示符显示策略。<br>
     <br>
-    关于父子节点操作函数介绍到这，这些函数的特点就是只处理直接的子节点，与孙子辈、更低辈分节点无关，孙子辈由儿子辈去管理，以此类推，族谱树中各层节点只管理亲
-    儿 子，其他辈分都不管。 递归操作 就是这样，只管处理儿子辈代码，孙子辈的由儿子辈去管，层层下推，就是递归的过程。<br>
+    关于父子节点操作函数介绍到这，这些函数的特点就是只处理直接的子节点，与孙子辈、更低辈分节点无关，孙子辈由儿子辈去管理，以此类推，族谱树中各层
+    节点只管理亲 儿 子，其他辈分都不管。 递归操作 就是这样，只管处理儿子辈代码，孙子辈的由儿子辈去管，层层下推，就是递归的过程。<br>
     <br>
     （3）通用数据操作<br>
     通用数据一般是用于 QDataStream
@@ -560,7 +560,7 @@ style=" color:#000000;">;</span></pre>
     &nbsp;&nbsp;&nbsp; 如果所有子孙勾选，那么父节点勾选 Qt::Checked；<br>
     &nbsp;&nbsp;&nbsp; 如果部分子孙勾选，那么父节点部分勾选 Qt::PartiallyChecked；<br>
     &nbsp;&nbsp;&nbsp; 如果所有子孙不勾选，那么父节点不勾选 Qt::Unchecked。<br>
-    三态勾选其实是真正反映父子勾选关系的，如果用复选框，那么有子孙的节点应该用三态的，无子孙的叶子节点用二态的，并且应当将所有树形控件的条目都显示复选框：<br>
+    三态勾选其实是真正反映父子勾选关系的，如果用复选框，那么有子孙的节点应该用三态的，无子孙的叶子节点用二态的，并且应当将所有树形控件的条目都显 示复选框：<br>
     <div class="code"><span style=" color:#c0c0c0;">&nbsp;&nbsp; </span><span style=" color:#008000;">//
         迭代器</span>
       <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
@@ -771,7 +771,7 @@ style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
     这些枚举标志位大部分与节点条目自身的标志位 Qt::​ItemFlags
     枚举常量相对应，比如是否可编辑，是否能选中，用于筛选指定标志位的节点；还有一部分标志位，如是否折叠隐藏，是否高亮选中，与用户实时的操作相关。<br>
     <br>
-    QTreeWidgetItemIterator&nbsp;重载了多个运算符函数，方便程序员使用，比如&nbsp;Qt&nbsp;文档中的示例代码：<br>
+    QTreeWidgetItemIterator&nbsp;重载了多个运算符函数，方便程序员使用，比如&nbsp;Qt&nbsp;文档中的示例 代码：<br>
     <div class="code">&nbsp;&nbsp;&nbsp; QTreeWidgetItemIterator it(treeWidget);<br>
       &nbsp;&nbsp;&nbsp; while (*it) {<br>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if ((*it)-&gt;text(0) ==
@@ -789,13 +789,747 @@ style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
     QTreeWidgetItemIterator 类似链表，与数组不同，它没有 []
     运算符函数，不能按照序号取节点指针，在穷举完所有节点之前也是不知道总数目多少。遍历过程中，*it
     数值为&nbsp;NULL&nbsp;时，就是穷举完了，后面已经没有节点了。可以用&nbsp;while&nbsp;循环单独对节点数目计数，或者指定
-    IteratorFlags&nbsp;去穷举父节点多少个，叶子节点多少个等。关于迭代器的内容介绍到这，我们在下面小节专门用例子来解释递归算法。<br>
+    IteratorFlags&nbsp;去穷举父节点多少个，叶子节点多少个等。关于迭代器的内容介绍到这，我们在下面小节专门用例子来解释递归算 法。<br>
     <br>
-    <div class="os2">8.3.4 示例1</div>
+    <div class="os2">8.3.4 省市行政区示例</div>
     <br>
-    使用设计师编辑树形条目。递归算法代码讲解。<br>
+    本小节示范使用设计师添加编辑树形条目，树形控件设置三列信息，第一列是省市名称，第二列是经度，第三列是纬度。行政区划分正好是树形结构，省级的经
+    纬度用省会城 市的经纬度代替，城市经纬度用自身的数值。省市经纬度举例如下：<br>
+    <div class="code"> 安徽省 合肥市 117.250 31.833 <br>
+      安徽省 安庆市 117.050 30.533 <br>
+      广东省 广州市 113.267 23.133 <br>
+      广东省 深圳市 114.050 22.550 <br>
+      湖南省 长沙市 112.933 28.233 <br>
+      湖南省 株洲市 113.133 27.833 </div>
+    我们以省级作为树形控件顶级节点，城市作为子节点。下面开始示例，打开 QtCreator，新建一个 Qt Widgets Application
+    项目，在新建项目的向导里填写：<br>
+    ①项目名称 citytree，创建路径 D:\QtProjects\ch08，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    我们打开 widget.ui 界面文件，按照下图拖入控件：<br>
+    <center> <img src="images/ch08/ch08-03-07.png" alt="ui" width="800"></center>
+    界面拖入三行控件，第一行：树形控件，默认对象名 treeWidget。<br>
+    第二行：三个标签，文本分别为“省市名称”、“经度”、“纬度”，三个单行编辑器，对象名分别为
+    lineEditName、lineEditLon、lineEditLat，第二行使用水平布局。<br>
+    第三行：四个按钮，文本、对象名分别为“添加顶级节点”pushButtonAddTop、“添加子节点”pushButtonAddChild、 “删除叶子节
+    点”pushButtonDelLeaf、“删除节点子树”pushButtonDelSubtree，第三行也是用水平布局。<br>
+    窗口整体使用垂直布局，尺寸 440*330。<br>
     <br>
-    <div class="os2">8.3.5 示例2</div>
+    布局完成后，<b>我们选中树形控件，在右下角设置 columnCount 为 3</b>，然后右击树形控件：<br>
+    <center> <img src="images/ch08/ch08-03-08.png" alt="ui" width="800"></center>
+    在右键菜单选择编辑项目。弹出如下编辑对话框：<br>
+    <center> <img src="images/ch08/ch08-03-09.png" alt="ui"></center>
+    首先看到的“列”标签页，指的是树头条目，有三列内容，分别是 1、2、3，我们点击“属性”按钮，展开右边的树头属性编辑，把树头的三个列 text 值修改为
+    “省市名称”、“经度”、“纬度”，修改后如下图所示：<br>
+    <center> <img src="images/ch08/ch08-03-10.png" alt="ui"></center>
+    然后我们点击上面的“项目”标签页，即树形节点的编辑界面：<br>
+    <center> <img src="images/ch08/ch08-03-11.png" alt="ui"></center>
+    绿色加号按钮就是添加节点的按钮，我们点击该按钮，添加一个新条目：<br>
+    <center> <img src="images/ch08/ch08-03-12.png" alt="ui"></center>
+    我们编辑第一列文本为 “安徽省”，第二列经度 117.250，第三列纬度 31.833 ，使用的是省会经纬度。每列信息都可以双击编辑文本。添加后如下图所
+    示：<br>
+    <center> <img src="images/ch08/ch08-03-13.png" alt="ui"></center>
+    然后我们选中“安徽省”条目，点击左下角第二个按钮添加子节点，是转折箭头和加号的图标，添加安徽省的子节点：<br>
+    <center> <img src="images/ch08/ch08-03-14.png" alt="ui"></center>
+    我们编辑子节点名字为 “合肥市 ”，第二列&nbsp; 117.250，第三列 31.833 。然后如法炮制，为安徽省添加安庆市节点，添加两个子节点后显
+    示如下：<br>
+    <center> <img src="images/ch08/ch08-03-15.png" alt="ui"></center>
+    <b>注意，左下角第一个按钮（加号图标）意为添加选中节点的同级别节点；<br>
+      第二个按钮（转折箭头和小加号）意为添加选中节点的子节点；<br>
+      第三个按钮（减号）是删除选中节点。添加节点功能和添加子节点功能都是相对于选中节点而言的。</b><br>
+    上面示范的是先建立父节点，后建立子节点。下面示范反过来的情况，先创建子节点，后添加到父节点。<br>
+    <br>
+    我们选中“安徽省”节点，点击左下角第一个添加同级别节点按钮，添加一个 “广州市 ” 113.267 23.133 ，<br>
+    然后接着点击该按钮，再添加一个 “深圳市” 114.050 22.550 ，如下图所示：<br>
+    <center> <img src="images/ch08/ch08-03-16.png" alt="ui"></center>
+    然后我们继续点击加号按钮，添加节点“广东省” 113.267 23.133：<br>
+    <center> <img src="images/ch08/ch08-03-17.png" alt="ui"></center>
+    广东的省市节点新建后，下一步是建立父子节点关系，我们选中广东省上面一个节点“深圳市”：<br>
+    <center> <img src="images/ch08/ch08-03-18.png" alt="ui"></center>
+    我们点击中间第二个按钮，即将选中节点设置为下一个同级节点的首个子节点，点击后的效果如下图所示：<br>
+    <center> <img src="images/ch08/ch08-03-19.png" alt="ui"></center>
+    这样深圳市就变成广东省的子节点了。然后我们再选中“广州市”节点，也点击中间第二个按钮，使得广州市也成为广东省的子节点：<br>
+    <center> <img src="images/ch08/ch08-03-20.png" alt="ui"></center>
+    这样就完成广东省两个子节点设置了。<b>上面对话框中间四个按钮意义为：<br>
+      中间第一个按钮（转折箭头向上）：将选中节点提高级别，升格为父节点同级别，并移动到父节点前面；<br>
+      中间第二个按钮（转折箭头向右）：将选中节点设置为下一个同级别节点的首个子节点，是降级操作；<br>
+      中间第三个按钮（向上）：将选中节点上移，不改变级别，就是排到上面亲兄弟节点之前；<br>
+      中间第三个按钮（向下）：将选中节点下移，不改变级别，就是排到下面亲兄弟节点之后。<br>
+    </b><br>
+    安徽省和广东省的节点设置完后，我们点击“OK”按钮，回到设计师界面。湖南省的节点留着程序运行时用。<br>
+    我们在设计师界面，右击各个按钮，为每个按钮添加槽函数：<br>
+    <center> <img src="images/ch08/ch08-03-21.png" alt="ui"></center>
+    添加四个按钮的槽函数之后，我们开始代码的编辑。首先是 widget.h 头文件代码：<br>
+    <div class="code"> <span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>WIDGET_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">WIDGET_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QTreeWidgetItem&gt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//条目类的头文件</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QTreeWidget&gt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//树形控件头文件</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+style=" color:#000000;">();</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonAddTop_clicked</span><span
+style=" color:#000000;">();</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonAddChild_clicked</span><span
+style=" color:#000000;">();</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonDelLeaf_clicked</span><span
+style=" color:#000000;">();</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonDelSubtree_clicked</span><span
+style=" color:#000000;">();</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//递归删除节点子树</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">RemoveSubtree</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QTreeWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>curLevelItem<span
+style=" color:#000000;">);</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre>
+      </div>
+    头文件新增内容主要是三块：
+  <br>添加了树形条目和树形控件的头文件引用；
+ <br>之前添加了四个按钮的槽函数；
+     <br>最后添加了递归删除节点子树的函数 void RemoveSubtree(QTreeWidgetItem *curLevelItem) 
+   ，这个函数后面详细讲解。<br>然后我们分块来讲解源码文件 widget.cpp 的内容：<br>
+<div class="code">
+  
+<style type="text/css">
+p, li { white-space: pre-wrap; }
+</style>
+
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"widget.h"</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QMessageBox&gt;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+  </div>
+          
+          
+     上面部分，添加了消息框和调试输出的头文件包含，构造函数和析构函数没有改动，是 QtCreator 自动生成的代码。<br><br>下面来看第一个“添加顶级节点”按钮的槽函数：<br>
+  <div class="code">
+<style type="text/css">
+p, li { white-space: pre-wrap; }
+</style>
+
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonAddTop_clicked</span><span
+style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取省市名称、经度、纬度三个文本</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditName</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strLon</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditLon</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strLat</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditLat</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//检查字符串都不空才继续</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strName</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">||</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strLon</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">||</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strLat</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">information</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"输入检查"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"三个编辑框均需要输入信息！"</span><span style=" color:#000000;">));</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//新建树形条目，设置三列文本，名称、经度、纬度</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QTreeWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">itemNew</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QTreeWidgetItem</span><span
+style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">itemNew</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">0</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strName</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">itemNew</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">1</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strLon</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">itemNew</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">2</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strLat</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//添加顶级条目</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">treeWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addTopLevelItem</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">itemNew</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">treeWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setFocus</span><span
+style=" color:#000000;">();</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//设置树形控件显示焦点</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+          该函数首先获取省市名称、经度、纬度三个编辑框的内容，判断是否都有字符串，如果有空的编辑框，提示消息框；<br>
+          如果三个编辑框都有内容，然后进行新建树形条目，设置省市名称、经度、纬度三列文本；
+          <br>最后添加新条目为顶级节点，并将显示焦点设置给树形控件，方便用户查看新增的顶级节点。<br>
+          <br>下面来看第二个“添加子节点”按钮的代码：<br>
+    <div class="code">
+<style type="text/css">
+p, li { white-space: pre-wrap; }
+</style>
+
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonAddChild_clicked</span><span
+style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取当前选中节点</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QTreeWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">curItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">treeWidget</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">currentItem</span><span style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">NULL</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">==</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">curItem</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">information</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"无选中节点"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"请先选中一个节点，然后为其添加子节点！"</span><span style=" color:#000000;">));</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取省市名称、经度、纬度三个文本</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditName</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strLon</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditLon</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strLat</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditLat</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//检查字符串都不空才继续</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strName</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">||</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strLon</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">||</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strLat</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">information</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"输入检查"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"三个编辑框均需要输入信息！"</span><span style=" color:#000000;">));</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//新建子节点，添加三列文本</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QTreeWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">itemChild</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QTreeWidgetItem</span><span
+style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">itemChild</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">0</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strName</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">itemChild</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">1</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strLon</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">itemChild</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">2</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strLat</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//添加到选中节点</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">curItem</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addChild</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">itemChild</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//自动展开显示新加的子节点</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">treeWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">expandItem</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">curItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">treeWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setFocus</span><span
+style=" color:#000000;">();</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//设置树形控件显示焦点</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      </div>
+          该函数首先获取当前选中的节点，如果没有选中任何节点，那么不能添加子节点；如果有选中的节点，那么继续：<br>
+          获取三个编辑框的内容，并判断非空；<br>
+          三个文本非空的时候，新建一个条目，并设置三列文本信息；<br>
+          然后调用&nbsp; curItem-&gt;addChild( itemChild )，添加新节点为选中节点的子节点；<br>
+          自动展开当前选中节点，并设置树形控件为显示焦点，方便用户查看新增的子节点。<br>
+          添加子节点的函数代码与添加顶级节点比较类似，需要注意的是，凡是指针都要判断是否为空指针，避免访问野指针导致程序崩溃。<br><br>下面来看第三个“删除叶子节点”按钮的代码：<br>
+    <div class="code">
+<style type="text/css">
+p, li { white-space: pre-wrap; }
+</style>
+
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonDelLeaf_clicked</span><span
+style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取当前选中节点</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QTreeWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">curItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">treeWidget</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">currentItem</span><span style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">NULL</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">==</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">curItem</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">warning</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"未选中节点"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"未选中节点，没东西删除。"</span><span style=" color:#000000;">));</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//判断是否为叶子节点</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">curItem</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">childCount</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&gt;</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//该节点还有子节点，不能直接删除，因为子孙节点尚未删除</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">warning</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"不是叶子节点"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"不是叶子节点，不能删除！"</span><span style=" color:#000000;">));</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//是叶子节点可以删除</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//凡是知道指针的叶子节点，可以直接</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">delete</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//QTreeWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">析构函数会自动将条目从树形控件卸载掉</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">curItem</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">curItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">NULL</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre></div>
+          该函数首先获取当前选中节点，如果没有选中就提示未选中消息框；<br>
+          有选中节点时，我们获取选中节点的子节点数目，如果存在子节点，那么不是叶子节点，不能直接删除，提示消息框；<br>
+          如果没有子节点，那么直接 delete 并将指针置空。<br>
+          两点需要说明：<br>第一，非叶子节点不能直接删除，因为它的子孙节点没有删除，会一直占用内存，删除非叶子节点会导致内存泄漏；<br>第二，对于叶子节点，在知道指针的情况下，可以直接 delete 并将指针置空，~QTreeWidgetItem() 析构函数会自动将自己从树形控件卸载掉并删除内存空间。注意析构函数只能删除自己一个节点，不会删除儿孙节点。<br><br>删除节点和其子树，需要手动编写代码，从最底层叶子节点开始删除，自底向上删除，最后删除选中节点。<br>第四个按钮“删除节点子树”就是完成删除选中节点和其子树的功能：<br>
+   <div class="code">
+<style type="text/css">
+p, li { white-space: pre-wrap; }
+</style>
+
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonDelSubtree_clicked</span><span
+style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取当前选中节点</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QTreeWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">curItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">treeWidget</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">currentItem</span><span style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">NULL</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">==</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">curItem</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">warning</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"未选中节点"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"未选中节点，没东西删除。"</span><span style=" color:#000000;">));</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//递归删除节点子树</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">RemoveSubtree</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">curItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre></div>       
+          该函数先获取当前选中节点，如果是空指针就提示消息框；<br>如果不是空指针，存在选中节点，那么使用递归函数 RemoveSubtree( curItem ) 删除选中节点的儿孙和该节点本身。<br>实际干活的是 RemoveSubtree( curItem )&nbsp; 函数，我们下面来看看它的代码：<br>
+          
+ <div class="code">
+<style type="text/css">
+p, li { white-space: pre-wrap; }
+</style>
+
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">RemoveSubtree</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QTreeWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">curLevelItem</span><span
+style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//凡是指针，都要判断是否为空</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">NULL</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">==</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">curLevelItem</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//儿子节点个数</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nCount</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">curLevelItem</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">columnCount</span><span style=" color:#000000;">();</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//截止判断代码</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nCount</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&lt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">1</span><span style=" color:#000000;">)</span><span style=" color:#008000;">//一个子节点都没有，已经是叶子节点</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//直接删除</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">curLevelItem</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">    </span><span style=" color:#000000;">curLevelItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">NULL</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//递归层数截止</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//踢皮球代码，对各个子节点调用本函数，称为递归</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">for</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">i</span><span style=" color:#000000;">=</span><span style=" color:#000080;">0</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#000000;">nCount</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span
+style=" color:#000000;">++)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//逐个卸载子节点</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QTreeWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">curChild</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">curLevelItem</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">takeChild</span><span style=" color:#000000;">(</span><span
+style=" color:#000000;">i</span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//递归调用本函数，即踢皮球代码，叫儿子们自己去处理</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">RemoveSubtree</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">curChild</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//儿孙们都删除干净了，儿孙们先做苦工，自己后做苦工，叫后序递归</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//苦工代码，自己动手删除自己</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">curLevelItem</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">    </span><span style=" color:#000000;">curLevelItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">NULL</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//返回父辈</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre></div>         
+          递归的意思就是函数内部调用函数本身，递归函数的代码是对当前节点和其所有子孙节点通用的，一般包括三部分：<br>递归截止判断代码；<br>递归调用代码（踢皮球代码）；<br>本节点工作代码（苦工代码）。<br>踢皮球代码和苦工代码顺序可能互换，根据情况调整顺序。<br>上面函数首先判断指针非空，非空后继续；<br>计算当前节点的子节点数目；<br>然后判断是否为叶子节点，叶子节点时最低级的节点，干完活后返回，是递归调用最深的节点；<br>接着是踢皮球代码，对每个子节点，删除时先卸载父子关系，然后得到各个儿子节点；<br>儿子节点还有多少孙子我们不知道，那么就对每个儿子调用 RemoveSubtree(curChild)，这就是递归的意义；<br>最后等儿孙们干完活了，子孙节点删干净了，在删除本节点，就是最后的苦工代码。<br>当前节点活也干完了，就返回父辈函数。<br>本例子代码先讲解到这，递归函数下面小节专门探讨。我们构建这个示例代码，运行：<br>
+          <center> <img src="images/ch08/ch08-03-22.png" alt="run"></center>
+
+          填写三个编辑框内容，添加湖南省顶级节点，然后选中湖南省顶级节点，修改三个编辑框，添加长沙市和株洲市的节点：<br>
+           <center> <img src="images/ch08/ch08-03-23.png" alt="run"></center>
+          删除叶子节点和删除节点子树的功能读者自行测试一下，这里不截图了。我们下面小节专门讲解递归算法。<br>
+    <br>
+    <div class="os2">8.3.5 二叉树示例</div>
+    <br>
+    递归算法代码讲解。 <br>
+    <br>
+    <br>
+    <div class="os2">8.3.6 树形节点读写示例</div>
     <br>
     使用代码生成条目。*.tree 文件打开和保存。 <br>
     <br>
@@ -807,18 +1541,17 @@ style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
         <tr>
           <td style="width: 40%;">
             <div style="text-align: center;"><a href="ch08-02.htm"><img class="pic"
-                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
           </td>
           <td style="width: 20%;">
             <div style="text-align: center;"><a href="contents.htm"><img class="pic"
-                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
           </td>
           <td style="width: 40%;">
             <div style="text-align: center;"><a href="ch08-04.htm"><img class="pic"
-                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
           </td>
         </tr>
       </tbody>
     </table>
-  </body>
-</html>
+</body></html>

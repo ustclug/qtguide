@@ -141,7 +141,7 @@ void Widget::SaveTree(QTreeWidgetItem *curItem)
     if(NULL == curItem) return; //空指针不处理
     //获取子节点数目
     int nChildCount = curItem->childCount();
-    //递归截止判断，叶子节点是递归最底层
+    //递归层级截止判断，叶子节点是递归最底层
     if( nChildCount < 1 )
     {
         //所有节点都保存自身数据和子节点数，叶子的子节点数为 0
@@ -227,7 +227,7 @@ void Widget::on_pushButtonLoadFile_clicked()
 
     //加载结束
     QString strMsg = tr("加载文件中树形节点结束。");
-    //数据里状态测试
+    //数据流状态测试
     if( m_ds.status() != QDataStream::Ok )
     {
         strMsg += tr("\r\n文件读取异常，只加载了合格的部分数据。");
@@ -253,7 +253,7 @@ void Widget::on_pushButtonLoadFile_clicked()
 void Widget::LoadTree(QTreeWidgetItem *curItem)
 {
     if(NULL == curItem) return; //空指针不处理
-    //递归截止判断，树没有创建完，不能用叶子节点判断
+    //递归层级截止判断，树没有创建完，不能用叶子节点判断
     //用数据流的结束标志作为截止判断
     if( m_ds.atEnd() )
     {

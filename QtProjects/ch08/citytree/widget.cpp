@@ -111,7 +111,7 @@ void Widget::RemoveSubtree(QTreeWidgetItem *curLevelItem)
         return;
     }
     //儿子节点个数
-    int nCount = curLevelItem->columnCount();
+    int nCount = curLevelItem->childCount();
 
     //截止判断代码
     if( nCount < 1)//一个子节点都没有，已经是叶子节点

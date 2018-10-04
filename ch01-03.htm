@@ -18,9 +18,7 @@
     <div class="os1">1.3 Qt在Windows下安装</div>
     <p> 本节先示范 Qt 开发环境在 Windows 系统里的安装，然后简要介绍 Qt 开发环境的目录结构和 Qt 命令行脚本内容。 </p>
     <p><b>2018.09.12 注：最新版 Qt 5.11.1 安装过程请点击下面链接查看：<br>
-    <a href="inwin/inwin.htm" target="new">
-        Qt最新版在Windows下安装 </a> 
-    </b></p>
+        <a href="inwin/inwin.htm" target="new"> Qt最新版在Windows下安装 </a> </b></p>
     <p>2016.03.22 注：本节介绍的是 MinGW 版本的 Qt 开发环境，如果读者希望使用 Visual Studio 2015 版本的 Qt
       开发环境， 请参考《Qt 5.6.0-VS2015 版本安装配置图文教程》和《Qt-VS2015问题梳理和C 2001 常量中有换行符的处理》：<br>
       <a href="http://pan.baidu.com/s/1nuyQHzb" target="new">
@@ -121,24 +119,72 @@ PATH=C:\Qt\Qt5.4.0\5.4\mingw491_32\bin;C:\Qt\Qt5.4.0\Tools\mingw491_32\bin;%PATH
     这是由于操作系统里PATH环境变量没有添加 Qt 和 MinGW 的运行库路径，遇到这种情况， 我们打开开始菜单里的 “Qt 5.4 for
     Desktop (MinGW 4.9 32bit)”命令行，然后将 exe 拖入 Qt 命令行后按回车键，在Qt 命令行里面运行exe就行了。 <br>
     <br>
+    <div class="os2">1.3.4 Qt 静态库下载配置</div>
+    <br>
+    Qt 官方库生成的 exe 会依赖一大堆 dll 动态库，系统里如果有 Qt 开发环境的命令行，那么可以在 Qt 命令行运行
+    exe，但是如果其他计算机里面没有 Qt 环境，那么需要将 exe 和依赖的 dll 全部拷贝打包才能在其他计算机上运行 exe，Qt
+    环境里面自带了发布工具 windeployqt ，其使用教程参考文档：<br>
+    <a href="https://qtguide.ustclug.org/extradoc/windeployqt.doc.7z" target="new">
+      https://qtguide.ustclug.org/extradoc/windeployqt.doc.7z </a><br>
+    <br>
+    我们下面教大家一种省事的 exe 发布方式——使用 Qt 静态库，QTCN 开发网的 Realfan 大神会跟随 Qt 官方动态库的更新，生成静态库
+    可以在他的主页找到各个版本静态库下载。<br>
+    Realfan 大神主页：<br>
+    <a href="http://www.qtcn.org/bbs/u/123401" target="new">http://www.qtcn.org/bbs/u/123401
+      </a><br> 下面的网盘链接也分享了他打包的 Qt 静态库： <br>
+    <a href="https://pan.baidu.com/s/1sOFrkti69SCIb-hAZEfOXw" target="new">
+      https://pan.baidu.com/s/1sOFrkti69SCIb-hAZEfOXw </a> <br>
+    本教程使用的动态库是 5.4.0，到网盘下载 <b>5.4.2-mingw32-rel-static.7z</b> ，5.4.2 是对 5.4.0
+    的补丁更新。<br>
+    我们将该压缩包解压到 C:\Qt\ 文件夹里：<br>
+    <center> <img src="images/installwin/static01.jpg" alt="realstatic"> </center>
+    然后我们从开始菜单点击运行 QtCreator，开始配置静态库：<br>
+    <center> <img src="images/installwin/static02.jpg" alt="realstatic"> </center>
+    点击 QtCreator 的菜单“工具”--&gt; “选项”，打开选项对话框：<br>
+    <center> <img src="images/installwin/static03.jpg" alt="realstatic"> </center>
+    在选项对话框的左边列表点击“构建和运行”，然后在右边标签页点击“Qt Versions”，接着点击“添加”按钮：<br>
+    <center> <img src="images/installwin/static04.jpg" alt="realstatic"> </center>
+    弹出的对话框是需要我们手动指定 qmake.exe 构建工具的位置，静态库的 qmake.exe 路径为<br>
+    <div style="color: red"><b>C:\Qt\5.4.2-mingw32-rel-static\bin</b></div>
+    我们进入该文件夹，选中 qmake.exe：<br>
+    <center> <img src="images/installwin/static05.jpg" alt="realstatic"> </center>
+    点击打开按钮，然后回到如下界面：<br>
+    <center> <img src="images/installwin/static06.jpg" alt="realstatic"> </center>
+    我们可以看到新增了 Qt 5.4.2 版本 Qt 库，路径 C:\Qt\5.4.2-mingw32-rel-static\bin\qmake.exe 。
+    <br>
+    点击右下角“Apply”按钮，应用配置。然后在上面标签页点击“构建套件(Kit)”，看到如下界面：<br>
+    <center> <img src="images/installwin/static07.jpg" alt="realstatic"> </center>
+    在构建套件配置页面，点击右上角的“添加按钮”，看到新的套件页面：<br>
+    <center> <img src="images/installwin/static08.jpg" alt="realstatic"> </center>
+    我们修改套件名称为 QtStatic，修改 Qt 版本为 Qt 5.4.2 (5.4.2-mingw32-rel-static)，修改后如下图所示：<br>
+    <center> <img src="images/installwin/static09.jpg" alt="realstatic"> </center>
+    其他栏目用默认的即可以，编译器是默认的 MinGW 4.9.1 32bit ，调试器的 GNU gdb 7.8。<br>
+    最后我们点击上面页面的“Apply” 按钮和 “OK” 按钮完成配置。<br>
+    静态库生成的 exe 大概十几兆，虽然占点空间，但是直接拷贝到其他电脑都可以用，很方便。<br>
+    注意静态库只有 Release 模式的库文件，只能构建 Release 版本的目标程序，构建静态程序要在 QtCreator 里手动选择 Release
+    模式：<br>
+    <center> <img src="images/installwin/staticbuild.png" alt="realstatic"> </center>
+    如果之前有旧的项目代码，QtCreator 左下角没看到 QtStatic 构建套件，那么将旧项目里的&nbsp; <i><b>项目名.user</b></i>&nbsp;
+    文件删掉，然后用 QtCreator 重新打开该项目，就能看到套件选择配置页面，勾选 QtStatic 构建套件即可。<br>
+    如果读者希望使用 Qt Quick/Qt QML 编程，发布&nbsp; Qt Quick/Qt QML 的静态程序，那么必须使用<b> Qt
+      5.7.0 </b>以上的静态库，老版本的 Qt 静态库都有 bug，不能正常生成&nbsp; Qt Quick/Qt QML 静态程序。Qt
+    5.7.0 以上的静态库可以在上面网盘链接里找到，配置方法是一样的。<br>
+    <br>
     下一节讲解Qt开发环境在Linux系统里面的安装， 如果读者不使用Linux系统，可以跳过，直接进入 1.5 节。 <br>
     <br>
     <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
       <tbody>
         <tr>
           <td style="width: 40%;">
-            <div style="text-align: center;"><a href="ch01-02.htm"><img class="pic"
-
+            <div style="text-align: center;"><a href="ch01-02.htm"><img class="pic"
                   style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
           </td>
           <td style="width: 20%;">
-            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
-
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
                   style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
           </td>
           <td style="width: 40%;">
-            <div style="text-align: center;"><a href="ch01-04.htm"><img class="pic"
-
+            <div style="text-align: center;"><a href="ch01-04.htm"><img class="pic"
                   style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
           </td>
         </tr>

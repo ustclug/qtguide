@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta  content="text/html; charset=UTF-8"  http-equiv="content-type">
+    <title>ch09-01</title>
+    <link  href="css/style.css"  rel="stylesheet"  type="text/css">
+    <link  rel="stylesheet"  href="thumbnailviewer.css"  type="text/css">
+    <script  src="thumbnailviewer.js"  type="text/javascript">
+
+/***********************************************
+* Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
+* This notice must stay intact for legal use.
+* Visit http://www.dynamicdrive.com/ for full source code
+***********************************************/
+
+</script> </head>
+  <body>
+    <div  class="os1">9.1 顺序容器：QList、QQueue和QLinkedList </div>
+    <br>
+    本节介绍三种顺序容器：列表 QList、先进先出（First Input First Output，FIFO）队列 QQueue、链表
+    QLinkedList， 每种容器配一个示例，示范使用方法。QList 是最为常用的，队列 QQueue 是 QList 的派生类，
+    增加了几个队列操作函数。链表 QLinkedList 是比较特别的顺序容器，是真正的双向链表，数据离散存储，
+    用双向指针衔接前后节点，需要借助迭代器进行遍历， 而其他顺序容器都可以用数组下标的形式访问元素。 <br>
+    <br>
+    <div  class="os2">9.1.1 列表 QList</div>
+    <br>
+    在开始讲解 QList 之前，我们先明确一下 Qt 数据容器能存储什么，不能存储什么。<br>
+    Qt 提供的数据容器都是模板类，构造时要带数据类型，比如下面这句定义整型数列表：<br>
+    <div  class="code"> QList&lt;int&gt; integerList; </div>
+    Qt 数据容器有支持的数据类型，也有不支持的类型，不仅是 QList ，其他数据容器都有不支持的数据类型。<br>
+    <span  style="color: red"><b>存储在 Qt 数据容器里面的数据，必须是可赋值类型！</b></span><br>
+    比如 C++ 基本数据类型，int、double、指针等可以存储在 Qt 数据容器里；<br>
+    Qt 的数据类型，比如 QString、QDate、QTime 等，我们在 Qt Assistant 帮助文档里面查询 QDataStream
+    支持的可串行化的数值类型，关键字索引为“Serializing Qt Data Types”，这些基本都是可以存到 Qt 数据容器里面的。<br>
+    <br>
+    还有不能存储在数据容器里的：窗体 QWidget、对话框 QDialog、定时器 QTimer 等等， <span  style="color: red">
+      <b>凡是 QObject 类和所有 QObject 派生类的对象都不允许直接存储在数据容器里面</b> </span> 。如果代码里新建
+    QList&lt;QWidget&gt; 列表，那么编译器会报错，QWidget 的复制构造函数和赋值运算符 =
+    函数都是禁用的。因为窗口不算数据类型，窗口里有线程、指针、句柄、信号和槽函数等等非常复杂的东西，不能当普通数据类型使用。如果确实要存储窗口列表，那么只能存储指
+    针，比如 QList&lt;QWidget *&gt;。<br>
+    <b><br>
+      如果希望自定义数据类型能存储在 Qt 数据容器里面，那么自定义类型必须至少满足三个条件：<br>
+      ①定义默认构造函数，比如 MyData() ;<br>
+      ②定义复制构造函数，比如 MyData(const MyData&nbsp;&nbsp; &amp;d);<br>
+      ③定义赋值运算符 = 函数，比如 MyData&amp;&nbsp;&nbsp;&nbsp; operator=(const MyData
+      &amp;d)。</b><br>
+    <br>
+    讲完可以存储和不能存储的类型之后，我们开始列表类 QList 的学习。<br>
+    &nbsp;QList&lt;T&gt; 就是存储 T 类型的数据的列表，类似 T 的数组，可以通过数据下标访问各个元素， QList&lt;T&gt;
+    针对数据的插入、列表头部添加元素、列表尾部添加元素等等做过优化，访问也非常高效。下面按功能划分，列举该类的函数：<br>
+    （1）构造函数<br>
+    <div  class="code">QList()&nbsp;&nbsp;&nbsp; //默认构造函数<br>
+      QList(const QList&lt;T&gt; &amp; other) &nbsp; //复制构造函数<br>
+      QList(QList&lt;T&gt; &amp;&amp; other) &nbsp;&nbsp; //移动构造函数<br>
+      QList(std::initializer_list&lt;T&gt; args)&nbsp;&nbsp; //初始列表构造函数<br>
+      ~QList() &nbsp; //析构函数</div>
+    第一个是默认构造函数，不带任何参数，可以支持嵌套的列表或与其他数据容器嵌套。<br>
+    第二个是复制构造函数，将 other 里面的元素均复制到新对象里面。<br>
+    第三个是 C++11 新特性，配合 std::move 语句使用，将 other 里面的元素全部移动给新建对象，other 本身清空。<br>
+    第四个也是 C++11 新特性，使得列表对象可以用大括号列举元素初始化，比如 {1, 3, 6, 8} 可以用于初始化整型数列表。<br>
+    项目里启用 C++11 特性，需要在 *.pro 项目文件里添加一行配置代码：<br>
+    <div  class="code">CONFIG&nbsp; +=&nbsp; c++11</div>
+    第五个是析构函数。<br>
+    关于移动构造函数请参考： <a  href="https://www.cnblogs.com/qingergege/p/7607089.html"  target="new">
+      https://www.cnblogs.com/qingergege/p/7607089.html</a> <br>
+    关于初始化列表构造请参考： <a  href="https://blog.csdn.net/fengxinlinux/article/details/72614874"
+       target="new"> https://blog.csdn.net/fengxinlinux/article/details/72614874</a>
+    <br>
+    <br>
+    （2）添加函数<br>
+    <div  class="code">void&nbsp;&nbsp; &nbsp;append(const T &amp; value)<br>
+      void&nbsp;&nbsp; &nbsp;append(const QList&lt;T&gt; &amp; value)<br>
+      void&nbsp;&nbsp;&nbsp; push_back(const T &amp; value)&nbsp; //同第一个
+      append()，STL风格添加到队尾</div>
+    append() 是追加元素到列表的末尾，第一个追加函数添加一个元素到列表末尾，第二个追加函数将一个列表中所有元素追加到列表末尾。<br>
+    <div  class="code">void&nbsp;&nbsp; &nbsp;insert(int i, const T &amp; value)</div>
+    插入函数将 value 插入到序号为 i 的位置，如果 i 为 0，元素插到列表列头部，如果 i 为 size() 数值，那么元素添加到列表末尾。<br>
+    <div  class="code">void&nbsp;&nbsp; &nbsp;prepend(const T &amp; value)<br>
+      void&nbsp;&nbsp;&nbsp; push_front(const T &amp; value)&nbsp; //STL风格，同
+      prepend()</div>
+    prepend() 是将参数里的元素 value 添加到列表头部，等同于 insert(0, value) 。<br>
+    <br>
+    （3）移除和删除函数<br>
+    移除函数和删除函数调用之前都要判断列表是否非空，用 ! empty() 或&nbsp; ! isEmpty()&nbsp; 判断，带有序号 i
+    的必须保证序号不越界。<br>
+    <div  class="code">T&nbsp;&nbsp; &nbsp;takeAt(int i)&nbsp; //移除序号为 i
+      元素并返回该元素<br>
+      T&nbsp;&nbsp; &nbsp;takeFirst()&nbsp;&nbsp; &nbsp; //移除队头元素并返回该元素<br>
+      T&nbsp;&nbsp; &nbsp;takeLast()&nbsp;&nbsp; &nbsp;&nbsp; //移除队尾元素并返回该元素</div>
+    take**() 移除函数只是将元素从列表中卸载下来，并不会删除元素内存空间，卸下来的元素作为返回值返回。<br>
+    <div  class="code">void&nbsp;&nbsp; &nbsp;removeAt(int i)&nbsp; //删除序号为 i
+      的元素，释放该元素内存<br>
+      void&nbsp;&nbsp; &nbsp;removeFirst()&nbsp; &nbsp;&nbsp; //删除队头元素，释放该元素内存<br>
+      void&nbsp;&nbsp;&nbsp; pop_front()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //同
+      removeFirst() ，STL风格<br>
+      void&nbsp;&nbsp; &nbsp;removeLast()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //删除队尾元素，释放该元素内存<br>
+      void&nbsp;&nbsp;&nbsp;
+      pop_back()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //同
+      removeLast()，STL风格</div>
+    &nbsp;remove**() 函数没有返回值，直接从列表删除元素，并释放该元素内存空间，删除的元素彻底消失。<br>
+    <div  class="code">int&nbsp;&nbsp; &nbsp;removeAll(const T &amp;
+      value)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //删除列表中所有等于 value 值的元素，返回删除的数量<br>
+      bool&nbsp;&nbsp;&nbsp; removeOne(const T &amp; value) //删除列表中第一个等于 value
+      值的元素，如果列表有等于 value 值的元素，返回 true，否则返回 false</div>
+    注意 removeAll( value ) 函数不是清空列表，而是删除列表中所有等于 value 值的元素，并返回删除的计数。<br>
+    removeOne( value ) 函数第一个等于 value 值的元素，如果删除成功返回 true，即列表中存在等于 value 的元素，<br>
+    如果删除失败返回 false，即列表中不存在等于 value 的元素。需要特别注意的是：<br>
+    <span  style="font-weight: bold;">removeAll( value )、removeOne( value
+      )这两个函数必 须要类型 T 存在 operator==() 等于号函数，T 类型能够进行相等判断！</span><br>
+    <div  class="code">void&nbsp;&nbsp; &nbsp;clear()</div>
+    clear() 函数才是删除列表所有元素，并释放内存空间。<br>
+    <br>
+    （4）访问和查询函数<br>
+    <div  class="code">int&nbsp;&nbsp; &nbsp;size() const<br>
+      int&nbsp;&nbsp;&nbsp; length() const&nbsp;&nbsp;&nbsp; //同 size()&nbsp; </div>
+    获取列表大小，即存储的元素总数量。列表有 size() 函数，但是没有 resize() 函数，不能直接扩展列表大小。<br>
+    列表只有为新元素提前保留空间的函数：<br>
+    <div  class="code">void&nbsp;&nbsp; &nbsp;reserve(int alloc)</div>
+    reserve() 函数是在程序员能够提前预估元素总量的情况提前为 alloc 数量的元素申请内存空间，保留使用。<br>
+    如果 alloc 数值不超过 size() 数值，该函数调用被忽略；如果 alloc 数值大于 size() 数值，那么提前分配空间，保证列表能够存储
+    alloc&nbsp; 数量的元素。注意 reserve() 函数不会改变列表&nbsp; size()
+    数值大小，不会添加任何新元素，仅仅是调整内部存储空间，保留使用，实际并没有使用新分配的空间，列表内的元素个数不变。<br>
+    列表有两个 count() 计数函数，用途不一样：<br>
+    <div  class="code">int&nbsp;&nbsp; &nbsp;count(const T &amp; value) const<br>
+      int&nbsp;&nbsp; &nbsp;count() const</div>
+    第一个 count( value ) 函数统计列表中等于 value 值的元素个数，这个函数也需要类型 T 带有 operator==() 等于号函数。<br>
+    第二个 count() 函数不带参数，等同于 size() 函数，是列表元素的总数量。<br>
+    <br>
+    判断列表是否为空列表，使用如下函数：<br>
+    <div  class="code"> bool&nbsp;&nbsp; &nbsp;empty() const&nbsp;&nbsp;&nbsp;
+      //空列表返回 true，有元素就返回 false，STL风格<br>
+      bool&nbsp;&nbsp;&nbsp; isEmpty() const //空列表返回 true，有元素就返回 false ，Qt 风格</div>
+    <span  style="font-weight: bold;">注意 empty() /isEmpty()
+      、size()/length()/count()&nbsp; 函数要牢记经常使用，因 为列表的函数，凡是涉及到序号 i 的，一般都不会判断序号 i
+      是否越界，需要程序员手动判断数组是否越界，列表的很多函数并不安全！</span><br>
+    列表函数为了优化访问效率，基本上没有为访问序号 i 的函数添加越界判断，所以一旦越界，程序很可能崩溃！<br>
+    <br>
+    访问序号为 i 的元素，可以使用如下函数：<br>
+    <div  class="code">const T &amp;&nbsp;&nbsp; &nbsp;at(int i) const</div>
+    at( i ) 函数返回序号为 i 元素的<span  style="font-weight: bold;">只读引用</span>，但是不进行数组越界
+    判断，需要手动判断，该函数的好处是读取效率高。<br>
+    比较安全的访问函数是下面两个：<br>
+    <div  class="code">T&nbsp;&nbsp; &nbsp;value(int i) const<br>
+      T&nbsp;&nbsp; &nbsp;value(int i, const T &amp; defaultValue) const</div>
+    第一个 value( i ) 函数返回 序号为 i 的元素（数值复制，不是引用），如果 i 越界，那么返回 T 类型默认构造函数生成的数值，比如
+    int、double、指针 都返回 0（Qt 容器为基本数据类型做了初始化）。<br>
+    第二个 value( i, value )&nbsp; 原理是类似的， i 不越界就返回该序号元素值，越界就返回参数里指定的 value 值。<br>
+    两个 value() 函数因为每次调用都进行数组越界判断，所以访问效率不如 at() 函数高，在知道不越界的情况下使用 at() 更好。<br>
+    <br>
+    查询数组里是否包含某个数值元素，使用如下函数：<br>
+    <div  class="code">bool&nbsp;&nbsp; &nbsp;contains(const T &amp; value)
+      const</div>
+    如果包含等于 value 值的元素返回 true，否则返回 false。要统计等于 value 值的元素个数，使用前面的 count( value
+    )&nbsp; 函数。<br>
+    如果希望查询等于 value 值的元素的序号，<br>
+    <div  class="code">int&nbsp;&nbsp; &nbsp;indexOf(const T &amp; value, int
+      from = 0) const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //从前向后 查找等于 value 值的元素序号<br>
+      int&nbsp;&nbsp;&nbsp; lastIndexOf(const T &amp; value, int from = -1)
+      const&nbsp; //从后向前查找等于 value 值的元素序号 </div>
+    indexOf( value, from ) 是从前向后查找元素，第一个参数是要匹配的数值，第二个是查询的起始最小序号，默认从 0&nbsp;
+    序号开始查找。<br>
+    lastIndexOf( value, from ) 是从后向前查找元素，第一个参数是要匹配的数值，第二个是查询的起始最大序号，默认从队尾开始查找。<br>
+    注意 contains( value )、count( value ) 、indexOf( value, from )、lastIndexOf(
+    value, from ) 函数都要求 T 类型支持 operator==() 等于号函数。<br>
+    <br>
+    判断队头、队尾元素是否为 value 的函数如下：<br>
+    <div  class="code">bool&nbsp;&nbsp;&nbsp; startsWith(const T &amp; value)
+      const&nbsp;&nbsp;&nbsp; //检查队头是否等于 value<br>
+      bool&nbsp;&nbsp; &nbsp;endsWith(const T &amp; value)
+      const&nbsp;&nbsp;&nbsp;&nbsp; //检查队尾是否等于 value</div>
+    startsWith( value ) 检查队头元素，如果等于 value 就返回 true，如果列表为空或队头不等于 value 返回 false。<br>
+    endsWith( value ) 检查队尾元素，如果等于 value 就返回 true，如果列表为空或末尾不等于 value 返回 false。<br>
+    <br>
+    获取列表头部、尾部元素引用的函数如下：<br>
+    <div  class="code">T &amp;&nbsp;&nbsp;
+      &nbsp;first()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //队头读写引用，可以修改队头数值<br>
+      const T &amp;&nbsp;&nbsp; &nbsp;first()
+      const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //队头只读引用<br>
+      T &amp;&nbsp;&nbsp;
+      &nbsp;front()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //队头读写引用，可以修改队头数值，STL风格<br>
+      const T &amp;&nbsp;&nbsp; &nbsp;front() const&nbsp;&nbsp;&nbsp;&nbsp;
+      //队头只读引用，STL风格<br>
+      T &amp;&nbsp;&nbsp;&nbsp;
+      last()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //队尾读写引用，可以修改队尾数值<br>
+      const T &amp;&nbsp;&nbsp;&nbsp; last() const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //队尾只读引用<br>
+      T &amp;&nbsp;&nbsp;&nbsp;
+      back()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //队尾读写引用，可以修改队尾数值，STL风格<br>
+      const T &amp;&nbsp;&nbsp;&nbsp; back() const&nbsp;&nbsp; &nbsp;
+      //队尾只读引用，STL风格</div>
+    注意区分只读引用和读写引用，只读引用不会改变元素的数值，而读写引用可以修改队头或队尾的数值。<br>
+    上面获取队头、队尾引用的 8 个函数本身没有进行列表数组非空判断，在调用它们之前，<br>
+    必须手动用 ! empty() 或&nbsp; ! isEmpty() 判断列表非空之后才能调用上面 8 个函数。<br>
+    <br>
+    获取列表的子列表，使用如下函数：<br>
+    <div  class="code">QList&lt;T&gt;&nbsp;&nbsp; &nbsp;mid(int pos, int length
+      = -1) const</div>
+    mid() 函数新建一个子列表，将本列表从序号 pos 开始位置，复制长度为 length 数量的元素到子列表中并返回。<br>
+    如果 length 为 -1（或大于后面剩余的元素数量），就返回从 pos 开始的所有元素列表。返回的子列表是独立的新列表，与本列表没有内存共享。<br>
+    <br>
+    （5）替换、移动和交换函数<br>
+    替换函数就是赋值修改：<br>
+    <div  class="code">void&nbsp;&nbsp;&nbsp; replace(int i, const T &amp;
+      value)&nbsp; // 等同于 list[i] = value;</div>
+    将 序号为 i 的元素数值修改为新的 value。注意序号 i 不能越界，必须满足&nbsp; 0 &lt;= i &lt; size() 。<br>
+    <div  class="code">void&nbsp;&nbsp;&nbsp; move(int from, int to)</div>
+    move(from, to) 移动函数是将序号 from 的元素移动到序号为 to 的位置，就是先卸载 from 序号元素，然后插入到 to 序号位置。<br>
+    两个序号必须都位于 0 到 size() 之间，序号必须合法。
+    <div  class="code">void&nbsp;&nbsp;&nbsp; swap(QList&lt;T&gt; &amp; other)</div>
+    这是大 swap() 函数，将本列表所有元素与参数 other 列表内所有元素互换，这个函数不会出错，并且互相的效率非常高。<br>
+    <div  class="code">void&nbsp;&nbsp;&nbsp; swap(int i, int j)</div>
+    第二个是小 swap() 函数，将序号 i 的元素和序号 j 的元素数值互换，序号 i、j 不能越界，必须合法。<br>
+    <br>
+    （6）运算符函数<br>
+    我们设置三个简单整数列表，在表格中举例说明各个运算符函数用途。三个列表如下：<br>
+    <div  class="code">QList&lt;int&gt; aList = {1, 3, 5};<br>
+      QList&lt;int&gt; bList = {2, 4, 6};<br>
+      QList&lt;int&gt; cList;</div>
+    上面使用 C++11 初始列表构造了列表 aList 和 bList ，cList 是空列表。各个运算符函数举例如下表：<br>
+    <br>
+    <table  class="tabel">
+      <tbody>
+        <tr  class="d1">
+          <td  style="width: 360px;"  align="center"><b>运算符函数</b></td>
+          <td  style="width: 200px;"  align="center"><span  style="font-weight: bold;">举
+              例</span></td>
+          <td  align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>bool operator!=(const QList&lt;T&gt; &amp; other) const</td>
+          <td>&nbsp;aList != bList ;</td>
+          <td> aList 和 bList 两个列表有元素不同，结果为 true。 </td>
+        </tr>
+        <tr  class="d1">
+          <td>QList&lt;T&gt; operator+(const QList&lt;T&gt; &amp; other) const</td>
+          <td>&nbsp;cList = aList + bList;</td>
+          <td> aList 和 bList拼接后生成新列表，赋值给 cList。</td>
+        </tr>
+        <tr>
+          <td>QList&lt;T&gt; &amp; operator+=(const QList&lt;T&gt; &amp; other)</td>
+          <td>&nbsp;aList += bList ;</td>
+          <td> bList 所有元素追加到 aList 末尾。 </td>
+        </tr>
+        <tr  class="d1">
+          <td>QList&lt;T&gt; &amp; operator+=(const T &amp; value)</td>
+          <td  style="height: 16px;">&nbsp;aList+= 100 ;</td>
+          <td> 添加一个元素 100 到 aList 末尾。 </td>
+        </tr>
+        <tr>
+          <td>QList&lt;T&gt; &amp; operator&lt;&lt;(const QList&lt;T&gt; &amp;
+            other)</td>
+          <td>&nbsp;aList&lt;&lt;bList;</td>
+          <td  style="height: 16px;"> bList 所有元素追加到 aList 末尾。 </td>
+        </tr>
+        <tr  class="d1">
+          <td>QList&lt;T&gt; &amp; operator&lt;&lt;(const T &amp; value)</td>
+          <td>&nbsp;aList&lt;&lt;100;</td>
+          <td> 添加一个元素 100 到 aList 末尾。 </td>
+        </tr>
+        <tr>
+          <td>QList&lt;T&gt; &amp; operator=(const QList&lt;T&gt; &amp; other)</td>
+          <td>&nbsp;cList = aList;</td>
+          <td> aList 所有元素都复制一份给 cList，aList本身不变。 </td>
+        </tr>
+        <tr  class="d1">
+          <td>QList &amp; operator=(QList&lt;T&gt; &amp;&amp; other) //移动赋值</td>
+          <td>&nbsp;cList = std::move(aList) ; </td>
+          <td> aList 所有元素都移动给 cList，aList本身被清空。 </td>
+        </tr>
+        <tr>
+          <td>bool operator==(const QList&lt;T&gt; &amp; other) const</td>
+          <td>&nbsp;aList == bList ;</td>
+          <td> aList 和 bList 有元素不同，结果为 false。 </td>
+        </tr>
+        <tr  class="d1">
+          <td>T &amp; operator[](int i)</td>
+          <td>&nbsp;aList[0] = 100;<br>
+          </td>
+          <td  style="height: 16px;"> 获取序号为 i 的元素的读写引用，可修改列表元素。 </td>
+        </tr>
+        <tr>
+          <td>const T &amp; operator[](int i) const</td>
+          <td>&nbsp;qDebug()&lt;&lt;aList[0] ;</td>
+          <td> 获取序号为 i 的元素的只读引用。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    这里说明一下：operator==() 函数需要左右两个列表的长度、每个序号对应元素全部都相同才返回
+    true，两个列表的元素次序也都要求一样。列表的等于号函数和不等于号函数都要求元素类型 T 必须有 operator==() 判断各个元素是否相等。<br>
+    移动赋值与移动构造类似，都是 C++11 的新特性，需要使用 std::move&nbsp; 语句实现，移动后右边列表会被清空，元素只存在左边列表里。<br>
+    中括号函数要求序号 i 必须合法， 0 &lt;= i &lt; size() ，如果序号越界，程序会崩溃。<br>
+    <br>
+    （7）迭代器函数<br>
+    <br>
+    （8）容器类型转换函数<br>
+    QSet&lt;T&gt;&nbsp;&nbsp;&nbsp; toSet() const<br>
+    std::list&lt;T&gt;&nbsp;&nbsp;&nbsp; toStdList() const<br>
+    QVector&lt;T&gt;&nbsp;&nbsp;&nbsp; toVector() const<br>
+    <br>
+    QList&lt;T&gt;&nbsp;&nbsp;&nbsp; fromSet(const QSet&lt;T&gt; &amp; set)<br>
+    QList&lt;T&gt;&nbsp;&nbsp;&nbsp; fromStdList(const std::list&lt;T&gt; &amp;
+    list)<br>
+    QList&lt;T&gt;&nbsp;&nbsp;&nbsp; fromVector(const QVector&lt;T&gt; &amp;
+    vector)<br>
+    <br>
+    <br>
+    （9）其他内容<br>
+    <br>
+    QDataStream &amp;&nbsp;&nbsp;&nbsp; operator&lt;&lt;(QDataStream &amp; out,
+    const QList&lt;T&gt; &amp; list)<br>
+    QDataStream &amp;&nbsp;&nbsp;&nbsp; operator&gt;&gt;(QDataStream &amp; in,
+    QList&lt;T&gt; &amp; list)<br>
+    <br>
+    <br>
+    <div  class="os2">9.1.2 队列 QQueue</div>
+    <br>
+    <br>
+    <br>
+    <div  class="os2">9.1.3 链表 QLinkedList </div>
+    <br>
+    <br>
+    <br>
+    <table  style="text-align: left; width: 100%;"  border="0"  cellpadding="2"
+       cellspacing="2">
+      <tbody>
+        <tr>
+          <td  style="width: 40%;">
+            <div  style="text-align: center;"><a  href="ch09-00.htm"><img  class="pic"
+                   style="width: 32px; height: 32px;"  alt="prev"  src="images/pics/prev.png"></a></div>
+          </td>
+          <td  style="width: 20%;">
+            <div  style="text-align: center;"><a  href="contents.htm"><img  class="pic"
+                   style="width: 32px; height: 32px;"  alt="contents"  src="images/pics/contents.png"></a></div>
+          </td>
+          <td  style="width: 40%;">
+            <div  style="text-align: center;"><a  href="ch09-02.htm"><img  class="pic"
+                   style="width: 32px; height: 32px;"  alt="next"  src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>

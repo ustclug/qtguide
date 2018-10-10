@@ -44,10 +44,14 @@
       ②定义复制构造函数，比如 MyData(const MyData&nbsp;&nbsp; &amp;d);<br>
       ③定义赋值运算符 = 函数，比如 MyData&amp;&nbsp;&nbsp;&nbsp; operator=(const MyData
       &amp;d)。</b><br>
-    <br>
     讲完可以存储和不能存储的类型之后，我们开始列表类 QList 的学习。<br>
-    &nbsp;QList&lt;T&gt; 就是存储 T 类型的数据的列表，类似 T 的数组，可以通过数据下标访问各个元素， QList&lt;T&gt;
-    针对数据的插入、列表头部添加元素、列表尾部添加元素等等做过优化，访问也非常高效。下面按功能划分，列举该类的函数：<br>
+    <br>
+    &nbsp;QList&lt;T&gt; 就是存储 T 类型数据的列表，类似 T 的数组，可以通过数据下标访问各个元素， QList&lt;T&gt;
+    针对数据的插入、列表头部添加元素、列表尾部添加元素等等做过优化，访问也非常高效。 QList&lt;T&gt; 应用非常广泛，
+    QList&lt;T&gt; 可以模拟队列操作，比如入队 append() ，出队 takeFirst()；也可以模拟栈工作，比如入栈 append()
+    ，出栈&nbsp;&nbsp; takeLast()；模拟数组就更简单了，直接用用下标形式，如 aList[0] 。<br>
+    <br>
+    下面按功能划分，列举该类的函数：<br>
     （1）构造函数<br>
     <div  class="code">QList()&nbsp;&nbsp;&nbsp; //默认构造函数<br>
       QList(const QList&lt;T&gt; &amp; other) &nbsp; //复制构造函数<br>
@@ -213,7 +217,7 @@
     move(from, to) 移动函数是将序号 from 的元素移动到序号为 to 的位置，就是先卸载 from 序号元素，然后插入到 to 序号位置。<br>
     两个序号必须都位于 0 到 size() 之间，序号必须合法。
     <div  class="code">void&nbsp;&nbsp;&nbsp; swap(QList&lt;T&gt; &amp; other)</div>
-    这是大 swap() 函数，将本列表所有元素与参数 other 列表内所有元素互换，这个函数不会出错，并且互相的效率非常高。<br>
+    这是大 swap() 函数，将本列表所有元素与参数 other 列表内所有元素互换，这个函数不会出错，并且互换的效率非常高。<br>
     <div  class="code">void&nbsp;&nbsp;&nbsp; swap(int i, int j)</div>
     第二个是小 swap() 函数，将序号 i 的元素和序号 j 的元素数值互换，序号 i、j 不能越界，必须合法。<br>
     <br>
@@ -240,23 +244,23 @@
         <tr  class="d1">
           <td>QList&lt;T&gt; operator+(const QList&lt;T&gt; &amp; other) const</td>
           <td>&nbsp;cList = aList + bList;</td>
-          <td> aList 和 bList拼接后生成新列表，赋值给 cList。</td>
+          <td> aList 和 bList 复制拼接后生成新列表，赋值给 cList。</td>
         </tr>
         <tr>
           <td>QList&lt;T&gt; &amp; operator+=(const QList&lt;T&gt; &amp; other)</td>
           <td>&nbsp;aList += bList ;</td>
-          <td> bList 所有元素追加到 aList 末尾。 </td>
+          <td> 复制 bList 所有元素追加到 aList 末尾。 </td>
         </tr>
         <tr  class="d1">
           <td>QList&lt;T&gt; &amp; operator+=(const T &amp; value)</td>
-          <td  style="height: 16px;">&nbsp;aList+= 100 ;</td>
+          <td  style="height: 16px;">&nbsp;aList += 100 ;</td>
           <td> 添加一个元素 100 到 aList 末尾。 </td>
         </tr>
         <tr>
           <td>QList&lt;T&gt; &amp; operator&lt;&lt;(const QList&lt;T&gt; &amp;
             other)</td>
           <td>&nbsp;aList&lt;&lt;bList;</td>
-          <td  style="height: 16px;"> bList 所有元素追加到 aList 末尾。 </td>
+          <td  style="height: 16px;"> 复制 bList 所有元素追加到 aList 末尾。 </td>
         </tr>
         <tr  class="d1">
           <td>QList&lt;T&gt; &amp; operator&lt;&lt;(const T &amp; value)</td>
@@ -295,29 +299,126 @@
     这里说明一下：operator==() 函数需要左右两个列表的长度、每个序号对应元素全部都相同才返回
     true，两个列表的元素次序也都要求一样。列表的等于号函数和不等于号函数都要求元素类型 T 必须有 operator==() 判断各个元素是否相等。<br>
     移动赋值与移动构造类似，都是 C++11 的新特性，需要使用 std::move&nbsp; 语句实现，移动后右边列表会被清空，元素只存在左边列表里。<br>
-    中括号函数要求序号 i 必须合法， 0 &lt;= i &lt; size() ，如果序号越界，程序会崩溃。<br>
+    中括号函数（数组下标访问函数）要求序号 i 必须合法， 0 &lt;= i &lt; size() ，如果序号越界，程序会崩溃。<br>
     <br>
     （7）迭代器函数<br>
+    QList 内嵌了 STL 风格的只读迭代器和读写迭代器：<br>
+    <div  class="code">QList::const_iterator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //只读迭代器类，STL风格<br>
+      QList::iterator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //读写迭代器类，STL风格<br>
+      QList::​ConstIterator&nbsp;&nbsp; &nbsp;&nbsp; //只读迭代器，Qt命名风格<br>
+      QList::​
+      Iterator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //读写迭代器，Qt命名风格</div>
+    迭代器就像指向元素的指针，可以枚举列表中所有元素，迭代器本身支持各种操作符函数，<br>
+    比如 ++ 是找寻下一个元素，-- 是倒退一个元素， (* it) 是获取元素。Qt 帮助文档中示范了迭代器的使用：<br>
+    <div  class="code">QList&lt;QString&gt; list;<br>
+      list.append("January");<br>
+      list.append("February");<br>
+      ...<br>
+      list.append("December");<br>
+      <br>
+      QList&lt;QString&gt;::const_iterator i;<br>
+      for (i = list.constBegin(); i != list.constEnd(); ++i)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; cout &lt;&lt; *i &lt;&lt;
+      endl;</div>
+    上述代码定义了一个字符串列表，为字符串列表添加多个字符串，然后定义字符串列表的迭代器 i；<br>
+    i 从列表头部迭代器开始，逐个遍历列表元素，打印每个字符串，直到迭代器末尾结束。<br>
+    &nbsp;list.constBegin() 是指向队头元素的指针，但是注意&nbsp; list.constEnd() 是指向队尾后面假想元素的指
+    针，<br>
+    &nbsp;<span  style="font-weight: bold;">list.constEnd() 指向的东西根本不存在，仅用于越界判断。</span><br>
+    <br>
+    获取指向队头、队尾假想元素的只读迭代器函数如下：<br>
+    <div  class="code">const_iterator&nbsp;&nbsp; &nbsp;begin()
+      const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //指向队头迭代
+      器，STL风格<br>
+      const_iterator&nbsp;&nbsp; &nbsp;cbegin()
+      const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; //指向队头迭代器，STL风格<br>
+      const_iterator&nbsp;&nbsp;&nbsp; constBegin() const&nbsp; //指向队头迭代器，Qt命名风格<br>
+      const_iterator&nbsp;&nbsp;&nbsp; end()
+      const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;
+      //指向队尾假想元素迭代器，STL风格<br>
+      const_iterator&nbsp;&nbsp;&nbsp; cend()
+      const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;
+      //指向队尾假想元素迭代器，STL风格<br>
+      const_iterator&nbsp;&nbsp;&nbsp; constEnd() const&nbsp;&nbsp;&nbsp;&nbsp;
+      //指向队尾假想元素迭代器，Qt命名风格</div>
+    获取指向队头、队尾假想元素的读写迭代器函数如下：<br>
+    <div  class="code">iterator&nbsp;&nbsp; &nbsp;begin()&nbsp; //指向队头迭代器，STL风格<br>
+      iterator&nbsp;&nbsp;&nbsp; end()&nbsp;&nbsp;&nbsp;&nbsp;
+      //指向队尾假想元素迭代器，STL风格</div>
+    利用迭代器也可以添加元素或删除元素，通过迭代器插入元素的函数如下：<br>
+    <div  class="code">iterator&nbsp;&nbsp; &nbsp;insert(iterator before, const
+      T &amp; value)&nbsp; //在 before 指向的元素前面插入元素 value</div>
+    这个 insert() 函数需要注意两点：第一是返回值的迭代器指向新增元素 value ；<br>
+    第二是执行插入元素操作后，参数里的迭代器 before 失效，不能再使用，只能利用返回值的迭代器进行遍历。<br>
+    通过迭代器删除一个元素或多个元素的函数如下：<br>
+    <div  class="code">iterator&nbsp;&nbsp; &nbsp;erase(iterator pos)&nbsp; //删除
+      pos 指向的元素，返回指向下一个元素的迭代器或者 list.end() <br>
+      iterator&nbsp;&nbsp; &nbsp;erase(iterator begin, iterator end) //删除从 begin
+      到 end 指向的元素，注意 end 指向的元素不删除</div>
+    第一个 erase() 函数删除单个元素，它的返回值可能为指向下一个元素或者 list.end() ，要注意判断是否为指向队尾假想元素的迭代器。<br>
+    第二个 erase() 函数删除多个元素，从 begin 删除到 end，但是 end 指向的元素不删除，这个函数总是返回参数里的 end 迭代器。<br>
+    由于 QList 自身带有非常多的功能函数，并且支持数组下标形式的访问，实际中几乎不需要使用迭代器操作
+    QList。因为用迭代器不如用数组下标来操作简单快捷。<br>
     <br>
     （8）容器类型转换函数<br>
-    QSet&lt;T&gt;&nbsp;&nbsp;&nbsp; toSet() const<br>
-    std::list&lt;T&gt;&nbsp;&nbsp;&nbsp; toStdList() const<br>
-    QVector&lt;T&gt;&nbsp;&nbsp;&nbsp; toVector() const<br>
-    <br>
-    QList&lt;T&gt;&nbsp;&nbsp;&nbsp; fromSet(const QSet&lt;T&gt; &amp; set)<br>
-    QList&lt;T&gt;&nbsp;&nbsp;&nbsp; fromStdList(const std::list&lt;T&gt; &amp;
-    list)<br>
-    QList&lt;T&gt;&nbsp;&nbsp;&nbsp; fromVector(const QVector&lt;T&gt; &amp;
-    vector)<br>
-    <br>
+    列表支持将自身对象转换为其他容器类型，比如集合、标准库列表、向量：<br>
+    <div  class="code"> QSet&lt;T&gt;&nbsp;&nbsp;&nbsp; toSet()
+      const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //转为集合<br>
+      std::list&lt;T&gt;&nbsp;&nbsp;&nbsp; toStdList() const&nbsp;&nbsp; &nbsp;
+      //转为标准库的列表<br>
+      QVector&lt;T&gt;&nbsp;&nbsp;&nbsp; toVector() const &nbsp; //转为向量<br>
+    </div>
+    QList 能够转出，也能使用列表的静态成员函数，把其他三种容器转换为新的列表对象：<br>
+    <div  class="code"> QList&lt;T&gt;&nbsp;&nbsp;&nbsp; fromSet(const
+      QSet&lt;T&gt; &amp;
+      set)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //静态函数，将集合转为列表<br>
+      QList&lt;T&gt;&nbsp;&nbsp;&nbsp; fromStdList(const std::list&lt;T&gt;
+      &amp; list)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;
+      //静态函数，将标准库列表转为 Qt 列表<br>
+      QList&lt;T&gt;&nbsp;&nbsp;&nbsp; fromVector(const QVector&lt;T&gt; &amp;
+      vector)&nbsp;&nbsp; &nbsp; //静态函数，将向量转为列表<br>
+    </div>
+    静态成员函数的语法类似下面这样：<br>
+    <div  class="code">&nbsp;&nbsp;&nbsp; QVector&lt;int&gt;&nbsp; v = {1, 2,
+      3};<br>
+      &nbsp;&nbsp;&nbsp; QList&lt;int&gt; cList =
+      QList&lt;int&gt;::fromVector(v);</div>
     <br>
     （9）其他内容<br>
+    QList 附带了友元函数 operator&lt;&lt;() 和 operator&gt;&gt;()，用于支持数据流输入和输出：<br>
+    <div  class="code"> QDataStream &amp;&nbsp;&nbsp;&nbsp;
+      operator&lt;&lt;(QDataStream &amp; out, const QList&lt;T&gt; &amp; list)<br>
+      QDataStream &amp;&nbsp;&nbsp;&nbsp; operator&gt;&gt;(QDataStream &amp; in,
+      QList&lt;T&gt; &amp; list)<br>
+    </div>
+    这些流操作符函数正常运行的前提是 类型 T 也能支持流的输入输出，对于 C++ 基本类型 int、double 等都没问题；<br>
+    Qt 的数据类型如 QColor、QPoint 一般也都附带了友元函数，用于支持流输入输出。<br>
+    如果使用自定义类型，希望存储在列表中并支持自动的流输入输出，那么要为自定义类型添加友元函数 operator&lt;&lt;() 和
+    operator&gt;&gt;() 。<br>
     <br>
-    QDataStream &amp;&nbsp;&nbsp;&nbsp; operator&lt;&lt;(QDataStream &amp; out,
-    const QList&lt;T&gt; &amp; list)<br>
-    QDataStream &amp;&nbsp;&nbsp;&nbsp; operator&gt;&gt;(QDataStream &amp; in,
-    QList&lt;T&gt; &amp; list)<br>
+    <span  style="font-weight: bold;">使用 QList 时，需要注意 QList 仅支持存储
+      值类型、指针类型，不能存储变量的引用。</span><br>
+    如果定义列表时类型 T 设置为引用，如 QList&lt;int &amp;&gt; ，那么程序无法编译！<br>
     <br>
+    Qt 带有全局函数，可以支持容器类对象的排序：<br>
+    <div  class="code">void qSort(Container &amp; container)&nbsp; //排序 <br>
+      void qStableSort(Container &amp; container)&nbsp; //稳定排序</div>
+    排序函数要求容器的元素类型 T 必须支持 operator&lt;() 小于号函数，用于比较元素大小。<br>
+    <br>
+    最后我们梳理一下，如果自定义类型希望能够完美地和 QList 配合使用，那么需求如下：<br>
+    ① 必须是可赋值类型，需要默认构造函数、复制构造函数、赋值函数 operator=() ；<br>
+    ② 如果希望支持查询函数，需要双等号函数 operator==()；<br>
+    ③ 如果希望支持排序函数，需要小于号函数 operator&lt;() ；<br>
+    ④ 如果希望支持 QDataStream 输入流，那么添加友元函数&nbsp; operator&lt;&lt;() 和
+    operator&gt;&gt;() 。 <br>
+    第一条是必须实现的函数，后面三条是建议实现的函数。<br>
+    <br>
+    列表的内容介绍到这，下面开始本小节的示例程序。<br>
     <br>
     <div  class="os2">9.1.2 队列 QQueue</div>
     <br>

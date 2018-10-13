@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta  content="text/html; charset=UTF-8"  http-equiv="content-type">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <title>ch09-01</title>
-    <link  href="css/style.css"  rel="stylesheet"  type="text/css">
-    <link  rel="stylesheet"  href="thumbnailviewer.css"  type="text/css">
-    <script  src="thumbnailviewer.js"  type="text/javascript">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -15,25 +15,25 @@
 
 </script> </head>
   <body>
-    <div  class="os1">9.1 顺序容器：QList、QQueue和QLinkedList </div>
+    <div class="os1">9.1 顺序容器：QList、QQueue和QLinkedList </div>
     <br>
     本节介绍三种顺序容器：列表 QList、先进先出（First Input First Output，FIFO）队列 QQueue、链表
     QLinkedList， 每种容器配一个示例，示范使用方法。QList 是最为常用的，队列 QQueue 是 QList 的派生类，
     增加了几个队列操作函数。链表 QLinkedList 是比较特别的顺序容器，是真正的双向链表，数据离散存储，
     用双向指针衔接前后节点，需要借助迭代器进行遍历， 而其他顺序容器都可以用数组下标的形式访问元素。 <br>
     <br>
-    <div  class="os2">9.1.1 列表 QList</div>
+    <div class="os2">9.1.1 列表 QList</div>
     <br>
     在开始讲解 QList 之前，我们先明确一下 Qt 数据容器能存储什么，不能存储什么。<br>
     Qt 提供的数据容器都是模板类，构造时要带数据类型，比如下面这句定义整型数列表：<br>
-    <div  class="code"> QList&lt;int&gt; integerList; </div>
+    <div class="code"> QList&lt;int&gt; integerList; </div>
     Qt 数据容器有支持的数据类型，也有不支持的类型，不仅是 QList ，其他数据容器都有不支持的数据类型。<br>
-    <span  style="color: red"><b>存储在 Qt 数据容器里面的数据，必须是可赋值类型！</b></span><br>
+    <span style="color: red"><b>存储在 Qt 数据容器里面的数据，必须是可赋值类型！</b></span><br>
     比如 C++ 基本数据类型，int、double、指针等可以存储在 Qt 数据容器里；<br>
     Qt 的数据类型，比如 QString、QDate、QTime 等，我们在 Qt Assistant 帮助文档里面查询 QDataStream
     支持的可串行化的数值类型，关键字索引为“Serializing Qt Data Types”，这些基本都是可以存到 Qt 数据容器里面的。<br>
     <br>
-    还有不能存储在数据容器里的：窗体 QWidget、对话框 QDialog、定时器 QTimer 等等， <span  style="color: red">
+    还有不能存储在数据容器里的：窗体 QWidget、对话框 QDialog、定时器 QTimer 等等， <span style="color: red">
       <b>凡是 QObject 类和所有 QObject 派生类的对象都不允许直接存储在数据容器里面</b> </span> 。如果代码里新建
     QList&lt;QWidget&gt; 列表，那么编译器会报错，QWidget 的复制构造函数和赋值运算符 =
     函数都是禁用的。因为窗口不算数据类型，窗口里有线程、指针、句柄、信号和槽函数等等非常复杂的东西，不能当普通数据类型使用。如果确实要存储窗口列表，那么只能存储指
@@ -53,7 +53,7 @@
     <br>
     下面按功能划分，列举该类的函数：<br>
     （1）构造函数<br>
-    <div  class="code">QList()&nbsp;&nbsp;&nbsp; //默认构造函数<br>
+    <div class="code">QList()&nbsp;&nbsp;&nbsp; //默认构造函数<br>
       QList(const QList&lt;T&gt; &amp; other) &nbsp; //复制构造函数<br>
       QList(QList&lt;T&gt; &amp;&amp; other) &nbsp;&nbsp; //移动构造函数<br>
       QList(std::initializer_list&lt;T&gt; args)&nbsp;&nbsp; //初始列表构造函数<br>
@@ -63,23 +63,23 @@
     第三个是 C++11 新特性，配合 std::move 语句使用，将 other 里面的元素全部移动给新建对象，other 本身清空。<br>
     第四个也是 C++11 新特性，使得列表对象可以用大括号列举元素初始化，比如 {1, 3, 6, 8} 可以用于初始化整型数列表。<br>
     项目里启用 C++11 特性，需要在 *.pro 项目文件里添加一行配置代码：<br>
-    <div  class="code">CONFIG&nbsp; +=&nbsp; c++11</div>
+    <div class="code">CONFIG&nbsp; +=&nbsp; c++11</div>
     第五个是析构函数。<br>
-    关于移动构造函数请参考： <a  href="https://www.cnblogs.com/qingergege/p/7607089.html"  target="new">
+    关于移动构造函数请参考： <a href="https://www.cnblogs.com/qingergege/p/7607089.html" target="new">
       https://www.cnblogs.com/qingergege/p/7607089.html</a> <br>
-    关于初始化列表构造请参考： <a  href="https://blog.csdn.net/fengxinlinux/article/details/72614874"
-       target="new"> https://blog.csdn.net/fengxinlinux/article/details/72614874</a>
+    关于初始化列表构造请参考： <a href="https://blog.csdn.net/fengxinlinux/article/details/72614874"
+      target="new"> https://blog.csdn.net/fengxinlinux/article/details/72614874</a>
     <br>
     <br>
     （2）添加函数<br>
-    <div  class="code">void&nbsp;&nbsp; &nbsp;append(const T &amp; value)<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;append(const T &amp; value)<br>
       void&nbsp;&nbsp; &nbsp;append(const QList&lt;T&gt; &amp; value)<br>
       void&nbsp;&nbsp;&nbsp; push_back(const T &amp; value)&nbsp; //同第一个
       append()，STL风格添加到队尾</div>
     append() 是追加元素到列表的末尾，第一个追加函数添加一个元素到列表末尾，第二个追加函数将一个列表中所有元素追加到列表末尾。<br>
-    <div  class="code">void&nbsp;&nbsp; &nbsp;insert(int i, const T &amp; value)</div>
+    <div class="code">void&nbsp;&nbsp; &nbsp;insert(int i, const T &amp; value)</div>
     插入函数将 value 插入到序号为 i 的位置，如果 i 为 0，元素插到列表列头部，如果 i 为 size() 数值，那么元素添加到列表末尾。<br>
-    <div  class="code">void&nbsp;&nbsp; &nbsp;prepend(const T &amp; value)<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;prepend(const T &amp; value)<br>
       void&nbsp;&nbsp;&nbsp; push_front(const T &amp; value)&nbsp; //STL风格，同
       prepend()</div>
     prepend() 是将参数里的元素 value 添加到列表头部，等同于 insert(0, value) 。<br>
@@ -87,12 +87,11 @@
     （3）移除和删除函数<br>
     移除函数和删除函数调用之前都要判断列表是否非空，用 ! empty() 或&nbsp; ! isEmpty()&nbsp; 判断，带有序号 i
     的必须保证序号不越界。<br>
-    <div  class="code">T&nbsp;&nbsp; &nbsp;takeAt(int i)&nbsp; //移除序号为 i
-      元素并返回该元素<br>
+    <div class="code">T&nbsp;&nbsp; &nbsp;takeAt(int i)&nbsp; //移除序号为 i 元素并返回该元素<br>
       T&nbsp;&nbsp; &nbsp;takeFirst()&nbsp;&nbsp; &nbsp; //移除队头元素并返回该元素<br>
       T&nbsp;&nbsp; &nbsp;takeLast()&nbsp;&nbsp; &nbsp;&nbsp; //移除队尾元素并返回该元素</div>
     take**() 移除函数只是将元素从列表中卸载下来，并不会删除元素内存空间，卸下来的元素作为返回值返回。<br>
-    <div  class="code">void&nbsp;&nbsp; &nbsp;removeAt(int i)&nbsp; //删除序号为 i
+    <div class="code">void&nbsp;&nbsp; &nbsp;removeAt(int i)&nbsp; //删除序号为 i
       的元素，释放该元素内存<br>
       void&nbsp;&nbsp; &nbsp;removeFirst()&nbsp; &nbsp;&nbsp; //删除队头元素，释放该元素内存<br>
       void&nbsp;&nbsp;&nbsp; pop_front()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //同
@@ -103,49 +102,49 @@
       pop_back()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //同
       removeLast()，STL风格</div>
     &nbsp;remove**() 函数没有返回值，直接从列表删除元素，并释放该元素内存空间，删除的元素彻底消失。<br>
-    <div  class="code">int&nbsp;&nbsp; &nbsp;removeAll(const T &amp;
+    <div class="code">int&nbsp;&nbsp; &nbsp;removeAll(const T &amp;
       value)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //删除列表中所有等于 value 值的元素，返回删除的数量<br>
       bool&nbsp;&nbsp;&nbsp; removeOne(const T &amp; value) //删除列表中第一个等于 value
       值的元素，如果列表有等于 value 值的元素，返回 true，否则返回 false</div>
     注意 removeAll( value ) 函数不是清空列表，而是删除列表中所有等于 value 值的元素，并返回删除的计数。<br>
     removeOne( value ) 函数第一个等于 value 值的元素，如果删除成功返回 true，即列表中存在等于 value 的元素，<br>
     如果删除失败返回 false，即列表中不存在等于 value 的元素。需要特别注意的是：<br>
-    <span  style="font-weight: bold;">removeAll( value )、removeOne( value
-      )这两个函数必 须要类型 T 存在 operator==() 等于号函数，T 类型能够进行相等判断！</span><br>
-    <div  class="code">void&nbsp;&nbsp; &nbsp;clear()</div>
+    <span style="font-weight: bold;">removeAll( value )、removeOne( value )这两个函数必
+      须要类型 T 存在 operator==() 等于号函数，T 类型能够进行相等判断！</span><br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;clear()</div>
     clear() 函数才是删除列表所有元素，并释放内存空间。<br>
     <br>
     （4）访问和查询函数<br>
-    <div  class="code">int&nbsp;&nbsp; &nbsp;size() const<br>
+    <div class="code">int&nbsp;&nbsp; &nbsp;size() const<br>
       int&nbsp;&nbsp;&nbsp; length() const&nbsp;&nbsp;&nbsp; //同 size()&nbsp; </div>
     获取列表大小，即存储的元素总数量。列表有 size() 函数，但是没有 resize() 函数，不能直接扩展列表大小。<br>
     列表只有为新元素提前保留空间的函数：<br>
-    <div  class="code">void&nbsp;&nbsp; &nbsp;reserve(int alloc)</div>
+    <div class="code">void&nbsp;&nbsp; &nbsp;reserve(int alloc)</div>
     reserve() 函数是在程序员能够提前预估元素总量的情况提前为 alloc 数量的元素申请内存空间，保留使用。<br>
     如果 alloc 数值不超过 size() 数值，该函数调用被忽略；如果 alloc 数值大于 size() 数值，那么提前分配空间，保证列表能够存储
     alloc&nbsp; 数量的元素。注意 reserve() 函数不会改变列表&nbsp; size()
     数值大小，不会添加任何新元素，仅仅是调整内部存储空间，保留使用，实际并没有使用新分配的空间，列表内的元素个数不变。<br>
     列表有两个 count() 计数函数，用途不一样：<br>
-    <div  class="code">int&nbsp;&nbsp; &nbsp;count(const T &amp; value) const<br>
+    <div class="code">int&nbsp;&nbsp; &nbsp;count(const T &amp; value) const<br>
       int&nbsp;&nbsp; &nbsp;count() const</div>
     第一个 count( value ) 函数统计列表中等于 value 值的元素个数，这个函数也需要类型 T 带有 operator==() 等于号函数。<br>
     第二个 count() 函数不带参数，等同于 size() 函数，是列表元素的总数量。<br>
     <br>
     判断列表是否为空列表，使用如下函数：<br>
-    <div  class="code"> bool&nbsp;&nbsp; &nbsp;empty() const&nbsp;&nbsp;&nbsp;
+    <div class="code"> bool&nbsp;&nbsp; &nbsp;empty() const&nbsp;&nbsp;&nbsp;
       //空列表返回 true，有元素就返回 false，STL风格<br>
       bool&nbsp;&nbsp;&nbsp; isEmpty() const //空列表返回 true，有元素就返回 false ，Qt 风格</div>
-    <span  style="font-weight: bold;">注意 empty() /isEmpty()
+    <span style="font-weight: bold;">注意 empty() /isEmpty()
       、size()/length()/count()&nbsp; 函数要牢记经常使用，因 为列表的函数，凡是涉及到序号 i 的，一般都不会判断序号 i
       是否越界，需要程序员手动判断数组是否越界，列表的很多函数并不安全！</span><br>
     列表函数为了优化访问效率，基本上没有为访问序号 i 的函数添加越界判断，所以一旦越界，程序很可能崩溃！<br>
     <br>
     访问序号为 i 的元素，可以使用如下函数：<br>
-    <div  class="code">const T &amp;&nbsp;&nbsp; &nbsp;at(int i) const</div>
-    at( i ) 函数返回序号为 i 元素的<span  style="font-weight: bold;">只读引用</span>，但是不进行数组越界
+    <div class="code">const T &amp;&nbsp;&nbsp; &nbsp;at(int i) const</div>
+    at( i ) 函数返回序号为 i 元素的<span style="font-weight: bold;">只读引用</span>，但是不 进行数组越界
     判断，需要手动判断，该函数的好处是读取效率高。<br>
     比较安全的访问函数是下面两个：<br>
-    <div  class="code">T&nbsp;&nbsp; &nbsp;value(int i) const<br>
+    <div class="code">T&nbsp;&nbsp; &nbsp;value(int i) const<br>
       T&nbsp;&nbsp; &nbsp;value(int i, const T &amp; defaultValue) const</div>
     第一个 value( i ) 函数返回 序号为 i 的元素（数值复制，不是引用），如果 i 越界，那么返回 T 类型默认构造函数生成的数值，比如
     int、double、指针 都返回 0（Qt 容器为基本数据类型做了初始化）。<br>
@@ -153,12 +152,11 @@
     两个 value() 函数因为每次调用都进行数组越界判断，所以访问效率不如 at() 函数高，在知道不越界的情况下使用 at() 更好。<br>
     <br>
     查询数组里是否包含某个数值元素，使用如下函数：<br>
-    <div  class="code">bool&nbsp;&nbsp; &nbsp;contains(const T &amp; value)
-      const</div>
+    <div class="code">bool&nbsp;&nbsp; &nbsp;contains(const T &amp; value) const</div>
     如果包含等于 value 值的元素返回 true，否则返回 false。要统计等于 value 值的元素个数，使用前面的 count( value
     )&nbsp; 函数。<br>
     如果希望查询等于 value 值的元素的序号，<br>
-    <div  class="code">int&nbsp;&nbsp; &nbsp;indexOf(const T &amp; value, int
+    <div class="code">int&nbsp;&nbsp; &nbsp;indexOf(const T &amp; value, int
       from = 0) const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       //从前向后 查找等于 value 值的元素序号<br>
       int&nbsp;&nbsp;&nbsp; lastIndexOf(const T &amp; value, int from = -1)
@@ -166,11 +164,12 @@
     indexOf( value, from ) 是从前向后查找元素，第一个参数是要匹配的数值，第二个是查询的起始最小序号，默认从 0&nbsp;
     序号开始查找。<br>
     lastIndexOf( value, from ) 是从后向前查找元素，第一个参数是要匹配的数值，第二个是查询的起始最大序号，默认从队尾开始查找。<br>
+    这两个查询函数，如果没找到匹配元素就返回 -1，如果找到了就返回值正确的序号。<br>
     注意 contains( value )、count( value ) 、indexOf( value, from )、lastIndexOf(
     value, from ) 函数都要求 T 类型支持 operator==() 等于号函数。<br>
     <br>
     判断队头、队尾元素是否为 value 的函数如下：<br>
-    <div  class="code">bool&nbsp;&nbsp;&nbsp; startsWith(const T &amp; value)
+    <div class="code">bool&nbsp;&nbsp;&nbsp; startsWith(const T &amp; value)
       const&nbsp;&nbsp;&nbsp; //检查队头是否等于 value<br>
       bool&nbsp;&nbsp; &nbsp;endsWith(const T &amp; value)
       const&nbsp;&nbsp;&nbsp;&nbsp; //检查队尾是否等于 value</div>
@@ -178,7 +177,7 @@
     endsWith( value ) 检查队尾元素，如果等于 value 就返回 true，如果列表为空或末尾不等于 value 返回 false。<br>
     <br>
     获取列表头部、尾部元素引用的函数如下：<br>
-    <div  class="code">T &amp;&nbsp;&nbsp;
+    <div class="code">T &amp;&nbsp;&nbsp;
       &nbsp;first()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       //队头读写引用，可以修改队头数值<br>
       const T &amp;&nbsp;&nbsp; &nbsp;first()
@@ -203,45 +202,45 @@
     必须手动用 ! empty() 或&nbsp; ! isEmpty() 判断列表非空之后才能调用上面 8 个函数。<br>
     <br>
     获取列表的子列表，使用如下函数：<br>
-    <div  class="code">QList&lt;T&gt;&nbsp;&nbsp; &nbsp;mid(int pos, int length
-      = -1) const</div>
+    <div class="code">QList&lt;T&gt;&nbsp;&nbsp; &nbsp;mid(int pos, int length =
+      -1) const</div>
     mid() 函数新建一个子列表，将本列表从序号 pos 开始位置，复制长度为 length 数量的元素到子列表中并返回。<br>
     如果 length 为 -1（或大于后面剩余的元素数量），就返回从 pos 开始的所有元素列表。返回的子列表是独立的新列表，与本列表没有内存共享。<br>
     <br>
     （5）替换、移动和交换函数<br>
     替换函数就是赋值修改：<br>
-    <div  class="code">void&nbsp;&nbsp;&nbsp; replace(int i, const T &amp;
+    <div class="code">void&nbsp;&nbsp;&nbsp; replace(int i, const T &amp;
       value)&nbsp; // 等同于 list[i] = value;</div>
     将 序号为 i 的元素数值修改为新的 value。注意序号 i 不能越界，必须满足&nbsp; 0 &lt;= i &lt; size() 。<br>
-    <div  class="code">void&nbsp;&nbsp;&nbsp; move(int from, int to)</div>
+    <div class="code">void&nbsp;&nbsp;&nbsp; move(int from, int to)</div>
     move(from, to) 移动函数是将序号 from 的元素移动到序号为 to 的位置，就是先卸载 from 序号元素，然后插入到 to 序号位置。<br>
     两个序号必须都位于 0 到 size() 之间，序号必须合法。
-    <div  class="code">void&nbsp;&nbsp;&nbsp; swap(QList&lt;T&gt; &amp; other)</div>
+    <div class="code">void&nbsp;&nbsp;&nbsp; swap(QList&lt;T&gt; &amp; other)</div>
     这是大 swap() 函数，将本列表所有元素与参数 other 列表内所有元素互换，这个函数不会出错，并且互换的效率非常高。<br>
-    <div  class="code">void&nbsp;&nbsp;&nbsp; swap(int i, int j)</div>
+    <div class="code">void&nbsp;&nbsp;&nbsp; swap(int i, int j)</div>
     第二个是小 swap() 函数，将序号 i 的元素和序号 j 的元素数值互换，序号 i、j 不能越界，必须合法。<br>
     <br>
     （6）运算符函数<br>
     我们设置三个简单整数列表，在表格中举例说明各个运算符函数用途。三个列表如下：<br>
-    <div  class="code">QList&lt;int&gt; aList = {1, 3, 5};<br>
+    <div class="code">QList&lt;int&gt; aList = {1, 3, 5};<br>
       QList&lt;int&gt; bList = {2, 4, 6};<br>
       QList&lt;int&gt; cList;</div>
     上面使用 C++11 初始列表构造了列表 aList 和 bList ，cList 是空列表。各个运算符函数举例如下表：<br>
     <br>
-    <table  class="tabel">
+    <table class="tabel">
       <tbody>
-        <tr  class="d1">
-          <td  style="width: 360px;"  align="center"><b>运算符函数</b></td>
-          <td  style="width: 200px;"  align="center"><span  style="font-weight: bold;">举
+        <tr class="d1">
+          <td style="width: 360px;" align="center"><b>运算符函数</b></td>
+          <td style="width: 200px;" align="center"><span style="font-weight: bold;">举
               例</span></td>
-          <td  align="center"><b> 描述</b></td>
+          <td align="center"><b> 描述</b></td>
         </tr>
         <tr>
           <td>bool operator!=(const QList&lt;T&gt; &amp; other) const</td>
           <td>&nbsp;aList != bList ;</td>
           <td> aList 和 bList 两个列表有元素不同，结果为 true。 </td>
         </tr>
-        <tr  class="d1">
+        <tr class="d1">
           <td>QList&lt;T&gt; operator+(const QList&lt;T&gt; &amp; other) const</td>
           <td>&nbsp;cList = aList + bList;</td>
           <td> aList 和 bList 复制拼接后生成新列表，赋值给 cList。</td>
@@ -251,18 +250,18 @@
           <td>&nbsp;aList += bList ;</td>
           <td> 复制 bList 所有元素追加到 aList 末尾。 </td>
         </tr>
-        <tr  class="d1">
+        <tr class="d1">
           <td>QList&lt;T&gt; &amp; operator+=(const T &amp; value)</td>
-          <td  style="height: 16px;">&nbsp;aList += 100 ;</td>
+          <td style="height: 16px;">&nbsp;aList += 100 ;</td>
           <td> 添加一个元素 100 到 aList 末尾。 </td>
         </tr>
         <tr>
           <td>QList&lt;T&gt; &amp; operator&lt;&lt;(const QList&lt;T&gt; &amp;
             other)</td>
           <td>&nbsp;aList&lt;&lt;bList;</td>
-          <td  style="height: 16px;"> 复制 bList 所有元素追加到 aList 末尾。 </td>
+          <td style="height: 16px;"> 复制 bList 所有元素追加到 aList 末尾。 </td>
         </tr>
-        <tr  class="d1">
+        <tr class="d1">
           <td>QList&lt;T&gt; &amp; operator&lt;&lt;(const T &amp; value)</td>
           <td>&nbsp;aList&lt;&lt;100;</td>
           <td> 添加一个元素 100 到 aList 末尾。 </td>
@@ -272,7 +271,7 @@
           <td>&nbsp;cList = aList;</td>
           <td> aList 所有元素都复制一份给 cList，aList本身不变。 </td>
         </tr>
-        <tr  class="d1">
+        <tr class="d1">
           <td>QList &amp; operator=(QList&lt;T&gt; &amp;&amp; other) //移动赋值</td>
           <td>&nbsp;cList = std::move(aList) ; </td>
           <td> aList 所有元素都移动给 cList，aList本身被清空。 </td>
@@ -282,11 +281,11 @@
           <td>&nbsp;aList == bList ;</td>
           <td> aList 和 bList 有元素不同，结果为 false。 </td>
         </tr>
-        <tr  class="d1">
+        <tr class="d1">
           <td>T &amp; operator[](int i)</td>
           <td>&nbsp;aList[0] = 100;<br>
           </td>
-          <td  style="height: 16px;"> 获取序号为 i 的元素的读写引用，可修改列表元素。 </td>
+          <td style="height: 16px;"> 获取序号为 i 的元素的读写引用，可修改列表元素。 </td>
         </tr>
         <tr>
           <td>const T &amp; operator[](int i) const</td>
@@ -303,7 +302,7 @@
     <br>
     （7）迭代器函数<br>
     QList 内嵌了 STL 风格的只读迭代器和读写迭代器：<br>
-    <div  class="code">QList::const_iterator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <div class="code">QList::const_iterator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       //只读迭代器类，STL风格<br>
       QList::iterator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       //读写迭代器类，STL风格<br>
@@ -313,7 +312,7 @@
       //读写迭代器，Qt命名风格</div>
     迭代器就像指向元素的指针，可以枚举列表中所有元素，迭代器本身支持各种操作符函数，<br>
     比如 ++ 是找寻下一个元素，-- 是倒退一个元素， (* it) 是获取元素。Qt 帮助文档中示范了迭代器的使用：<br>
-    <div  class="code">QList&lt;QString&gt; list;<br>
+    <div class="code">QList&lt;QString&gt; list;<br>
       list.append("January");<br>
       list.append("February");<br>
       ...<br>
@@ -327,10 +326,10 @@
     i 从列表头部迭代器开始，逐个遍历列表元素，打印每个字符串，直到迭代器末尾结束。<br>
     &nbsp;list.constBegin() 是指向队头元素的指针，但是注意&nbsp; list.constEnd() 是指向队尾后面假想元素的指
     针，<br>
-    &nbsp;<span  style="font-weight: bold;">list.constEnd() 指向的东西根本不存在，仅用于越界判断。</span><br>
+    &nbsp;<span style="font-weight: bold;">list.constEnd() 指向的东西根本不存在，仅用于越界判断。</span><br>
     <br>
     获取指向队头、队尾假想元素的只读迭代器函数如下：<br>
-    <div  class="code">const_iterator&nbsp;&nbsp; &nbsp;begin()
+    <div class="code">const_iterator&nbsp;&nbsp; &nbsp;begin()
       const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //指向队头迭代
       器，STL风格<br>
       const_iterator&nbsp;&nbsp; &nbsp;cbegin()
@@ -345,16 +344,16 @@
       const_iterator&nbsp;&nbsp;&nbsp; constEnd() const&nbsp;&nbsp;&nbsp;&nbsp;
       //指向队尾假想元素迭代器，Qt命名风格</div>
     获取指向队头、队尾假想元素的读写迭代器函数如下：<br>
-    <div  class="code">iterator&nbsp;&nbsp; &nbsp;begin()&nbsp; //指向队头迭代器，STL风格<br>
+    <div class="code">iterator&nbsp;&nbsp; &nbsp;begin()&nbsp; //指向队头迭代器，STL风格<br>
       iterator&nbsp;&nbsp;&nbsp; end()&nbsp;&nbsp;&nbsp;&nbsp;
       //指向队尾假想元素迭代器，STL风格</div>
     利用迭代器也可以添加元素或删除元素，通过迭代器插入元素的函数如下：<br>
-    <div  class="code">iterator&nbsp;&nbsp; &nbsp;insert(iterator before, const
-      T &amp; value)&nbsp; //在 before 指向的元素前面插入元素 value</div>
+    <div class="code">iterator&nbsp;&nbsp; &nbsp;insert(iterator before, const T
+      &amp; value)&nbsp; //在 before 指向的元素前面插入元素 value</div>
     这个 insert() 函数需要注意两点：第一是返回值的迭代器指向新增元素 value ；<br>
     第二是执行插入元素操作后，参数里的迭代器 before 失效，不能再使用，只能利用返回值的迭代器进行遍历。<br>
     通过迭代器删除一个元素或多个元素的函数如下：<br>
-    <div  class="code">iterator&nbsp;&nbsp; &nbsp;erase(iterator pos)&nbsp; //删除
+    <div class="code">iterator&nbsp;&nbsp; &nbsp;erase(iterator pos)&nbsp; //删除
       pos 指向的元素，返回指向下一个元素的迭代器或者 list.end() <br>
       iterator&nbsp;&nbsp; &nbsp;erase(iterator begin, iterator end) //删除从 begin
       到 end 指向的元素，注意 end 指向的元素不删除</div>
@@ -365,7 +364,7 @@
     <br>
     （8）容器类型转换函数<br>
     列表支持将自身对象转换为其他容器类型，比如集合、标准库列表、向量：<br>
-    <div  class="code"> QSet&lt;T&gt;&nbsp;&nbsp;&nbsp; toSet()
+    <div class="code"> QSet&lt;T&gt;&nbsp;&nbsp;&nbsp; toSet()
       const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       //转为集合<br>
       std::list&lt;T&gt;&nbsp;&nbsp;&nbsp; toStdList() const&nbsp;&nbsp; &nbsp;
@@ -373,7 +372,7 @@
       QVector&lt;T&gt;&nbsp;&nbsp;&nbsp; toVector() const &nbsp; //转为向量<br>
     </div>
     QList 能够转出，也能使用列表的静态成员函数，把其他三种容器转换为新的列表对象：<br>
-    <div  class="code"> QList&lt;T&gt;&nbsp;&nbsp;&nbsp; fromSet(const
+    <div class="code"> QList&lt;T&gt;&nbsp;&nbsp;&nbsp; fromSet(const
       QSet&lt;T&gt; &amp;
       set)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       //静态函数，将集合转为列表<br>
@@ -384,14 +383,13 @@
       vector)&nbsp;&nbsp; &nbsp; //静态函数，将向量转为列表<br>
     </div>
     静态成员函数的语法类似下面这样：<br>
-    <div  class="code">&nbsp;&nbsp;&nbsp; QVector&lt;int&gt;&nbsp; v = {1, 2,
-      3};<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QVector&lt;int&gt;&nbsp; v = {1, 2, 3};<br>
       &nbsp;&nbsp;&nbsp; QList&lt;int&gt; cList =
       QList&lt;int&gt;::fromVector(v);</div>
     <br>
     （9）其他内容<br>
     QList 附带了友元函数 operator&lt;&lt;() 和 operator&gt;&gt;()，用于支持数据流输入和输出：<br>
-    <div  class="code"> QDataStream &amp;&nbsp;&nbsp;&nbsp;
+    <div class="code"> QDataStream &amp;&nbsp;&nbsp;&nbsp;
       operator&lt;&lt;(QDataStream &amp; out, const QList&lt;T&gt; &amp; list)<br>
       QDataStream &amp;&nbsp;&nbsp;&nbsp; operator&gt;&gt;(QDataStream &amp; in,
       QList&lt;T&gt; &amp; list)<br>
@@ -401,48 +399,1572 @@
     如果使用自定义类型，希望存储在列表中并支持自动的流输入输出，那么要为自定义类型添加友元函数 operator&lt;&lt;() 和
     operator&gt;&gt;() 。<br>
     <br>
-    <span  style="font-weight: bold;">使用 QList 时，需要注意 QList 仅支持存储
+    <span style="font-weight: bold;">使用 QList 时，需要注意 QList 仅支持存储
       值类型、指针类型，不能存储变量的引用。</span><br>
     如果定义列表时类型 T 设置为引用，如 QList&lt;int &amp;&gt; ，那么程序无法编译！<br>
     <br>
     Qt 带有全局函数，可以支持容器类对象的排序：<br>
-    <div  class="code">void qSort(Container &amp; container)&nbsp; //排序 <br>
+    <div class="code">void qSort(Container &amp; container)&nbsp; //排序 <br>
       void qStableSort(Container &amp; container)&nbsp; //稳定排序</div>
     排序函数要求容器的元素类型 T 必须支持 operator&lt;() 小于号函数，用于比较元素大小。<br>
+    Qt 调用的小于号函数原型是两个参数的全局 operator&lt;() 函数，不是成员函数，应该在类外面声明并定义下面的小于号函数：<br>
+    <div class="code">bool&nbsp; operator&lt; ( const T &amp;t1, const T &amp;t2
+      )</div>
+    一般要将该函数声明为 T 类型的友元函数，方便访问私有变量。<br>
     <br>
     最后我们梳理一下，如果自定义类型希望能够完美地和 QList 配合使用，那么需求如下：<br>
     ① 必须是可赋值类型，需要默认构造函数、复制构造函数、赋值函数 operator=() ；<br>
     ② 如果希望支持查询函数，需要双等号函数 operator==()；<br>
-    ③ 如果希望支持排序函数，需要小于号函数 operator&lt;() ；<br>
-    ④ 如果希望支持 QDataStream 输入流，那么添加友元函数&nbsp; operator&lt;&lt;() 和
+    ③ 如果希望支持排序函数，需要全局小于号函数 operator&lt; (&nbsp; const T &amp;t1, const T &amp;t2
+    ) ；<br>
+    ④ 如果希望支持 QDataStream 数据流输入输出，那么添加友元函数&nbsp; operator&lt;&lt;() 和
     operator&gt;&gt;() 。 <br>
     第一条是必须实现的函数，后面三条是建议实现的函数。<br>
     <br>
-    列表的内容介绍到这，下面开始本小节的示例程序。<br>
+    列表的内容介绍到这，本教程在之前的 3.4.2 、7.2.4 、 7.5.4、8.1.4、8.2.6、8.3.5 等章节均有使用列表类的示例代码。<br>
+    读者可以回顾一下前面的代码，8.3.5 节将列表当作队列使用，其他章节将列表当作数组来使用。<br>
+    本小节的示例实现自定义类型的联系人 Contact，为联系人 Contact
+    添加功能函数，使得列表类能够存储该类对象，并添加各种辅助函数实现查询、排序、数据流输入输出等功能。<br>
+    我们在 D:\QtProjects 里面新建名为 ch09 的文件夹，开始本章示例学习。<br>
+    打开 QtCreator，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>
+    ①项目名称 contactlist，创建路径 D:\QtProjects\ch09，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    我们打开 widget.ui 界面文件，按照下图拖入控件：<br>
+    <center> <img src="images/ch09/ch09-01-01.png" alt="ui" width="800"></center>
+    第一行是列表控件，默认对象名 listWidget。<br>
+    第二行是三个标签和三个单行编辑器，标签文本分别为 “姓名”、“电话”、“地址”，<br>
+    单行编辑器对象名 lineEditName、lineEditPhone、lineEditAddress，第二行使用水平布局。<br>
+    第三行和第四行是六个按钮，按钮文本对象名分别为：<br>
+    “添加”pushButtonAdd、“删除”pushButtonDel、“查询姓名”pushButtonFind、“姓名排
+    序”pushButtonSort、“保存”pushButtonSave、“打开”pushButtonOpen，第三行和第四行使用一个网格布局。<br>
+    窗口整体使用垂直布局，窗口尺寸 500*330。<br>
+    界面布局设置好后，我们依次为六个按钮添加槽函数：<br>
+    <center> <img src="images/ch09/ch09-01-02.png" alt="ui" width="800"></center>
+    添加槽函数之后，我们进入 QtCreator编辑界面，我们点击 QtCreator 菜单“文件”--&gt;“新建文件或项目...”，<br>
+    弹出新建对话框，我们在该对话框左边一列选择“文件和类”里面的“C++”，然后中间选择“C++ Class”<br>
+    <center> <img src="images/ch09/ch09-01-03.png" alt="ui" width="800"></center>
+    然后右下角点击 “Choose... ”按钮，进入定义类的界面：<br>
+    <center> <img src="images/ch09/ch09-01-04.png" alt="ui" width="800"></center>
+    类名输入 Contact，头文件名和源文件名用自动填充的 contact.h 和 contact.cpp ，然后点击“下一步”按钮，进入项目管理界面：<br>
+    <center> <img src="images/ch09/ch09-01-05.png" alt="ui" width="800"></center>
+    项目管理界面不用修改，直接点击“完成”按钮，回到 QtCreator 编辑界面可以看到新增的 contact.h 和 contact.cpp 文件。<br>
+    我们打开 contact.h 头文件并编辑代码如下：<br>
+    <div class="code"> <span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>CONTACT_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">CONTACT_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QString&gt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//字符串</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QFile&gt;</span><span style=" color:#c0c0c0;">   </span><span
+style=" color:#008000;">//文件类</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDataStream&gt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//数据流类</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Contact</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Contact</span><span
+style=" color:#000000;">();</span><span style=" color:#008000;">//默认构造函数，必须有</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" color:#800080;">Contact</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//带参数的构造函数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Contact</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span>strName<span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span>strPhone<span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span>strAddress<span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//复制构造函数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Contact</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Contact</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span>c<span
+style=" color:#000000;">);</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//必须有</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//赋值运算符函数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Contact</span><span
+style=" color:#000000;">&amp;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">operator</span><span style=" color:#000000;">=(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Contact</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span>c<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//必须有</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//双等号函数，用于支持列表查询函数，双等号和小于号都按姓名字符串比较</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">bool</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">operator</span><span
+style=" color:#000000;">==(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Contact</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span>c<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//友元声明，小于号函数必须用两个参数的全局函数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">friend</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">bool</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">operator</span><span style=" color:#000000;">&lt;(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Contact</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span>c1<span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Contact</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span>c2<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//友元声明，流插入运算符和流提取运算符函数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">friend</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QDataStream</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">operator</span><span
+style=" color:#000000;">&lt;&lt;(</span><span style=" color:#800080;">QDataStream</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#c0c0c0;"> </span>out<span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">const</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Contact</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">&amp;</span>c<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">friend</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QDataStream</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">operator</span><span
+style=" color:#000000;">&gt;&gt;(</span><span style=" color:#800080;">QDataStream</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#c0c0c0;"> </span>in<span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Contact</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">&amp;</span>c<span style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//toString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">函数方便将三个成员变量作为一行文本显示到列表控件</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">toString</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//成员变量</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_strName</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//姓名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_strPhone</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//电话</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_strAddress</span><span
+style=" color:#000000;">;</span><span style=" color:#008000;">//地址</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//两个参数的小于号函数声明</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">bool</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">operator</span><span
+style=" color:#000000;">&lt;(</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">const</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Contact</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">&amp;</span>c1<span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Contact</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span>c2<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//流插入运算符和流提取运算符函数本身的声明</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">QDataStream</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">&amp;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">operator</span><span style=" color:#000000;">&lt;&lt;(</span><span
+style=" color:#800080;">QDataStream</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">&amp;</span><span style=" color:#c0c0c0;"> </span>out<span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Contact</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span>c<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">QDataStream</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">&amp;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">operator</span><span style=" color:#000000;">&gt;&gt;(</span><span
+style=" color:#800080;">QDataStream</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">&amp;</span><span style=" color:#c0c0c0;"> </span>in<span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Contact</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span>c<span
+style=" color:#000000;">);</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">CONTACT_H</span></pre>
+    </div>
+    我们在该文件添加了字符串、文件类和数据流类的头文件引用。<br>
+    Contact 类只有默认构造函数和析构函数是创建文件时自动添加的，其他代码都是手动编写的。<br>
+    我们为该类添加了带三个参数的构造函数，对应三个成员变量，即姓名字符串、电话字符串和地址字符串。<br>
+    然后添加了复制构造函数、赋值运算符函数的声明，加上原有的默认构造函数，这三个函数是支持 QList 存储的必要条件。<br>
+    然后添加了双等号比较函数，用于支持 QList 的查询函数。<br>
+    添加了全局函数 operator&lt;( )&nbsp; 的友元声明，这样保证能访问类的私有变量。 <br>
+    添加了全局函数 operator&lt;&lt;() 和 operator&gt;&gt;()
+    的友元声明，这样保证数据流输入输出时能够访问类的私有变量。<br>
+    添加了类的公开成员函数 toString()，方便将成员变量字符串拼接成一行文本，用于后面窗口里的列表控件显示。<br>
+    类里面最后是三个成员变量，存储姓名、电话和地址。<br>
+    类外面是三个全局函数声明，小于号函数 operator&lt;( ) 用于支持容器内元素的排序，后面是按照联系人姓名字符串比较的。<br>
+    operator&lt;&lt;() 和 operator&gt;&gt;() 用于支持数据流输出和输入。<br>
     <br>
-    <div  class="os2">9.1.2 队列 QQueue</div>
+    接下来分段添加 contact.cpp 文件的代码，实现头文件里声明的所有函数，首先来看默认的构造函数和析构函数：<br>
+    <div class="code">
+      <style type="text/css">
+p, li { white-space: pre-wrap; }
+</style> <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"contact.h"</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//默认构造函数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Contact</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Contact</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_strName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"None"</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_strPhone</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"00000"</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_strAddress</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"None"</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Contact</span><span style=" color:#000000;">::~</span><span
+style=" color:#800080;">Contact</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    默认构造函数里设置了默认的姓名、电话和地址的字符串，析构函数没改动。<br>
+    下面来看带三个参数的构造函数和复制构造函数：<br>
+    <div class="code">
+      <style type="text/css">
+p, li { white-space: pre-wrap; }
+</style> <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//带参数的构造函数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Contact</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Contact</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QString</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strName</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strPhone</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strAddress</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_strName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strName</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_strPhone</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strPhone</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_strAddress</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strAddress</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//复制构造函数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Contact</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Contact</span><span style=" color:#000000;">(</span><span
+style=" color:#808000;">const</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Contact</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">&amp;</span><span style=" color:#000000;">c</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_strName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">c</span><span style=" color:#000000;">.</span><span style=" color:#800000;">m_strName</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_strPhone</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">c</span><span style=" color:#000000;">.</span><span style=" color:#800000;">m_strPhone</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_strAddress</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">c</span><span style=" color:#000000;">.</span><span style=" color:#800000;">m_strAddress</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    这两个构造函数代码简单，就是把参数里的变量对应地设置给成员变量。<br>
+    然后来看赋值运算符函数：<br>
+    <div class="code">
+      <style type="text/css">
+p, li { white-space: pre-wrap; }
+</style> <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//赋值运算符函数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Contact</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">&amp;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Contact</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">operator</span><span style=" color:#000000;">=</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">const</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Contact</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">&amp;</span><span style=" color:#000000;">c</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_strName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">c</span><span style=" color:#000000;">.</span><span style=" color:#800000;">m_strName</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_strPhone</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">c</span><span style=" color:#000000;">.</span><span style=" color:#800000;">m_strPhone</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_strAddress</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">c</span><span style=" color:#000000;">.</span><span style=" color:#800000;">m_strAddress</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">return</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#808000;">this</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    这个函数也简单，从参数对象里复制对应的字符串给成员变量，然后返回自身对象。返回值是方便连等操作，如 a=b=c 。<br>
+    下面来看双等号比较函数：<br>
+    <div class="code">
+      <style type="text/css">
+p, li { white-space: pre-wrap; }
+</style> <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//双等号函数，用于支持列表查询函数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">bool</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Contact</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">operator</span><span
+style=" color:#000000;">==</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Contact</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#000000;">c</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//比较纯粹看姓名的字符串比较</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">return</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">c</span><span style=" color:#000000;">.</span><span style=" color:#800000;">m_strName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">==</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">m_strName</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    该函数将参数里对象 c 的姓名字符串与成员变量姓名字符串进行相等判断，然后返回比较结果。这个函数用于支持 QList 查询操作，QList 的函数比如
+    contains()、indexOf()、lastIndexOf()
+    会调用这个函数做比较，查看列表对象里是否有相等的元素。我们的双等号函数只做了姓名字符串比较，电话字符串和地址字符串没有判断，是否相等只看姓名字符串是否一致。<br>
+    下面来看全局的小于号函数：<br>
+    <div class="code">
+      <style type="text/css">
+p, li { white-space: pre-wrap; }
+</style> <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//两个参数的小于号函数，全局函数，用于支持排序功能</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">bool</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">operator</span><span
+style=" color:#000000;">&lt;(</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">const</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Contact</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">&amp;</span><span style=" color:#000000;">c1</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Contact</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#000000;">c2</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//纯粹看姓名的字符串比较</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">return</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">c1</span><span style=" color:#000000;">.</span><span style=" color:#800000;">m_strName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&lt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">c2</span><span style=" color:#000000;">.</span><span style=" color:#800000;">m_strName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    小于号函数也是只比较两个对象里姓名字符串的字典序，而不用管电话、地址。注意等于号、小于号、大于号这些比较运算符都有两种实现，一种是单参数的类成员函数，如
+    上 面的双等号成员函数，另一种是带两个参数的全局函数，比如这里的小于号函数，参数 c1 是小于号左边的对象，c2
+    是小于号右边的对象。具体使用哪种实现要看场景需求，因为 qSort() 排序函数调用的是两个参数的全局小于号函数，所以这里使用全局的小于号函数。<br>
+    接下来看看 toString() 函数：<br>
+    <div class="code">
+      <style type="text/css">
+p, li { white-space: pre-wrap; }
+</style> <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//toString</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">函数方便将三个成员变量作为一行文本显示到列表控件</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">QString</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Contact</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">toString</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//用制表符拼接三个字符串</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strRet</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">m_strName</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">+</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"\t"</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">+</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_strPhone</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QString</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"\t"</span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">+</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_strAddress</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">return</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strRet</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    该函数将三个字符串用两个 Tab 制表符拼接，这个函数与 QList 要求无关，是我们方便添加对象的字符串到列表控件显示用的。<br>
+    contact.cpp 文件最后是两个全局的流操作符函数：<br>
+    <div class="code">
+      <style type="text/css">
+p, li { white-space: pre-wrap; }
+</style> <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//数据流操作，流插入运算符</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">QDataStream</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">&amp;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">operator</span><span style=" color:#000000;">&lt;&lt;(</span><span
+style=" color:#800080;">QDataStream</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">&amp;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">out</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">const</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Contact</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">&amp;</span><span style=" color:#000000;">c</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">out</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">c</span><span
+style=" color:#000000;">.</span><span style=" color:#800000;">m_strName</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">c</span><span
+style=" color:#000000;">.</span><span style=" color:#800000;">m_strPhone</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">c</span><span
+style=" color:#000000;">.</span><span style=" color:#800000;">m_strAddress</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">return</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">out</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//数据流操作，流提取运算符</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">QDataStream</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">&amp;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">operator</span><span style=" color:#000000;">&gt;&gt;(</span><span
+style=" color:#800080;">QDataStream</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">&amp;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">in</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Contact</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">&amp;</span><span style=" color:#000000;">c</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">in</span><span
+style=" color:#000000;">&gt;&gt;</span><span style=" color:#000000;">c</span><span
+style=" color:#000000;">.</span><span style=" color:#800000;">m_strName</span><span
+style=" color:#000000;">&gt;&gt;</span><span style=" color:#000000;">c</span><span
+style=" color:#000000;">.</span><span style=" color:#800000;">m_strPhone</span><span
+style=" color:#000000;">&gt;&gt;</span><span style=" color:#000000;">c</span><span
+style=" color:#000000;">.</span><span style=" color:#800000;">m_strAddress</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">return</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">in</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    第一个流插入操作符函数，依次将姓名、电话、地址字符串输出到流 out 中，并返回 out 流对象。<br>
+    第二个流提取操作符函数，依次从输入流 in 中提取姓名、电话、地址字符串，并返回 in 流对象。<br>
+    <br>
+    Contact 类的内容就是上面的代码，接下来我们来编辑窗体类的头文件 widget.h ，窗体头文件内容如下：<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>WIDGET_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">WIDGET_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QList&gt;</span><span style=" color:#c0c0c0;">   </span><span
+style=" color:#008000;">//列表类</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"contact.h"</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#008000;">//联系人</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonAdd_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonDel_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonFind_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonSort_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonSave_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonOpen_clicked</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//联系人列表</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QList</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#800080;">Contact</span><span
+style=" color:#000000;">&gt;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_listContacts</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre>
+    </div>
+    该文件首先添加 QList 模板类和自定义 Contact 类的头文件引用。<br>
+    Widget 类里的六个槽函数是之前在设计界面通过按钮的右键菜单添加的。<br>
+    Widget 类里最后一行定义了联系人列表&nbsp; m_listContacts，使用 QList 容器存储自定义的 Contact 类对象。<br>
+    <br>
+    接下来我们分段编辑 widget.cpp 源文件的代码，首先是头文件引用、构造函数、析构函数：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;">
+      </span><span style=" color:#008000;">"widget.h"</span>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QMessageBox&gt;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QFile&gt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//文件</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QFileDialog&gt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//文件打开或保存对话框</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDataStream&gt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//数据流</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//定义4个联系人，添加到列表对象和列表控件，列表对象和列表控件一直同步</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//第1个</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Contact</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">daala</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"Daala"</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"44444"</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"North"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_listContacts</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">append</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">daala</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">listWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addItem</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">daala</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">toString</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//第2个</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Contact</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">bob</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"Bob"</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"22222"</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"South"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_listContacts</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">append</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">bob</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">listWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addItem</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">bob</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">toString</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//第3个</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Contact</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">carl</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"Carl"</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"33333"</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"West"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_listContacts</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">append</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">carl</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">listWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addItem</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">carl</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">toString</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//第4个</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Contact</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">alice</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"Alice"</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"11111"</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"East"</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_listContacts</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">append</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">alice</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">listWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addItem</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">alice</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">toString</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    我们添加打印调试信息、消息框、文件、文件对话框、数据流等类的头文件引用。<br>
+    构造函数代码逻辑很简单，就是定义了四个联系人对象，添加到 m_listContacts 列表对象和窗口里的列表控件。<br>
+    Contact 类的 toString() 函数这时候就体现出方便了，不需要每次都自己用代码拼接该类的三个成员字符串。<br>
+    <br>
+    下面来看“添加”按钮的槽函数：<br>
+    <div class="code">
+      <style type="text/css">
+p, li { white-space: pre-wrap; }
+</style> <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//添加联系人</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonAdd_clicked</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取姓名、电话、地址字符串</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditName</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">().</span><span
+style=" color:#000000;">trimmed</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strPhone</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditPhone</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">().</span><span
+style=" color:#000000;">trimmed</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strAddress</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditAddress</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">().</span><span
+style=" color:#000000;">trimmed</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//姓名不能为空，电话地址可以空</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strName</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">warning</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"姓名检查"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"姓名为空，请输入姓名。"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//姓名不空</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Contact</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">person</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strName</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strPhone</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strAddress</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//添加到列表对象和列表控件</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_listContacts</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">append</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">person</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QListWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">item</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QListWidgetItem</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">person</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">toString</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">listWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addItem</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">item</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//选中新条目</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">listWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setCurrentItem</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">item</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span><span style=" color:#008000;">//当前条目是加虚线框的那个</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">item</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setSelected</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">true</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#008000;">//高亮显示</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">listWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setFocus</span><span
+style=" color:#000000;">();</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//设置显示焦点</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    该函数首先获取三个单行编辑器的字符串，并判断姓名字符串是否为空，如果姓名为空就不处理。<br>
+    姓名不空的时候，定义联系人对象 person，然后同步地添加到列表对象&nbsp; m_listContacts 和列表控件。<br>
+    这里手动 new 了一个列表控件条目，方便设置新条目为列表控件的当前条目，并高亮选中，<br>
+    最后把显示焦点设置给列表控件，这样用户就能立即看到高亮的新条目。<br>
+    <br>
+    接下里看“删除”按钮的槽函数：<br>
+    <div class="code">
+      <style type="text/css">
+p, li { white-space: pre-wrap; }
+</style> <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//删除联系人</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonDel_clicked</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取当前条目</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QListWidgetItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#000000;">curItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">listWidget</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">currentItem</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//判断指针是否为空</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">NULL</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">==</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">curItem</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//没东西可以删除</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//存在当前条目</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取当前条目的序号</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">ix</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">listWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">currentRow</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//从列表对象删除联系人</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_listContacts</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">removeAt</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">ix</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//列表控件同步删除</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">curItem</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">curItem</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">NULL</span><span style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    该函数首先获取列表控件的当前条目，如果为空指针就不处理。<br>
+    如果当前条目非空，那么获取当前条目的行号，也就是条目序号，我们首先从列表对象 m_listContacts 删除该序号的元素，<br>
+    然后同步删除列表控件的对应条目。为了让列表对象 m_listContacts 和
+    列表控件显示一致，我们要在所有元素的增加、删除、排序等过程中注意列表对象和列表控件的同步操作。<br>
+    <br>
+    下面来看看“查询姓名”按钮的槽函数：<br>
+    <div class="code">
+      <style type="text/css">
+p, li { white-space: pre-wrap; }
+</style> <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//查找联系人</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonFind_clicked</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取姓名字符串</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditName</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">().</span><span
+style=" color:#000000;">trimmed</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//判断是否为空</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strName</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//姓名为空，不需要查询</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">warning</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"姓名检查"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"姓名为空，无法查询。"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//存在姓名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//从列表对象查找序号</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">ix</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_listContacts</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">indexOf</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Contact</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strName</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">""</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">""</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//如果找不到返回</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">-1</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">ix</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&lt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">information</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"查找"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"没有找到姓名一样的联系人。"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">else</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//找到了</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">information</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"查找"</span><span style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                     </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"存在姓名匹配的联系人，序号为</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%1</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"</span><span style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">ix</span><span style=" color:#000000;">)</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//设置列表控件当前选中条目为该序号</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">listWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setCurrentRow</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">ix</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">listWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">currentItem</span><span
+style=" color:#000000;">()-&gt;</span><span style=" color:#000000;">setSelected</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">true</span><span style=" color:#000000;">);</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//高亮色</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">listWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setFocus</span><span
+style=" color:#000000;">();</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//显示焦点</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    该函数首先获取单行编辑器里的姓名字符串，判断如果为空，那么不处理返回。<br>
+    如果姓名字符串不为空，那么调用 m_listContacts.indexOf()
+    函数查询是否有同样姓名字符串的对象，这个函数参数里是一个临时联系人对象，只设置了姓名字符串，电话和地址为空，因为查询时调用的&nbsp;
+    Contact::operator== () 函数只比较姓名字符串，其他的成员变量不比较。<br>
+    查询函数的返回值 ix 如果小于 0，说明没找到，提示消息框说没有找到，并返回；<br>
+    如果返回值是 0 或正数，说明找到了，提示消息框，显示第一个匹配的联系人序号，然后设置列表控件的当前条目为 ix
+    序号的条目，并设置该条目高亮色显示，将显示焦点设置给列表控件，方便用户直接看到匹配的联系人。<br>
+    <br>
+    下面来看“姓名排序”按钮的槽函数代码：<br>
+    <div class="code">
+      <style type="text/css">
+p, li { white-space: pre-wrap; }
+</style> <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//按照姓名排序</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonSort_clicked</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取计数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nCount</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">m_listContacts</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">count</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nCount</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&lt;=</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">1</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//没有联系人或者只有</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">1</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">个，不需要排序</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//存在</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">2</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">个以上联系人，直接调用排序函数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">qSort</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_listContacts</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//清空列表控件，然后按照排序后的结果显示</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">listWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">clear</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//循环添加条目给列表控件</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">for</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">i</span><span style=" color:#000000;">=</span><span style=" color:#000080;">0</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#000000;">nCount</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span
+style=" color:#000000;">++)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">listWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addItem</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_listContacts</span><span
+style=" color:#000000;">[</span><span style=" color:#000000;">i</span><span style=" color:#000000;">].</span><span
+style=" color:#000000;">toString</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//列表控件和列表对象的同步完毕</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    该函数首先获取列表对象存储的联系人总数，如果总数小于等于 1，说明没联系人或只有 1 个联系人，不需要排序，直接返回。<br>
+    如果联系人有 2 个或以上，那么调用 qSort() 函数对列表容器进行排序，排序函数的语法非常简单，把容器对象作为参数调用即可。<br>
+    qSort() 函数内部会调用我们之前编写的 全局小于号函数 operator&lt;( c1, c2 )。<br>
+    排序完成后，为了同步显示到列表控件，我们先把列表控件内容全部清空，然后将排序后的 m_listContacts
+    列表的每个元素，按照顺序添加相应字符串给列表控件， m_listContacts 列表的每个元素对于一个列表控件的条目。<br>
+    这样保证排序后的列表对象里元素顺序和列表控件条目顺序能一致。<br>
+    <br>
+    下面来看“保存”按钮的槽函数代码：<br>
+    <div class="code">
+      <style type="text/css">
+p, li { white-space: pre-wrap; }
+</style> <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//保存到文件</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">*.ds</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonSave_clicked</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取计数</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nCount</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">m_listContacts</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">count</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">nCount</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&lt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">1</span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//没有元素</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//存在元素，先获取要打开的文件名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strFile</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QFileDialog</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">getSaveFileName</span><span style=" color:#000000;">(</span><span
+style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"保存文件"</span><span
+style=" color:#000000;">),</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"./test.ds"</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                      </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"QDataStream</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Files</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">(*.ds)"</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//判断文件名是否为空</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strFile</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//用户没有设置保存的文件名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置了文件名，定义文件对象并尝试打开</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QFile</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">fileOut</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strFile</span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">fileOut</span><span
+style=" color:#000000;">.</span><span style=" font-style:italic; color:#000000;">open</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QIODevice</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">WriteOnly</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">warning</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"保存文件"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"指定文件名无法打开，请检查文件名和写入权限。"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//正常打开</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QDataStream</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">ds</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#000000;">fileOut</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//输出到文件只需一句</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">ds</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#800000;">m_listContacts</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//QList</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">和</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">Contact</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">都有配套的流操作符函数，因此可以这样一句搞定</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//保存成功</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">information</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"保存文件"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"保存成功！"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//关闭文件</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">ds</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setDevice</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">NULL</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">fileOut</span><span
+style=" color:#000000;">.</span><span style=" font-style:italic; color:#000000;">close</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    该函数首先获取列表对象里的联系人总数，如果总数小于 1，说明没联系人，直接返回，不需要处理。<br>
+    如果存在联系人，那么调用 QFileDialog::getSaveFileName() 静态函数获取要保存的文件名，
+    这个静态对话框函数第一个参数是父窗口指针，第二个参数对话框标题文本，第三个参数是预设的默认文件名， 第四个参数是扩展名筛选字符串。<br>
+    如果用户在弹出的文件保存对话框设置了文件名，那么该函数返回文件名，
+    如果用户没有设置文件名就关闭了对话框，那么返回空字符串。所以我们要先判断获取的文件名字符串，如果为空就返回，不处理。 <br>
+    如果文件名字符串有内容，那么根据文件名定义文件对象 fileOut，并尝试用只写模式打开：<br>
+    如果打开失败，提示消息框通知用户检查文件名和写入权限等问题，然后返回。 <br>
+    如果打开成功，那么以文件对象指针定义数据流对象，然后把 m_listContacts 联系人列表输出到数据流。 <br>
+    将&nbsp; m_listContacts 输出数据流的代码只有一句，因为 QList 类附带流操作符函数，循环将每个元素写入数据流；<br>
+    <div> 而对于每个元素内，就调用我们之前编写的 operator&lt;&lt;() 函数，将联系人三个字符串写到数据流。 </div>
+    <div>ds&lt;&lt;m_listContacts&nbsp; 这一句调用非常简单，简单的前提是 QList 模板类和我们的 Contact
+      类做了很多工作，才能够这么方便地输出联系人列表。</div>
+    输出联系人列表完成后，显示保存成功的消息框，然后将数据流置空，关闭文件。<br>
+    <br>
+    下面来看最后一个“打开”按钮的槽函数代码：
+    <div class="code">
+      <style type="text/css">
+p, li { white-space: pre-wrap; }
+</style> <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//从文件</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">*.ds</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">读取联系人并显示</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonOpen_clicked</span><span
+style=" color:#000000;">()</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取要打开的文件名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strFile</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QFileDialog</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">getOpenFileName</span><span style=" color:#000000;">(</span><span
+style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"打开文件"</span><span
+style=" color:#000000;">),</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"./test.ds"</span><span
+style=" color:#000000;">),</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                      </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"QDataStream</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">Files</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">(*.ds)"</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//判断是否为空</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strFile</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//用户没设置要打开的文件名</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置了文件名，定义文件对象，并尝试打开</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QFile</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">fileIn</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strFile</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">fileIn</span><span
+style=" color:#000000;">.</span><span style=" font-style:italic; color:#000000;">open</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QIODevice</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">ReadOnly</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">warning</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"打开文件"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"无法打开指定文件，请检查文件名和读取权限。"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//正常打开</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QDataStream</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">ds</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#000000;">fileIn</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//先清空旧的列表对象和列表控件内容</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_listContacts</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">clear</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">listWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">clear</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//加载</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">ds</span><span
+style=" color:#000000;">&gt;&gt;</span><span style=" color:#800000;">m_listContacts</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//QList</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">和</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">Contact</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">都有配套的流操作符函数，因此可以这样一句搞定</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//读取完毕，需要同步显示到列表控件</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nCount</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">m_listContacts</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">count</span><span style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">for</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">i</span><span style=" color:#000000;">=</span><span style=" color:#000080;">0</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#000000;">nCount</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span
+style=" color:#000000;">++)</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">listWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addItem</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_listContacts</span><span
+style=" color:#000000;">[</span><span style=" color:#000000;">i</span><span style=" color:#000000;">].</span><span
+style=" color:#000000;">toString</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//同步完成</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QMessageBox</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">information</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"打开文件"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"打开文件成功，并已加载联系人列表。"</span><span style=" color:#000000;">));</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//关闭文件</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">ds</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setDevice</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">NULL</span><span style=" color:#000000;">);</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">fileIn</span><span
+style=" color:#000000;">.</span><span style=" font-style:italic; color:#000000;">close</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+    </div>
+    该函数首先调用 QFileDialog::getOpenFileName() 函数获取要打开的文件名，文件对话框类的 getOpenFileName()
+    和getSaveFileName() 参数是差不多的，只是 getOpenFileName() 针对打开文件时选择已经存在的文件，而
+    getSaveFileName() 一般用于构造不存在的文件名以供写入，如果 getSaveFileName()&nbsp;
+    选择了已存在的文件，该对话框会提示是否覆盖现有文件。<br>
+    QFileDialog::getOpenFileName()
+    对话框也可能没有选择文件名就关闭了，所以要判断返回的字符串，如果文件名字符串为空就返回，不处理；
+    如果返回的字符串有内容，那么根据文件名创建文件对象，并尝试以只读模式打开。<br>
+    如果文件打开失败，弹出消息框通知用户检查文件名和读取权限等问题，然后返回。<br>
+    如果文件打开成功，根据文件对象指针创建数据流对象。<br>
+    接着把列表对象和列表控件全部清空，然后用一句&nbsp; ds&gt;&gt;m_listContacts 从文件中加载联系人列表。<br>
+    从数据流输入到列表对象的代码也是非常简单的，因为 QList 模板类和我们的 Contact 类做了流操作符重载，所以可以直接输入列表对象。<br>
+    数据流输入完毕后，我们获取列表对象里的联系人总数，然后将每个联系人对象的字符串添加到列表控件显示。 <br>
+    然后弹出消息框表示打开文件和加载联系人列表都完成了，最后将数据流置空，关闭文件。<br>
+    <br>
+    注意这个示例为了节省篇幅，没有对输入数据流的异常进行判断，一般正式项目中一定要对输入文件的异常做判断，尽可能防止输入源污染造成程序崩溃。这个示例的代码讲
+    解到这，我们构建运行示例，可以尝试添加新联系人：<br>
+    <center> <img src="images/ch09/ch09-01-06.png" alt="run"></center>
+    点击“姓名排序”，就可以看到排序后的效果： <br>
+    <center> <img src="images/ch09/ch09-01-07.png" alt="run"></center>
+    其他按钮的功能读者自行测试一下。我们下面学习 QList 的派生类 QQueue 。<br>
+    <br>
+    <div class="os2">9.1.2 队列 QQueue</div>
     <br>
     <br>
     <br>
-    <div  class="os2">9.1.3 链表 QLinkedList </div>
+    <div class="os2">9.1.3 链表 QLinkedList </div>
     <br>
     <br>
     <br>
-    <table  style="text-align: left; width: 100%;"  border="0"  cellpadding="2"
-       cellspacing="2">
+    <table style="text-align: left; width: 100%;" cellspacing="2" cellpadding="2"
+      border="0">
       <tbody>
         <tr>
-          <td  style="width: 40%;">
-            <div  style="text-align: center;"><a  href="ch09-00.htm"><img  class="pic"
-                   style="width: 32px; height: 32px;"  alt="prev"  src="images/pics/prev.png"></a></div>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch09-00.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
           </td>
-          <td  style="width: 20%;">
-            <div  style="text-align: center;"><a  href="contents.htm"><img  class="pic"
-                   style="width: 32px; height: 32px;"  alt="contents"  src="images/pics/contents.png"></a></div>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
           </td>
-          <td  style="width: 40%;">
-            <div  style="text-align: center;"><a  href="ch09-02.htm"><img  class="pic"
-                   style="width: 32px; height: 32px;"  alt="next"  src="images/pics/next.png"></a></div>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch09-02.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
           </td>
         </tr>
       </tbody>

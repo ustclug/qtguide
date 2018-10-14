@@ -270,7 +270,7 @@
         <tr>
           <td>QList&lt;T&gt; &amp; operator=(const QList&lt;T&gt; &amp; other)</td>
           <td>&nbsp;cList = aList;</td>
-          <td> aList 所有元素都复制一份给 cList，aList本身不变。 </td>
+          <td> aList 所有元素都复制一份给 cList，aList本身不变。二者相等。 </td>
         </tr>
         <tr class="d1">
           <td>QList &amp; operator=(QList&lt;T&gt; &amp;&amp; other) //移动赋值</td>
@@ -280,7 +280,8 @@
         <tr>
           <td>bool operator==(const QList&lt;T&gt; &amp; other) const</td>
           <td>&nbsp;aList == bList ;</td>
-          <td> aList 和 bList 有元素不同，结果为 false。 </td>
+          <td> aList 和 bList 有元素不同，结果为 false。<br>
+            只有两个列表所有元素相等并且顺序一样，它们才能算相等。</td>
         </tr>
         <tr class="d1">
           <td>T &amp; operator[](int i)</td>
@@ -1962,7 +1963,145 @@ style=" color:#000000;">}</span></pre>
     <br>
     <div class="os2">9.1.3 链表 QLinkedList </div>
     <br>
-    链表 QLinkedList 和列表 QList 毫无关系，只是名字有点像。链表 QLinkedList 是通过双向指针前后衔接的，不能用数组下标的形式访问，所有的遍历操作都是通过迭代器实现。QList 和 QVector 插入元素时像数组，需要进行大批量的元素腾挪，把插入元素后方的元素全部往后面移动，所以随机插入数据的开销比较大。而 QLinkedList 插入新元素时，仅仅是修改前后元素的双向指针，链表插入元素操作的时间复杂度总是 O(1) ，即常量时间。在频繁随机插入和随机删除元素的情景，链表就比较适合使用，因为链表的随机插入和随机删除的效率在所有顺序容器中效率最高。<br><br><br><br><br><br>
+    链表 QLinkedList 和列表 QList 没什么关系，只是名字有点像。链表 QLinkedList 是通过双向指针前后衔接的，不能用数组下标的形式访问，所有的遍历操作都是通过迭代器实现。QList 和 QVector 插入元素时像数组，需要进行大批量的元素腾挪，把插入元素后方的元素全部往后面移动，所以随机插入数据的开销比较大。而 QLinkedList 插入新元素时，仅仅是修改前后元素的双向指针，链表插入元素操作的时间复杂度总是 O(1) ，即常量时间。在频繁随机插入和随机删除元素的情景，链表就比较适合使用，因为链表的随机插入和随机删除的效率在所有顺序容器中效率最高。<br>&nbsp;<br>存储在链表里的元素也要求必须是可赋值类型，这点与 QList 一样。下面按功能划分，列举该类的函数：<br>
+          （1）构造函数<br>
+          <div class="code">QLinkedList()&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; //默认构造函数<br>QLinkedList(const QLinkedList&lt;T&gt; &amp; other)&nbsp;&nbsp;&nbsp; //复制构造函数<br>QLinkedList(std::initializer_list&lt;T&gt; list)&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; //初始化列表构造函数，C++11特性<br>QLinkedList(QLinkedList&lt;T&gt; &amp;&amp; other)&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; //移动构造函数，C++11特性<br>~QLinkedList()&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; //析构函数</div>
+          
+          第一个是默认构造函数，可以用于支持容器类的嵌套。<br>第二个是复制构造函数，将参数 other 里的元素都复制一份给新建链表对象。<br>第三个是初始化列表构造函数，可以根据 {1, 2, 3}&nbsp; 这种列表新建链表对象。<br>第四个是移动构造函数，将 other 里的元素全部移动给新建的链表对象，就是将元素都搬家的意思，这个函数调用语法示例：
+          <div class="code">
+          QLinkedList&lt;int&gt;&nbsp; listA = {1, 2, 3};&nbsp;&nbsp;&nbsp; //初始化列表构造 &nbsp;&nbsp; <br>QLinkedList&lt;int&gt;&nbsp; listB = std::move (listA  );&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //移动构造函数，listA 会被搬空，元素都存到 listB<br>
+          </div>
+          第五个是析构函数。<br>
+          （2）添加函数<br>链表自带了两个添加元素到末尾的函数和两个添加元素到头部的函数：<br>
+          
+          <div class="code">void&nbsp;&nbsp; &nbsp;append(const T &amp; value) &nbsp;&nbsp; &nbsp;&nbsp; &nbsp; //添加元素到链表末尾<br>void&nbsp;&nbsp;&nbsp; push_back(const T &amp; value)&nbsp;&nbsp;&nbsp; //添加元素到链表末尾，STL风格<br>void&nbsp;&nbsp;&nbsp; prepend(const T &amp; value)&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; //添加元素到链表头部<br>void&nbsp;&nbsp;&nbsp; push_front(const T &amp; value)&nbsp;&nbsp;&nbsp; //添加元素到链表头部，STL风格</div>
+          链表能添加元素到头部和尾部，但是没有直接将元素插入到中间某个位置的函数，链表必须借助迭代器才能将元素插到链表中间的某个位置。<b>链表除了头部、尾部的元素，其他中间元素都要依赖迭代器插入、删除和访问。</b><br><br>
+          （3）移除和删除函数<br>注意使用移除和删除函数之前要先用&nbsp; ! empty() 或&nbsp; ! isEmpty() &nbsp; 判断列表非空才能移除和删除。<br>take***() 移除函数只是将元素从链表卸下，并返回该元素值，不会彻底删除该元素：<br>
+           <div class="code">T&nbsp;&nbsp;&nbsp; takeFirst() &nbsp;&nbsp;&nbsp; //卸下头部元素并返回该元素<br>T&nbsp;&nbsp;&nbsp; takeLast()&nbsp;&nbsp;&nbsp;&nbsp; //卸下尾部元素并返回该元素</div>
+          remove***() 函数会将元素从链表卸下，并且彻底删除该元素的内存空间，删除链表头部、尾部元素的函数如下：<br>
+          <div class="code">void&nbsp;&nbsp;&nbsp; removeFirst()&nbsp;&nbsp;&nbsp; //删除头部元素<br>void&nbsp;&nbsp;&nbsp; pop_front()&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; //删除头部元素，STL风格<br>void&nbsp;&nbsp;&nbsp; removeLast()&nbsp;&nbsp;&nbsp; //删除尾部元素<br>void&nbsp;&nbsp;&nbsp; pop_back()&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; //删除尾部元素，STL风格</div>
+          如果希望删除一个匹配的元素或删除所有匹配的元素，使用如下函数：<br>
+           <div class="code">bool&nbsp;&nbsp;&nbsp; removeOne(const T &amp; value)&nbsp;&nbsp; //如果找到匹配的元素就删除第一个匹配的元素，删除后返回true，如果没找到相等的元素返回 false<br>int&nbsp;&nbsp;&nbsp; removeAll(const T &amp; value)&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; //删除所有匹配的元素，并返回删除数量</div>
+          removeOne(&nbsp; value ) 和 removeAll(&nbsp; value )&nbsp; 函数要求元素类型 T 支持 operator==() 双等号函数。<br>removeAll(&nbsp; value ) 函数不是删除所有元素，是删除所有匹配的元素。<br>真正删除链表全部内容的函数是下面这个：<br>
+           <div class="code">void&nbsp;&nbsp; &nbsp;clear()</div>
+          <br>
+          （4）访问和查询函数<br>链表可以查询元素的总数量：<br>
+          <div class="code">int&nbsp;&nbsp;&nbsp; size() const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //获取元素总数量<br>int&nbsp;&nbsp;&nbsp; count() const&nbsp;&nbsp;&nbsp; //获取元素总数量</div>
+          
+          
+          如果希望统计匹配某 value 的元素个数，使用下面的函数：<br>
+          <div class="code">int&nbsp;&nbsp;&nbsp; count(const T &amp; value) const &nbsp;&nbsp;&nbsp; //统计等于 value 值的元素个数</div>
+          
+          判断链表中是否包含匹配 value 的元素，使用下面函数：<br>
+           <div class="code">bool&nbsp;&nbsp;&nbsp; contains(const T &amp; value) const&nbsp;&nbsp;&nbsp; //判断有没有等于 value 值的元素</div>
+          判断链表是否为空，可以用下面两个函数：<br>
+          <div class="code">bool&nbsp;&nbsp;&nbsp; empty() const&nbsp;&nbsp;&nbsp; //判断链表是否为空，STL风格<br>bool&nbsp;&nbsp;&nbsp; isEmpty() const&nbsp; //判断链表是否为空</div>
+          不卸下元素，直接获取链表头部、尾部元素引用的函数如下：<br>
+           <div class="code">T &amp;&nbsp;&nbsp;&nbsp; first()&nbsp;&nbsp;&nbsp; //获取头部元素的读写引用<br>const T &amp;&nbsp;&nbsp;&nbsp; first() const&nbsp;&nbsp;&nbsp; //获取头部元素的只读引用<br>T &amp;&nbsp;&nbsp;&nbsp; front()&nbsp; //获取头部元素的读写引用，STL风格<br>const T &amp;&nbsp;&nbsp;&nbsp; front() const&nbsp; //获取头部元素的只读引用，STL风格<br>T &amp;&nbsp;&nbsp; &nbsp;back()&nbsp;&nbsp;&nbsp; //获取尾部元素的读写引用，STL风格<br>const T &amp;&nbsp;&nbsp; &nbsp;back() const&nbsp; //获取尾部元素的只读引用，STL风格<br>T &amp;&nbsp;&nbsp;&nbsp; last()&nbsp;&nbsp;&nbsp; //获取尾部元素的读写引用<br>const T &amp;&nbsp;&nbsp;&nbsp; last() const&nbsp;&nbsp;&nbsp; //获取尾部元素的只读引用</div>
+          判断头部、尾部元素是否等于 value 值的函数如下：<br>
+          <div class="code">bool&nbsp;&nbsp;&nbsp; startsWith(const T &amp; value) const&nbsp;&nbsp;&nbsp; //判断头部元素是否等于 value<br>bool&nbsp;&nbsp;&nbsp; endsWith(const T &amp; value) const&nbsp;&nbsp;&nbsp;&nbsp; //判断尾部元素是否等于 value</div>
+          访问和查询函数、删除函数里面，凡是带 value 参数都要求链表元素类型 T 本身支持  operator==() 函数判断。<br><br>
+          （5）交换函数<br>下面函数将自身元素与 other 链表的元素全部互换，这个操作非常快，并且不会失败。<br>
+           <div class="code">void&nbsp;&nbsp; &nbsp;swap(QLinkedList&lt;T&gt; &amp; other)</div>
+          <br>       
+          （6）运算符函数<br>我们以下面三个链表举例子，示范运算符函数的使用：<br>
+          <div class="code">QLinkedList&lt;int&gt; listA = {1, 2, 3};<br>QLinkedList&lt;int&gt; listB = {4, 5, 6};<br>QLinkedList&lt;int&gt; listC;</div>
+          
+          链表支持运算符函数如下表所示：<br>
+           <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 430px;" align="center"><b>运算符函数</b></td>
+          <td style="width: 200px;" align="center"><span style="font-weight: bold;">举
+              例</span></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>bool operator!=(const QLinkedList&lt;T&gt; &amp; other) const</td>
+          <td>&nbsp;listA != listB ;</td>
+          <td> listA 和 listB 两个链表有元素不同，结果为 true。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QLinkedList&lt;T&gt; operator+(const QLinkedList&lt;T&gt; &amp; other) const</td>
+          <td>&nbsp;listC = listA + listB;</td>
+          <td> 将listA和listB的元素都复制并拼接为新链表，赋值给listC 。</td>
+        </tr>
+        <tr>
+          <td>QLinkedList&lt;T&gt; &amp; operator+=(const QLinkedList&lt;T&gt; &amp; other)</td>
+          <td>&nbsp;listA += listB ;</td>
+          <td> 将 listB 的元素都复制添加到 listA 的末尾。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QLinkedList&lt;T&gt; &amp; operator+=(const T &amp; value)</td>
+          <td style="height: 16px;">&nbsp;listA += 100 ;</td>
+          <td> 将 100 添加到listA 末尾。 </td>
+        </tr>
+        <tr>
+          <td>QLinkedList&lt;T&gt; &amp; operator&lt;&lt;(const QLinkedList&lt;T&gt; &amp; other)</td>
+          <td>&nbsp;listA&lt;&lt;listB;</td>
+          <td style="height: 16px;"> 将 listB 的元素都复制添加到 listA 的末尾。</td>
+        </tr>
+        <tr class="d1">
+          <td>QLinkedList&lt;T&gt; &amp; operator&lt;&lt;(const T &amp; value)</td>
+          <td>&nbsp;listA&lt;&lt;100;</td>
+          <td> 将 100 添加到listA 末尾。 </td>
+        </tr>
+        <tr>
+          <td>QLinkedList&lt;T&gt; &amp; operator=(const QLinkedList&lt;T&gt; &amp; other)</td>
+          <td>&nbsp;listC = listA;</td>
+          <td> 将listA的元素都复制并添加给listC，listA 本身不变。二者相等。</td>
+        </tr>
+        <tr class="d1">
+          <td>QLinkedList&lt;T&gt; &amp; operator=(QLinkedList&lt;T&gt; &amp;&amp; other)//移动赋值</td>
+          <td>&nbsp;listC = std::move(listA); </td>
+          <td style="height: 16px;"> 将listA的元素都移动添加给listC，listA 本身被清空。 </td>
+        </tr>
+        <tr>
+          <td>bool operator==(const QLinkedList&lt;T&gt; &amp; other) const</td>
+          <td>&nbsp;listA == listB;</td>
+          <td> listA 和 listB 存在不相等的元素，结果为 false。<br>只有两个链表所有元素相等并且顺序一样，它们才能算相等。</td>
+        </tr>
+       
+     
+      </tbody>
+    </table>
+    <br>这里说明一下：operator==() 函数要求两个链表的所有元素都相等，并且顺序都一样，链表长度一样，才会判断二者相等。
+          双等号函数、不等号函数都要求链表元素类型 T 自身支持 operator==() 函数判断。
+          <br>移动赋值与移动构造类似，都是 C++11 的新特性，需要使用 std::move&nbsp; 语句实现，
+          移动后右边链表会被清空，元素只存在左边链表里。<br>
+          链表不能通过数组下标访问元素，只能依赖迭代器遍历元素，而其他的顺序数据容器是支持数组下标形式访问的。<br>
+          
+          <br>
+          （7）迭代器函数<br>链表自带了 STL 风格迭代器：<br>
+          <div class="code">class&nbsp;&nbsp;&nbsp; iterator&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; //STL 命名风格读写迭代器<br>typedef&nbsp;&nbsp;&nbsp; Iterator&nbsp;&nbsp; //Qt 命名风格读写迭代器<br>class&nbsp;&nbsp;&nbsp; const_iterator&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; //STL 命名风格只读迭代器<br>typedef&nbsp;&nbsp;&nbsp; ConstIterator&nbsp;&nbsp;&nbsp; //Qt 命名风格只读迭代器</div>
+          
+          迭代器就像指向元素的指针，可以枚举链表中所有元素，迭代器本身支持各种操作符函数，<br>比如 ++ 是找寻下一个元素，-- 是倒退一个元素， (* it) 是获取元素。Qt 帮助文档中示范了迭代器的使用：<br>
+          <div class="code">QLinkedList&lt;QString&gt; list;<br>list.append("January");<br>list.append("February");<br>...<br>list.append("December");<br><br>QLinkedList&lt;QString&gt;::iterator i;<br>for (i = list.begin(); i != list.end(); ++i)<br>&nbsp;&nbsp;&nbsp; cout &lt;&lt; *i &lt;&lt; endl;</div>
+          
+          上述代码定义了一个字符串链表 list，为字符串链表添加多个字符串，然后定义字符串链表的迭代器 i；<br>i 从链表头部迭代器开始，逐个遍历链表元素，打印每个字符串，直到迭代器末尾结束。<br>&nbsp;list.begin() 是指向链表头部元素的指针，但是注意&nbsp; list.end() 是指向链表尾部后面假想元素的指 针，<br><b>&nbsp;list.end() 指向的东西根本不存在，仅用于越界判断。</b><br><br>获取指向链表头部迭代器、尾部后面假想元素迭代器的函数如下：<br>
+          <div class="code">iterator&nbsp;&nbsp; &nbsp;begin()&nbsp;&nbsp;&nbsp; //指向头部元素的读写迭代器<br>const_iterator&nbsp;&nbsp; &nbsp;begin() const&nbsp;&nbsp;&nbsp; //指向头部元素的只读迭代器，STL风格<br>const_iterator&nbsp;&nbsp; &nbsp;cbegin() const&nbsp; //指向头部元素的只读迭代器，STL风格<br>const_iterator&nbsp;&nbsp;&nbsp; constBegin() const //指向头部元素的只读迭代器，Qt风格<br>iterator&nbsp;&nbsp;&nbsp; end()&nbsp;&nbsp;&nbsp; //指向尾部后面假想元素的读写迭代器<br>const_iterator&nbsp;&nbsp;&nbsp; end() const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  //指向尾部后面假想元素的只读迭代器，STL风格<br>const_iterator&nbsp;&nbsp; &nbsp;cend() const&nbsp; &nbsp;  //指向尾部后面假想元素的只读迭代器，STL风格<br>const_iterator&nbsp;&nbsp;&nbsp; constEnd() const&nbsp;   //指向尾部后面假想元素的只读迭代器，Qt风格</div>
+          
+          注意 *begin() 迭代器是指向真实存在的头部元素，而 *end() 迭代器指向尾部后面不存在的假想元素， *end() 迭代器只能做不等于判断，它不指向任何东西！<br><br>链表除了头部、尾部元素，其他中间所有元素都需要用迭代器来操作，在链表中间插入元素的迭代器函数如下：<br>
+          <div class="code">iterator&nbsp;&nbsp;&nbsp; insert(iterator before, const T &amp; value)</div>
+          
+          该函数在 before 指向元素的前面插入 value 元素，返回指向新的 value 元素的迭代器。<br>插入元素后，要使用新返回的迭代器进行后面的元素遍历。<br>从链表中间部分删除一个元素或连续多个元素的函数如下：<br>
+           <div class="code">iterator&nbsp;&nbsp;&nbsp; erase(iterator pos)&nbsp;&nbsp;&nbsp; //删除 pos 迭代器指向的元素，返回 pos 下一个元素迭代器，注意返回值可能是指向假想元素的 end()<br>iterator&nbsp;&nbsp;&nbsp; erase(iterator begin, iterator end)&nbsp; //删除从 begin 开始到 end 之间所有元素，但是参数 end 指向的元素不删除，该函数总是返回参数 end </div>
+          第一个 erase() 函数删除 pos 指向的单个元素，它的返回值可能为指向下一个元素或者 指向末尾假想元素的 end() ，要注意判断返回值。<br>第二个 erase() 函数删除多个元素，从参数 begin 删除到参数 end，但是 end 指向的元素不删除，这个函数总是返回参数里的 end 迭代器。<br>链表在大部分情况下都需要用迭代器操作，后面的链表示例也都基于迭代器实现。<br><br>
+          （8）容器类型转换函数<br>链表带有一个成员函数，将自身对象转换为标准库的链表 std::list&lt;T&gt; ：
+           <div class="code">std::list&lt;T&gt;&nbsp;&nbsp; &nbsp;toStdList() const</div>
+          而将标准库链表转为 Qt 链表是通过静态函数实现的，该函数的返回值是新的 Qt 链表：<br>
+          <div class="code">QLinkedList&lt;T&gt;&nbsp;&nbsp;&nbsp; fromStdList(const std::list&lt;T&gt; &amp; list)</div>
+          
+          静态函数的语法类似下面这样：<br>
+          <div class="code">&nbsp;&nbsp;&nbsp; std::list&lt;int&gt; sl = {1, 2, 3};<br>&nbsp;&nbsp;&nbsp; QLinkedList&lt;int&gt; qll = QLinkedList&lt;int&gt;::fromStdList( sl );</div>
+          <br>（9）其他内容<br>链表类附带了两个友元 流操作符函数，用于支持数据流输出、输入：<br>
+           <div class="code">QDataStream &amp;&nbsp;&nbsp; &nbsp;operator&lt;&lt;(QDataStream &amp; out, const QLinkedList&lt;T&gt; &amp; list)<br>QDataStream &amp;&nbsp;&nbsp; &nbsp;operator&gt;&gt;(QDataStream &amp; in, QLinkedList&lt;T&gt; &amp; list)</div>
+          这些流操作符函数正常运行的前提是元素类型 T 也能支持流的输入输出，对于 C++ 基本类型、Qt 常见数据类型都是支持数据流输入输出的，如果是自定义类型，那么需要手动编写两个友元 流操作符函数。自定义类型和流操作符函数可以参考上面 9.1.1 节示例。<br>链表不是在内存里连续存储的类型，是不支持排序的，所以不需要考虑排序支持了。<br><br>最后我们梳理一下，如果自定义类型希望能够完美地和 QLinkedList 配合使用，那么需求如下：<br>① 必须是可赋值类型，需要默认构造函数、复制构造函数、赋值函数 operator=() ；<br>② 如果希望支持查询函数，需要双等号函数 operator==()；<br>③ 如果希望支持 QDataStream 数据流输入输出，那么添加友元函数&nbsp; operator&lt;&lt;() 和 operator&gt;&gt;() 。 <br>第一条是必须实现的函数，后面两条是建议实现的函数。<br><br><br><br>
+          
+          
+          
+          
     <br>
     <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
       <tbody>

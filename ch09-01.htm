@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <title>ch09-01</title>
     <link href="css/style.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
@@ -18,9 +18,10 @@
     <div class="os1">9.1 顺序容器：QList、QQueue和QLinkedList </div>
     <br>
     本节介绍三种顺序容器：列表 QList、先进先出（First Input First Output，FIFO）队列 QQueue、链表
-    QLinkedList， 每种容器配一个示例，示范使用方法。QList 是最为常用的，队列 QQueue 是 QList 的派生类，
-    增加了几个队列操作函数。链表 QLinkedList 是比较特别的顺序容器，是真正的双向链表，数据离散存储，
-    用双向指针衔接前后节点，需要借助迭代器进行遍历， 而其他顺序容器都可以用数组下标的形式访问元素。 <br>
+    QLinkedList， QList 和 QLinkList 各配一个示例，示范使用方法。QList 是最为常用的，可以当作数组、队列、栈等使用，队列
+    QQueue 是 QList 的派生类， 增加了几个队列操作函数，QQueue 自身的函数特别简单，就不单独设置示例了。链表 QLinkedList
+    是比较特别的顺序容器，是真正的双向链表，数据离散存储， 用双向指针衔接前后节点，需要借助迭代器进行遍历， 而其他顺序容器都可以用数组下标的形式访问元素。
+    <br>
     <br>
     <div class="os2">9.1.1 列表 QList</div>
     <br>
@@ -1944,30 +1945,41 @@ style=" color:#000000;">}</span></pre>
     <br>
     <div class="os2">9.1.2 队列 QQueue</div>
     <br>
-    <br>
+    QQueue 是 QList 的派生类，继承了列表的全部功能，仅仅是添加了几个队列操作函数，这些队列新函数都可以在基类 QList 找到相应的功能实现，就是名字有点区别。QQueue 也有默认的构造函数和析构函数：<br>
+    <div class="code">QQueue()<br>~QQueue()</div>   
+          这两个函数内容都是空的，队列的复制构造函数、赋值运算符函数等全都继承基类 QList 的函数。<br>新增的入队和出队操作函数如下：<br>
+     <div class="code">void&nbsp;&nbsp;&nbsp; enqueue(const T &amp; t)&nbsp; //元素入队，添加到队尾<br>T&nbsp;&nbsp; &nbsp;dequeue()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //元素出队，将队头元素卸下并返回</div>    
+          
+          入队其实就是调用基类的 append() ，出队就是调用基类的 takeFirst()，仅仅就是套层壳，加个新函数名。<br>队列类还添加了获取队头元素引用，但是不卸下队头的函数：<br>
+          <div class="code">T &amp;&nbsp;&nbsp; &nbsp;head()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //获取队头的读写引用<br>const T &amp;&nbsp;&nbsp;&nbsp; head() const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //获取队头的只读引用</div>
+          
+          最后队列还添加了与其他队列互换元素的函数：<br>
+          <div class="code">void&nbsp;&nbsp; &nbsp;swap(QQueue&lt;T&gt; &amp; other)</div>
+          
+          这个函数将自身所有元素和 other 队列里面的元素全部互换，交换效率非常高，并且从不失败。<br>典型的队列操作代码示例如下：<br>
+          <div class="code">QQueue&lt;int&gt; queue;<br>queue.enqueue(1);<br>queue.enqueue(2);<br>queue.enqueue(3);<br>while (!queue.isEmpty())<br>&nbsp;&nbsp;&nbsp; cout &lt;&lt; queue.dequeue() &lt;&lt; endl;</div>
+          上述代码依次入队了三个元素，然后用 while 循环依次将元素出队并打印。isEmpty() 函数是从基类继承的，判断队列是否为空。<br>QQueue 自身的函数非常简单，不单独设置示例了，QQueue 作为本节末尾的练习供读者练手。<br>
     <br>
     <div class="os2">9.1.3 链表 QLinkedList </div>
     <br>
+    链表 QLinkedList 和列表 QList 毫无关系，只是名字有点像。链表 QLinkedList 是通过双向指针前后衔接的，不能用数组下标的形式访问，所有的遍历操作都是通过迭代器实现。QList 和 QVector 插入元素时像数组，需要进行大批量的元素腾挪，把插入元素后方的元素全部往后面移动，所以随机插入数据的开销比较大。而 QLinkedList 插入新元素时，仅仅是修改前后元素的双向指针，链表插入元素操作的时间复杂度总是 O(1) ，即常量时间。在频繁随机插入和随机删除元素的情景，链表就比较适合使用，因为链表的随机插入和随机删除的效率在所有顺序容器中效率最高。<br><br><br><br><br><br>
     <br>
-    <br>
-    <table style="text-align: left; width: 100%;" cellspacing="2" cellpadding="2"
-      border="0">
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
       <tbody>
         <tr>
           <td style="width: 40%;">
             <div style="text-align: center;"><a href="ch09-00.htm"><img class="pic"
-                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
           </td>
           <td style="width: 20%;">
             <div style="text-align: center;"><a href="contents.htm"><img class="pic"
-                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
           </td>
           <td style="width: 40%;">
             <div style="text-align: center;"><a href="ch09-02.htm"><img class="pic"
-                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
           </td>
         </tr>
       </tbody>
     </table>
-  </body>
-</html>
+</body></html>

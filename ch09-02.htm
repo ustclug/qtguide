@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="content-type">
+    <title>ch09-02</title>
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
+
+/***********************************************
+* Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
+* This notice must stay intact for legal use.
+* Visit http://www.dynamicdrive.com/ for full source code
+***********************************************/
+
+</script> </head>
+  <body>
+    <div class="os1">9.2 顺序容器：QVector、QStack </div>
+    <br>
+    本节介绍剩下的两种顺序容器，向量 QVector 和 栈 QStack。向量 QVector
+    本质就是封装好的数组，向量的相邻元素在内存里是连续存储的，可以用数组下标访问，其读取和修改元素的操作是非常快的，与C++数组是一样的，但是随机插入元素和随机删除
+    元素需要大量腾挪后面的元素，所以不同的数据结构有不同的应用场景。如果读写操作频繁，但是随机增删操作比较少，那么这种场景就很适合向量。栈 QStack
+    是向量的派生类，继承了向量的全部功能，并添加了几个进栈、出栈的操作函数。<br>
+    <br>
+    本节内容安排：9.2.1 小节介绍向量 QVector 的功能，通过城市经纬度查询示例学习向量和嵌套容器的使用； 9.2.2 小节简单介绍栈
+    QStack 的功能，利用栈实现树形结构的遍历； 9.2.3 小节对五种顺序容器进行对比归纳，测试它们常用操作函数的执行效率。 <br>
+    <br>
+    <div class="os2">9.2.1 向量 QVector </div>
+    <br>
+    向量 QVector 就是封装好的数组，不仅支持 C++ 基本类型和 Qt
+    常见的数据类型，对于自定义类型也可以支持，如果希望保存大量的自定义类型对象并且能高效读写，就可以使用向量。Qt 容器还可以进行嵌套，比如下面代码就定义了
+    10*10 的二维向量：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QVector&lt;&nbsp;
+      QVector&lt;int&gt;&nbsp; &gt;&nbsp; vc;<br>
+      &nbsp;&nbsp;&nbsp; vc.resize(10);<br>
+      &nbsp;&nbsp;&nbsp; for(int i=0; i&lt;10; i++)<br>
+      &nbsp;&nbsp;&nbsp; {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; vc[i].resize(10);<br>
+      &nbsp;&nbsp;&nbsp; }</div>
+    容器嵌套定义时，要注意在两层尖括号中间加空格，避免编译器把容器嵌套识别为流操作符。二维向量分配存储空间完成后就和二维数组用起来差不多。<b>向量
+      QVector 与之前介绍的列表 QList 类似，只能存储值类型，即类型 T 必须支持默认构造函数、复制构造函数和等于号赋值函数。</b><br>
+    下面我们分类列举向 量模板类的功能函数：<br>
+    （1）构造函数<br>
+    <div class="code">QVector()&nbsp;&nbsp;&nbsp; //默认构造函数<br>
+      QVector(int size)&nbsp;&nbsp;&nbsp; //初始化 size 个元素的向量，元素初始值为类型 T
+      默认构造函数生成的值<br>
+      QVector(int size, const T &amp; value)&nbsp;&nbsp;&nbsp; //用 value 值初始化
+      size 个元素的向量<br>
+      QVector(const QVector&lt;T&gt; &amp; other)&nbsp;&nbsp;&nbsp; //复制构造函数<br>
+      QVector(QVector&lt;T&gt; &amp;&amp; other)&nbsp;&nbsp;&nbsp; //移动构造函数<br>
+      QVector(std::initializer_list&lt;T&gt; args)&nbsp;&nbsp;&nbsp; //初始化列表构造函数<br>
+      ~QVector()&nbsp;&nbsp;&nbsp; //析构函数</div>
+    第一个是默认构造函数，用于支持容器嵌套；<br>
+    第二个是构造 size 个元素的向量，每个元素初始值都是类型 T 默认构造函数设定的数值；<br>
+    第三个是构造 size 个元素的向量，并且每个元素都设置为 value 值；<br>
+    第四个是复制构造函数，将参数 other 里的元素都复制一份给新向量；<br>
+    第五个是移动构造函数，将参数 other 里的元素都移动到新向量里面，旧的 other 向量内容清空；<br>
+    第六个是初始化列表构造，支持根据类似 {1, 2, 3} 的初始化表构造新的向量；<br>
+    第七个是析构函数。<br>
+    需要注意第二和第三个构造函数，不仅仅是分配空间，而且填充了 size 个元素。<br>
+    <br>
+    （2）添加和分配空间函数<br>
+    将元素添加到向量头部、尾部的函数如下：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;append(const T &amp;
+      value)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //将 value 添加到向量尾部<br>
+      void&nbsp;&nbsp;&nbsp; push_back(const T &amp; value) //将 value
+      添加到向量尾部，STL风格<br>
+      void&nbsp;&nbsp;&nbsp; prepend(const T &amp; value)&nbsp;&nbsp;&nbsp; //将
+      value 添加到向量头部<br>
+      void&nbsp;&nbsp;&nbsp; push_front(const T &amp; value)//将 value
+      添加到向量头部，STL风格</div>
+    通常情况下，添加到向量尾部的开销比较小，而添加到头部意味着将向量原有的元素都向后平移，开销会很大。<br>
+    在向量中间位置插入一个元素或多个元素的函数如下：<br>
+    <div class="code">void&nbsp;&nbsp;&nbsp; insert(int i, const T &amp; value)<br>
+      void&nbsp;&nbsp;&nbsp; insert(int i, int count, const T &amp; value)</div>
+    第一个 insert() 是将一个 value 插入到序号 i 的位置，原本序号 i 以及后面的元素都平移，然后把 value 复制到序号 i 的位置。<br>
+    第二个 insert() 是将 count 个 value 值插入到序号 i 的位置，插入后从序号 i 到 i+count-1 序号都是等于 value
+    值的元素。<br>
+    insert() 函数支持的最大序号是 size() ，即元素总数，如果 i 等于 size() ，那么元素添加到向量末尾。如果 i
+    &gt;size()&nbsp; ，程序会因为访问越界而崩溃。其他带序号 i 的函数，序号范围仅支持 0 ~ size()-1 ，只有 insert()
+    例外多支持一个添加到末尾。
+    <div style="color: red;"><b> 这里着重说明一下，向量为了提升访问效率，绝大部分带序号 i
+        的函数都不做越界判断，一旦出现越界程序就会崩溃，这点与普通数组是一样的！<br>
+      </b></div>
+    向量还支持自动填充元素：<br>
+    <div class="code">QVector&lt;T&gt; &amp;&nbsp;&nbsp;&nbsp; fill(const T
+      &amp; value, int size = -1)</div>
+    如果 fill() 第二个参数为默认的 -1，那么向量内所有元素都被填充为数值 value；<br>
+    如果第二个参数不是 -1，那么向量首先进行增长或裁剪，使得元素个数正好是 size 计数，然后将向量的 size 个元素数值设置为 value。<br>
+    <br>
+    获取向量的元素数量（即向量的长度、尺寸）函数如下：<br>
+    <div class="code">int&nbsp;&nbsp;&nbsp; count() const<br>
+      int&nbsp;&nbsp;&nbsp; size() const<br>
+      int&nbsp;&nbsp;&nbsp; length() const</div>
+    这三个函数是一样的，都是向量里的元素计数。如果希望改变向量元素的计数（长度、尺寸），可以用下面的重置尺寸函数：<br>
+    <div class="code">void&nbsp;&nbsp;&nbsp; resize(int size)</div>
+    重置向量尺寸后，向量的元素就变成 参数里的 size 个，如果元素变多，那么使用类型 T
+    的默认构造函数设置末尾的新元素，如果元素变少了，那么后面的元素会被删除掉。<br>
+    resize()
+    函数会直接影响向量里的元素个数，如果希望在不影响元素个数的情况下扩容，那么也有相应的函数。下面三个函数就是用于设置、获取容量，但不影响元素个数：<br>
+    <div class="code">void&nbsp;&nbsp;&nbsp; reserve(int size)&nbsp; //为 size
+      个元素分配空间，但是不增加任何新元素，向量的元素总数不变<br>
+      int&nbsp;&nbsp;&nbsp; capacity() const&nbsp;&nbsp;&nbsp;
+      //查询向量内部的存储容量，容量一般大于等于 count()<br>
+      void&nbsp;&nbsp;&nbsp; squeeze()&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp; //释放不需要的额外容量，与 reserve()&nbsp; 函数功能相反</div>
+    <b>这三个容量操作的函数不会影响向量中的元素总数，也不改变任何元素的数值。</b>reserve(&nbsp; size&nbsp; ) 是为
+    size 个数元素提前分配空间，如果参数里的个数小于向量原本的尺寸，那么该函数不执行任何操作，不会截断向量；如果参数 size
+    大于向量原本的尺寸，那么提前分配空间。reserve(&nbsp; size&nbsp; ) 仅仅是提前分配空间，不会为向量添加新元素，向量的元素计数
+    count () 是不变的。<br>
+    capacity() 用于查询向量的存储空间，一般大于等于 count() 。<br>
+    squeeze() 用于释放额外空间，与 reserve(&nbsp; size&nbsp; ) 的操作正好相反。<br>
+    <br>
+    这里需要特别注意 resize( size) 和&nbsp; reserve( size ) 的区别：<br>
+    resize( size ) 直接影响元素个数，如果参数里数值比旧的尺寸大，那么扩容并添加新元素，向量元素总数变为参数指定的个数；<br>
+    如果resize( size ) 参数里的数值比旧的尺寸小，那么对向量进行截断，只保留参数里指定个数的元素。<br>
+    而 reserve( size )
+    无论参数里数值是什么，都不会改变向量元素的个数，也不会修改任何元素的数值，仅仅用于提前分配空间，但不会添加任何的新元素。如果在添加元素之前，提前知道向量大概的元
+    素总数，那么用 reserve( size ) 提前分配空间可以避免添加新元素过程中的向量自动扩容操作。<br>
+    <br>
+    为区别这两个函数，读者可以测试下面的错误代码：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QVector&lt;int&gt; va = {1, 2, 3};<br>
+      &nbsp;&nbsp;&nbsp; va.reserve(10);<br>
+      &nbsp;&nbsp;&nbsp; va[4] = 1;&nbsp;&nbsp;&nbsp; //！！！错误示范</div>
+    reserve(10) 会为向量扩容，但没有新增元素，上面最后一句&nbsp; va[4] = 1 是数组越界，会导致程序崩溃。<br>
+    如果使用 resize( 10 )，那么上面代码就是合法的，因为 resize( 10 ) 会为向量新添加 7 个元素到后面，va[4] 就不会越界。<br>
+    <br>
+    （3）移除和删除函数<br>
+    在调用移除和删除函数之前，一定要确保向量非空，用 ! empty() 或 ! isEmpty() 判断，不能对着没有元素的向量进行删除元素。<br>
+    如果希望从向量卸下元素并返回该元素值，使用 take**() 函数：<br>
+    <div class="code">T&nbsp;&nbsp;&nbsp; takeAt(int i) //卸下序号 i 位置元素，并返回该元素<br>
+      T&nbsp;&nbsp;&nbsp; takeFirst()&nbsp;&nbsp;&nbsp; //卸下向量的头部元素，并返回该元素<br>
+      T&nbsp;&nbsp;&nbsp; takeLast()&nbsp;&nbsp;&nbsp; //卸下向量的尾部元素，并返回该元素</div>
+    不返回元素，直接删除元素的函数如下：<br>
+    <div class="code">void&nbsp;&nbsp;&nbsp; remove(int
+      i)&nbsp;&nbsp;&nbsp;&nbsp; //删除序号 i 位置元素<br>
+      void&nbsp;&nbsp;&nbsp; removeAt(int i) //删除序号 i 位置元素 <br>
+      void&nbsp;&nbsp;&nbsp; remove(int i, int count) //从序号 i 位置开始删除参数里 count
+      个数的元素<br>
+      void&nbsp;&nbsp;&nbsp; removeFirst()&nbsp; //删除头部元素<br>
+      void&nbsp;&nbsp;&nbsp; pop_front()&nbsp;&nbsp;&nbsp; //删除头部元素，STL风格<br>
+      void&nbsp;&nbsp;&nbsp; removeLast() //删除尾部元素<br>
+      void&nbsp;&nbsp;&nbsp; pop_back()&nbsp;&nbsp;&nbsp; //删除尾部元素，STL风格</div>
+    向量从尾部删除元素的效率高，但是删除头部或中间的元素，意味着将后面大批量元素往前复制腾挪，效率就比较低了。 take**() 函数与
+    remove**() 函数效率差不多，仅仅是多个返回值。<br>
+    如果希望删除匹配的一个或多个元素，使用下面的函数：<br>
+    <div class="code">bool&nbsp;&nbsp;&nbsp; removeOne(const T &amp;
+      t)&nbsp;&nbsp;&nbsp; //如果向量里存在等于 t 的元素就删除并返回 true，否则找不到返回 false<br>
+      int&nbsp;&nbsp;&nbsp; removeAll(const T &amp; t)&nbsp;&nbsp;&nbsp;
+      //删除向量中所有等于 t 的元素，并返回删除的数量</div>
+    removeOne( t ) 和 removeAll( t ) 函数需要元素类型 T 支持双等号比较函数 operator==() 。<br>
+    如果需要清空向量，删除所有元素，那么使用如下函数：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;clear()<br>
+    </div>
+    <br>
+    （4）访问和查询函数<br>
+    访问指定序号 i 元素的函数如下：<br>
+    <div class="code">const T &amp;&nbsp;&nbsp; &nbsp;at(int i)
+      const&nbsp;&nbsp;&nbsp; //返回序号 i 元素的常量引用，效率最高，但是不做越界判断！<br>
+      T&nbsp;&nbsp;&nbsp; value(int i) const<br>
+      T&nbsp;&nbsp;&nbsp; value(int i, const T &amp; defaultValue) const</div>
+    at( i ) 的函数效率最高，但是它不检查数组越界，一旦越界程序就会崩溃，对于该函数必须确保 0 &lt;= i &lt; size() 。<br>
+    两个 value( ) 函数都会检查参数的序号是否越界，第一个 value( i ) 如果序号越界，返回类型 T 默认构造函数设置的元素数值，第二个
+    value( i,&nbsp; defaultValue )&nbsp; 如果发生序号 i 越界，那么返回参数里指定的数值 defaultValue
+    。如果不发生越界，两个 value() 函数都返回正常的序号 i 位置元素数值。<br>
+    快速获取向量头部、尾部元素的函数如下：<br>
+    <div class="code">T &amp;&nbsp;&nbsp;&nbsp; first()&nbsp;&nbsp;&nbsp;
+      //头部元素的读写引用<br>
+      const T &amp;&nbsp;&nbsp;&nbsp; first() const&nbsp;&nbsp;&nbsp; //头部元素的只读引
+      用<br>
+      T &amp;&nbsp;&nbsp;&nbsp; front()&nbsp; //头部元素的读写引用，STL风格<br>
+      const_reference&nbsp;&nbsp;&nbsp; front() const&nbsp;&nbsp;
+      //头部元素的只读引用，STL风格<br>
+      T &amp;&nbsp;&nbsp;&nbsp; last()&nbsp;&nbsp;&nbsp; //尾部元素的读写引用<br>
+      const T &amp;&nbsp;&nbsp;&nbsp; last() const&nbsp;&nbsp;&nbsp; //尾部元素的只读引用<br>
+      reference&nbsp;&nbsp;&nbsp; back()&nbsp;&nbsp;&nbsp; //尾部元素的读写引用，STL风格<br>
+      const_reference&nbsp;&nbsp;&nbsp; back() const&nbsp;&nbsp;&nbsp;
+      //尾部元素的只读引用，STL风格</div>
+    STL风格函数返回值的 reference 是类型定义，等同 T &amp;&nbsp; ； const_reference 也是类型定义，等同
+    const T &amp;&nbsp; 。<br>
+    判断向量是否为空的函数如下：<br>
+    <div class="code">bool&nbsp;&nbsp;&nbsp; empty() const&nbsp;&nbsp;&nbsp;
+      //判断向量是否为空，STL风格<br>
+      bool&nbsp;&nbsp;&nbsp; isEmpty() const //判断向量是否为空</div>
+    查询向量里是否包含 value 数值或查询有几个等于 value 数值的元素，使用下面的函数：<br>
+    <div class="code">bool&nbsp;&nbsp;&nbsp; contains(const T &amp; value)
+      const&nbsp;&nbsp;&nbsp; //查询向量是否包含等于 value 数值的元素，有就返回 true，没有就返回 false<br>
+      int&nbsp;&nbsp;&nbsp; count(const T &amp; value) const&nbsp;&nbsp;&nbsp;
+      //查询向量包含几个等于 value 数值的元素，有就返回个数，没有就返回 0</div>
+    凡是参数里带 value 的查询函数、移除或删除函数，都需要元素类型 T 支持双等号比较函数&nbsp; operator==() 。<br>
+    如果需要查询等于 value 数值的元素的序号，使用下面两个函数：<br>
+    <div class="code">int&nbsp;&nbsp;&nbsp; indexOf(const T &amp; value, int
+      from = 0) const&nbsp;&nbsp;&nbsp; //从前到后查询，从 from 序号开始查找等于 value
+      的元素序号，找不到时返回 -1<br>
+      int&nbsp;&nbsp;&nbsp; lastIndexOf(const T &amp; value, int from = -1)
+      const //从后向前查询，从 from 序号开始倒着查找等于 value 的元素序号，找不到就返回 -1</div>
+    indexOf() 是按照序号从小到大查找，lastIndexOf() 是反过来，按照序号从大到小来查找，这两个函数如果找不到匹配的元素，就会返回
+    -1，要注意返回值的判断。<br>
+    查询头部和尾部是否等于某数值的快捷函数如下：<br>
+    <div class="code">bool&nbsp;&nbsp;&nbsp; startsWith(const T &amp; value)
+      const&nbsp;&nbsp;&nbsp; //查询头部元素是否等于 value<br>
+      bool&nbsp;&nbsp;&nbsp; endsWith(const T &amp; value)
+      const&nbsp;&nbsp;&nbsp; //查询尾部元素是否等于 value</div>
+    向量类还有特殊的函数，可以直接获取内部的连续存储空间指针：<br>
+    <div class="code">T *&nbsp;&nbsp;&nbsp; data()&nbsp;&nbsp;&nbsp;
+      //获取向量内部存储空间的读写指针，可以修改元素值<br>
+      const T *&nbsp;&nbsp;&nbsp; data() const&nbsp;&nbsp;&nbsp;
+      //获取向量内部存储空间的只读指针<br>
+      const T *&nbsp;&nbsp;&nbsp; constData() const //获取向量内部存储空间的只读指针 </div>
+    data() 和 constData() 返回值就是向量里真实的数组指针，如果读者希望自己直接用指针操作各个元素，就可以用这三个函数。<br>
+    一般是不建议直接调用这三个函数，因为如果处理不当就容易出现越界，而且不能直接为存储空间扩容。<br>
+    <br>
+    （5）获取子序列、替换和交换函数<br>
+    如果希望从向量复制出来一个子序列的向量，那么使用如下函数：<br>
+    <div class="code">QVector&lt;T&gt;&nbsp;&nbsp; &nbsp;mid(int pos, int length
+      = -1) const&nbsp; //从序号 pos 开始复制 length 个数的元素到新向量，返回新向量</div>
+    mid() 函数专门提取子序列向量，从 pos 开始复制 length 个数的元素到新向量里，返回新向量。如果 length 为 -1
+    或超出原向量的界限，那么从 pos 开始的所有元素都会复制到新向量里。<br>
+    修改序号 i 位置元素数值的函数如下：<br>
+    <div class="code">void&nbsp;&nbsp;&nbsp; replace(int i, const T &amp; value)</div>
+    注意序号 i 不能越界，必须合法，即 0 &lt;= i &lt; size() 。<br>
+    如果希望与其他向量交换所有的元素，使用下面函数：<br>
+    <div class="code">void&nbsp;&nbsp;&nbsp; swap(QVector&lt;T&gt; &amp; other)</div>
+    swap() 函数执行效率非常高，并且不会失败。<br>
+    <br>
+    （6）运算符函数<br>
+    对于运算符函数，我们以下面三个向量来举例说明：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QVector&lt;int&gt; va = {1, 2, 3};<br>
+      &nbsp;&nbsp;&nbsp; QVector&lt;int&gt; vb = {4, 5, 6};<br>
+      &nbsp;&nbsp;&nbsp; QVector&lt;int&gt; vc;</div>
+    运算符使用示范如下表所示：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 400px;" align="center"><b>运算符函数</b></td>
+          <td style="width: 200px;" align="center"><span style="font-weight: bold;">举
+              例</span></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>bool operator!=(const QVector&lt;T&gt; &amp; other) const</td>
+          <td>&nbsp;va != vb;</td>
+          <td> va 和 vb 两个向量有元素不同，结果为 true。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QVector&lt;T&gt; operator+(const QVector&lt;T&gt; &amp; other)
+            const</td>
+          <td>&nbsp;vc = va + vb;</td>
+          <td> va 和 vb 复制拼接后生成新向量，赋值给 vc。</td>
+        </tr>
+        <tr>
+          <td>QVector&lt;T&gt; &amp; operator+=(const QVector&lt;T&gt; &amp;
+            other)</td>
+          <td>&nbsp;va += vb;</td>
+          <td> 复制 vb 所有元素追加到 va 末尾。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QVector&lt;T&gt; &amp; operator+=(const T &amp; value)</td>
+          <td style="height: 16px;">&nbsp;va += 100 ;</td>
+          <td> 添加一个元素 100 到 va 末尾。 </td>
+        </tr>
+        <tr>
+          <td>QVector&lt;T&gt; &amp; operator&lt;&lt;(const QVector&lt;T&gt;
+            &amp; other)</td>
+          <td>&nbsp;va &lt;&lt; vb;</td>
+          <td style="height: 16px;"> 复制 vb 所有元素追加到 va 末尾。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QVector&lt;T&gt; &amp; operator&lt;&lt;(const T &amp; value)</td>
+          <td>&nbsp;va &lt;&lt; 100;</td>
+          <td> 添加一个元素 100 到 va 末尾。 </td>
+        </tr>
+        <tr>
+          <td>QVector&lt;T&gt; &amp; operator=(const QVector&lt;T&gt; &amp;
+            other)</td>
+          <td>&nbsp;vc = va;</td>
+          <td> va 所有元素都复制一份给 vc，va本身不变。二者相等。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QVector&lt;T&gt; operator=(QVector&lt;T&gt; &amp;&amp; other)
+            //移动赋值</td>
+          <td>&nbsp;vc = std::move(va) ; </td>
+          <td> va 所有元素都移动给 vc， va本身被清空。 </td>
+        </tr>
+        <tr>
+          <td>bool operator==(const QVector&lt;T&gt; &amp; other) const</td>
+          <td>&nbsp;va == vb;</td>
+          <td> va 和 vb 有元素不同，结果为 false。<br>
+            只有两个向量的所有元素相等并且顺序一样，它们才能算相等。</td>
+        </tr>
+        <tr class="d1">
+          <td>T &amp; operator[](int i)</td>
+          <td>&nbsp;va[0] = 100;<br>
+          </td>
+          <td style="height: 16px;"> 获取序号为 i 的元素的读写引用，可修改向量元素。 </td>
+        </tr>
+        <tr>
+          <td>const T &amp; operator[](int i) const</td>
+          <td>&nbsp;qDebug()&lt;&lt;va[0] ;</td>
+          <td> 获取序号为 i 的元素的只读引用。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    上表双等号函数判断的条件非常严苛，只有在两个向量的元素完全相等、顺序一样、元素个数一样的情况下，两个向量才会相等。<br>
+    对于带序号 i 的中括号函数（数组下标访问函数），要求序号必须满足&nbsp; 0 &lt;= i &lt; size()，如果序号不合法，出现越界访
+    问，程序就会崩溃。<br>
+    <br>
+    （7）迭代器函数<br>
+    为了兼容 STL，向量也是一样带有迭代器的，向量内部自带的迭代器类型如下：<br>
+    <div class="code">typedef&nbsp;&nbsp;&nbsp; iterator&nbsp;&nbsp;&nbsp;
+      //读写迭代器，STL风格<br>
+      typedef&nbsp;&nbsp; &nbsp;Iterator&nbsp;&nbsp; //读写迭代器，Qt 风格<br>
+      typedef&nbsp;&nbsp;&nbsp; const_iterator&nbsp;&nbsp;&nbsp; //只读迭代器，STL风格<br>
+      typedef&nbsp;&nbsp; &nbsp;ConstIterator&nbsp;&nbsp;&nbsp; //只读迭代器，Qt风格</div>
+    迭代器使用示范如下：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QVector&lt;int&gt; va = {1, 2, 3};<br>
+      &nbsp;&nbsp;&nbsp; QVector&lt;int&gt;::iterator&nbsp; it = va.begin();<br>
+      &nbsp;&nbsp;&nbsp; while(&nbsp; it != va.end() )<br>
+      &nbsp;&nbsp;&nbsp; {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; qDebug()&lt;&lt; (*it);<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; it++;&nbsp;&nbsp; //下一个<br>
+      &nbsp;&nbsp;&nbsp; }</div>
+    获取向量头部、尾部后面假想元素迭代器的函数如下：<br>
+    <div class="code">iterator&nbsp;&nbsp;&nbsp; begin()&nbsp;&nbsp;&nbsp;
+      //指向头部的读写迭代器<br>
+      const_iterator&nbsp;&nbsp;&nbsp; begin() const&nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; //指向头部的只读迭代器<br>
+      const_iterator&nbsp;&nbsp;&nbsp; cbegin() const&nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //指向头部的只读迭代器<br>
+      const_iterator&nbsp;&nbsp;&nbsp; constBegin() const &nbsp; //指向头部的只读迭代器，Qt
+      风格<br>
+      iterator&nbsp;&nbsp;&nbsp; end()&nbsp;&nbsp;&nbsp; //指向尾部后面假想元素的读写迭代器<br>
+      const_iterator&nbsp;&nbsp;&nbsp; end() const&nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; //指向尾部后面假想元素的只读迭代器<br>
+      const_iterator&nbsp;&nbsp;&nbsp; cend() const&nbsp;&nbsp;&nbsp; &nbsp;
+      &nbsp; &nbsp; //指向尾部后面假想元素的只读迭代器<br>
+      const_iterator&nbsp;&nbsp;&nbsp; constEnd() const&nbsp;&nbsp;
+      //指向尾部后面假想元素的只读迭代器，Qt风格</div>
+    注意 *end() 返回的迭代器只能做不等于判断，它指向的东西根本不存在， *end() 仅用于越界判断。<br>
+    虽然获取头部、尾部迭代器的函数多，其实功能类似，起了一堆名字是方便兼容 STL 风格函数命名。<br>
+    利用迭代器插入一个或多个元素的函数如下：<br>
+    <div class="code">iterator&nbsp;&nbsp;&nbsp; insert(iterator before, const T
+      &amp; value)&nbsp;&nbsp;&nbsp; //在 before 指向的元素前面插入元素 value<br>
+      iterator&nbsp;&nbsp;&nbsp; insert(iterator before, int count, const T
+      &amp; value) //在&nbsp; before 指向的元素前面插入 count 个数的 value 元素</div>
+    insert() 迭代器函数返回值就会自动指向新插入的元素，如果插入多个元素，就指向新插入的第一个元素，参数里迭代器 before
+    不能再使用。一定要使用返回值里的迭代器进行后续遍历操作。<br>
+    利用迭代器删除元素的函数如下：<br>
+    <div class="code">iterator&nbsp;&nbsp;&nbsp; erase(iterator
+      pos)&nbsp;&nbsp;&nbsp; //删除 pos 指向的一个元素，返回值指向下一个元素，可能指向尾部后面假想元素<br>
+      iterator&nbsp;&nbsp;&nbsp; erase(iterator begin, iterator end) //删除从参数
+      begin 到参数 end 的元素，但是参数 end 元素不删除，总是返回参数 end<br>
+    </div>
+    第一个 erase() 删除参数 pos 指向的一个元素，返回下一个元素的迭代器，返回值可能是指向尾部后面假想元素。<br>
+    第二个 erase() 删除从参数 begin 到参数 end 的多个元素，但是参数 end 指向的元素不删除，该函数总是返回参数 end 迭代器。<br>
+    一般向量很少使用迭代器访问，因为使用数组下标形式更直接而且高效。<br>
+    <br>
+    （8）容器类型转换函数<br>
+    如果希望将向量转为列表或标准库的向量，使用下面函数：<br>
+    <div class="code">QList&lt;T&gt;&nbsp;&nbsp; &nbsp;toList()
+      const&nbsp;&nbsp;&nbsp; //转为 Qt 列表<br>
+      std::vector&lt;T&gt;&nbsp;&nbsp; &nbsp;toStdVector()
+      const&nbsp;&nbsp;&nbsp; //转为标准库的向量</div>
+    向量类还提供了静态成员函数，实现将参数里类型转为向量类型，返回值就是新的向量：<br>
+    <div class="code"> QVector&lt;T&gt;&nbsp;&nbsp;&nbsp; fromList(const
+      QList&lt;T&gt; &amp; list)&nbsp;&nbsp;&nbsp; //将参数里的列表转为向量，返回值是新向量<br>
+      QVector&lt;T&gt;&nbsp;&nbsp;&nbsp; fromStdVector(const
+      std::vector&lt;T&gt; &amp; vector)&nbsp;&nbsp;&nbsp; //将参数里的标准库向量转为 Qt 向量</div>
+    列表的好处是针对头部插入元素有优化，向量头部插入元素需要大量元素向后复制腾挪，向量头部元素的增删不如列表效率高。<br>
+    <br>
+    （9）其他内容<br>
+    向量类还附带了两个友元函数，是流操作符重载函数，支持数据流的输出、输入，<br>
+    <div class="code">QDataStream &amp;&nbsp;&nbsp;
+      &nbsp;operator&lt;&lt;(QDataStream &amp; out, const QVector&lt;T&gt; &amp;
+      vector)&nbsp; //输出<br>
+      QDataStream &amp;&nbsp;&nbsp; &nbsp;operator&gt;&gt;(QDataStream &amp; in,
+      QVector&lt;T&gt; &amp; vector)&nbsp;&nbsp;&nbsp; //输入</div>
+    这些流操作符函数正常运行的前提是元素类型 T 必须支持数据流的输入和输出。C++ 基本类型和 Qt 常见数据类型都支持，如果是自定义类型那么必须类似重
+    载&nbsp; operator&lt;&lt;() 和 operator&gt;&gt;() 函数。<br>
+    <br>
+    向量与列表一样都支持排序函数：<br>
+    <div class="code">void qSort(Container &amp; container)&nbsp; //排序 <br>
+      void qStableSort(Container &amp; container)&nbsp; //稳定排序</div>
+    排序函数要求容器的元素类型 T 必须支持小于号函数&nbsp; operator&lt;()，用于比较元素大小。Qt
+    调用的小于号函数原型是两个参数的全局 operator&lt;() 函数，不是成员函数，应该在类外面声明并定义下面的小于号函数：<br>
+    <div class="code">bool&nbsp; operator&lt; ( const T &amp;t1, const T &amp;t2
+      )</div>
+    一般要将该函数声明为 T 类型的友元函数，方便访问私有变量。<br>
+    <br>
+    最后我们梳理一下，如果自定义类型希望能够完美地和 QVector 配合使用，那么需求如下：<br>
+    ① 必须是可赋值类型，需要默认构造函数、复制构造函数、赋值函数 operator=() ；<br>
+    ② 如果希望支持查询函数，需要双等号函数 operator==()；<br>
+    ③ 如果希望支持排序函数，需要全局小于号函数 operator&lt; (&nbsp; const T &amp;t1, const T &amp;t2
+    ) ；<br>
+    ④ 如果希望支持 QDataStream 数据流输入输出，那么添加友元函数&nbsp; operator&lt;&lt;() 和
+    operator&gt;&gt;() 。 <br>
+    第一条是必须实现的函数，后面三条是建议实现的函数。<br>
+    <br>
+    对于自定义类型支持 QVector ，可以参考 9.1.1 小节的示例，因为 QList 和 QVector 对自定义类型的要求是一样的。<br>
+    本小节示例实现一个查询城市经纬度的功能，并示范嵌套容器的使用。<br>
+    <br>
+    <div class="os2">9.2.2 栈 QStack </div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <div class="os2">9.2.3 顺序容器对比 </div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch09-01.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch09-03.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>

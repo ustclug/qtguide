@@ -399,7 +399,57 @@
     第一条是必须实现的函数，后面三条是建议实现的函数。<br>
     <br>
     对于自定义类型支持 QVector ，可以参考 9.1.1 小节的示例，因为 QList 和 QVector 对自定义类型的要求是一样的。<br>
-    本小节示例实现一个查询城市经纬度的功能，并示范嵌套容器的使用。<br>
+    本小节示例实现一个查询城市经纬度的功能，并示范嵌套容器的使用。在开始例子之前，请读者到下面网址下载一个文本文件：<br>
+    <a href="https://qtguide.ustclug.org/QtProjects/ch09/cityposition/position.txt">
+      https://qtguide.ustclug.org/QtProjects/ch09/cityposition/position.txt</a>
+    <br>
+    position.txt 保存了全国各省市的经纬度，里面的内容举例如下：<br>
+    <div class="code">安徽省 合肥市 31 50 117 15<br>
+      安徽省 安庆市 30 32 117 3<br>
+      安徽省 池州市 30 40 117 29<br>
+      安徽省 六安市 31 46 116 30</div>
+    每行文本分别是省名称、市名称、纬度的度和分、经度的度和分。比如合肥市就是纬度 31°50′，经度 117°15′
+    。所有的行都是这种格式，方便我们用程序加载。<br>
+    下载 position.txt 之后，我们打开 QtCreator，新建一个 Qt Widgets Application
+    项目，在新建项目的向导里填写：<br>
+    ①项目名称 cityposition，创建路径 D:\QtProjects\ch09，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    新建项目之后，我们把 position.txt 复制到项目文件夹 D:\QtProjects\ch09\cityposition 里面。<br>
+    我们点击 QtCreator 菜单“文件”-&gt; “新建文件或项目”，进入新建对话框，<br>
+    在对话框左边选择“文件和类”里的“Qt”栏目，然后在对话框中间选择“Qt Resource File”：<br>
+    <center> <img src="images/ch09/ch09-02-01.png" alt="ui" width="600"></center>
+    点击下面 Choose... 按钮，进入文件名称路径设置页面，名称里填写 res.qrc ：<br>
+    <center> <img src="images/ch09/ch09-02-02.png" alt="ui" width="600"></center>
+    点击下一步按钮，进入项目管理界面：<br>
+    <center> <img src="images/ch09/ch09-02-03.png" alt="ui" width="600"></center>
+    项目管理界面不需要修改，直接点击完成，这样就添加了 res.qrc 文件到项目里了。<br>
+    添加 res.qrc 文件之后，自动进入该文件编辑界面，我们在 QtCreator 左侧项目管理栏，右击 res.qrc 文件，<br>
+    在右键菜单选择“添加现有文件...”：<br>
+    <center> <img src="images/ch09/ch09-02-04.png" alt="ui" width="600"></center>
+    在弹出的添加现有文件对话框里面，选择 position.txt 添加到资源文件里面：<br>
+    <center> <img src="images/ch09/ch09-02-05.png" alt="ui" width="600"></center>
+    点击上面对话框的打开按钮，然后我们就可以看到该记事本文件成功添加到资源文件里了：<br>
+    <center> <img src="images/ch09/ch09-02-06.png" alt="ui" width="600"></center>
+    我们保存该资源文件，然后就可以关闭它了，将 position.txt 添加到资源文件里，项目编译之后就会将该文件嵌入到生成的可执行目标程序里，程序里可以
+    使用下面路径读取该文件：<br>
+    :/position.txt<br>
+    <br>
+    接下来我们编辑 widget.ui 界面文件，参考下图拖入控件：<br>
+    <center> <img src="images/ch09/ch09-02-07.png" alt="ui" width="800"></center>
+    第一行是两个标签和两个组合框，标签文本分别为“省份”、“市县”，组合框对象名分别为
+    comboBoxProvince、comboBoxCity，这里需要将两个组合框的 sizePolicy 的水平策略都修改为 Expanding
+    自动拉伸模式，方便与第二行的单行编辑器对齐。<br>
+    第二行是两个标签和两个单行编辑器，标签文本分别为“经度”、“纬度”，单行编辑器对象名为
+    lineEditLongitude、lineEditLatitude。<br>
+    窗口整体使用一个栅格布局，窗口大小 400*200 。<br>
+    这个界面用组合框存储全国所有的省份和市县，当省份改变时，自动加载该省的市县；用户选择了省份和市县之后，下面单行编辑器自动显示该市县的经纬度。下面我们开始
+    编辑代码，首先是头文件 widget.h 的代码：<br>
+    <br>
+    <br>
+    <br>
+    <br>
     <br>
     <div class="os2">9.2.2 栈 QStack </div>
     <br>
@@ -415,15 +465,18 @@
       <tbody>
         <tr>
           <td style="width: 40%;">
-            <div style="text-align: center;"><a href="ch09-01.htm"><img class="pic"
+            <div style="text-align: center;"><a href="ch09-01.htm"><img class="pic"
+
                   style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
           </td>
           <td style="width: 20%;">
-            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+
                   style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
           </td>
           <td style="width: 40%;">
-            <div style="text-align: center;"><a href="ch09-03.htm"><img class="pic"
+            <div style="text-align: center;"><a href="ch09-03.htm"><img class="pic"
+
                   style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
           </td>
         </tr>

@@ -37,7 +37,7 @@
       &nbsp;&nbsp;&nbsp; {<br>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; vc[i].resize(10);<br>
       &nbsp;&nbsp;&nbsp; }</div>
-    容器嵌套定义时，要注意在两层尖括号中间加空格，避免编译器把容器嵌套识别为流操作符。二维向量分配存储空间完成后就和二维数组用起来差不多。<b>向量
+    容器嵌套定义时，要注意在两层尖括号中间加空格，避免编译器把容器嵌套识别为流操作符。二维向量分配存储空间完成后就和二维数组用起来差不多。<b>向 量
       QVector 与之前介绍的列表 QList 类似，只能存储值类型，即类型 T 必须支持默认构造函数、复制构造函数和等于号赋值函数。</b><br>
     下面我们分类列举向 量模板类的功能函数：<br>
     （1）构造函数<br>
@@ -444,17 +444,642 @@
     第二行是两个标签和两个单行编辑器，标签文本分别为“经度”、“纬度”，单行编辑器对象名为
     lineEditLongitude、lineEditLatitude。<br>
     窗口整体使用一个栅格布局，窗口大小 400*200 。<br>
-    这个界面用组合框存储全国所有的省份和市县，当省份改变时，自动加载该省的市县；用户选择了省份和市县之后，下面单行编辑器自动显示该市县的经纬度。下面我们开始
-    编辑代码，首先是头文件 widget.h 的代码：<br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
+    这个界面用组合框存储全国所有的省份和市县，当省份改变时，自动加载该省的市县；用户选择了省份和市县之后，下面单行编辑器自动显示该市县的经纬度。
+    下面我们开始 编辑代码，首先是头文件 widget.h 的代码：<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>WIDGET_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">WIDGET_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QVector&gt;</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+style=" color:#000000;">();</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//省份变化时，自动加载该省的市县</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">onProvinceIndexChange</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span>index<span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//市县变化时，自动显示市县的经纬度到编辑框</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">onCityIndexChange</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span>index<span
+style=" color:#000000;">);</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//保存省份名称</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QVector</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#800080;">QString</span><span
+style=" color:#000000;">&gt;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_vProvinces</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//二维向量保存市县名称</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QVector</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#800080;">QVector</span><span style=" color:#000000;">&lt;</span><span
+style=" color:#800080;">QString</span><span style=" color:#000000;">&gt;</span><span
+style=" color:#c0c0c0;">  </span><span style=" color:#000000;">&gt;</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_vCities</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//二维向量保存市县的经度</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QVector</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#800080;">QVector</span><span style=" color:#000000;">&lt;</span><span
+style=" color:#808000;">double</span><span style=" color:#000000;">&gt;</span><span
+style=" color:#c0c0c0;">  </span><span style=" color:#000000;">&gt;</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_vLongitudes</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//二维向量保存市县的纬度</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QVector</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#800080;">QVector</span><span style=" color:#000000;">&lt;</span><span
+style=" color:#808000;">double</span><span style=" color:#000000;">&gt;</span><span
+style=" color:#c0c0c0;">  </span><span style=" color:#000000;">&gt;</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_vLatitudes</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//从</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">position.txt</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">加载各省市及其经纬度</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">loadPositions</span><span
+style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre>
+</div>
+    该文件添加了向量模板类的头文件引用。Widget 类声明里的私有槽函数都是手动添加的，onProvinceIndexChange(int) 用于关联省份组合框的序号变化信号，onCityIndexChange(int) 用于关联市县组合框的序号变化信号，当用户选择省份时自动更新该省的市县，用户选择市县时，自动显示该市县的经纬度到编辑框。<br>类的私有变量里，添加了一维字符串向量 m_vProvinces ，保存省份的名称列表；<br>添加了二维向量 m_vCities 保存市县名称， m_vLongitudes 保存市县经度，m_vLatitudes 保存市县纬度，二维向量定义时要注意在两层尖括号中间加空格，防止编译器将二维向量的尖括号识别为流操作符。这里的二维向量，第一维是省份的序号，第二维是该省市县的序号。<br>最后的私有函数 loadPositions() 在窗口构建时从资源文件加载全国所有的省份和市县信息。<br><br>下面分段编辑源文件 widget.cpp 的代码，首先是头文件包含、构造函数、析构函数：<br>
+    <div class="code">
+<style type="text/css">
+p, li { white-space: pre-wrap; }
+</style>
+
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"widget.h"</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QFile&gt;</span><span style=" color:#c0c0c0;">    </span><span
+style=" color:#008000;">//文件</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QTextStream&gt;//文本流</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置编辑框为只读</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditLongitude</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setReadOnly</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">true</span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditLatitude</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setReadOnly</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">true</span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//从资源文件</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">position.txt</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">读取省市经纬度</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">loadPositions</span><span
+style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//关联信号，省份组合框序号变化</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">connect</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">comboBoxProvince</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SIGNAL</span><span
+style=" color:#000000;">(</span>currentIndexChanged<span style=" color:#000000;">(</span><span
+style=" color:#808000;">int</span><span style=" color:#000000;">)),</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#808000;">this</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SLOT</span><span
+style=" color:#000000;">(</span>onProvinceIndexChange<span style=" color:#000000;">(</span><span
+style=" color:#808000;">int</span><span style=" color:#000000;">))</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//市县组合框序号变化</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">connect</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">comboBoxCity</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SIGNAL</span><span
+style=" color:#000000;">(</span>currentIndexChanged<span style=" color:#000000;">(</span><span
+style=" color:#808000;">int</span><span style=" color:#000000;">)),</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#808000;">this</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SLOT</span><span
+style=" color:#000000;">(</span>onCityIndexChange<span style=" color:#000000;">(</span><span
+style=" color:#808000;">int</span><span style=" color:#000000;">))</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre></div>      
+          
+          
+          该文件添加了调试打印类、文件类和文本流的头文件包含。<br>构造函数里先将经度、纬度编辑框设置为只读，防止显示市县经纬度后被用户修改，因为市县经纬度是固定值。<br>然后调用 loadPositions() 加载全国所有省份、市县的经纬度信息。<br>加载经纬度信息之后，关联省份组合框的序号变化信号到槽函数 onProvinceIndexChange(int)；<br>关联市县组合框的序号变化信号到槽函数 onCityIndexChange(int) 。<br>构造函数里先加载经纬度信息，后关联信号到槽函数，是避免添加省份或市县组合框条目时触发序号变化信号，因为数据没加载完，如果冒然触发序号变化关联的槽函数，槽函数容易出现越界访问或者读取不了经纬度。<br>析构函数是默认代码，没有修改。<br>
+          <br>下面手动编辑加载全国省份和市县经纬度信息的函数：<br>
+<div class="code">
+<style type="text/css">
+p, li { white-space: pre-wrap; }
+</style>
+
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//从资源文件</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">position.txt</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">读取省市经纬度</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">loadPositions</span><span
+style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//打开资源里的文件</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QFile</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">fileIn</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">":/position.txt"</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//资源文件打开一般不需要判断，只要文件名对就可以打开</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">fileIn</span><span
+style=" color:#000000;">.</span><span style=" font-style:italic; color:#000000;">open</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QIODevice</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">ReadOnly</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//定义文本流</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QTextStream</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tsIn</span><span style=" color:#000000;">(&amp;</span><span
+style=" color:#000000;">fileIn</span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">tsIn</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setCodec</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"UTF-8"</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//该文件使用</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">UTF-8</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">文本编码</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//为二维向量的第一维省份添加元素空间，这样后面才能使用中括号访问</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_vCities</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">resize</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">40</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span><span style=" color:#008000;">//全国省份目前只有34个，分配</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">40</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">保证够用</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_vLongitudes</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">resize</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">40</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_vLatitudes</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">resize</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">40</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//定义变量</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strProvBefore</span><span
+style=" color:#000000;">;</span><span style=" color:#008000;">//保存前一行记录的省份，用于判断是否应该添加新省份了</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strProvCur</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">   </span><span style=" color:#008000;">//当前行加载的省份</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strCity</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//当前行加载的市县</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nLonD</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//经度的度</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nLonM</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//经度的分</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nLatD</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//纬度的度</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nLatM</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//纬度的分</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//记录当前省份的序号</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nProvIndex</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">-</span><span style=" color:#000080;">1</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//开始读取，文本流不结束就一直读</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">while</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!</span><span
+style=" color:#000000;">tsIn</span><span style=" color:#000000;">.</span><span style=" color:#000000;">atEnd</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//依次读取省份、市县、纬度的度和分、经度的度和分</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">tsIn</span><span
+style=" color:#000000;">&gt;&gt;</span><span style=" color:#000000;">strProvCur</span><span
+style=" color:#000000;">&gt;&gt;</span><span style=" color:#000000;">strCity</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#000000;">&gt;&gt;</span><span
+style=" color:#000000;">nLatD</span><span style=" color:#000000;">&gt;&gt;</span><span
+style=" color:#000000;">nLatM</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#000000;">&gt;&gt;</span><span
+style=" color:#000000;">nLonD</span><span style=" color:#000000;">&gt;&gt;</span><span
+style=" color:#000000;">nLonM</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//如果当前省份不等于前一个省份，需要新增省份</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strProvBefore</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strProvCur</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#000000;">nProvIndex</span><span
+style=" color:#000000;">++;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//省份序号增加</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#000000;">strProvBefore</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strProvCur</span><span style=" color:#000000;">;</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//保存省份，用于下一行记录判断</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#008000;">//添加新的省份</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#800000;">m_vProvinces</span><span
+style=" color:#000000;">&lt;&lt;</span><span style=" color:#000000;">strProvCur</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//一维向量不需要提前分配，自动分配空间并追加元素</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//无论省份新旧，都要添加市县、经度、纬度</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//添加市县</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">m_vCities</span><span
+style=" color:#000000;">[</span><span style=" color:#000000;">nProvIndex</span><span
+style=" color:#000000;">]</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strCity</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//添加纬度，转为浮点数的度</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">m_vLatitudes</span><span
+style=" color:#000000;">[</span><span style=" color:#000000;">nProvIndex</span><span
+style=" color:#000000;">]</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nLatD</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">double</span><span
+style=" color:#000000;">)</span><span style=" color:#000000;">nLatM</span><span
+style=" color:#000000;">/</span><span style=" color:#000080;">60.0</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//添加经度</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">m_vLongitudes</span><span
+style=" color:#000000;">[</span><span style=" color:#000000;">nProvIndex</span><span
+style=" color:#000000;">]</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&lt;&lt;</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nLonD</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">double</span><span
+style=" color:#000000;">)</span><span style=" color:#000000;">nLonM</span><span
+style=" color:#000000;">/</span><span style=" color:#000080;">60.0</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//从文件加载完毕</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//省份组合框的内容是固定的，直接添加</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">for</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">i</span><span style=" color:#000000;">=</span><span style=" color:#000080;">0</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#800000;">m_vProvinces</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">count</span><span
+style=" color:#000000;">();</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span
+style=" color:#000000;">++)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">comboBoxProvince</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addItem</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_vProvinces</span><span
+style=" color:#000000;">[</span><span style=" color:#000000;">i</span><span style=" color:#000000;">]</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置省份序号</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">comboBoxProvince</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setCurrentIndex</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//手动调用省份变化槽函数，显示第一个省份的所有市县到组合框</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">onProvinceIndexChange</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//手动调用市县变化槽函数，显示经纬度</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">onCityIndexChange</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//打印省份计数</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">qDebug</span><span
+style=" color:#000000;">()&lt;&lt;</span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"加载完毕，省份计数：</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%1"</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">m_vProvinces</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">count</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre></div>
+          
+          该函数首先定义文件输入对象 fileIn，文件名为资源文件&nbsp; ":/position.txt" ，然后直接打开该文件，对于资源里的文件，我们不需要判断是否打开成功，因为该文件总是存在的，并且格式已知，也不需要进行输入异常判断，因为我们程序员可以控制 ":/position.txt" 文件的内容，不行可以在程序编译之前纠正该文件内容。程序运行时资源里的文件都是只读的，所以不需要考虑数据源污染问题。<br>打开文件之后，以该文件对象定义输入文本流，设置文本编码格式 UTF-8 。<br>然后提前为三个二维向量增加了第一维的 40 个元素，全国目前省份只有 34 个，添加 40 个已经很富余了，保证后面用中括号访问时不会越界。 <br>
+    接下来定义了三个字符串，strProvBefore 保存前一行记录的省份，strProvCur 保存当前行的省份，strCity 保存当前的市县。当上一行的省份不同于当前行的省份时，我们就知道需要为一维向量 m_vProvinces 添加新的省份名称，省份序号也就加一，然后新省份的市县、经纬度就保存到二维向量的新序号记录行里面。 <br>
+    然后定义了经度的度、分，纬度的度、分变量，方便从文件读取市县的经纬度。<br>我们定义省份序号 nProvIndex 从 -1 开始，然后开始用 while 循环加载 position.txt 文件：<br>我们从文件当前行里面加载省份名称、市县名称、纬度的度值和分值、经度的度值和分值；<br>然后判断 strProvBefore 是否与 strProvCur&nbsp; 不一样：<br>&nbsp;&nbsp;&nbsp; 如果不一样就将省份序号加一，保存当前行的省份给 strProvBefore 用于下轮循环判断，将新省份名称添加到向量 m_vProvinces。<br>因为 nProvIndex 总是与当前的省份序号同步，所以无论新旧省份，都将市县的名称添加到 m_vCities[nProvIndex] 记录行里面，计算纬度浮点数值保存到 m_vLatitudes[nProvIndex] 记录行，计算经度浮点数值保存到 m_vLongitudes[nProvIndex] 记录行。<br>&nbsp;当文件所有内容读取完毕时，结束循环。<br>这样全国所有省份市县信息都加载到四个向量里面了。<br>我们将省份名称循环添加为省份组合框的条目，将当前省份条目序号设为 0 ；<br>然后手动调用了省份序号变化关联的槽函数和市县序号变化的槽函数，用于填充市县组合框，并显示第一个市县的经纬度到编辑框。<br>
+    最后打印了实际加载的省份计数。<br><br>下面我们编辑关联省份组合框序号变化信号的槽函数：<br>
+    <div class="code">
+<style type="text/css">
+p, li { white-space: pre-wrap; }
+</style>
+
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//根据省份序号变化，自动加载该省的市县</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">onProvinceIndexChange</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">index</span><span style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">index</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&lt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;">   </span><span
+style=" color:#808000;">return</span><span style=" color:#000000;">;</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//序号不合法，不处理</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//清空市县组合框</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">comboBoxCity</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">clear</span><span
+style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//根据省份序号，加载该省的市县到市县组合框</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//该省的市县计数</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nCount</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">m_vCities</span><span style=" color:#000000;">[</span><span
+style=" color:#000000;">index</span><span style=" color:#000000;">].</span><span
+style=" color:#000000;">count</span><span style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">for</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">i</span><span style=" color:#000000;">=</span><span style=" color:#000080;">0</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#000000;">nCount</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span
+style=" color:#000000;">++)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//第一维是省序号，第二维是市县序号</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">comboBoxCity</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addItem</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_vCities</span><span
+style=" color:#000000;">[</span><span style=" color:#000000;">index</span><span
+style=" color:#000000;">][</span><span style=" color:#000000;">i</span><span style=" color:#000000;">]</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置默认市县的序号</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">comboBoxCity</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setCurrentIndex</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre></div>      
+          
+          该函数首先对序号进行判断，如果序号不合法直接返回；序号合法才进行后续操作。<br>当省份序号变化时，我们先清空市县组合框的内容；<br>然后获取新省份对应的市县计数；<br>将新省份的市县名称全部添加到市县组合框，完成市县组合框的更新；<br>最后设置默认的市县为该省打头的第一个市县。<br><br>最后我们编辑关联市县组合框序号变化的槽函数：<br>
+          <div class="code">
+<style type="text/css">
+p, li { white-space: pre-wrap; }
+</style>
+
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//根据市县序号变化，自动显示市县的经纬度到编辑框</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">onCityIndexChange</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">index</span><span style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">index</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&lt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;">   </span><span
+style=" color:#808000;">return</span><span style=" color:#000000;">;</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//序号不合法，不处理</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取省份序号，为第一个纬度</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nProvIndex</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">comboBoxProvince</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">currentIndex</span><span style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置经度编辑框</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditLongitude</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"%1"</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">m_vLongitudes</span><span style=" color:#000000;">[</span><span
+style=" color:#000000;">nProvIndex</span><span style=" color:#000000;">][</span><span
+style=" color:#000000;">index</span><span style=" color:#000000;">]</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置纬度编辑框</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditLatitude</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"%1"</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">m_vLatitudes</span><span style=" color:#000000;">[</span><span
+style=" color:#000000;">nProvIndex</span><span style=" color:#000000;">][</span><span
+style=" color:#000000;">index</span><span style=" color:#000000;">]</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre></div>
+          
+          该函数第一件事也是判断序号，如果序号不合法就直接返回，如果序号合法才进行后续操作。<br>我们获取当前省份序号 nProvIndex ，市县的序号就是参数里 index；<br>当前省市的经度就是 m_vLongitudes[nProvIndex][index] ，显示到经度编辑框；<br>当前省市的纬度就是 m_vLatitudes[nProvIndex][index]，显示到纬度编辑框。<br>我们更换省份时，会自动加载该省的市县，而市县组合框变化时，就会自动显示该省指定市县的经纬度。<br>示例代码讲解到这，我们构建运行示例，当选择的省份、市县变化时，经纬度会同步更新：<br>
+          <center> <img src="images/ch09/ch09-02-08.png" alt="run"></center>
+
+          
+          <br>
     <div class="os2">9.2.2 栈 QStack </div>
     <br>
-    <br>
-    <br>
+    QStack 是向量 QVector 的派生类，继承了基类全部的功能，仅仅添加少许的栈操作函数。首先是进栈、出栈的函数：<br>
+    <div class="code">void push(const T &amp; t) //将 t 添加到栈顶<br>T&nbsp; pop()&nbsp;&nbsp;&nbsp; //取出栈顶元素并返回</div> 
+          
+          还有两个获取栈顶元素引用的函数：<br>
+    <div class="code">T &amp;&nbsp; top()&nbsp; //获取栈顶元素的读写引用<br>const T &amp;&nbsp;&nbsp;&nbsp; top() const&nbsp; //获取栈顶元素的只读引用</div>
+          另外栈重载了基类的交换函数，用于和另一个对象互换所有元素：<br>
+      <div class="code">void swap(QStack&lt;T&gt; &amp; other)</div>    
+          交换函数的执行效率非常高，并且不会失败。<br>
+    栈自身的新函数就这些，其他功能都可以使用基类的函数实现。<br>栈的用途非常广泛，比如我们可执行程序所有的函数调用都是基于栈的，栈也可以实现遍历树形结构，能够取代递归函数调用。本小节的示例我们就使用栈来遍历简单的树。<br><br>
     <br>
     <div class="os2">9.2.3 顺序容器对比 </div>
     <br>
@@ -465,22 +1090,18 @@
       <tbody>
         <tr>
           <td style="width: 40%;">
-            <div style="text-align: center;"><a href="ch09-01.htm"><img class="pic"
-
-                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+            <div style="text-align: center;"><a href="ch09-01.htm"><img class="pic"
+style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
           </td>
           <td style="width: 20%;">
-            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
-
-                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
           </td>
           <td style="width: 40%;">
-            <div style="text-align: center;"><a href="ch09-03.htm"><img class="pic"
-
-                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+            <div style="text-align: center;"><a href="ch09-03.htm"><img class="pic"
+style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
           </td>
         </tr>
       </tbody>
     </table>
-  </body>
-</html>
+</body></html>

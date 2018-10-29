@@ -2151,8 +2151,62 @@ style=" color:#000000;">}</span></pre></div>
           其他功能读者自行测试。在树形节点不多的情况下，递归函数遍历和栈遍历都可以使用。<br>当树形节点数量达到十万量级以后，通常必须用栈遍历，因为递归函数的层次太多，很可能导致程序的函数执行栈溢出，程序就会崩溃。QStack 在堆上分配空间，而不依赖函数执行栈，就不容易出现溢出的情况。函数执行栈一般只有 1MB ~ 2MB，而堆空间可以分配 * GB 。<br><br>
     <div class="os2">9.2.3 顺序容器对比 </div>
     <br>
+    五种顺序容器其实按照基类来说，只有三类：QList（含派生类 QQueue）、QLinkedList、QVector（含派生类 QStack），概括来说，它们的应用场景如下：<br>① 在大多数情况下，QList 都是非常优秀的选择。QList 基于序号的访问机制比链表 QLinkedList 访问效率要高， 通常情况 QList&nbsp; 的访问速度优于 QVector，因为 QList 专门优化过内存存储方式，并且 QList 的代码编写也很简洁。<br>② 如果需要使用链式的数据结构，希望随机插入、随机删除总是常量时间，那么应该使用 QLinkedList。<br>③ 如果希望元素在内存中连续相邻存储，就是使用封装好的数组，那么 QVector 是适合的选择。<br>
+    ④ Qt 另外提供了低级别的可变长度数组 QVarLengthArray， 比 QVector 函数少一些，QVarLengthArray 不会初始化C++基本类型的元素，而 QVector&nbsp; 总是对元素做初始化。通常情况下，连续空间数组的场景建议优先使用 QVector 。<br><br>QList、QLinkedList、QVector 各种操作的算法复杂度不一样，用于描述算法复杂度的标记为 O(*) ，常见的列举如下：<br>
+          ① 常量时间，记为 O(1) 。即某操作的时间与容器中的元素多少无关，链表的插入操作就是常量时间。<br>
+          ② 对数时间，记为 O(log n)。在容器上的某个操作耗费时间与元素个数的对数成比例关系，对于排序好的数组，使用二分查找 qBinaryFind() 就是对数时间。<br>
+          ③ 线性时间，记为 O(n)。在容器上的某个操作时间直接与元素个数成比例关系，向量的插入操作就是线性时间。<br>
+          ④ 线性对数时间，记为 O(n log n)。在容器上的某个操作时间与（元素个数×元素个数的对数） 成比例关系。快速排序和堆排序的平均算法复杂度就是&nbsp; O(n log n) 。<br>
+          ⑤ 二次方时间，记为 O(n<sup>2</sup>) 。在容器上的某个操作的时间与 元素个数的二次方 成比例关系。冒泡排序算法就是二次方时间。<br><br>
+          我们对 QLinkedList、QList、QVector 常见操作的算法复杂度列举如下：<br>
+           <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 120px;" align="center"><b>容器类型</b></td>
+          <td style="width: 100px;" align="center"><b>索引查找</b></td>
+          <td style="width: 100px;" align="center"><b> 随机插入</b></td>
+          <td style="width: 100px;" align="center"><b> 头部添加 </b></td>
+          <td style="width: 100px;" align="center"><b> 尾部追加 </b></td>
+        </tr>
+        <tr>
+          <td>QLinkedList</td>
+          <td> O(n) </td>
+          <td> O(1) </td>
+          <td> O(1) </td>
+          <td> O(1) </td>
+        </tr>
+        <tr class="d1">
+          <td>QList / QQueue</td>
+          <td> O(1) </td>
+          <td> O(n) </td>
+          <td> Amort. O(1) </td>
+          <td> Amort. O(1) </td>
+        </tr>
+        <tr>
+          <td>QVector / QStack</td>
+          <td> O(1) </td>
+          <td> O(n) </td>
+          <td> O(n) </td>
+          <td> Amort. O(1) </td>
+        </tr>
+       
+      </tbody>
+    </table>
     <br>
-    <br>
+
+          
+          
+          
+          
+          表格中 Amort. 是 amortized behavior 的缩写，即均摊行为。以 Amort. O(1) 为例，如果程序仅执行一次操作，那么有可能是 O(n) 时间，但是如果执行很多次该操作，那么很多次平均分摊下来，平均的时间是 O(1) 。<br>从表格上的算法复杂度来看，QList 的操作效率比较高，并且支持数组下标访问，QLinkedList 虽然增删元素效率高，但是访问元素的效率比较低，并且不支持数组下标访问。大多数情况下都建议使用 QList ，Qt 很多的类函数涉及到序列存储时，都是优先使用 QList ，比如获取本地主机 IP 地址列表 QNetworkInterface::​allAddresses() 、获取声卡设备列表QAudioDeviceInfo::​availableDevices(QAudio::Mode mode) 等等。<br>下面我们设计一个示例，用于测试 QLinkedList、QList、QVector 常见操作耗费的时间。<br>
+          Qt 提供了耗费时间计时器类 QElapsedTimer ，该类的使用举例如下：<br>
+   <div class="code">&nbsp;&nbsp;&nbsp; QElapsedTimer timer;<br>&nbsp;&nbsp;&nbsp; timer.start();<br><br>&nbsp;&nbsp;&nbsp; slowOperation1();<br><br>&nbsp;&nbsp;&nbsp; qDebug() &lt;&lt; "The slow operation took" &lt;&lt; timer.elapsed() &lt;&lt; "milliseconds";</div>
+          
+          定义耗费计时器对象 timer，调用 timer.start() 开始计时，然后执行某操作，操作结束后调用计时函数 timer.elapsed() ，就可以获知某操作花费的时间。QElapsedTimer&nbsp; 的计时函数主要有两个：<br>
+          <div class="code">qint64&nbsp;&nbsp; &nbsp;elapsed() const&nbsp; //计算耗费的毫秒时间，milliseconds<br>qint64&nbsp;&nbsp;&nbsp; nsecsElapsed() const&nbsp; //计算耗费的纳秒时间，nanoseconds</div>
+          
+          我们的示例里面用纳秒计时。<br><br><br><br>
     <br>
     <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
       <tbody>

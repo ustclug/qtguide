@@ -3,11 +3,9 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <title>ch09-03</title>
-    
-<link href="css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-
-<script src="thumbnailviewer.js" type="text/javascript">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -15,54 +13,248 @@
 * Visit http://www.dynamicdrive.com/ for full source code
 ***********************************************/
 
-</script>
-
-
-  </head>
-  
-  
-<div class="os1">9.3 关联容器：QMap、QMultiMap和QSet </div>
-<br />
-本节介绍三种关联容器，单映射QMap、多映射 QMultiMap 和 集合 QSet。
-前面介绍的顺序容器通常存储大量连续序号的元素，而关联容器则存储离散的“不正常序号”的元素。
-数组和顺序容器的序号都是从 0 开始，逐渐递增，而关联容器没有正常的序号，
-映射和哈希映射通过重载中括号[]运算符函数，它们的元素序号可以是各种奇葩的数值类型，
-比如用字符串、图片、颜色、日期、字体等数据作为序号，像 map["红色"] = 0xFF0000 就是映射的例子。
- 集合 QSet就是数学上的集合，比如求交集∩、求并集∪等。集合的元素没有序号，元素之间也不讲究顺序。
-本节共三个小节内容，依次介绍 QMap、QMultiMap 和 QSet，并各安排一个示例使用这些关联容器。
-<br /><br />
-
-<div class="os2">9.3.1 单映射 QMap </div>
-<br />
-<br />
-<br />
-<br />
-
-<div class="os2">9.3.2 多映射 QMultiMap</div>
-<br />
-<br />
-<br />
-<br />
-
-<div class="os2">9.3.3 集合 QSet </div>
-
-
-
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch09-02.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch09-04.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+</script> </head>
+  <body>
+    <div class="os1">9.3 关联容器：QMap、QMultiMap和QSet </div>
+    <br>
+    本节介绍三种关联容器，单映射QMap、多映射 QMultiMap 和 集合 QSet。
+    前面介绍的顺序容器通常存储大量连续序号的元素，而关联容器则存储离散的“不正常序号”的元素。 数组和顺序容器的序号都是从 0
+    开始，逐渐递增，而关联容器没有正常的序号， 映射和哈希映射通过重载中括号[]运算符函数，它们的元素序号可以是各种奇葩的数值类型，
+    比如用字符串、图片、颜色、日期、字体等数据作为序号，像 map["红色"] = 0xFF0000 就是映射的例子。 集合
+    QSet就是数学上的集合，比如求交集∩、求并集∪等。集合的元素没有序号，元素之间也不讲究顺序。 本节共三个小节内容，依次介绍
+    QMap、QMultiMap 和 QSet，并各安排一个示例使用这些关联容器。 <br>
+    <br>
+    <div class="os2">9.3.1 单映射 QMap </div>
+    <br>
+    QMap 模板类通常将数据按照 key - value（键-值） 配对的形式存储，程序中以 key 作为序号来查询对应的 value，比如&nbsp;
+    map["红色"] = 0xFF0000 。QMap 通常将一个 key 映射为一个 value，而 QMultiMap 通常将 一个 key
+    映射为多个 value，这就是单映射和多映射的区别。<br>
+    QMap 模板类 key 和 value 的类型可以是C++和Qt常用的数据类型，也可以使用自定义类型，<b>但是注意key 和 value
+      都必须是可赋值类型！</b><br>
+    QMap 使用红黑树存储 key - value 配对数据，排序时按照 key 来比较大小，因此对 key 类型有额外要求：<br>
+    <b>key 类型必须提供&nbsp; operator&lt;()&nbsp; 比较数值大小。</b><br>
+    <br>
+    下面我们分类列举QMap模板类的功能函数：<br>
+    （1）构造函数<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QMap()&nbsp; //默认构造函数<br>
+      &nbsp;&nbsp;&nbsp; QMap(std::initializer_list&lt;std::pair&lt;Key, T&gt;
+      &gt; list) //初始化列表构造函数<br>
+      &nbsp;&nbsp;&nbsp; QMap(const QMap&lt;Key, T&gt; &amp; other) //复制构造函数<br>
+      &nbsp;&nbsp;&nbsp; QMap(QMap&lt;Key, T&gt; &amp;&amp; other)&nbsp;&nbsp;
+      //移动构造函数<br>
+      &nbsp;&nbsp;&nbsp; QMap(const std::map&lt;Key, T&gt; &amp; other)
+      //根据标准库的映射构造 QMap<br>
+      &nbsp;&nbsp;&nbsp; ~QMap() //析构函数</div>
+    最常用是默认构造函数，注意适用模板类时要带 key 和 value&nbsp; 的类型，必须定义姓名和年龄的映射：<br>
+    <div class="code">QMap&lt;QString, int&gt; nameAge;</div>
+    QString 作为 key 类型，保存姓名，int 作为 value 类型，保存年龄。<br>
+    C++11特性支持初始化列表构造和移动构造，比如：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QMap&lt;QString, int&gt; nameAge{
+      {"Alice", 20},<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      {"Bob", 22},<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      {"Cell", 19} };<br>
+      &nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;nameAge;<br>
+      &nbsp;&nbsp;&nbsp; QMap&lt;QString, int&gt; nameAgeOther = std::move(
+      nameAge );<br>
+      &nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;nameAge;<br>
+      &nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;nameAgeOther;</div>
+    上面一段代码的输出如下所示：<br>
+    <i>QMap(("Alice", 20)("Bob", 22)("Cell", 19))<br>
+      QMap()<br>
+      QMap(("Alice", 20)("Bob", 22)("Cell", 19))</i><br>
+    <br>
+    移动构造函数会将 nameAge 内所有元素都转移给 nameAgeOther，因此 nameAge 最后变成空的，而 nameAgeOther
+    会包含原本 nameAge 拥有的元素。<br>
+    <br>
+    std::map 是标准库的映射模板类，包含在 &lt;map&gt; 头文件中，使用方法与 QMap 类似，如果需要从标准库的 map 构造 QMap
+    对象，可以参照下面代码编写：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; std::map&lt;QString , int&gt;&nbsp;
+      astdMap{ {"Alice", 20},<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      {"Bob", 22},<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      {"Cell", 19} };<br>
+      &nbsp;&nbsp;&nbsp; QMap&lt;QString, int&gt; nameAge( astdMap );</div>
+    注意 std::map 和 QMap 的 key、value 类型必须要一致，才能这样构造。<br>
+    <br>
+    （2）添加函数<br>
+    本小节的元素是指一对 key - value ，添加元素后，QMap 内部的红黑树会新加一个节点。<br>
+    向 QMap 添加新元素有两种方式，第一种通过两个 insert()&nbsp; 函数：<br>
+    <div class="code">iterator&nbsp;&nbsp;&nbsp; insert(const Key &amp; key,
+      const T &amp; value) //直接插入一对 key - value<br>
+      iterator&nbsp;&nbsp;&nbsp; insert(const_iterator pos, const Key &amp; key,
+      const T &amp; value)//在建议的迭代器 pos 位置插入一对 key - value</div>
+    第一个 insert() 函数不关心元素插入位置，直接添加到红黑树中；<br>
+    第二个 insert() 函数是建议在迭代器 pos 位置插入元素，但是建议的位置不一定有效，红黑树是按照 key
+    大小排序的，实际插入的位置是按照排序规则确定的，pos 位置不一定有效，所以一般插入元素推荐用第一个 insert() 函数。<br>
+    向 QMap 添加新元素第二种方式，就是运算符重载函数 operator[]() ：<br>
+    <div class="code">T &amp; QMap::​operator[](const Key &amp; key)</div>
+    两种插入元素方式举例：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QMap&lt;QString, int&gt; nameAge;<br>
+      &nbsp;&nbsp;&nbsp; nameAge.insert( "Alice", 20 );<br>
+      &nbsp;&nbsp;&nbsp; nameAge["Bob"] = 22;<br>
+      &nbsp;&nbsp;&nbsp; nameAge["Cell"] = 19;</div>
+    中括号的方式用起来更像数组，语法也相对简单一些。<br>
+    <b><br>
+      如果 key - value 配对已经存储在映射对象里面了，那么继续用相同 key 调用 insert() 或 operator[]() ，<br>
+      由于单映射的特性，结果就是 key 不变，而 key 对应的 value 会被新的 value 覆盖。</b><br>
+    <b> insert() 或 operator[]() 在映射对象里没有 key 时添加新元素，而当已存在 key 时用新value覆盖旧的value。</b><br>
+    <br>
+    （3）移除和删除函数<br>
+    从映射对象卸下一个元素，但不释放空间，使用下面函数：<br>
+    <div class="code">T&nbsp;&nbsp;&nbsp; take(const Key &amp; key)</div>
+    返回值 T 是 value 类型的数值。如果映射对象里根本没有指定 key，那么返回值是 value 类型默认构造函数生成的对象。<br>
+    如果不需要返回值，直接从映射对象删除指定 key 及其 value，使用下面函数：<br>
+    <div class="code">int&nbsp;&nbsp;&nbsp; remove(const Key &amp; key)</div>
+    返回值是删除元素的个数，如果返回值为 0，说明映射里没有该 value，如果为 1 ，说明正好删除了一对 key - value 。<br>
+    如果希望清空所有元素，那么使用如下函数：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;clear()<br>
+    </div>
+    <br>
+    （4）访问和查询函数<br>
+    <div class="code">bool&nbsp;&nbsp; &nbsp;contains(const Key &amp; key) const<br>
+      int&nbsp;&nbsp; &nbsp;count(const Key &amp; key) const<br>
+      int&nbsp;&nbsp; &nbsp;count() const<br>
+      bool&nbsp;&nbsp; &nbsp;empty() const<br>
+      T &amp;&nbsp;&nbsp;&nbsp; first()<br>
+      const T &amp;&nbsp;&nbsp;&nbsp; first() const<br>
+      const Key &amp;&nbsp;&nbsp;&nbsp; firstKey() const<br>
+      bool&nbsp;&nbsp;&nbsp; isEmpty() const<br>
+      <br>
+      const Key&nbsp;&nbsp;&nbsp; key(const T &amp; value, const Key &amp;
+      defaultKey = Key()) const<br>
+      QList&lt;Key&gt;&nbsp;&nbsp;&nbsp; keys() const<br>
+      QList&lt;Key&gt;&nbsp;&nbsp;&nbsp; keys(const T &amp; value) const<br>
+      <br>
+      T &amp;&nbsp;&nbsp;&nbsp; last()<br>
+      const T &amp;&nbsp;&nbsp;&nbsp; last() const<br>
+      const Key &amp;&nbsp;&nbsp;&nbsp; lastKey() const<br>
+      <br>
+      int&nbsp;&nbsp;&nbsp; size() const<br>
+      QList&lt;Key&gt;&nbsp;&nbsp;&nbsp; uniqueKeys() const<br>
+      const T&nbsp;&nbsp;&nbsp; value(const Key &amp; key, const T &amp;
+      defaultValue = T()) const<br>
+      QList&lt;T&gt;&nbsp;&nbsp;&nbsp; values() const<br>
+      QList&lt;T&gt;&nbsp;&nbsp;&nbsp; values(const Key &amp; key) const</div>
+    <br>
+    <br>
+    <br>
+    <br>
+    （5）替换和交换函数<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;swap(QMap&lt;Key, T&gt; &amp;
+      other)</div>
+    <br>
+    <br>
+    <br>
+    <br>
+    （6）运算符函数<br>
+    <div class="code">bool&nbsp;&nbsp; &nbsp;operator!=(const QMap&lt;Key, T&gt;
+      &amp; other) const<br>
+      QMap&lt;Key, T&gt; &amp;&nbsp;&nbsp; &nbsp;operator=(const QMap&lt;Key,
+      T&gt; &amp; other)<br>
+      QMap&lt;Key, T&gt; &amp;&nbsp;&nbsp; &nbsp;operator=(QMap&lt;Key, T&gt;
+      &amp;&amp; other)<br>
+      bool&nbsp;&nbsp; &nbsp;operator==(const QMap&lt;Key, T&gt; &amp; other)
+      const<br>
+      T &amp;&nbsp;&nbsp; &nbsp;operator[](const Key &amp; key)<br>
+      const T&nbsp;&nbsp; &nbsp;operator[](const Key &amp; key) const</div>
+    <br>
+    <br>
+    <br>
+    <br>
+    （7）迭代器函数<br>
+    <div class="code">iterator&nbsp;&nbsp; &nbsp;begin()<br>
+      const_iterator&nbsp;&nbsp; &nbsp;begin() const<br>
+      const_iterator&nbsp;&nbsp; &nbsp;cbegin() const<br>
+      const_iterator&nbsp;&nbsp; &nbsp;cend() const<br>
+      const_iterator&nbsp;&nbsp;&nbsp; constBegin() const<br>
+      const_iterator&nbsp;&nbsp;&nbsp; constEnd() const<br>
+      const_iterator&nbsp;&nbsp;&nbsp; constFind(const Key &amp; key) const<br>
+      iterator&nbsp;&nbsp;&nbsp; end()<br>
+      const_iterator&nbsp;&nbsp;&nbsp; end() const<br>
+      QPair&lt;iterator, iterator&gt;&nbsp;&nbsp;&nbsp; equal_range(const Key
+      &amp; key)<br>
+      iterator&nbsp;&nbsp;&nbsp; erase(iterator pos)<br>
+      iterator&nbsp;&nbsp;&nbsp; find(const Key &amp; key)<br>
+      const_iterator&nbsp;&nbsp;&nbsp; find(const Key &amp; key) const<br>
+      <br>
+      <br>
+      <br>
+      iterator&nbsp;&nbsp;&nbsp; insertMulti(const Key &amp; key, const T &amp;
+      value)<br>
+      iterator&nbsp;&nbsp;&nbsp; insertMulti(const_iterator pos, const Key &amp;
+      key, const T &amp; value)<br>
+      <br>
+      iterator&nbsp;&nbsp;&nbsp; lowerBound(const Key &amp; key)<br>
+      const_iterator&nbsp;&nbsp;&nbsp; lowerBound(const Key &amp; key) const<br>
+      iterator&nbsp;&nbsp;&nbsp; upperBound(const Key &amp; key)<br>
+      const_iterator&nbsp;&nbsp;&nbsp; upperBound(const Key &amp; key) const</div>
+    <br>
+    <br>
+    <br>
+    <br>
+    （8）容器类型转换函数<br>
+    <div class="code">std::map&lt;Key, T&gt;&nbsp;&nbsp; &nbsp;toStdMap() const<br>
+      QMap&lt;Key, T&gt; &amp;&nbsp;&nbsp;&nbsp; unite(const QMap&lt;Key, T&gt;
+      &amp; other)</div>
+    <br>
+    <br>
+    <br>
+    <br>
+    （9）其他内容<br>
+    <div class="code">QDataStream &amp;&nbsp;&nbsp;
+      &nbsp;operator&lt;&lt;(QDataStream &amp; out, const QMap&lt;Key, T&gt;
+      &amp; map)<br>
+      QDataStream &amp;&nbsp;&nbsp; &nbsp;operator&gt;&gt;(QDataStream &amp; in,
+      QMap&lt;Key, T&gt; &amp; map)</div>
+    <br>
+    <br>
+    <br>
+    <br>
+    注意事项：<br>
+    ① To avoid this problem, replace map[i] with map.value(i) in the code above.<br>
+    <br>
+    ② insertMulti(const Key &amp; key, const T &amp; value)&nbsp; 和&nbsp;&nbsp;
+    values(const Key &amp; key)<br>
+    <br>
+    <br>
+    示例程序：<br>
+    <br>
+    <br>
+    <br>
+    <div class="os2">9.3.2 多映射 QMultiMap<span style="color: rgb(0, 0, 0); font-family: Arial, Helvetica; font-size: 13.63636302947998px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 14.545454025268555px; orphans: auto; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none;"><span
+          class="Apple-converted-space"> </span></span><span style="color: rgb(0, 0, 0); font-family: Arial, Helvetica; font-size: 13.63636302947998px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 14.545454025268555px; orphans: auto; text-align: left; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none;"></span></div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <div class="os2">9.3.3 集合 QSet </div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch09-02.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch09-04.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

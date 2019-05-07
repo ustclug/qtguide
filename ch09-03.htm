@@ -31,7 +31,8 @@
     映射为多个 value，这就是单映射和多映射的区别。<br>
     QMap 模板类 key 和 value 的类型可以是C++和Qt常用的数据类型，也可以使用自定义类型，<b>但是注意key 和 value
       都必须是可赋值类型！</b><br>
-    QMap 使用红黑树存储 key - value 配对数据，排序时按照 key 来比较大小，因此对 key 类型有额外要求：<br>
+    QMap 使用红黑树存储 key - value 配对数据（ 一对 key - value 后文统称为映射中一个元素，或者红黑树的一个节点），排序时按照
+    key 来比较大小，因此对 key 类型有额外要求：<br>
     <b>key 类型必须提供&nbsp; operator&lt;()&nbsp; 比较数值大小。</b><br>
     <br>
     下面我们分类列举QMap模板类的功能函数：<br>
@@ -108,117 +109,274 @@
     返回值 T 是 value 类型的数值。如果映射对象里根本没有指定 key，那么返回值是 value 类型默认构造函数生成的对象。<br>
     如果不需要返回值，直接从映射对象删除指定 key 及其 value，使用下面函数：<br>
     <div class="code">int&nbsp;&nbsp;&nbsp; remove(const Key &amp; key)</div>
-    返回值是删除元素的个数，如果返回值为 0，说明映射里没有该 value，如果为 1 ，说明正好删除了一对 key - value 。<br>
+    返回值是删除元素的个数，如果返回值为 0，说明映射里没有该 value；如果为 1 ，说明正好删除了一对 key - value
+    ；如果返回值大于1，说明程序之前使用 insertMulti() 函数为一个 key 添加了多个 value 值（QMap 允许一对多映射，多个
+    key-value 元素 的 key 值相同，但一般不建议这样做）。<br>
     如果希望清空所有元素，那么使用如下函数：<br>
     <div class="code">void&nbsp;&nbsp; &nbsp;clear()<br>
     </div>
     <br>
     （4）访问和查询函数<br>
-    <div class="code">bool&nbsp;&nbsp; &nbsp;contains(const Key &amp; key) const<br>
-      int&nbsp;&nbsp; &nbsp;count(const Key &amp; key) const<br>
-      int&nbsp;&nbsp; &nbsp;count() const<br>
-      bool&nbsp;&nbsp; &nbsp;empty() const<br>
-      T &amp;&nbsp;&nbsp;&nbsp; first()<br>
-      const T &amp;&nbsp;&nbsp;&nbsp; first() const<br>
-      const Key &amp;&nbsp;&nbsp;&nbsp; firstKey() const<br>
-      bool&nbsp;&nbsp;&nbsp; isEmpty() const<br>
-      <br>
-      const Key&nbsp;&nbsp;&nbsp; key(const T &amp; value, const Key &amp;
-      defaultKey = Key()) const<br>
-      QList&lt;Key&gt;&nbsp;&nbsp;&nbsp; keys() const<br>
-      QList&lt;Key&gt;&nbsp;&nbsp;&nbsp; keys(const T &amp; value) const<br>
-      <br>
-      T &amp;&nbsp;&nbsp;&nbsp; last()<br>
-      const T &amp;&nbsp;&nbsp;&nbsp; last() const<br>
-      const Key &amp;&nbsp;&nbsp;&nbsp; lastKey() const<br>
-      <br>
-      int&nbsp;&nbsp;&nbsp; size() const<br>
-      QList&lt;Key&gt;&nbsp;&nbsp;&nbsp; uniqueKeys() const<br>
-      const T&nbsp;&nbsp;&nbsp; value(const Key &amp; key, const T &amp;
-      defaultValue = T()) const<br>
-      QList&lt;T&gt;&nbsp;&nbsp;&nbsp; values() const<br>
-      QList&lt;T&gt;&nbsp;&nbsp;&nbsp; values(const Key &amp; key) const</div>
+    查询映射对象内是否包含 key 键：<br>
+    <div class="code">bool&nbsp;&nbsp; &nbsp;contains(const Key &amp; key) const</div>
+    查询映射对象内所有元素数目：<br>
+    <div class="code">int&nbsp;&nbsp; &nbsp;count() const<br>
+      int&nbsp;&nbsp;&nbsp; size() const</div>
+    统计 key 对应的 value 值数量，使用下面函数：<br>
+    <div class="code">int&nbsp;&nbsp; &nbsp;count(const Key &amp; key) const</div>
+    如果映射对象不存在 key 键，那么返回值为 0，如果存在一对 key-value ，那么返回值为 1；如果程序之前使用 insertMulti()
+    函数为一个 key 添加了多个 value，那么返回值是多个 value 值的数量。<br>
+    判断映射对象是否全空，没有元素，使用下面两个函数都可以：<br>
+    <div class="code">bool&nbsp;&nbsp; &nbsp;empty() const&nbsp; &nbsp; &nbsp;
+      //STL风格<br>
+      bool&nbsp;&nbsp;&nbsp; isEmpty() const&nbsp;&nbsp; //Qt风格</div>
     <br>
+    获取映射中第一个 value 值，使用下面函数：<br>
+    <div class="code">T &amp;&nbsp;&nbsp;&nbsp; first()<br>
+      const T &amp;&nbsp;&nbsp;&nbsp; first() const</div>
+    获取映射中第一个 key 键，使用下面函数：<br>
+    <div class="code">const Key &amp;&nbsp;&nbsp;&nbsp; firstKey() const</div>
+    获取映射中最后一个 value 值，使用下面函数：<br>
+    <div class="code">T &amp;&nbsp;&nbsp;&nbsp; last()<br>
+      const T &amp;&nbsp;&nbsp;&nbsp; last() const</div>
+    获取映射中最后一个 key 键，使用下面函数：<br>
+    <div class="code">const Key &amp;&nbsp;&nbsp;&nbsp; lastKey() const</div>
     <br>
+    根据已知 value 值反查归属的 key 键：<br>
+    <div class="code">const Key&nbsp;&nbsp;&nbsp; key(const T &amp; value, const
+      Key &amp; defaultKey = Key()) const</div>
+    反查耗时比较长，需要逐个遍历元素，注意多个 key 对应的 value 可能一样，所以上面函数只返回第一个匹配的 key。如果找不到就返回默认构造的
+    Key() 。<br>
+    如果要根据 value 反查所有匹配的 key 键列表，使用下面函数：<br>
+    <div class="code">QList&lt;Key&gt;&nbsp;&nbsp;&nbsp; keys(const T &amp;
+      value) const</div>
+    如果需要获取映射所有元素的 key 值列表，使用下面函数：<br>
+    <div class="code">QList&lt;Key&gt;&nbsp;&nbsp;&nbsp; keys() const</div>
+    注意 insertMulti() 函数可能导致多个 key-value 元素的 key 值一样，keys()
+    获取的键值是可能重复的。如果希望获取不重复出现的 key 列表，使用下面函数：<br>
+    <div class="code">QList&lt;Key&gt;&nbsp;&nbsp;&nbsp; uniqueKeys() const</div>
+    根据 key 查询对应 value ，使用下面函数：<br>
+    <div class="code">const T&nbsp;&nbsp;&nbsp; value(const Key &amp; key, const
+      T &amp; defaultValue = T()) const</div>
+    如果没有找到 key-value 元素，那么返回 T() 值，就是 value 类型默认构造值。<br>
+    存在一对多映射的情况下，可以用下面函数获取 key 对应的多个 value 值列表：<br>
+    <div class="code">QList&lt;T&gt;&nbsp;&nbsp;&nbsp; values(const Key &amp;
+      key) const</div>
+    如果要获取映射中所有元素的 value 值列表，使用下面函数：<br>
+    <div class="code">QList&lt;T&gt;&nbsp;&nbsp;&nbsp; values() const</div>
     <br>
-    <br>
-    （5）替换和交换函数<br>
+    （5）交换函数<br>
+    将映射对象自身的元素与另一个映射对象中的元素全部互换，使用下面函数：<br>
     <div class="code">void&nbsp;&nbsp; &nbsp;swap(QMap&lt;Key, T&gt; &amp;
       other)</div>
-    <br>
-    <br>
-    <br>
+    swap() 函数效率非常高，并且从不失败。<br>
     <br>
     （6）运算符函数<br>
-    <div class="code">bool&nbsp;&nbsp; &nbsp;operator!=(const QMap&lt;Key, T&gt;
-      &amp; other) const<br>
-      QMap&lt;Key, T&gt; &amp;&nbsp;&nbsp; &nbsp;operator=(const QMap&lt;Key,
-      T&gt; &amp; other)<br>
-      QMap&lt;Key, T&gt; &amp;&nbsp;&nbsp; &nbsp;operator=(QMap&lt;Key, T&gt;
-      &amp;&amp; other)<br>
-      bool&nbsp;&nbsp; &nbsp;operator==(const QMap&lt;Key, T&gt; &amp; other)
-      const<br>
-      T &amp;&nbsp;&nbsp; &nbsp;operator[](const Key &amp; key)<br>
-      const T&nbsp;&nbsp; &nbsp;operator[](const Key &amp; key) const</div>
+    对于运算符函数，我们以下面两个向量来举例说明：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QMap&lt;QString, int&gt; m1;<br>
+      &nbsp;&nbsp;&nbsp; m1["Alice"] =&nbsp; 20;<br>
+      &nbsp;&nbsp;&nbsp; QMap&lt;QString, int&gt; m2;<br>
+      &nbsp;&nbsp;&nbsp; m2["Bob"] = 22;<br>
+      &nbsp;&nbsp;&nbsp; m2["Cell"] = 19;</div>
+    运算符使用示范如下表所示：<br>
     <br>
-    <br>
-    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 400px;" align="center"><b>运算符函数</b></td>
+          <td style="width: 200px;" align="center"><span style="font-weight: bold;">举
+              例</span></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>bool operator!=(const QMap&lt;Key, T&gt; &amp; other) const</td>
+          <td>&nbsp;m1 != m2;</td>
+          <td> 两个映射的元素不一样，不等号判断结果为 true。 </td>
+        </tr>
+        <tr class="d1">
+          <td>bool operator==(const QMap&lt;Key, T&gt; &amp; other) const</td>
+          <td>&nbsp;m1 == m2;</td>
+          <td> 两个映射的元素不一样，等于号判断结果为 false。</td>
+        </tr>
+        <tr>
+          <td>QMap&lt;Key, T&gt; &amp; operator=(const QMap&lt;Key, T&gt; &amp;
+            other)</td>
+          <td>&nbsp;m1 = m2;</td>
+          <td> 将 m2 所有元素复制给 m1，执行后二者相等。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QMap&lt;Key, T&gt; &amp; operator=(QMap&lt;Key, T&gt; &amp;&amp;
+            other)</td>
+          <td style="height: 32px;">&nbsp;m1 = std::move(m2);</td>
+          <td> 将 m2 中所有元素移动给m1，m2自己清空。 </td>
+        </tr>
+        <tr>
+          <td>T &amp; operator[](const Key &amp; key)</td>
+          <td>&nbsp;m2["Cell"]= 18;</td>
+          <td style="height: 16px;"> 修改了 "Cell" 对应的value值。 </td>
+        </tr>
+        <tr class="d1">
+          <td>const T operator[](const Key &amp; key) const</td>
+          <td style="height: 16px;">&nbsp;qDebug()&lt;&lt; m1["Alice"];</td>
+          <td> 打印 "Alice" 对应的常量值。 </td>
+        </tr>
+      </tbody>
+    </table>
     <br>
     （7）迭代器函数<br>
-    <div class="code">iterator&nbsp;&nbsp; &nbsp;begin()<br>
-      const_iterator&nbsp;&nbsp; &nbsp;begin() const<br>
-      const_iterator&nbsp;&nbsp; &nbsp;cbegin() const<br>
-      const_iterator&nbsp;&nbsp; &nbsp;cend() const<br>
-      const_iterator&nbsp;&nbsp;&nbsp; constBegin() const<br>
-      const_iterator&nbsp;&nbsp;&nbsp; constEnd() const<br>
-      const_iterator&nbsp;&nbsp;&nbsp; constFind(const Key &amp; key) const<br>
-      iterator&nbsp;&nbsp;&nbsp; end()<br>
-      const_iterator&nbsp;&nbsp;&nbsp; end() const<br>
-      QPair&lt;iterator, iterator&gt;&nbsp;&nbsp;&nbsp; equal_range(const Key
-      &amp; key)<br>
-      iterator&nbsp;&nbsp;&nbsp; erase(iterator pos)<br>
-      iterator&nbsp;&nbsp;&nbsp; find(const Key &amp; key)<br>
-      const_iterator&nbsp;&nbsp;&nbsp; find(const Key &amp; key) const<br>
-      <br>
-      <br>
-      <br>
+    映射类也定义了 STL 风格和 Qt 命名风格的迭代器：<br>
+    <div class="code">class&nbsp;&nbsp; &nbsp;const_iterator&nbsp;&nbsp;
+      //STL风格只读迭代器<br>
+      class&nbsp;&nbsp; &nbsp;iterator&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;&nbsp;&nbsp; //STL风格读写迭代器<br>
+      typedef&nbsp;&nbsp;&nbsp; ConstIterator&nbsp; //Qt 风格只读迭代器<br>
+      typedef&nbsp;&nbsp;&nbsp;
+      Iterator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //Qt风格读写迭代器</div>
+    STL 风格迭代器使用示范：<br>
+    <div class="code">QMap&lt;QString, int&gt;::const_iterator i =
+      map.constBegin();<br>
+      while (i != map.constEnd()) {<br>
+      &nbsp;&nbsp;&nbsp; cout &lt;&lt; i.key() &lt;&lt; ": " &lt;&lt; i.value()
+      &lt;&lt; endl;<br>
+      &nbsp;&nbsp;&nbsp; ++i;<br>
+      }<br>
+    </div>
+    获取映射的头部元素、尾部假想元素的迭代器函数列举如下：<br>
+    <div class="code">iterator&nbsp;&nbsp; &nbsp;begin()&nbsp;&nbsp;&nbsp;&nbsp;
+      //指向头部的读写迭代器<br>
+      const_iterator&nbsp;&nbsp; &nbsp;begin() const&nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; //指向头部的只读迭代器<br>
+      const_iterator&nbsp;&nbsp; &nbsp;cbegin() const&nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //指向头部的只读迭代器<br>
+      const_iterator&nbsp;&nbsp;&nbsp; constBegin() const&nbsp;
+      //指向头部的只读迭代器，Qt风格<br>
+      iterator&nbsp;&nbsp;&nbsp; end()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //指向尾部后面假想元素的读写迭代器<br>
+      const_iterator&nbsp;&nbsp;&nbsp; end() const&nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; //指向尾部后面假想元素的只读迭代器<br>
+      const_iterator&nbsp;&nbsp; &nbsp;cend() const&nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; //指向尾部后面假想元素的只读迭代器<br>
+      const_iterator&nbsp;&nbsp;&nbsp; constEnd() const&nbsp; &nbsp;
+      //指向尾部后面假想元素的只读迭代器，Qt风格</div>
+    注意 *end() 返回的迭代器只能做不等于判断，它指向的东西根本不存在， *end() 仅用于越界判断。<br>
+    虽然获取头部、尾部迭代器的函数多，其实功能类似，起了一堆名字是方便兼容 STL 风格函数命名。<br>
+    查找指定 key 键对应的迭代器位置，使用下面函数：<br>
+    <div class="code">iterator&nbsp;&nbsp;&nbsp; find(const Key &amp;
+      key)&nbsp;&nbsp;&nbsp; //根据指定key查找所在位置的读写迭代器<br>
+      const_iterator&nbsp;&nbsp;&nbsp; find(const Key &amp; key)
+      const&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
+      //根据指定key查找所在位置的只读迭代器，STL风格<br>
+      const_iterator&nbsp;&nbsp;&nbsp; constFind(const Key &amp; key)
+      const&nbsp;&nbsp;&nbsp; //根据指定key查找所在位置的只读迭代器，Qt风格</div>
+    如果存在 key 键的一对多映射，返回最新插入的节点迭代器，相同 key 的多个节点会排在该迭代器之后连续位置；<br>
+    如果找不到包含指定 key 的元素，那么查找函数返回 end() 尾部虚假元素迭代器，注意判断几个 *find 函数的返回值。<br>
+    根据读写迭代器指定位置，可以删除该位置元素：<br>
+    <div class="code">iterator&nbsp;&nbsp;&nbsp; erase(iterator pos)</div>
+    删除后返回指向下一元素的迭代器，注意可能是 end() 位置。<br>
+    <br>
+    QMap 在绝大多数情况下，都是用于一对一映射，但是它也提供了一对多映射的接口函数：<br>
+    <div class="code"> //插入指定键值对，如果之前有该键的元素，那么不会替换旧元素，直接增加新的元素，造成一对多映射<br>
       iterator&nbsp;&nbsp;&nbsp; insertMulti(const Key &amp; key, const T &amp;
-      value)<br>
+      value)&nbsp;&nbsp; //插入一对多映射元素<br>
       iterator&nbsp;&nbsp;&nbsp; insertMulti(const_iterator pos, const Key &amp;
-      key, const T &amp; value)<br>
+      key, const T &amp; value) //在建议的 pos 位置附近插入一对多映射元素</div>
+    insertMulti() 会直接向映射添加键值对，并且不会替换旧的相同键值节点，所以会造成多个节点拥有相同的键值，一般不建议这样调用，Qt 专门封装了
+    QMultiMap 类用于处理一对多映射。<br>
+    <br>
+    由于 insertMulti() 会造成一对多映射，红黑树是排序树，同样的 key 键节点是按照排序相邻的，迭代器位置是连续排布的，可以获取一个 key
+    对应的多个元素迭代器范围：<br>
+    <div class="code">QPair&lt;iterator, iterator&gt;&nbsp;&nbsp;&nbsp;
+      equal_range(const Key &amp; key)&nbsp; //返回一对迭代器<br>
+      //QPair&lt;iterator, iterator&gt;&nbsp;
+      中，第一个迭代器是排在最前面的key键节点位置，第二个是排在最后的key键节点位置<br>
+    </div>
+    <br>
+    根据红黑树的排序特性，QMap 还提供了查找 key 下边界和上边界的迭代器函数：<br>
+    <div class="code">iterator&nbsp;&nbsp;&nbsp; lowerBound(const Key &amp;
+      key)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //查找 key 下边界的读写迭代器<br>
+      const_iterator&nbsp;&nbsp;&nbsp; lowerBound(const Key &amp; key) const
+      //查找 key 下边界的只读迭代器<br>
+      iterator&nbsp;&nbsp;&nbsp; upperBound(const Key &amp;
+      key)&nbsp;&nbsp;&nbsp; //查找 key 上边界的读写迭代器<br>
+      const_iterator&nbsp;&nbsp;&nbsp; upperBound(const Key &amp; key) const
+      //查找 key 上边界的只读迭代器 </div>
+    key 下边界的意思是按照从小到大顺序，找到红黑树中首个满足如下条件的 keyLB 节点：&nbsp; <br>
+    keyLB &gt;= key<br>
+    如果映射存在 key 节点，那么返回第一个键值等于 key 的节点迭代器；<br>
+    如果没有 key 节点，那么返回首个大于 key 的节点迭代器。举例如下：<br>
+    <div class="code">QMap&lt;int, QString&gt; map;<br>
+      map.insert(1, "one");<br>
+      map.insert(5, "five");<br>
+      map.insert(10, "ten");<br>
       <br>
-      iterator&nbsp;&nbsp;&nbsp; lowerBound(const Key &amp; key)<br>
-      const_iterator&nbsp;&nbsp;&nbsp; lowerBound(const Key &amp; key) const<br>
-      iterator&nbsp;&nbsp;&nbsp; upperBound(const Key &amp; key)<br>
-      const_iterator&nbsp;&nbsp;&nbsp; upperBound(const Key &amp; key) const</div>
-    <br>
-    <br>
-    <br>
+      map.lowerBound(0);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // returns iterator to
+      (1, "one")<br>
+      map.lowerBound(1);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // returns iterator to
+      (1, "one")<br>
+      map.lowerBound(2);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // returns iterator to
+      (5, "five")<br>
+      map.lowerBound(10);&nbsp;&nbsp;&nbsp;&nbsp; // returns iterator to (10,
+      "ten")<br>
+      map.lowerBound(999);&nbsp;&nbsp;&nbsp; // returns end()</div>
+    key 上边界的意思是按照从小到大顺序，找到红黑树中首个满足如下条件的节点 keyUB：<br>
+    keyUB &gt; key<br>
+    上边界总是返回大于 key 的最邻近节点迭代器。<br>
+    举例如下：<br>
+    <div class="code">QMap&lt;int, QString&gt; map;<br>
+      map.insert(1, "one");<br>
+      map.insert(5, "five");<br>
+      map.insert(10, "ten");<br>
+      <br>
+      map.upperBound(0);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // returns iterator to
+      (1, "one")<br>
+      map.upperBound(1);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // returns iterator to
+      (5, "five")<br>
+      map.upperBound(2);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // returns iterator to
+      (5, "five")<br>
+      map.upperBound(10);&nbsp;&nbsp;&nbsp;&nbsp; // returns end()<br>
+      map.upperBound(999);&nbsp;&nbsp;&nbsp; // returns end()</div>
     <br>
     （8）容器类型转换函数<br>
-    <div class="code">std::map&lt;Key, T&gt;&nbsp;&nbsp; &nbsp;toStdMap() const<br>
-      QMap&lt;Key, T&gt; &amp;&nbsp;&nbsp;&nbsp; unite(const QMap&lt;Key, T&gt;
-      &amp; other)</div>
-    <br>
-    <br>
-    <br>
+    Qt 提供了映射类，STL 也有自己映射类，两种映射类互相转换的函数如下：<br>
+    <div class="code">std::map&lt;Key, T&gt;&nbsp;&nbsp; &nbsp;toStdMap()
+      const&nbsp; //转为 STL 映射类<br>
+      QMap(const std::map&lt;Key, T&gt; &amp; other) //构造函数，根据 STL 映射构造 QMap 映射<br>
+    </div>
+    QMap 另外支持两个映射合并，将参数 other 映射的元素全部复制添加给自己，如果两个映射都包含相同的 key，那么合并类似
+    insertMulti() 造成一对多映射：<br>
+    <div class="code">QMap&lt;Key, T&gt; &amp;&nbsp;&nbsp;&nbsp; unite(const
+      QMap&lt;Key, T&gt; &amp; other)</div>
+    insertMulti() 和 unite() 会无脑添加新元素，即使新的键值对与旧节点完全一样，比如：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QMap&lt;QString, int&gt; m1;<br>
+      &nbsp;&nbsp;&nbsp; m1["Alice"] =&nbsp; 20;<br>
+      &nbsp;&nbsp;&nbsp; QMap&lt;QString, int&gt; m2;<br>
+      &nbsp;&nbsp;&nbsp; m2["Alice"] =&nbsp; 20;<br>
+      <br>
+      &nbsp;&nbsp;&nbsp; m1.unite( m2 );<br>
+      &nbsp;&nbsp;&nbsp; m1.insertMulti("Alice",20 );<br>
+      <br>
+      &nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;m1&lt;&lt;endl&lt;&lt;m2;</div>
+    打印结果是 m1 包含三个相同节点：<br>
+    <i>QMap(("Alice", 20)("Alice", 20)("Alice", 20)) <br>
+      QMap(("Alice", 20))</i><br>
     <br>
     （9）其他内容<br>
+    映射类也支持数据串行化，进行数据流输入和输出，但注意前提是 key 和 value 的类型都必须支持串行化：
     <div class="code">QDataStream &amp;&nbsp;&nbsp;
       &nbsp;operator&lt;&lt;(QDataStream &amp; out, const QMap&lt;Key, T&gt;
-      &amp; map)<br>
+      &amp; map)&nbsp; //串行化输出<br>
       QDataStream &amp;&nbsp;&nbsp; &nbsp;operator&gt;&gt;(QDataStream &amp; in,
-      QMap&lt;Key, T&gt; &amp; map)</div>
+      QMap&lt;Key, T&gt; &amp; map)&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; //串行化输入</div>
     <br>
+    关于 QMap，这里再提醒两个注意事项：<br>
+    <b>① 不能使用 map[key] 这种形式查找映射里是否包含键 key 的元素，因为 ​operator[](const Key &amp;
+      key) 函数在找不到 key 元素时，自动调用 value 类默认构造函数为映射添加 key-value 新元素。</b><br>
+    应该用 contains(key) 来判断是否包含该 key 元素，或者用&nbsp; map.value( key ) 函数查找值，value()
+    函数不会为映射添加新元素，虽然 value() 函数找不到时也会返回 value 类型默认构造的值，但不会改变映射内容。<br>
     <br>
-    <br>
-    <br>
-    注意事项：<br>
-    ① To avoid this problem, replace map[i] with map.value(i) in the code above.<br>
-    <br>
-    ② insertMulti(const Key &amp; key, const T &amp; value)&nbsp; 和&nbsp;&nbsp;
-    values(const Key &amp; key)<br>
-    <br>
+    ② <b>一般不建议使用 insertMulti() 和&nbsp; unite() 进行多重映射添加或映射合并，Qt 单独提供了 QMultiMap
+      表示多重映射，在程序中尽量让 QMap 保持一对一映射，避免代码的误解。</b><br>
     <br>
     示例程序：<br>
     <br>

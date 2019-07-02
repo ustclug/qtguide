@@ -1019,11 +1019,88 @@ style=" color:#000000;">}</span></pre></div>
           我们在窗口构造函数添加的四个映射元素显示在了列表控件里。<br>
           我们设置年龄为 23 ，然后点击“查找匹配年龄元素”按钮，可以看到反查结果：<br>
     <center><img src="images/ch09/ch09-03-03.png" alt="run2"></center>
-          其他功能读者都可以自行测试一下，本小节的内容到这，我们下面小节介绍多映射 QMultiMap 的内容。<br><br>
+          其他功能读者都可以自行测试一下，注意示例中映射的 key 是区分字母大小写的，大写字母的键排在前面，小写字母的键排在后面。本小节的内容到这，我们下面小节介绍多映射 QMultiMap 的内容。<br><br>
     <div class="os2">9.3.2 多映射 QMultiMap</div>
     <br>
-    <br>
-    <br>
+    QMultiMap 是 QMap 的派生类，继承了 QMap 绝大多数的功能函数，同时也根据一对多映射的特性做了改进，将基类的部分函数功能进行了重载，使用 QMultiMap&nbsp; 时需要注意与基类的区别。除了基类的功能函数，QMultiMap 类的函数主要有如下几个：<br>
+          （1）构造函数<br>
+          <div class="code">QMultiMap() //默认构造函数 <br>QMultiMap(std::initializer_list&lt;std::pair&lt;Key, T&gt; &gt; list) //初始化列表构造函数<br>QMultiMap(const QMap&lt;Key, T&gt; &amp; other) //复制构造函数，支持从 QMap 和 QMultiMap 构造新对象</div>第一个是不带参数的默认构造函数；第二个是支持 C++11 特性的初始化列表构造函数；<br>第三个是复制构造函数，参数里无论是 QMap 对象或 QMultiMap 对象都可以进行复制构造。<br>QMultiMap 也是支持移动构造函数的，从基类自动继承，比如下面代码：<br>
+          <div class="code">&nbsp;&nbsp;&nbsp; QMultiMap&lt;QString, QString&gt; namePhone{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {"Alice", "10086"},<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {"Alice", "10087"},<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {"Bob", "10010"},<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {"Bob", "10011"}<br>&nbsp;&nbsp;&nbsp; }; <br>&nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;namePhone;<br>&nbsp;&nbsp;&nbsp; QMultiMap&lt;QString, QString&gt; namePhone2( namePhone );<br>&nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;namePhone2;<br><br>&nbsp;&nbsp;&nbsp; QMultiMap&lt;QString, QString&gt; namePhone3 =&nbsp; std::move(namePhone);<br>&nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;namePhone&lt;&lt;endl&lt;&lt;namePhone3;</div>
+          示例代码中三个对象依次使用初始化列表构造、复制构造和移动构造，打印结果如下：<br>
+          <div class="output">QMap(("Alice", "10087")("Alice", "10086")("Bob", "10011")("Bob", "10010"))<br>QMap(("Alice", "10087")("Alice", "10086")("Bob", "10011")("Bob", "10010"))<br>QMap() <br>QMap(("Alice", "10087")("Alice", "10086")("Bob", "10011")("Bob", "10010"))</div>
+          QMultiMap 的打印函数自动使用了基类的版本，所以看到类名是 QMap，其实是 QMultiMap&nbsp; 对象。<br><br>
+          （2）添加函数<br>
+            <div class="code">QMap&lt;Key, T&gt;::iterator QMultiMap::​insert(const Key &amp; key, const T &amp; value)<br>QMap&lt;Key, T&gt;::iterator QMultiMap::​insert(QMap&lt;Key, T&gt;::const_iterator pos, const Key &amp; key, const T &amp; value)</div>QMultiMap 的迭代器完全从基类 QMap 继承，因此可以看到参数和返回值的迭代器都是 QMap 的迭代器。但要注意 QMultiMap::​insert() 总是插入新的 key-value 节点，不会对旧节点进行替换，即使新旧节点键值一模一样，也会增加新的节点。<br>第一个 ​insert() 自动添加新节点到红黑树的排序位置，红黑树只按照 key 排序，同样 key 的多个 value 值不会排序，同样 key 的新节点总是插入到同样 key 旧节点的最前面。<br>第二个 insert() 会在建议的迭代器位置 pos 附近插入新节点，但不一定是指定位置，最终还是要按红黑树的 key 进行排序确定位置。<br>
+          （3）删除函数<br>
+            <div class="code">int&nbsp;&nbsp;&nbsp; remove(const Key &amp; key, const T &amp; value)<br>int&nbsp;&nbsp;&nbsp; remove(const Key &amp; key)</div>第一个删除函数会删除所有键为 key、值为 value 的节点，返回值是删除的个数，因为多映射对象中可以插入多个相同键且相同值的节点，所以第一个删除函数返回值可能大于 1 。 <br>第二个删除函数会删除所有键为 key 的节点，返回值是删除的个数。<br>
+          （4）访问和查询函数<br>统计多映射对象所有节点个数使用下面函数：<br>
+            <div class="code">int count() const</div>
+          统计所有键为 key 且值为 value 的节点数使用下面函数：<br>
+            <div class="code">int count(const Key &amp; key, const T &amp; value) const</div>
+          
+          统计所有键为 key 的节点数，使用下面函数：<br>
+            <div class="code">int count(const Key &amp; key) const</div>
+          判断多映射对象是否包含 key-value 对的函数如下：<br>
+            <div class="code">bool contains(const Key &amp; key, const T &amp; value) const</div>
+          判断多映射对象是否包含 key 的函数如下：<br>
+           <div class="code">bool contains(const Key &amp; key) const</div>
+          <br>根据 key-value 对查找匹配节点的迭代器位置函数如下：<br>
+           <div class="code">QMap&lt;Key, T&gt;::const_iterator&nbsp;&nbsp; &nbsp;constFind(const Key &amp; key, const T &amp; value) const //只读迭代器查询，Qt风格函数名<br>QMap&lt;Key, T&gt;::const_iterator&nbsp;&nbsp;&nbsp; find(const Key &amp; key, const T &amp; value) const&nbsp; //只读迭代器，STL风格函数名<br>QMap&lt;Key, T&gt;::iterator&nbsp;&nbsp;&nbsp; find(const Key &amp; key, const T &amp; value)&nbsp; //读写迭代器查询</div>
+          根据 key 查找匹配节点的迭代器位置函数如下：<br>
+           <div class="code">QMap&lt;Key, T&gt;::const_iterator&nbsp;&nbsp; &nbsp;constFind(const Key &amp; key) const&nbsp; //只读迭代器查询，Qt风格函数名<br>QMap&lt;Key, T&gt;::const_iterator&nbsp;&nbsp;&nbsp; find(const Key &amp; key) const&nbsp; //只读迭代器，STL风格函数名<br>QMap&lt;Key, T&gt;::iterator&nbsp;&nbsp;&nbsp; find(const Key &amp; key)&nbsp; //读写迭代器查询</div>
+          <br>
+          （5）替换和交换函数<br>多映射的节点替换函数如下：<br>
+            <div class="code">QMap&lt;Key, T&gt;::iterator QMultiMap::​replace(const Key &amp; key, const T &amp; value)</div>
+          节点替换函数在查找到匹配 key 的一个或多个节点时，替换之前最后一次插入的匹配 key 节点；<br>如果找不到匹配 key 的节点，那么会新增一个 key-value 节点。<br>多映射与其他同类对象的交换函数如下：<br>
+            <div class="code">void QMultiMap::​swap(QMultiMap&lt;Key, T&gt; &amp; other)</div>
+          swap() 函数不会失败，并且效率非常高。<br><br>
+          （6）运算符函数<br>QMultiMap 新加了 + 和 += 运算符函数，用于合并对象：<br>
+            <div class="code">QMultiMap QMultiMap::​operator+(const QMultiMap &amp; other) const<br>QMultiMap &amp; QMultiMap::​operator+=(const QMultiMap &amp; other)</div>合并后的对象节点数总是等于合并前两个对象节点数之和， 两个对象同样 key-value 的节点不会替换，节点数量直接重复累加。<br>另外 QMultiMap 取消了 operator[] 运算符函数，由于多映射的 key 很可能对应多个 value，同样 key 的多个节点定位不明确，所以不能用 operator[] 运算符函数。替换之前最新插入的键为 key 的节点使用 replace() 函数。<br>
+          <br>QMap 和 QMultiMap 二者功能函数的主要区别对比如下表所示：<br>
+           <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width:20%;" align="center"><b>功能</b></td>
+          <td style="width: 40%;" align="center"><b>QMap 函数</b></td>
+          <td align="center"><b> QMultiMap 函数</b></td>
+        </tr>
+        <tr>
+          <td>一对一添加节点</td>
+          <td style="height: 32px;"><b>insert(key,value)：无匹配key时直接插入新节点，有匹配key时替换旧节点。</b></td>
+          <td> replace(key,value)：无匹配key时直接插入新节点，有匹配key时，替换之前最新插入的同样key节点。 </td>
+        </tr>
+        <tr class="d1">
+          <td>一对多添加节点</td>
+          <td> insertMulti(key,value)：直接将新节点插入到红黑树，不考虑之前有无同样键值的节点。</td>
+          <td> <b>insert(key,value)：直接将新节点插入到红黑树，不考虑之前有无同样键值的节点。<br></b>insertMulti(key,value)函数同基类。<b><br></b> </td>
+        </tr>
+        <tr>
+          <td>中括号运算符</td>
+          <td> operator[](key)：根据key读写匹配的节点，如果没有匹配的，自动添加该 key 节点。</td>
+          <td> 没有中括号运算符，对于类似功能，读操作调用 value(key)函数，写操作调用replace(key,value)。 </td>
+        </tr>
+        <tr class="d1">
+          <td>合并两个对象</td>
+          <td> 无 + 和 += 运算符函数。QMap::​unite(other)可以将参数other所有节点添加给自己，类似 += 功能。</td>
+          <td style="height: 16px;">通过  + 和 += 运算符函数。</td>
+        </tr>
+        <tr>
+          <td>查询函数</td>
+          <td>count(key)、contains(key)、find(key)、constFind(key)，只需要通过 key 查询节点，因为通常是一对一映射。</td>
+          <td> 不仅有 count(key)、contains(key)、find(key)、constFind(key)，一对多映射查询时还可以根据键值对进行查询<br>count(key,value)、contains(key,value)、find(key,value)、constFind(key,value)。 </td>
+        </tr>
+        <tr class="d1">
+          <td>删除函数</td>
+          <td style="height: 16px;"> remove(key)，删除匹配 key 的节点。 </td>
+          <td> 两个删除函数，remove(key)删除匹配 key 的所有节点，remove(key,value)删除匹配 key-value 的所有节点。 </td>
+        </tr>
+      
+      </tbody>
+    </table>
+    <br><b>需要特别注意的就是 insert() 函数，基类 QMap 和 派生类 QMultiMap 的 insert() 函数名一样，功能却不一样，基类 QMap 是一对一添加或替换，而派生类 QMultiMap 是一对多的重复添加。</b><br><br>QMultiMap 的功能函数介绍到这，我们下面学习一个电话号码本的示例，将姓名映射到多个电话号码。<br><br><br><br>
+          
+          
     <div class="os2">9.3.3 集合 QSet </div>
     <br>
     <br>

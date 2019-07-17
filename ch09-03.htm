@@ -1031,7 +1031,7 @@ style=" color:#000000;">}</span></pre></div>
           （2）添加函数<br>
             <div class="code">QMap&lt;Key, T&gt;::iterator QMultiMap::​insert(const Key &amp; key, const T &amp; value)<br>QMap&lt;Key, T&gt;::iterator QMultiMap::​insert(QMap&lt;Key, T&gt;::const_iterator pos, const Key &amp; key, const T &amp; value)</div>QMultiMap 的迭代器完全从基类 QMap 继承，因此可以看到参数和返回值的迭代器都是 QMap 的迭代器。但要注意 QMultiMap::​insert() 总是插入新的 key-value 节点，不会对旧节点进行替换，即使新旧节点键值一模一样，也会增加新的节点。<br>第一个 ​insert() 自动添加新节点到红黑树的排序位置，红黑树只按照 key 排序，同样 key 的多个 value 值不会排序，同样 key 的新节点总是插入到同样 key 旧节点的最前面。<br>第二个 insert() 会在建议的迭代器位置 pos 附近插入新节点，但不一定是指定位置，最终还是要按红黑树的 key 进行排序确定位置。<br>
           （3）删除函数<br>
-            <div class="code">int&nbsp;&nbsp;&nbsp; remove(const Key &amp; key, const T &amp; value)<br>int&nbsp;&nbsp;&nbsp; remove(const Key &amp; key)</div>第一个删除函数会删除所有键为 key、值为 value 的节点，返回值是删除的个数，因为多映射对象中可以插入多个相同键且相同值的节点，所以第一个删除函数返回值可能大于 1 。 <br>第二个删除函数会删除所有键为 key 的节点，返回值是删除的个数。<br>
+            <div class="code">int&nbsp;&nbsp;&nbsp; remove(const Key &amp; key, const T &amp; value)<br>int&nbsp;&nbsp;&nbsp; remove(const Key &amp; key)</div>第一个删除函数会删除所有键为 key、值为 value 的节点，返回值是删除的个数，因为多映射对象中可以插入多个相同键且相同值的节点，所以第一个删除函数返回值可能大于 1 。 <br>第二个删除函数会删除所有键为 key 的节点，返回值是删除的个数。两个删除函数在找不到匹配节点时，不删除任何东西，返回值是 0 。<br>
           （4）访问和查询函数<br>统计多映射对象所有节点个数使用下面函数：<br>
             <div class="code">int count() const</div>
           统计所有键为 key 且值为 value 的节点数使用下面函数：<br>
@@ -1981,7 +1981,7 @@ style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span styl
 style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
 <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
 style=" color:#000000;">}</span></pre></div>
-   该函数先获取电话编辑框的文本，判断是否为空，如果为空，显示消息框，然后返回；<br>如果文本 strPhone 非空，继续后面代码。<br>调用 m_mmapNamePhone.keys( strPhone ) ，根据值 strPhone 反向查找匹配的 key 列表，同样的电话可能匹配多个姓名，比如公司的公用电话。keys() 函数返回匹配该值的所有键列表。<br>定义结果字符串 strResult；<br>获取键列表的计数保存到 nNamesCount；<br>然后对计数 nNamesCount 进行判断，如果小于 1，那么说明没有找到匹配的元素，设置相应的结果字符串；<br>如果大于等于 1，那么先设置 strResult 的第一行文本，说明匹配电话元素的计数，<br>然后循环遍历 listNames 列表，将列表的姓名和查询的电话字符串拼接成一行，添加给 strResult 。<br>最后将 strResult 显示到结果编辑框 ui-&gt;textEdit 里面。<br>
+   该函数先获取电话编辑框的文本，判断是否为空，如果为空，显示消息框，然后返回；<br>如果文本 strPhone 非空，继续后面代码。<br>调用 m_mmapNamePhone.keys( strPhone ) ，根据值 strPhone 反向查找匹配的 key 列表，同样的电话可能匹配多个姓名，比如公司的公用电话。keys() 函数返回匹配该值的所有键列表。<br>然后定义结果字符串 strResult；<br>获取键列表的计数保存到 nNamesCount；<br>然后对计数 nNamesCount 进行判断，如果小于 1，那么说明没有找到匹配的元素，设置相应的结果字符串；<br>如果大于等于 1，那么先设置 strResult 的第一行文本，说明匹配电话元素的计数，<br>然后循环遍历 listNames 列表，将列表的姓名和查询的电话字符串拼接成一行，添加给 strResult 。<br>最后将 strResult 显示到结果编辑框 ui-&gt;textEdit 里面。<br>
           <br>这个示例的代码介绍到这，我们编译运行该示例：<br>
    <center><img src="images/ch09/ch09-03-05.png" alt="run1"></center>
           
@@ -1992,7 +1992,7 @@ style=" color:#000000;">}</span></pre></div>
           abe 因为是小写的，会排在大写字母姓名的末尾。<br>
           我们再把电话编辑框内容改为 56789，点击“删除匹配姓名电话”，可以看到下图结果：<br>
     <center><img src="images/ch09/ch09-03-07.png" alt="run3"></center>
-                “删除匹配姓名电话”按钮会同时检查姓名和电话，必须二者都和编辑框里的一样才能匹配上，进行删除。当电话或者姓名有一个不匹配，都不会删除元素，所以上面操作没有找到匹配的元素，无法删除。其他按钮功能读者自行测试。<br>
+                “删除匹配姓名电话”按钮会同时检查姓名和电话，映射中元素的 key-value&nbsp;必须和编辑框里姓名电话一样才能匹配上，然后才能进行删除。当电话或者姓名有一个不匹配，都不会删除元素，所以上面操作没有找到匹配的元素，无法删除。其他按钮功能读者自行测试。<br>
           本节的内容就到这，下一节我们介绍关于哈希映射的内容。
           <br>
           <br>

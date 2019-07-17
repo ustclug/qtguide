@@ -26,8 +26,8 @@
     <br>
     <div class="os2"> 4.2.1 文本同步示例 </div>
     <br>
-    本小节的例子就是在窗口里放置一个单行文本编辑器（QLineEdit）和一个标签控件（QLabel），实现的效果就是当编辑器的内容被编辑时，标签控件同步显
-    示编辑控件里的内容。<br>
+    本小节的例子就是在窗口里放置一个单行文本编辑器（QLineEdit）和一个标签控件（QLabel），实现的效果就是当编辑器的内容被编辑时，标
+    签控件同步显 示编辑控件里的内容。<br>
     打开 QtCreator ，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>
     ①项目名称 textshow，创建路径 D:\QtProjects\ch04，点击下一步；<br>
     ②套件选择里面选择全部套件，点击下一步；<br>
@@ -319,28 +319,26 @@ style=" color:#000000;">}</span></pre>
     函数定义和声明里的参数看起来有点复杂，又是 const，又是 &amp;，在关联函数位置只需要按照 QtCreator
     编辑器的代码补全功能自动提示的槽函数名称即可。比如
     <div class="code"> <span style=" color:#000000;">connect</span><span style=" color:#000000;">(</span><span
-        style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
-        style=" color:#800000;">lineEdit</span><span style=" color:#000000;">,</span><span
-        style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SIGNAL</span><span
-        style=" color:#000000;">(</span>textEdited<span style=" color:#000000;">(</span><span
-        style=" color:#800080;">QString</span><span style=" color:#000000;">)),</span><span
-        style=" color:#c0c0c0;"> </span><span style=" color:#808000;">this</span><span
-        style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
-        style=" color:#808000;">SLOT</span><span style=" color:#000000;">(</span>PrintText<span
-        style=" color:#000000;">(</span><span style=" color:#800080;">QString</span><span
-        style=" color:#000000;">)));</span></div>
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEdit</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SIGNAL</span><span
+style=" color:#000000;">(</span>textEdited<span style=" color:#000000;">(</span><span
+style=" color:#800080;">QString</span><span style=" color:#000000;">)),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SLOT</span><span style=" color:#000000;">(</span>PrintText<span
+style=" color:#000000;">(</span><span style=" color:#800080;">QString</span><span
+style=" color:#000000;">)));</span></div>
     槽函数 PrintText 参数里只需要类型名 QString 就够了，不需要加变量名 text 的，信号 textEdited 的参数也是类似的。<br>
     如果用 Qt5 新式的关联语法，就如下面示例的这句：<br>
     <div class="code"><span style=" color:#000000;">connect</span><span style=" color:#000000;">(</span><span
-        style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
-        style=" color:#800000;">lineEdit</span><span style=" color:#000000;">,</span><span
-        style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
-        style=" color:#800080;">QLineEdit</span><span style=" color:#000000;">::</span>textEdited<span
-        style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
-        style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span
-        style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
-        style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span>PrintText<span
-        style=" color:#000000;">);</span></div>
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEdit</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#800080;">QLineEdit</span><span style=" color:#000000;">::</span>textEdited<span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">this</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span>PrintText<span
+style=" color:#000000;">);</span></div>
     <br>
     代码编辑好之后，点击 QtCreator 运行按钮，就可以测试例子运行的效果了：<br>
     <center><img src="images/ch04/ch04-02-06.png" alt="run" width="800"></center>
@@ -654,7 +652,9 @@ style=" color:#000000;">}</span></pre>
     <div class="code">bool QObject::​disconnect(const QObject * sender,
       PointerToMemberFunction signal, const QObject * receiver,
       PointerToMemberFunction method)</div>
-    disconnect 函数返回值表明解除过程是否正确执行。下面我们还是以单行文本编辑控件和标签控件为例，示范在程序运行时实现关联和解除关联。<br>
+    disconnect 函数返回值表明解除过程是否正确执行。<br>除了上述两种解除关联语法，还可以直接针对  connect 函数返回的连接对象进行解除关联，比如：<br>
+    <div class="code">//头文件声明连接对象<br>QMetaObject::Connection m_conn;<br>......<br>//关联时保存返回值，将信号关联到 lambda 表达式， lambda 表达式是 C++11 新特性<br>&nbsp;m_conn = connect(ui-&gt;pushButtonSignal, &amp;QPushButton::clicked, []() { qDebug()&lt;&lt;100; } );<br>......<br>//解除关联时使用对象 m_conn<br>disconnect(m_conn);</div>
+          <br>下面我们还是以单行文本编辑控件和标签控件为例，示范在程序运行时实现关联和解除关联。<br>
     重新打开 QtCreator，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>
     ①项目名称 disconn，创建路径 D:\QtProjects\ch04，点击下一步；<br>
     ②套件选择里面选择全部套件，点击下一步；<br>
@@ -895,18 +895,17 @@ style=" color:#000000;">}</span></pre>
         <tr>
           <td style="width: 40%;">
             <div style="text-align: center;"><a href="ch04-01.htm"><img class="pic"
-                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
           </td>
           <td style="width: 20%;">
             <div style="text-align: center;"><a href="contents.htm"><img class="pic"
-                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
           </td>
           <td style="width: 40%;">
             <div style="text-align: center;"><a href="ch04-03.htm"><img class="pic"
-                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
           </td>
         </tr>
       </tbody>
     </table>
-  </body>
-</html>
+</body></html>

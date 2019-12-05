@@ -301,6 +301,16 @@
       QHash&lt;Key, T&gt; &amp; hash)&nbsp; //从数据流输入</div>
     注意串行化输入输出正常工作的前提是 Key 类型和数值 T 类型都支持 QDataStream&nbsp; 串行化。<br>
     <br>
+    关于&nbsp; QHash，这里再提醒两个注意事项：<br>
+    <b>① 不能使用 hash[key] 这种形式查找哈希对象里是否包含键 key 的元素，因为 operator[](const Key &amp;
+      key) 函数在找不到 key 键元素时，自动调用 value 类默认构造函数为哈希对象添加新的 key-value 哈希映射元素。</b><br>
+    应该用 contains(key) 来判断是否包含该 key 元素，或者用&nbsp; hash.value( key ) 函数查找值，value()
+    函数不会为哈希对象添加新元素，虽然 value() 函数找不到时也会返回 value 类型默认构造的值，但不会改变哈希对象内容。<br>
+    <br>
+    <b>② 一般不建议使用 QHash 的 insertMulti() 和 unite() 函数进行多重哈希映射添加或哈希映射合并，Qt 单独提供了
+      QMultiHash表示多重哈希映射，在程序中尽量让 QHash 保持一对一映射，避免代码的误解。</b><br>
+    <br>
+    下面开始本小节的示例程序：<br>
     <br>
     <div class="os2">9.4.2 多哈希映射 QMultiHash </div>
     <br>

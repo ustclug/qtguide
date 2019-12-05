@@ -3,11 +3,9 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <title>ch09-04</title>
-    
-<link href="css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-
-<script src="thumbnailviewer.js" type="text/javascript">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -15,47 +13,324 @@
 * Visit http://www.dynamicdrive.com/ for full source code
 ***********************************************/
 
-</script>
-
-
-  </head>
-  
-  
-<div class="os1">9.4 关联容器：QHash、QMultiHash和QSet </div>
-<br />
-本节介绍三种基于哈希表的关联容器，单哈希映射 QHash、多哈希映射 QMultiHash 和集合 QSet。
-集合 QSet 就是数学上的集合，比如求交集∩、求并集∪等。集合的元素没有序号，元素之间也不讲究顺序。 
-本节最后归纳一下关联容器操作的算法复杂度。
-<br />
-<br />
-<div class="os2">9.4.1 单哈希映射 QHash </div>
-
-<br />
-<br />
-<br />
-<div class="os2">9.4.2 多哈希映射 QMultiHash </div>
-
-<br />
-<br />
-<br />
-<div class="os2">9.4.3 集合 QSet </div>
-
-<br />
-<br />
-<br />
-<div class="os2">9.4.4 关联容器对比 </div>
-
-<br />
-<br />
-<br />
-
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch09-03.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch09-05.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+</script> </head>
+  <body>
+    <div class="os1">9.4 关联容器：QHash、QMultiHash和QSet </div>
+    <br>
+    本节介绍三种基于哈希表的关联容器，单哈希映射 QHash、多哈希映射 QMultiHash 和集合 QSet。 QHash 、QMultiHash
+    的功能与上一节 QMap、QMultiMap 功能非常类似，也是将存储 key-value
+    数据对，但哈希映射与普通映射对数据的内部存储结构和访问效率有区别。集合 QSet
+    就是数学上的集合，比如求交集∩、求并集∪等。集合的元素没有序号，元素之间也不讲究顺序。 <br>
+    本节共分为四个小节，前三个小节依次介绍 QHash、QMultiHash 和 QSet 的功能，并辅以示例讲解，最后归纳一下关联容器操作的算法复杂度。
+    <br>
+    <br>
+    <div class="os2">9.4.1 单哈希映射 QHash </div>
+    <br>
+    QHash 是基于哈希表实现的字典结构，存储 key-value
+    数据对。哈希表可以将任意长度的数据根据特定算法计算固定长度的“精简版”数值，就是数据条目的哈希值。简要来说，对于 key-value 数据对，我们根据
+    key 的数值计算得到哈希值作为数据存储空间的序号，在该序号位置保存 value，那么我们就可以快速地根据 key 访问到 value
+    数值。实际中的哈希表结构更复杂，因为要考虑哈希值碰撞的问题，本节就不讨论了。上一节 QMap 利用红黑树实现，读取一个元素的平均效率是 O(logN)
+    ，N 是元素总数。而通过 QHash 读取一个元素，只需要计算 key 对应的哈希值，不需要遍历查找树形结构或数组结构，哈希表的访问效率平均为 O(1)
+    。<br>
+    QHash
+    的优点是通常情况下访问元素效率极高，但是也有缺点，元素排列是无序的，元素排列不按照数值大小或字典序，是按照哈希算法计算的值进行排列，这些哈希值都是杂乱无章的数
+    值。如果需要有序的数据结构，那么 QMap 就更实用。<br>
+    <br>
+    QHash 与 QMap 的大部分功能函数名一样，存储的数据也都必须是<b>可赋值类型</b>。但 QHash 与 QMap 有三个重要区别，列举如下：<br>
+    <b>① QHash 拥有更快的元素查询效率，平均为 O(1)，QMap 平均为 O(logN) 。<br>
+      ② 在 QHash 对象里进行元素遍历时，元素排列杂乱无章，而 QMap 总是按照 key 的排序排列。<br>
+      ③ QHash 的 key 类型必须提供&nbsp; operator==() 运算符函数和&nbsp; qHash(Key)&nbsp;
+      全局函数，而 QMap 的 key 类型则必须提供 operator&lt;() 运算符函数。</b><br>
+    <br>
+    下面我们分类讲解 QHash 的功能函数：<br>
+    （1）构造函数<br>
+    <div class="code">QHash()&nbsp; //默认构造函数<br>
+      QHash(std::initializer_list&lt;std::pair&lt;Key, T&gt; &gt; list)<br>
+      QHash(const QHash&lt;Key, T&gt; &amp; other)<br>
+      QHash(QHash&lt;Key, T&gt; &amp;&amp; other)<br>
+      ~QHash()&nbsp; //析构函数</div>
+    第二个构造函数用于支持初始化列表构造，是 C++11 特性，第三个是复制构造函数，第四个是移动构造函数，也是 C++11 特性。构造函数使用举例如下：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QHash&lt;QString ,int&gt; nameAge = {
+      {"Alice", 20},<br>
+      &nbsp;&nbsp;&nbsp; {"Bob", 22},<br>
+      &nbsp;&nbsp;&nbsp; {"Kal", 19} };<br>
+      &nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;nameAge;<br>
+      &nbsp;&nbsp;&nbsp; QHash&lt;QString ,int&gt; nameAge2 = std::move( nameAge
+      );<br>
+      &nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;nameAge;<br>
+      &nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;nameAge2;</div>
+    上面一段代码打印输出结果为：<br>
+    <div class="output">QHash(("Alice", 20)("Kal", 19)("Bob", 22))<br>
+      QHash()<br>
+      QHash(("Alice", 20)("Kal", 19)("Bob", 22))<br>
+    </div>
+    注意 QHash 对象里三个元素是乱序的，没有按字典序排列；进行移动构造后，原本的对象 nameAge 被清空，元素全部填充到新对象 nameAge2
+    里面。<br>
+    <br>
+    （2）添加函数<br>
+    &nbsp; 对于单哈希映射，通常使用下面的添加函数：<br>
+    <div class="code">iterator&nbsp;&nbsp; &nbsp;insert(const Key &amp; key,
+      const T &amp; value)</div>
+    insert() 函数负责添加新元素，或者替换旧的同 key 元素，如果哈希映射之前没有 key 键元素，那么为哈希映射新增一个元素，键为
+    key，映射的值为 value；如果之前存在键为 key 的元素，那么替换该元素的映射值为新的 value。QHash
+    本身是支持多哈希映射功能的，但一般不建议这样用。对用于多哈希映射场景 QHash&nbsp; 对象，如果存在多个键为 key 的元素，那么
+    insert() 函数替换最近添加的同 key 元素。<br>
+    对于多哈希映射场景，建议使用下面的添加函数：<br>
+    <div class="code">iterator&nbsp;&nbsp; &nbsp;insertMulti(const Key &amp;
+      key, const T &amp; value)</div>
+    insertMulti() 总是为哈希映射添加新元素，而不管之前有无同 key 元素，也不管是否有同 key-value 对的元素。<br>
+    <br>
+    （3）移除和删除函数<br>
+    清空哈希映射对象所有元素，使用下面函数：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;clear()</div>
+    &nbsp;如果希望根据键 key 来删除元素，使用下面函数：<br>
+    <div class="code">int&nbsp;&nbsp;&nbsp; remove(const Key &amp; key)</div>
+    remove() 函数删除所有键为 key 的元素，返回值是删除的匹配元素个数，如果没有匹配元素，那么返回 0。<br>
+    如果希望从哈希映射中卸下一个元素，并作为返回值获取该元素，那么使用下面函数：<br>
+    <div class="code">T&nbsp;&nbsp;&nbsp; take(const Key &amp; key)</div>
+    如果哈希映射中不存在匹配 key 的元素，该函数返回 Key 类型默认构造函数生成的默认元素；如果存在 1
+    个匹配元素，将元素从哈希映射卸下，并返回；如果存在多个匹配 key 的元素，卸下最近添加的一个匹配元素返回，其他旧的匹配元素不变。<br>
+    如果知道元素对应的迭代器位置 pos，可以根据迭代器位置删除指向的元素：<br>
+    <div class="code">iterator&nbsp;&nbsp;&nbsp; erase(iterator pos)<br>
+    </div>
+    erase() 返回删除元素之后下一个元素的迭代器位置，有可能是迭代器末尾位置。<br>
+    <br>
+    （4）访问和查询函数<br>
+    查询 QHash 对象中元素个数，可以使用下面两个函数：<br>
+    <div class="code">int&nbsp;&nbsp;&nbsp; count() const<br>
+      int&nbsp;&nbsp;&nbsp; size() const</div>
+    另外 count() 还有带参数的版本，计算匹配 key 的元素数量：<br>
+    <div class="code">int&nbsp;&nbsp;&nbsp; count(const Key &amp; key) const</div>
+    QHash 对象内部使用哈希表，对于哈希表的容量，可以进行查询、扩容、以及缩减空余等操作：<br>
+    <div class="code">int&nbsp;&nbsp; &nbsp;capacity()
+      const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //查询哈希表容量<br>
+      void&nbsp;&nbsp;&nbsp; reserve(int size)&nbsp;&nbsp;
+      //提前预留好参数里指定个数的哈希表，扩容操作<br>
+      void&nbsp;&nbsp;&nbsp;
+      squeeze()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //缩减哈希表未使用的冗余空间</div>
+    针对哈希表容量操作的三个函数很少用到，如果提前知道需求的哈希表特别大，那么可以使用 reserve() 分配哈希表容量，避免大量增加元素时的自动扩容操
+    作，节省时间。<br>
+    检查 QHash&nbsp; 对象是否为空，使用下面函数判断：<br>
+    <div class="code">bool&nbsp;&nbsp;&nbsp; isEmpty() const // Qt
+      风格命名，检查哈希映射对象是否为空<br>
+      bool&nbsp;&nbsp;&nbsp; empty() const&nbsp;&nbsp;&nbsp; // STL
+      风格命名，检查哈希映射对象是否为空</div>
+    检查哈希映射对象是否包含匹配 key，使用下面函数：<br>
+    <div class="code">bool&nbsp;&nbsp;&nbsp; contains(const Key &amp; key) const</div>
+    如果希望直接找到匹配 key 元素对应的迭代器，使用下面三个函数：<br>
+    <div class="code">const_iterator&nbsp;&nbsp;&nbsp; constFind(const Key &amp;
+      key) const&nbsp; // Qt&nbsp; 风格命名，查找匹配 key 元素的只读迭代器<br>
+      const_iterator&nbsp;&nbsp;&nbsp; find(const Key &amp; key) const // STL
+      风格命名，查找匹配 key 元素的只读迭代器<br>
+      iterator&nbsp;&nbsp;&nbsp; find(const Key &amp; key) //查找匹配 key 元素的读写迭代器</div>
+    如果找不到匹配元素，constFind() 和 find()&nbsp;&nbsp; 返回 end() 迭代器数值，指向末尾不存在位置。<br>
+    凡是返回迭代器数值的函数，都要注意判断是否为 end() 末尾数值。<br>
+    <br>
+    如果需要根据 key 查询对应的 value（即正向查找，是通过哈希函数实现，效率高，平均O(1)），使用下面函数：<br>
+    <div class="code">const T&nbsp;&nbsp;&nbsp; value(const Key &amp; key) const<br>
+      const T&nbsp;&nbsp;&nbsp; value(const Key &amp; key, const T &amp;
+      defaultValue) const</div>
+    两个 value() 函数如果找到匹配的元素，就返回映射的值；如果第一个 value() 函数找不到匹配元素，就返回 T
+    值类型默认构造函数生成的默认数值，而第二个 value() 函数在找不到匹配元素时，返回参数里指定的 defaultValue
+    。对于多哈希映射的场景，如果匹配多个元素，那么返回最近添加的匹配元素的 value 值。<br>
+    <br>
+    如果希望一股脑获取所有的值列表，使用下面函数：<br>
+    <div class="code">QList&lt;T&gt;&nbsp;&nbsp;&nbsp; values() const<br>
+    </div>
+    对于多哈希映射的场景，获取匹配 key 所有映射的值，使用下面带参数的函数：<br>
+    <div class="code">QList&lt;T&gt;&nbsp;&nbsp;&nbsp; values(const Key &amp;
+      key) const</div>
+    <br>
+    如果希望根据 value 值，反查匹配的 key，那么使用下面函数： <br>
+    <div class="code">const Key&nbsp;&nbsp;&nbsp; key(const T &amp; value) const<br>
+      const Key&nbsp;&nbsp;&nbsp; key(const T &amp; value, const Key &amp;
+      defaultKey) const</div>
+    如果找到匹配 value 值的键，那么返回该键 key，对多个匹配元素的情况，总是返回首先匹配 value的 key；如果找不到，那么第一个 key()
+    函数返回 Key 类型默认构造函数生成的默认对象，第二个 key() 函数返回参数里的 defaultKey。反查操作是遍历哈希表，效率比较低，一般是
+    O(N)。<br>
+    如果希望一股脑获取所有的键列表，同样 key 的多个元素算作多个键，那么使用下面函数：<br>
+    <div class="code">QList&lt;Key&gt;&nbsp;&nbsp;&nbsp; keys() const&nbsp;
+      //多个相同 key&nbsp; 算做多个<br>
+    </div>
+    如果希望获取不会重复的键列表，使用下面函数：<br>
+    <div class="code">QList&lt;Key&gt;&nbsp;&nbsp;&nbsp; uniqueKeys()
+      const&nbsp; //多个相同 key 只算一个</div>
+    如果希望获取匹配 value 的所有键列表，那么使用下面函数：<br>
+    <div class="code">QList&lt;Key&gt;&nbsp;&nbsp;&nbsp; keys(const T &amp;
+      value) const</div>
+    <br>
+    （5）交换函数和合并函数<br>
+    &nbsp;将 QHash 对象自身与另一个 QHash 对象（key 类型、value 类型要一样）的内容全部交换，使用下面成员函数：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;swap(QHash&lt;Key, T&gt; &amp;
+      other)<br>
+    </div>
+    交换函数效率很高，并且不会失败。<br>
+    将另一个 QHash 对象的元素全部复制合并到对象自己内部（两个对象 key 类型、value 类型要一样），使用下面函数：
+    <div class="code">QHash&lt;Key, T&gt; &amp;&nbsp;&nbsp;&nbsp; unite(const
+      QHash&lt;Key, T&gt; &amp; other)</div>
+    unite()&nbsp; 函数总是添加新元素，同样 key 的元素只会增加，不会替换，所以很可能会形成多重映射。<br>
+    <br>
+    （6）运算符函数<br>
+    对于运算符函数，我们举两个哈希映射对象来举例说明：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QHash&lt;QString, int&gt; h1;<br>
+      &nbsp;&nbsp;&nbsp; h1["Ali"] = 99;<br>
+      &nbsp;&nbsp;&nbsp; QHash&lt;QString, int&gt; h2;<br>
+      &nbsp;&nbsp;&nbsp; h2["Bob"] = 88;<br>
+      &nbsp;&nbsp;&nbsp; h2["Kal"] = 77;</div>
+    运算符使用示范如下表所示：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 400px;" align="center"><b>运算符函数</b></td>
+          <td style="width: 200px;" align="center"><span style="font-weight: bold;">举
+              例</span></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>bool operator!=(const QHash&lt;Key, T&gt; &amp; other) const</td>
+          <td>&nbsp;h1 != h2;</td>
+          <td> 两个哈希对象的元素不一样，不等号判断结果为 true。 </td>
+        </tr>
+        <tr class="d1">
+          <td>bool operator==(const QHash&lt;Key, T&gt; &amp; other) const</td>
+          <td>&nbsp;h1 == h2;</td>
+          <td> 两个哈希对象的元素不一样，等于号判断结果为 false。</td>
+        </tr>
+        <tr>
+          <td>QHash&lt;Key, T&gt; &amp; operator=(const QHash&lt;Key, T&gt;
+            &amp; other)</td>
+          <td>&nbsp;h1 = h2;</td>
+          <td> 将 h2 所有元素复制给 h1，执行后二者相等。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QHash&lt;Key, T&gt; &amp; operator=(QHash&lt;Key, T&gt; &amp;&amp;
+            other)</td>
+          <td>&nbsp;h1 = std::move(h2);</td>
+          <td> 将 h2 中所有元素移动给h1，h2自己清空。 </td>
+        </tr>
+        <tr>
+          <td>T &amp; operator[](const Key &amp; key)</td>
+          <td>&nbsp;h2["Kal"] = 18;</td>
+          <td style="height: 16px;"> 修改了 "Kal" 对应的value值。 </td>
+        </tr>
+        <tr class="d1">
+          <td>const T operator[](const Key &amp; key) const</td>
+          <td style="height: 16px;">&nbsp;qDebug()&lt;&lt; h2["Kal"];</td>
+          <td> 打印 "Kal" 对应的常量值。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    &nbsp;两个哈希对象相等只需要二者拥有的键值对一样就行了，如果键值对的前后顺序不同，那么不会影响等于号判断。比如两个哈希对象，第一个哈希对象三个元素
+    在内存中的存储序列为：<br>
+    ("Bob", 98), ("Ali", 97), ("Cal", 99)<br>
+    第二个哈希对象三个同样元素的存储序列为：<br>
+    ("Ali", 97), ("Bob", 98), ("Cal", 99)<br>
+    那么这两个哈希对象依然是符合相等条件的。<br>
+    <br>
+    （7）迭代器函数<br>
+    映射类也定义了 STL 风格和 Qt 命名风格的迭代器：<br>
+    <div class="code">class&nbsp;&nbsp; &nbsp;const_iterator&nbsp;&nbsp;
+      //STL风格只读迭代器<br>
+      class&nbsp;&nbsp; &nbsp;iterator&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;&nbsp;&nbsp; //STL风格读写迭代器<br>
+      typedef&nbsp;&nbsp;&nbsp; ConstIterator&nbsp; //Qt 风格只读迭代器<br>
+      typedef&nbsp;&nbsp;&nbsp;
+      Iterator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //Qt风格读写迭代器</div>
+    STL 风格迭代器使用示范：<br>
+    <div class="code">QHash&lt;QString, int&gt;::const_iterator i =
+      hash.constBegin();<br>
+      while (i != hash.constEnd()) {<br>
+      &nbsp;&nbsp;&nbsp; cout &lt;&lt; i.key() &lt;&lt; ": " &lt;&lt; i.value()
+      &lt;&lt; endl;<br>
+      &nbsp;&nbsp;&nbsp; ++i;<br>
+      }<br>
+    </div>
+    QHash 对象中的元素排列是无序的，是通过内部哈希函数计算元素排列位置，元素前后序列难以预知。<br>
+    获取映射的头部元素、尾部假想元素的迭代器函数列举如下：<br>
+    <div class="code">iterator&nbsp;&nbsp;&nbsp; begin()&nbsp;&nbsp;&nbsp;&nbsp;
+      //指向头部的读写迭代器<br>
+      const_iterator&nbsp;&nbsp;&nbsp; begin()
+      const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //指向头部的只读迭代器<br>
+      const_iterator&nbsp;&nbsp;&nbsp; cbegin()
+      const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //指向头部的只读迭代器<br>
+      const_iterator&nbsp;&nbsp;&nbsp; constBegin() const&nbsp;
+      //指向头部的只读迭代器，Qt风格<br>
+      iterator&nbsp;&nbsp;&nbsp; end()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //指向尾部后面假想元素的读写迭代器<br>
+      const_iterator&nbsp;&nbsp;&nbsp; end()
+      const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //指向尾部后面假想元素的只读迭代器<br>
+      const_iterator&nbsp;&nbsp;&nbsp; cend()
+      const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //指向尾部后面假想元素的只读迭代器<br>
+      const_iterator&nbsp;&nbsp;&nbsp; constEnd() const&nbsp;&nbsp;&nbsp;
+      //指向尾部后面假想元素的只读迭代器，Qt风格</div>
+    注意 *end() 返回的迭代器通常只用来做不等于判断，它指向的东西根本不存在， *end() 仅用于越界判断。<br>
+    虽然获取头部、尾部迭代器的函数多，其实功能类似，起了一堆名字是方便兼容 STL 风格函数命名。<br>
+    另外，迭代器可以配合之前的 insert()、insertMulti()、erase() 、find()
+    等函数的返回值使用，利用迭代器进行元素查询或修改。<br>
+    <br>
+    （8）默认支持哈希的类型<br>
+    之前我们提到 QHash 的 key 类型必须提供&nbsp; operator==() 运算符函数和&nbsp; qHash(Key)&nbsp;
+    全局函数，Qt 为常见的 C++ 类型和 Qt 数据类型都提供了全局哈希函数，下面仅举几个例子：<br>
+    <div class="code">uint&nbsp;&nbsp; &nbsp;qHash(const QString &amp; key, uint
+      seed = 0)&nbsp; //计算字符串的哈希值<br>
+      uint&nbsp;&nbsp;&nbsp; qHash(const T * key, uint seed =
+      0)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //计算任意数据指针的哈希值<br>
+      uint&nbsp;&nbsp;&nbsp; qHashBits(const void * p, size_t len, uint seed =
+      0)&nbsp; //辅助函数，用于编写新类型的 qHash() 函数，可以根据任意内存块生成哈希值</div>
+    第一个 qHash()&nbsp; 函数，参数 key 类型为 QString ，参数 seed
+    是哈希算法种子，对于同样的两个字符串，如果种子不同，就可以生成不同的哈希值。哈希函数的返回值都一样，是 uint 类型，无符号整数。<br>
+    第二个 qHash() 函数，参数 key 类型是 T *，就是任意数据类型的指针，不管数据类型是什么，其指针总是固定的长度，可以将指针数值用于计算哈希
+    值。<br>
+    第三个是计算哈希值的辅助函数，函数名为 qHashBits() ，针对任意内存块来计算哈希值，p 是内存块指针，len
+    是内存块长度，这个函数可以辅助自定义类型编写新的全局 qHash() 函数，只需要将新类型对象的指针和长度、种子传递给 qHashBits()
+    函数，就能得到结果哈希值。<br>
+    <br>
+    （9）其他内容<br>
+    QHash 模板类也支持串行化输出和输入，通过以下函数实现：<br>
+    <div class="code">QDataStream &amp;&nbsp;&nbsp;
+      &nbsp;operator&lt;&lt;(QDataStream &amp; out, const QHash&lt;Key, T&gt;
+      &amp; hash) //输出到数据流<br>
+      QDataStream &amp;&nbsp;&nbsp; &nbsp;operator&gt;&gt;(QDataStream &amp; in,
+      QHash&lt;Key, T&gt; &amp; hash)&nbsp; //从数据流输入</div>
+    注意串行化输入输出正常工作的前提是 Key 类型和数值 T 类型都支持 QDataStream&nbsp; 串行化。<br>
+    <br>
+    <br>
+    <div class="os2">9.4.2 多哈希映射 QMultiHash </div>
+    <br>
+    <br>
+    <br>
+    <div class="os2">9.4.3 集合 QSet </div>
+    <br>
+    <br>
+    <br>
+    <div class="os2">9.4.4 关联容器对比 </div>
+    <br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch09-03.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch09-05.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

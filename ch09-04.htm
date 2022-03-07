@@ -1922,15 +1922,280 @@ style=" color:#000000;">}</span></pre> </div>
           这样我们删除的内容，通过加载文件，又全读取回来了，使用就非常方便。其他按钮功能请读者自行测试，下面小节我们讲解多哈希映射内容。<br><br>
     <div class="os2">9.4.2 多哈希映射 QMultiHash </div>
     <br>
-    <br>
-    <br>
+    QMultiHash 是 QHash 的派生类，继承了 QHash 绝大多数的函数，同时也根据一对多映射的特性做了改进，将基类的函数进行了重载。除了基类的函数，QMultiHash 新增了一些函数：<br>（1）构造函数<br>
+          <div class="code">QMultiHash() &nbsp;&nbsp; //默认构造函数<br>QMultiHash(std::initializer_list&lt;std::pair&lt;Key, T&gt; &gt; list)&nbsp;&nbsp;&nbsp; //初始化列表构造函数<br>QMultiHash(const QHash&lt;Key, T&gt; &amp; other)&nbsp;&nbsp;&nbsp; //复制构造函数<br> </div>
+          第一个是不带任何参数的默认构造函数，第二个是支持C++11特性的初始化列表函数，类似下面代码：<br>
+          <div class="code">&nbsp;&nbsp;&nbsp; QMultiHash&lt;QString, int&gt; ha1{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {"Alice", 10086},<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {"Alice", 10087},<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {"Bob", 10010},<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {"Bob", 10011}<br>&nbsp;&nbsp;&nbsp; };<br>&nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;ha1; </div>
+          第三个是复制构造函数，可以从已有对象新建一个内容一样的对象。<br>（2）添加函数<br>
+   <div class="code">QHash&lt;Key, T&gt;::iterator&nbsp;&nbsp; &nbsp;insert(const Key &amp; key, const T &amp; value) </div>
+          QMultiHash 使用的迭代器与基类一样，只是有些函数功能有差异，这个 insert() 函数就是最典型的差异。<br>基类 QHash 的插入函数是一对一映射，如果已经有了同样 key 的元素，那么仅修改 value 值，key 对应的 value 只有一个。<br>派生类 QMultiHash&nbsp; 的插入函数是总是新增新元素，即使旧的 key-value 元素一模一样，调用  QMultiHash&nbsp; 的插入函数仍然会新增元素，比如：<br>
+          <div class="code">&nbsp;&nbsp;&nbsp; QMultiHash&lt;QString, int&gt; ha1;<br>&nbsp;&nbsp;&nbsp; ha1.insert( "AA", 1 );<br>&nbsp;&nbsp;&nbsp; ha1.insert( "AA", 1 );<br>&nbsp;&nbsp;&nbsp; ha1.insert( "AA", 1 );<br>&nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;ha1; </div>
+          三句插入函数代码中的 key - value 一模一样，多哈希映射会自动添加三个元素，而不管他们相不相等，打印结果就是：<br>
+          <div class="output">
+          <span style=" font-family:'Courier'; font-size:10pt; color:#aa00aa;">QHash(("AA", 1)("AA", 1)("AA", 1))</span>
+          </div>
+          <br>总共有 3 个元素，内容一样。<br>如果是基类 QHash 调用 insert 插入函数，那么一个 key 仅有一个元素，只对应一个 value。<br>（3）删除函数<br>
+             <div class="code"> int&nbsp;&nbsp; &nbsp;remove(const Key &amp; key, const T &amp; value)<br>int&nbsp;&nbsp;&nbsp; remove(const Key &amp; key)</div>
+          第一个删除函数，只删除同时匹配 key 和 value 的元素，如果有多个匹配就删除多个元素，返回删除的个数；如果没有匹配的返回 0。<br>第二个删除函数，删除匹配 key&nbsp; 的所有元素，返回值是删除的元素个数，如果没有匹配的 key，返回 0。<br>（4）访问和查询函数<br>count 计数的函数有三个：<br>
+     <div class="code">int&nbsp;&nbsp; &nbsp;count(const Key &amp; key, const T &amp; value) const<br>int&nbsp;&nbsp;&nbsp; count(const Key &amp; key) const<br>int&nbsp;&nbsp;&nbsp; count() const<br> </div> 
+          第一个统计同时匹配 key-value 的元素个数，第二个统计匹配 key 的元素个数，最后一个是统计所有元素个数。<br>contains 包含查询有两个函数：<br>
+             <div class="code">bool&nbsp;&nbsp; &nbsp;contains(const Key &amp; key, const T &amp; value) const<br>bool&nbsp;&nbsp;&nbsp; contains(const Key &amp; key) const<br> </div>
+          第一个检查是否包含同时匹配 key-value 的元素，第二个检查是否包含匹配 key 的元素。<br>find 查找函数共有 6 个，首先是根据 key-value 对查找元素位置，3个函数：<br>
+             <div class="code">QHash&lt;Key, T&gt;::const_iterator&nbsp;&nbsp; &nbsp;constFind(const Key &amp; key, const T &amp; value) const &nbsp; //只读迭代器查询，Qt风格函数名<br>QHash&lt;Key, T&gt;::const_iterator&nbsp;&nbsp;&nbsp; find(const Key &amp; key, const T &amp; value) const&nbsp; &nbsp; //只读迭代器查询，STL风格函数名<br>QHash&lt;Key, T&gt;::iterator&nbsp;&nbsp;&nbsp; find(const Key &amp; key, const T &amp; value)&nbsp; &nbsp; //读写迭代器查询<br> </div>
+          然后是根据 key 查询元素位置，3个函数：<br>
+            <div class="code">QHash&lt;Key, T&gt;::const_iterator&nbsp;&nbsp; &nbsp;constFind(const Key &amp; key) const &nbsp;&nbsp; //只读迭代器查询，Qt风格函数名<br>QHash&lt;Key, T&gt;::const_iterator&nbsp;&nbsp;&nbsp; find(const Key &amp; key) const &nbsp;&nbsp; //只读迭代器查询，STL风格函数名<br>QHash&lt;Key, T&gt;::iterator&nbsp;&nbsp;&nbsp; find(const Key &amp; key) &nbsp;&nbsp; //读写迭代器查询</div>
+          （5）替换和交换函数<br>多哈希映射的元素替换函数如下：<br>
+       <div class="code">QHash&lt;Key, T&gt;::iterator&nbsp;&nbsp; &nbsp;replace(const Key &amp; key, const T &amp; value) </div>
+          如果对象不包含 key 键元素，那么新增一个 key-value 元素；如果存在已有的同样 key 元素，那么替换掉旧的 value 值；如果存在多个匹配 key 的元素，那么替换掉最近添加的一个匹配 key 元素。<br>多哈希映射交换函数如下：<br>
+             <div class="code">void&nbsp;&nbsp; &nbsp;swap(QMultiHash&lt;Key, T&gt; &amp; other) </div>
+          该函数交换数据的效率高，并且不会失败。<br>（6）运算符函数<br>多哈希映射新增了 + 和 += 运算符函数，用于合并两个多哈希映射：<br>
+           <div class="code"> QMultiHash&nbsp;&nbsp; &nbsp;operator+(const QMultiHash &amp; other) const<br>QMultiHash &amp;&nbsp;&nbsp;&nbsp; operator+=(const QMultiHash &amp; other)<br> </div>+ 函数返回新的合并后对象， += 函数直接将合并后的对象赋给左值对象。合并后的对象总是合并前两个对象元素个数的总和，而不会检查有没有重复的元素，元素有重复就重复添加。<br>另外 QMultiHash 取消了 operator[] 运算符函数，由于多映射的 key 很可能对应多个 value，同样 key 的多个节点定位不明确，所以不能用 operator[] 运算符函数。替换之前最新插入的键为 key 的节点使用 replace() 函数。<br>
+          <br>QHash 和 QMultiHash 二者功能函数的主要区别对比如下表所示：<br><br>
+            <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width:20%;" align="center"><b>功能</b></td>
+          <td style="width: 40%;" align="center"><b>QHash 函数</b></td>
+          <td align="center"><b> QMultiHash 函数</b></td>
+        </tr>
+        <tr>
+          <td>一对一添加节点</td>
+          <td style="height: 32px;"><b>insert(key,value)：无匹配key时直接插入新节点，有匹配key时替换旧节点。</b></td>
+          <td> replace(key,value)：无匹配key时直接插入新节点，有匹配key时，替换之前最新插入的同样key节点。 </td>
+        </tr>
+        <tr class="d1">
+          <td>一对多添加节点</td>
+          <td> insertMulti(key,value)：直接将新节点插入到哈希表，不考虑之前有无同样键值的节点。</td>
+          <td> <b>insert(key,value)：直接将新节点插入到哈希表，不考虑之前有无同样键值的节点。<br></b>insertMulti(key,value)函数同基类。<b><br></b> </td>
+        </tr>
+        <tr>
+          <td>中括号运算符</td>
+          <td> operator[](key)：根据key读写匹配的节点，如果没有匹配的，自动添加该 key 节点。</td>
+          <td> 没有中括号运算符，对于类似功能，读操作调用 value(key)函数，写操作调用replace(key,value)。 </td>
+        </tr>
+        <tr class="d1">
+          <td>合并两个对象</td>
+          <td> 无 + 和 += 运算符函数。QHash::​unite(other)可以将参数other所有节点添加给自己，类似 += 功能。</td>
+          <td style="height: 16px;">通过  + 和 += 运算符函数。</td>
+        </tr>
+        <tr>
+          <td>查询函数</td>
+          <td>count(key)、contains(key)、find(key)、constFind(key)，只需要通过 key 查询节点，因为通常是一对一映射。</td>
+          <td> 不仅有 count(key)、contains(key)、find(key)、constFind(key)，一对多映射查询时还可以根据键值对进行查询<br>count(key,value)、contains(key,value)、find(key,value)、constFind(key,value)。 </td>
+        </tr>
+        <tr class="d1">
+          <td>删除函数</td>
+          <td style="height: 16px;"> remove(key)，删除匹配 key 的节点。 </td>
+          <td> 两个删除函数，remove(key)删除匹配 key 的所有节点，remove(key,value)删除匹配 key-value 的所有节点。 </td>
+        </tr>
+      
+      </tbody>
+    </table> <br>
+          <b>需要特别注意的就是 insert() 函数，基类 QHash 和 派生类 QMultiHash 的 insert() 函数名一样，功能却不一样，基类 QHash 是一对一添加或替换，而派生类 QMultiHash 是一对多的重复添加。</b><br>
+          <br>
+    本小节例子作为练习题，将 9.3.2 多映射 QMultiMap 小节的 namephone 例子，用本小节的 QMultiHash 实现。<br><br>
     <div class="os2">9.4.3 集合 QSet </div>
     <br>
+    集合 QSet 类其实相当于去掉 value ，仅有 key 的哈希类，<b>它存储的元素就是哈希类的 key 类型，要求是可赋值类型，并且带有全局的 operator==() 和 qHash() 函数</b>。QSet 的元素要求唯一不重复，排列顺序则是无序的。下面介绍集合类的功能函数。<br><br>
+          （1）构造函数<br>
+            <div class="code">QSet()&nbsp;&nbsp; //默认构造函数<br>QSet(std::initializer_list&lt;T&gt; list)&nbsp;&nbsp;&nbsp; //初始化列表构造函数，C++11特性<br>QSet(const QSet&lt;T&gt; &amp; other)&nbsp;&nbsp;&nbsp; //复制构造函数<br>QSet(QSet &amp;&amp; other) &nbsp; &nbsp; //移动构造函数，C++11特性 </div>最常用的是默认构造函数，使用模板类要带上数值类型，第二个和第四个是C++11特性，举例如下：<br>
+          <div class="code">&nbsp;&nbsp;&nbsp; QSet&lt;QString&gt; s1{"Alice", "Bob", "Ceil"};<br>&nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;s1;<br>&nbsp;&nbsp;&nbsp; QSet&lt;QString&gt; s2 = std::move(s1);<br>&nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;s1;<br>&nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;s2; </div> 
+          输出结果如下：<br>
+           <div class="output">QSet("Bob", "Alice", "Ceil")<br>QSet()<br>QSet("Bob", "Alice", "Ceil") </div>
+          移动构造函数会将右边的对象内容移动给左值对象，右边对象清空。<br><br>
+          （2）添加函数<br>
+           <div class="code">iterator&nbsp;&nbsp; &nbsp;insert(const T &amp; value) </div>insert() 会检查集合是否存在相同元素，如果不存在相同的，添加新元素，如果已经有相同的，集合保持不变。与之前的 QMap 和 QHash 类不同的是，集合类没有 insertMulti 函数，因为集合要求元素唯一不重复。<br><br>
+          （3）删除函数<br>
+          <div class="code">bool&nbsp;&nbsp; &nbsp;remove(const T &amp; value) </div>
+          remove() 删除匹配数值的元素，如果集合中存在该元素，那么删除了并返回 true，如果没有匹配元素，那么返回 false。<br>如果希望清空所有元素，使用如下函数：<br>
+          <div class="code">void&nbsp;&nbsp; &nbsp;clear() </div>
+          <br>（4）访问和查询函数<br>
+          查询集合是否包含一个数值：<br>
+           <div class="code">bool&nbsp;&nbsp; &nbsp;contains(const T &amp; value) const </div>
+          如果集合存在数值，返回 true，不存在就返回 false。<br>
+          查询集合中元素的总数：<br>
+           <div class="code">int&nbsp;&nbsp; &nbsp;count() const<br>int&nbsp;&nbsp;&nbsp; size() const</div>
+          注意集合没有统计匹配数值个数的 count 函数，因为存在是 1，不存在是 0 ，有 contains 就能够判断了，不想要单独的计数函数。<br>
+          查询集合是否为空：<br>
+           <div class="code">bool&nbsp;&nbsp; &nbsp;empty() const&nbsp;&nbsp;&nbsp; //STL风格命名<br>bool&nbsp;&nbsp;&nbsp; isEmpty() const&nbsp;&nbsp; //Qt风格命名</div>
+          获取集合所有的元素使用下面两个函数：<br>
+             <div class="code">QList&lt;T&gt;&nbsp;&nbsp; &nbsp;values() const<br>QList&lt;T&gt;&nbsp;&nbsp;&nbsp; toList() const<br> </div>
+          
+          这两个函数是等价的，因为集合存储单值元素，而不是键值对。<br>集合有静态函数，根据列表构建集合，可以实现去重复的功能：<br>
+           <div class="code">QSet&lt;T&gt;&nbsp;&nbsp; &nbsp;fromList(const QList&lt;T&gt; &amp; list)  </div>        
+          
+          fromList() 静态函数根据参数的列表构造一个新集合返回，新集合中元素值是唯一的，可以快速去重复。<br><br>
+          <b>（5）数学集合函数</b><br>
+          并集 unite ：<br>
+           <div class="code">QSet&lt;T&gt; &amp;&nbsp;&nbsp; &nbsp;unite(const QSet&lt;T&gt; &amp; other) </div>
+          同 operator|=() ，将两个集合求并集，将并集存到调用该函数的对象中。<br>
+          交集 intersect ：<br>
+           <div class="code">QSet&lt;T&gt; &amp;&nbsp;&nbsp; &nbsp;intersect(const QSet&lt;T&gt; &amp; other) </div>
+          同 operator&amp;=()，将两个集合求交集，并将交集存到调用该函数的对象中。<br>
+          差集 subtract：<br>
+           <div class="code">QSet&lt;T&gt; &amp;&nbsp;&nbsp; &nbsp;subtract(const QSet&lt;T&gt; &amp; other) </div>
+          同 operator-=()，计算 *this 集合对象减去 other 集合对象的差集，差集部分存到 *this 对象中。差集就是 *this 对象去掉交集的部分。<br>
+          包含关系 contains：<br>
+           <div class="code">bool&nbsp;&nbsp; &nbsp;contains(const QSet&lt;T&gt; &amp; other) const </div>
+          
+          计算 *this 对象是否包含 other 集合对象中的所有元素，如果包含所有  other 内部元素，那么返回 ture，否则返回 false。<br>举例如下：<br>
+          <div class="code">&nbsp;&nbsp;&nbsp; QSet&lt;int&gt; s1{1,2,3};<br>&nbsp;&nbsp;&nbsp; QSet&lt;int&gt; s2{3,4,5};<br>&nbsp;&nbsp;&nbsp; s1.unite( s2 );<br>&nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;s1;<br><br>&nbsp;&nbsp;&nbsp; QSet&lt;int&gt; s3{1,2,3};<br>&nbsp;&nbsp;&nbsp; s3.intersect( s2 );<br>&nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;s3;<br><br>&nbsp;&nbsp;&nbsp; QSet&lt;int&gt; s4{1,2,3};<br>&nbsp;&nbsp;&nbsp; s4.subtract( s2 );<br>&nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;s4;<br><br>&nbsp;&nbsp;&nbsp; QSet&lt;int&gt; s5{1,2,3,4,5};<br>&nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;s5.contains( s2 ); </div>
+          其输出如下：<br>
+          <div class="output">QSet(1, 4, 5, 2, 3)<br>QSet(3)<br>QSet(1, 2)<br>true </div>
+          
+          由于集合采用哈希表实现，所以数值排列是无序的。<br><br>
+          
+          <b>（6）运算符函数</b><br>运算符函数包括更多的集合操作，我们这里以 s1={1, 2, 3} ，s2={3, 4, 5} ，s3={}&nbsp; 三个集合举例，在下面进行运算符举例：<br><br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 400px;" align="center"><b>运算符函数</b></td>
+          <td style="width: 200px;" align="center"><span style="font-weight: bold;">举
+              例</span></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>bool operator!=(const QSet&lt;T&gt; &amp; other) const</td>
+          <td>&nbsp;s1 != s2;</td>
+          <td> 两个映射的元素不一样，不等号判断结果为 true。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QSet&lt;T&gt; operator&amp;(const QSet&lt;T&gt; &amp; other) const</td>
+          <td>&nbsp;s3 = s1 &amp; s2;</td>
+          <td> s3 为交集 {3}，s1和s2不变。</td>
+        </tr>
+        <tr>
+          <td>QSet&lt;T&gt; &amp; operator&amp;=(const QSet&lt;T&gt; &amp; other)</td>
+          <td>&nbsp;s1 &amp;= s2;</td>
+          <td> s1 为交集 {3}，s2不变。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QSet&lt;T&gt; &amp; operator&amp;=(const T &amp; value)</td>
+          <td>&nbsp;s1 &amp;= 1;</td>
+          <td> s1 和单个数值求交集，s1变为 {1}。 </td>
+        </tr>
+        <tr>
+          <td>QSet&lt;T&gt; operator+(const QSet&lt;T&gt; &amp; other) const</td>
+          <td>&nbsp;s3 = s1 + s2;</td>
+          <td style="height: 16px;"> s3 为并集{1,2,3,4,5}，s1和s2不变。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QSet&lt;T&gt; &amp; operator+=(const QSet&lt;T&gt; &amp; other)</td>
+          <td style="height: 16px;">&nbsp;s1 += s2;</td>
+          <td> s1 为并集{1,2,3,4,5}，s2不变。 </td>
+        </tr>
+         <tr>
+          <td>QSet&lt;T&gt; &amp; operator+=(const T &amp; value)</td>
+          <td>&nbsp;s1 += 8;</td>
+          <td style="height: 16px;"> s1 为合并一个数值的新集合 {1,2,3,8}。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QSet&lt;T&gt; operator-(const QSet&lt;T&gt; &amp; other) const</td>
+          <td style="height: 16px;">&nbsp;s3 = s1 - s2;</td>
+          <td> s3 为差集{1,2}，s1和s2不变。s3 等同于 s1 - (s1&amp;s2) 。</td>
+        </tr>
+         <tr>
+          <td>QSet&lt;T&gt; &amp; operator-=(const QSet&lt;T&gt; &amp; other)</td>
+          <td>&nbsp;s1 -= s2;</td>
+          <td style="height: 16px;"> s1 为差集{1,2}，s2不变。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QSet&lt;T&gt; &amp; operator-=(const T &amp; value)</td>
+          <td style="height: 16px;">&nbsp;s1 -= 1;</td>
+          <td> s1 为{2,3}，去掉右边单个数值。 </td>
+        </tr>
+         <tr>
+          <td>QSet&lt;T&gt; &amp; operator&lt;&lt;(const T &amp; value)</td>
+          <td>&nbsp;s1 &lt;&lt; 8;</td>
+          <td style="height: 16px;"> 添加一个数值给 s1，s1变成{1,2,3,8}。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QSet&lt;T&gt; &amp; operator=(const QSet&lt;T&gt; &amp; other)</td>
+          <td style="height: 16px;">&nbsp;s3 = s1;</td>
+          <td> 赋值，s3变成 {1,2,3}，s1不变。 </td>
+        </tr>
+         <tr>
+          <td>QSet&lt;T&gt; &amp; operator=(QSet&lt;T&gt; &amp;&amp; other)</td>
+          <td>&nbsp;s3 = std::move(s1);</td>
+          <td style="height: 16px;"> 移动赋值，s3变成 {1,2,3}，s1变为空集合。 </td>
+        </tr>
+        <tr class="d1">
+          <td>bool operator==(const QSet&lt;T&gt; &amp; other) const</td>
+          <td style="height: 16px;">&nbsp;s1 == s2;</td>
+          <td>结果为 false，两个集合不一样。 </td>
+        </tr>
+         <tr>
+          <td>QSet&lt;T&gt; operator|(const QSet&lt;T&gt; &amp; other) const</td>
+          <td>&nbsp;s3 = s1 | s2;</td>
+          <td style="height: 16px;"> s3 为并集{1,2,3,4,5}，s1和s2不变。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QSet&lt;T&gt; &amp; operator|=(const QSet&lt;T&gt; &amp; other)</td>
+          <td style="height: 16px;">&nbsp;s1 |= s2;</td>
+          <td> s1 为并集{1,2,3,4,5}，s2不变。</td>
+        </tr>
+          <tr>
+          <td>QSet&lt;T&gt; &amp; operator|=(const T &amp; value)</td>
+          <td>&nbsp;s1 |= 8;</td>
+          <td style="height: 16px;"> s1 为合并一个数值的新集合 {1,2,3,8}。 </td>
+        </tr>
+        
+      </tbody>
+    </table>
     <br>
+          （7）迭代器函数<br>集合类定义了 STL 风格和 Qt 命名风格的迭代器：<br>
+            <div class="code">class&nbsp;&nbsp; &nbsp;const_iterator&nbsp; //STL风格只读迭代器<br>class&nbsp;&nbsp; &nbsp;iterator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //STL风格读写迭代器<br>typedef&nbsp;&nbsp; &nbsp;ConstIterator&nbsp; //Qt命名风格只读迭代器<br>typedef&nbsp;&nbsp; &nbsp;Iterator &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp; //Qt命名风格读写迭代器 </div>
+          
+          STL 风格迭代器使用示范：<br>
+            <div class="code">QSet&lt;QString&gt;::const_iterator i = set.constBegin();<br>while (i != set.constEnd()) {<br>&nbsp;&nbsp;&nbsp; qDebug() &lt;&lt; *i;<br>&nbsp;&nbsp;&nbsp; ++i;<br>} </div>
+          
+          获取集合的头部和尾部迭代器的函数列举如下：<br>
+           <div class="code">iterator&nbsp;&nbsp;&nbsp; begin()&nbsp;&nbsp;&nbsp;&nbsp; //指向头部的读写迭代器<br>const_iterator&nbsp;&nbsp;&nbsp; begin() const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //指向头部的只读迭代器<br>const_iterator&nbsp;&nbsp;&nbsp; cbegin() const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //指向头部的只读迭代器<br>const_iterator&nbsp;&nbsp;&nbsp; constBegin() const&nbsp; //指向头部的只读迭代器，Qt风格<br>iterator&nbsp;&nbsp;&nbsp; end()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //指向尾部后面假想元素的读写迭代器<br>const_iterator&nbsp;&nbsp;&nbsp; end() const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //指向尾部后面假想元素的只读迭代器<br>const_iterator&nbsp;&nbsp;&nbsp; cend() const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //指向尾部后面假想元素的只读迭代器<br>const_iterator&nbsp;&nbsp;&nbsp; constEnd() const&nbsp;&nbsp;&nbsp; //指向尾部后面假想元素的只读迭代器，Qt风格 </div>
+          
+          注意 *end() 返回的迭代器通常只用来做不等于判断，它指向的东西根本不存在， *end() 仅用于越界判断。<br>虽然获取头部、尾部迭代器的函数多，其实功能类似，起了一堆名字是方便兼容 STL 风格函数命名。<br><br>查询数值的迭代器位置：<br>
+           
+<div class="code">const_iterator&nbsp;&nbsp; &nbsp;constFind(const T &amp; value) const&nbsp; //只读迭代器查询，Qt风格命名<br>const_iterator&nbsp;&nbsp;&nbsp; find(const T &amp; value) const&nbsp;&nbsp;&nbsp; //只读迭代器查询，STL风格命名<br>iterator&nbsp;&nbsp;&nbsp; find(const T &amp; value)&nbsp;&nbsp; //读写迭代器查询<br> </div>
+          三个查找函数如果找到匹配数值，返回指向该数值的迭代器，否则返回末尾空的迭代器。<br>
+          <br>另外，根据迭代器位置删除元素的函数：<br>
+           
+<div class="code">iterator&nbsp;&nbsp; &nbsp;erase(iterator pos) </div>
+
+          erase() 函数删除时，不会导致内部哈希表的重构，因此可以在迭代遍历集合元素时，安全地调用 erase() 
+删除指定位置的元素，各个元素的哈希表位置不会错乱。而 remove() 函数会可能导致内部哈希表重构，所以不要在迭代过程中使用  
+remove() 函数删除元素，哈希表重构会导致迭代器失效。<br><br>
+          
+          （8）其他内容<br>集合类内部的存储空间默认是自动控制增长的，如果预先知道元素个数，那么可以提前分配内存空间：<br>
+      <div class="code">void&nbsp;&nbsp; &nbsp;reserve(int size) </div>
+          
+          reserve() 提前分配 size 大小的空间位置，用于预留内存空间。查询预留空间大小，使用如下函数：<br>
+            <div class="code">int&nbsp;&nbsp; &nbsp;capacity() const</div>
+          如果确定不再添加新元素，要把预留的内存空间释放了，不再预留，那么使用下面函数：<br>
+            <div class="code">void&nbsp;&nbsp; &nbsp;squeeze() </div>
+          交换两个集合内容，使用下面函数：<br>
+            <div class="code">void&nbsp;&nbsp; &nbsp;swap(QSet&lt;T&gt; &amp; other) &nbsp; //交换函数效率很高，并且不会失败 </div>
+          QSet集合类也支持串行化输入输出，前提是存储的数值类型也支持串行化：<br>
+            <div class="code">QDataStream &amp;&nbsp;&nbsp; &nbsp;operator&lt;&lt;(QDataStream &amp; out, const QSet&lt;T&gt; &amp; set)<br>QDataStream &amp;&nbsp;&nbsp; &nbsp;operator&gt;&gt;(QDataStream &amp; in, QSet&lt;T&gt; &amp; set) </div>
+          
+          <br>集合类内容介绍到这，下面编写开始一个集合类应用的例子。<br><br>
     <br>
+          
+          
     <div class="os2">9.4.4 关联容器对比 </div>
     <br>
+    <br><br>
+             <div class="practice">
+      <table>
+        <tbody>
+          <tr>
+            <td><img src="images/pics/practice.png" alt="tip"></td>
+            <td> <b>练习</b> </td>
+          </tr>
+        </tbody>
+      </table>
+      ① 将 9.3.2 多映射 QMultiMap 小节的 namephone 例子，用本小节的 QMultiHash 实现。<br><br>
+      </div>
     <br>
+          <br><br>
     <br>
     <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
       <tbody>

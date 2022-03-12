@@ -3,11 +3,9 @@
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <title>ch09-05</title>
-    
-<link href="css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-
-<script src="thumbnailviewer.js" type="text/javascript">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -15,35 +13,1043 @@
 * Visit http://www.dynamicdrive.com/ for full source code
 ***********************************************/
 
-</script>
-
-
-  </head>
-  
-  
-<div class="os1">9.5 数据容器的迭代器 </div>
-<br />
-
-本节列举数据容器对应的迭代器，Java 风格迭代器是单独的类，STL 风格的迭代器是数据容器类自己内嵌的，容器类的迭代器用法很相似。
-QList、QQueue、QVector、QStack 等容器经常根据序号使用中括号运算符遍历访问元素，而其他的容器则更多地使用迭代器进行遍历。
-<br /><br />
-
-<div class="os2">9.5.1 STL 风格迭代器 </div>
-<br />
-<br />
-<br />
-<div class="os2">9.5.2 Java 风格迭代器 </div>
-<br />
-<br />
-<br />
-
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch09-04.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch10-00.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
-</html>
+</script> </head>
+  <body>
+    <div class="os1">9.5 数据容器的迭代器 </div>
+    <br>
+    本节列举数据容器对应的迭代器，Java 风格迭代器是单独的类，STL 风格的迭代器是数据容器类自己内嵌的，容器类的迭代器用法很相似。
+    QList、QQueue、QVector、QStack 等容器经常根据序号使用中括号运算符遍历访问元素，而其他的容器则更多地使用迭代器进行遍历。 <br>
+    <br>
+    <div class="os2">9.5.1 STL 风格迭代器 </div>
+    <br>
+    本章所有容器类型都有 STL 风格的迭代器，内嵌到类型内部，每个容器类都有只读迭代器和读写迭代器，如下表所示：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 33%;" align="center"><b>容器</b></td>
+          <td style="width: 33%;" align="center"><b>只读迭代器</b></td>
+          <td align="center"><b> 读写迭代器</b></td>
+        </tr>
+        <tr>
+          <td>QList&lt;T&gt;, QQueue&lt;T&gt;</td>
+          <td>&nbsp;QList&lt;T&gt;::const_iterator</td>
+          <td> QList&lt;T&gt;::iterator </td>
+        </tr>
+        <tr class="d1">
+          <td>QLinkedList&lt;T&gt;</td>
+          <td>&nbsp;QLinkedList&lt;T&gt;::const_iterator</td>
+          <td> QLinkedList&lt;T&gt;::iterator</td>
+        </tr>
+        <tr>
+          <td style="height: 16px;">QVector&lt;T&gt;, QStack&lt;T&gt;</td>
+          <td>&nbsp;QVector&lt;T&gt;::const_iterator</td>
+          <td> QVector&lt;T&gt;::iterator </td>
+        </tr>
+        <tr class="d1">
+          <td>QMap&lt;Key, T&gt;, QMultiMap&lt;Key, T&gt;</td>
+          <td>&nbsp;QMap&lt;Key, T&gt;::const_iterator</td>
+          <td> QMap&lt;Key, T&gt;::iterator</td>
+        </tr>
+        <tr>
+          <td>QHash&lt;Key, T&gt;, QMultiHash&lt;Key, T&gt;</td>
+          <td>&nbsp;QHash&lt;Key, T&gt;::const_iterator</td>
+          <td style="height: 16px;"> QHash&lt;Key, T&gt;::iterator</td>
+        </tr>
+        <tr class="d1">
+          <td>QSet&lt;T&gt;</td>
+          <td style="height: 16px;">&nbsp;QSet&lt;T&gt;::const_iterator</td>
+          <td> QSet&lt;T&gt;::iterator</td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    每个容器的 STL 风格迭代器函数都是该类的成员函数，STL 迭代器使用方法就像指针，*it 是获取元素值，而 it++ 或 ++it
+    就像是指向下一个元素的指针。STL 风格迭代器使用代码举例：<br>
+    <div class="code">QList&lt;QString&gt; list;<br>
+      list &lt;&lt; "A" &lt;&lt; "B" &lt;&lt; "C" &lt;&lt; "D";<br>
+      <br>
+      QList&lt;QString&gt;::iterator i;<br>
+      for (i = list.begin(); i != list.end(); ++i)<br>
+      &nbsp;&nbsp;&nbsp; *i = (*i).toLower();</div>
+    上述代码定义了列表 list，里面存储四个大写字母；<br>
+    然后定义迭代器 i，使用 for 循环进行迭代，i 初始为 list.begin() ，每轮循环将元素字符串转为小写，再赋值给元素本身，完成大写转小写；<br>
+    注意循环结束的判断是&nbsp; i != list.end() ，因为 end() 指向不存在的假想末尾，是不能访问的假货，不能对 end() 使用
+    * 运算符访问元素！<br>
+    STL 迭代器遍历过程如下图所示：<br>
+    <center> <img src="images/ch09/ch09-05-01.png" alt="STL"></center>
+    每轮循环，迭代器都指向元素本身，除了 end() 是假想元素不能访问，其他的都是使用 *it 访问元素本身，如果是 QMap
+    、QHash及其派生类，那么使用 it.key() 和 it.value() 访问键-值对的内容。<br>
+    对于存储键-值对的容器，STL 风格迭代器的示例代码如下：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QMap&lt;int, int&gt; map;<br>
+      &nbsp;&nbsp;&nbsp; map.insert(1,1);<br>
+      &nbsp;&nbsp;&nbsp; map.insert(2,4);<br>
+      &nbsp;&nbsp;&nbsp; map.insert(3,9);<br>
+      &nbsp;&nbsp;&nbsp; //迭代访问<br>
+      &nbsp;&nbsp;&nbsp; QMap&lt;int, int&gt;::const_iterator it;<br>
+      &nbsp;&nbsp;&nbsp; for(it=map.constBegin(); it!=map.constEnd(); ++it)<br>
+      &nbsp;&nbsp;&nbsp; {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; qDebug()&lt;&lt; it.key()
+      &lt;&lt; it.value();<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; qDebug()&lt;&lt; *it;<br>
+      &nbsp;&nbsp;&nbsp; }</div>
+    it.key() 返回元素的关键字内容，it.value() 返回映射值内容，映射和哈希容器也有 *it 的用法。 *it 等同于 it.value()
+    映射值。上述代码输出为：<br>
+    <div class="output">1 1<br>
+      1<br>
+      2 4<br>
+      4<br>
+      3 9<br>
+      9</div>
+    STL 风格迭代器常见运算符使用如下表所示：<br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 30%;" align="center"><b>表达式</b></td>
+          <td style="width: 70%;" align="center"><b>行为</b></td>
+        </tr>
+        <tr>
+          <td>*i</td>
+          <td> 访问元素的数值(映射类元素的 value) </td>
+        </tr>
+        <tr class="d1">
+          <td>++i</td>
+          <td> 移动到下一个元素，注意该运算符不检查越界，越界就是野指针</td>
+        </tr>
+        <tr>
+          <td>i += n</td>
+          <td> 移动到后面第 n 个元素，注意该运算符不检查越界，越界就是野指针</td>
+        </tr>
+        <tr class="d1">
+          <td>--i</td>
+          <td> 移动到前一个元素，注意该运算符不检查越界，越界就是野指针</td>
+        </tr>
+        <tr>
+          <td>i += n</td>
+          <td> 移动到前面第 n 个元素，注意该运算符不检查越界，越界就是野指针</td>
+        </tr>
+        <tr class="d1">
+          <td>i - j</td>
+          <td style="height: 48px;"> 对于顺序容器，计算两个迭代器 i 和 j 位置中间包括元素的个数；<br>
+            如果 i 是迭代器，j 是 int，返回迭代器 i 往前第 j 个元素迭代器。<br>
+            对于关联容器，j 不能是迭代器，j 只能是整数int，返回迭代器 i 往前第 j 个元素迭代器。</td>
+        </tr>
+        <tr>
+          <td>i.key() 和 i.value()</td>
+          <td> 映射类元素的关键字 key 和映射值 value</td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    --i 、++i 与 i--、i++ 都类似指针的用法，前一对在表达式计算之前增减数值，后一对在表达式计算之后增减数值，通常推荐使用 --i 、++i
+    ，这对操作执行效率稍高一些。<br>
+    除了从前到后迭代，也可以反过来，从后往前迭代：<br>
+    <div class="code">QList&lt;QString&gt; list;<br>
+      list &lt;&lt; "A" &lt;&lt; "B" &lt;&lt; "C" &lt;&lt; "D";<br>
+      <br>
+      QList&lt;QString&gt;::iterator i = list.end();<br>
+      while ( i != list.begin() )<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp; --i;<br>
+      &nbsp;&nbsp;&nbsp; *i = (*i).toLower();<br>
+      }</div>
+    <span style=" color:#ff0000;"><b>注意迭代器移动时，要自己写代码检查是否越界，运算符功能本身不检查越界，
+        如果移动越界了，就是野指针访问，可能导致程序异常崩溃。</b> </span> <br>
+    <br>
+    使用迭代器时，需要特别注意 Qt 类对象的隐式共享特性，如果使用不当，会产生野指针访问：<br>
+    <div class="code">
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QVector</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#808000;">int</span><span
+style=" color:#000000;">&gt;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">a</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">b</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">a</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">resize</span><span style=" color:#000000;">(</span><span
+style=" color:#000080;">100</span><span style=" color:#000000;">);</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//向量初始化为100个0</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">i</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">指向向量第一个元素</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QVector</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#808000;">int</span><span
+style=" color:#000000;">&gt;::</span><span style=" color:#800080;">iterator</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">a</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">begin</span><span
+style=" color:#000000;">();</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//隐式共享，b</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">和</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">a</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">指向同一块存储空间</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">b</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">a</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//隐式共享在一个对象发生变化后，为变化的对象分配新空间，并赋值</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">a</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">元素修改后，i</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">迭代器与</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">a</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">无关了！！！</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">i</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">其实指向</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">b</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">首元素，因为</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">b</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">没有修改，使用旧的内存空间</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">a</span><span style=" color:#000000;">[</span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">]</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">5</span><span
+style=" color:#000000;">;</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//这时候</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">*i</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">是</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">b</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">开头的数值</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">0</span></pre>
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">b</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">clear</span><span style=" color:#000000;">();</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//清空</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">b，那么迭代器</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">i</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">就属于野指针！！！</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">迭代器的错误示范</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">j</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span
+style=" color:#000000;">i</span><span style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//野指针使用，未知结果</span></pre></div>
+    迭代器 i 原本指向 a 的空间，但是隐式共享特性是谁改变数值，就给谁分配新空间，修改 a[0] 之后，迭代器 i 其实已经处于异常状态，已经与 a 无关了。这时候 i 仍然指向 b，那么一旦 b 清除空间，i 就成了野指针，这是非常危险的，可能导致内存错误，程序异常结束。<br>因此，使用迭代器时，一定要注意使用最新的迭代器赋值，不要用旧的过期的迭代器。<br><b>隐式共享对象元素的增删改都可能导致迭代器失效</b>，如果不清楚状况，那最好的做法是复制一个常量对象，对常量对象使用只读迭代器：<br>
+ <div class="code">// OK<br>const QList&lt;int&gt; sizes = splitter-&gt;sizes();<br>QList&lt;int&gt;::const_iterator i;<br>for (i = sizes.begin(); i != sizes.end(); ++i)<br>&nbsp;&nbsp;&nbsp; ...</div>     
+          
+          如果没有使用隐式共享，只是一个对象一个存储空间，那么可以放心使用迭代器，迭代过程中删除元素应该使用专门的迭代器函数 erase()， erase() 会返回下一个元素迭代器位置，<b>迭代循环过程中一般不要使用 remove()，remove() 可能导致之前的迭代器失效</b>。<br>
+    <br>下面我们编写一个员工工资的例子，运用迭代器进行查询和遍历操作。<br>我们打开 QtCreator，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>①项目名称 salary，创建路径 D:\QtProjects\ch09，点击下一步；<br>②套件选择里面选择全部套件，点击下一步；<br>③基类选择 QWidget，点击下一步；<br>④项目管理不修改，点击完成。<br>打开 widget.ui 文件进入图形化编辑界面，构造界面如下图所示：<br>
+  <center> <img src="images/ch09/ch09-05-02.png" alt="ui" width="800"></center>    
+          
+          界面第一行是“人员工资列表”标签。第二行是一个列表控件 listWidget。<br>第三行是“所有人涨10%”按钮 pushButtonIncrease、“查找张三工资”按钮 pushButtonFindZhang3、“查找工资最高3人”按钮 pushButtonFindTop3；<br>第四行是“查找8K以上员工”按钮 pushButtonFind8K、“删除8K以上员工”按钮 pushButtonDel8K；<br>第三行和第四行使用网格布局器排布，2行3列，最后一个网格空的。<br>最后一行是一个文本浏览器 textBrowser。<br>窗口整体使用垂直布局器，窗口大小 420 * 480 。<br>窗口布局设置好之后，我们依次右击每个按钮，从右键菜单为每个按钮的 clicked() 信号添加槽函数，5 个槽函数添加之后，我们下面开始编辑代码。<br>我们开始编辑 头文件 widget.h 的代码：<br>
+   <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;"> </span>WIDGET_H
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">WIDGET_H</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QMultiHash&gt;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QMultiMap&gt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//可以用于键值对的同步排序</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+style=" color:#000000;">();</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//初始化填充</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">InitSalary</span><span
+style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//工资列表变动时，显示到列表控件</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">UpdateSalaryShow</span><span
+style=" color:#000000;">();</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonIncrease_clicked</span><span
+style=" color:#000000;">();</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonFindZhang3_clicked</span><span
+style=" color:#000000;">();</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonFindTop3_clicked</span><span
+style=" color:#000000;">();</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonFind8K_clicked</span><span
+style=" color:#000000;">();</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonDel8K_clicked</span><span
+style=" color:#000000;">();</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//使用哈希映射保存工资表</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QMultiHash</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#800080;">QString</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">double</span><span
+style=" color:#000000;">&gt;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_salary</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre></div>
+          
+          
+          我们添加 QMultiHash、QMultiMap 的头文件包含，QMultiMap 后面代码用于键值对的同步排序。<br>我们为窗口类添加一个多哈希映射类的对象 m_salary 保存工资信息。<br>我们为窗口类添加两个函数，InitSalary() 函数用于填充成员变量 m_salary，存储工资信息，<br>UpdateSalaryShow() 函数用于在成员变量 m_salary 变动时，更新列表控件显示。其他代码都是自动生成的，包括 5 个槽函数。<br><br>下面我们分块编辑 widget.cpp 源文件，首先是构造函数和两个自定义的函数部分：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"widget.h"</span>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QMessageBox&gt;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//初始化工资表</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">InitSalary</span><span
+style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//更新显示</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">UpdateSalaryShow</span><span
+style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//初始化填充</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">InitSalary</span><span
+style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_salary</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">clear</span><span
+style=" color:#000000;">();</span><span style=" color:#008000;">//清空</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//添加工资内容</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_salary</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">insert</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"张三"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">5000.0</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_salary</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">insert</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"张三"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">8000.0</span><span
+style=" color:#000000;">);</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//有重名的</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_salary</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">insert</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"李四"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">6000.0</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_salary</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">insert</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"王五"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">7000.0</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_salary</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">insert</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"孙六"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">8000.0</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_salary</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">insert</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"赵七"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">6600.0</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_salary</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">insert</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"钱八"</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">8800.0</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//工资列表变动时，显示到列表控件</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">UpdateSalaryShow</span><span
+style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//清空旧的内容</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">listWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">clear</span><span
+style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//只读迭代器遍历</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QMultiHash</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#800080;">QString</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">double</span><span
+style=" color:#000000;">&gt;::</span><span style=" color:#800080;">const_iterator</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">for</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span
+style=" color:#000000;">=</span><span style=" color:#800000;">m_salary</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">constBegin</span><span
+style=" color:#000000;">();</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span
+style=" color:#000000;">!=</span><span style=" color:#800000;">m_salary</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">constEnd</span><span
+style=" color:#000000;">();</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">++</span><span
+style=" color:#000000;">it</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strLine</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">it</span><span style=" color:#000000;">.</span><span style=" color:#000000;">key</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"\t%1"</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">it</span><span style=" color:#000000;">.</span><span style=" color:#000000;">value</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">listWidget</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addItem</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strLine</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//完成</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre></div>
+          
+          构造函数里面，调用 InitSalary() 初始化工资成员变量；调用 UpdateSalaryShow() 更新列表控件显示。<br>在  InitSalary() 函数内部，先清空旧的对象内容，然后简单调用 m_salary.insert() 添加人名和工资数值，人名是有重复的，因此我们使用多哈希映射类型的成员变量。<br>在 UpdateSalaryShow() 函数内部，先清空列表控件里旧的内容，然后使用只读迭代器，遍历 m_salary 内容，将每个元素的人名和工资构造一行文本，根据文本添加一个列表控件条目，显示到列表控件。<br>注意 m_salary.constEnd() 要使用不等于判断，在 it 指向末尾虚假节点时停止迭代，因为末尾虚假节点不能访问，必须终止。<br><br>
+    接下里我们编辑“所有人涨10%”按钮对应的槽函数：<br>
+     <div class="code"><span style=" color:#008000;">//让所有人涨工资</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">10%</span>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonIncrease_clicked</span><span
+style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//读写迭代器遍历</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QMultiHash</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#800080;">QString</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">double</span><span
+style=" color:#000000;">&gt;::</span><span style=" color:#800080;">iterator</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">for</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span
+style=" color:#000000;">=</span><span style=" color:#800000;">m_salary</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">begin</span><span
+style=" color:#000000;">();</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span
+style=" color:#000000;">!=</span><span style=" color:#800000;">m_salary</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">end</span><span style=" color:#000000;">();</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">++</span><span style=" color:#000000;">it</span><span
+style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//读写迭代器</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">it.value()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">返回可以读写的</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">value</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">引用，可以作为左值写入</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">it</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">value</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*=</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">1.1</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//注意</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">it.key()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">永远是只读引用，不能修改key，映射的</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">key</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">只能删除或添加，不能直接修改</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//更新显示</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">UpdateSalaryShow</span><span
+style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textBrowser</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"所有人涨工资</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">10%</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">完毕。"</span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre></div>
+          定义可以读写的迭代器 it，然后循环遍历 m_salary 所有元素，获取每个元素的 value() ，注意读写迭代器返回的 it.value() 是一个可以读写的值引用，<br>it.value() *= 1.1;<br>&nbsp;这句代码就是能够直接修改元素的 value 值，变为原来的 1.1 倍，就是涨工资 10% ，处理每个元素后，迭代器指向末尾的 m_salary.end()，结束循环。<br>因为 m_salary 内容发生变化，因此我们调用 UpdateSalaryShow() 更新列表控件，然后显示信息字符串到文本浏览框。 <br><br>然后我们编辑“查找张三工资”按钮对应的槽函数：<br>
+    <div class="code"><span style=" color:#008000;">//查找所有叫张三的人工资</span>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonFindZhang3_clicked</span><span
+style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//张三有重名，找到第一个张三</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QMultiHash</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#800080;">QString</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">double</span><span
+style=" color:#000000;">&gt;::</span><span style=" color:#800080;">const_iterator</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">it</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">m_salary</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">find</span><span style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"张三"</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//信息字符串</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"查找张三结果：\r\n"</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//查找多个张三</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">while</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">m_salary</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">constEnd</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">key</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">==</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"张三"</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//连续的多个张三都显示</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">it</span><span style=" color:#000000;">.</span><span style=" color:#000000;">key</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">工资：</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%1\r\n"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">value</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#000000;">++</span><span
+style=" color:#000000;">it</span><span style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//继续找下一个</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">else</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//人名不等于张三</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#808000;">break</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//遍历到</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">不是张三的位置，不需要再查找</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//显示</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textBrowser</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre></div>
+          
+          定义一个只读迭代器 it，调用 m_salary.find() 找到第一个 "张三" 元素的迭代器位置，构造信息字符串 strInfo；<br>由于多哈希映射可能存在多个 "张三" 元素，因此我们通过循环找出多个 "张三" 元素：<br>如果 it.key() 是等于 tr("张三") ，那么为信息字符串增加一行，显示当前 "张三" 元素及其工资数额，迭代器向后移动；<br>直到遇到下一个元素的名字不等于  tr("张三") ，那么结束循环。<br>查询完成后，我们显示信息字符串到文本浏览框。<br>关键字相同时，键值对总是存储在临近的连续位置，因为计算的哈希表位置一样，find() 函数返回第一个匹配的元素迭代器位置。<br>
+          <br>下面我们编辑“查找工资最高3人”按钮对应的槽函数：<br>
+            <div class="code"><span style=" color:#008000;">//查找工资前三的人</span>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonFindTop3_clicked</span><span
+style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//检查员工人数，如果不超过三个人，就不处理</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_salary</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">count</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&lt;=</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">3</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textBrowser</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"不超过三个人，不需要查询。"</span><span style=" color:#000000;">));</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//遍历哈希对象，然后创建工资到人名的QMultiMap映射对象</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//哈希对象迭代器</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QMultiHash</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#800080;">QString</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">double</span><span
+style=" color:#000000;">&gt;::</span><span style=" color:#800080;">const_iterator</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//工资到人名的反向映射</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QMultiMap</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#808000;">double</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#000000;">&gt;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">mapOrder</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//迭代处理</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">for</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span
+style=" color:#000000;">=</span><span style=" color:#800000;">m_salary</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">constBegin</span><span
+style=" color:#000000;">();</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span
+style=" color:#000000;">!=</span><span style=" color:#800000;">m_salary</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">constEnd</span><span
+style=" color:#000000;">();</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">++</span><span
+style=" color:#000000;">it</span><span style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">mapOrder</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">insert</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">value</span><span
+style=" color:#000000;">(),</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">key</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span><span style=" color:#008000;">//反向映射</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//QMultiMap</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">和</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">QMap</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">插入节点时，会自动按照</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">key</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">值排序，从小到大排序</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"工资前三的员工：\r\n"</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QMultiMap</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#808000;">double</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#000000;">&gt;::</span><span style=" color:#800080;">const_iterator</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">itMap</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">itMap</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">mapOrder</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">constEnd</span><span style=" color:#000000;">();</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//注意不能访问</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">end</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">虚假节点</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//查找最后三个即可</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">for</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">i</span><span style=" color:#000000;">=</span><span style=" color:#000080;">0</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#000080;">3</span><span style=" color:#000000;">;</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span style=" color:#000000;">++)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">--</span><span
+style=" color:#000000;">itMap</span><span style=" color:#000000;">;</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//开头</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">--，会跳过</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">end</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">虚假节点</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">itMap</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">value</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">工资：%1\r\n"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">itMap</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">key</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//显示</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textBrowser</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre></div>
+          函数开头计算一下 m_salary 元素个数，如果不超过三个，那么没必要计算，直接显示信息字符串到文本浏览框，返回。<br>对应 4 个及以上的情况，执行后续操作。<br>我们定义只读迭代器 it，定义多映射类对象 mapOrder；<br>遍历 m_salary 对象每个元素，将工资作为 key，将人名作为 value，旧的 key-value 互换了，添加给 mapOrder，<br>这样 mapOrder 就会以工资数值为关键字来排序，元素的映射值为人名，与工资数额同步排序。<br>mapOrder 的元素添加完成后，排序也就自动完成了，按照工资从小到大排列，我们只需要读取排在最后的三个，就是工资最高的三个人。<br>后续我们就定义信息字符串 strInfo，然后定义只读迭代器 itMap，从迭代器末尾 constEnd() 开始迭代：<br>每轮循环开始时调用 --itMap ，这样就能跳过末尾的虚假节点，进入真实的最后元素，读取 key 工资和 value 人名，添加到信息字符串，<br>最后显示信息字符串到文本显示框。<br>
+          <br>接下来我们编辑“查找8K以上员工”按钮对应的槽函数：<br>
+    <div class="code"><span style=" color:#008000;">//查找</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">8K</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">以上的员工</span>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonFind8K_clicked</span><span
+style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//哈希对象迭代器</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QMultiHash</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#800080;">QString</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">double</span><span
+style=" color:#000000;">&gt;::</span><span style=" color:#800080;">const_iterator</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//信息字符串</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"查找8K以上工资的员工：\r\n"</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">for</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span
+style=" color:#000000;">=</span><span style=" color:#800000;">m_salary</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">cbegin</span><span
+style=" color:#000000;">();</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span
+style=" color:#000000;">!=</span><span style=" color:#800000;">m_salary</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">cend</span><span style=" color:#000000;">();</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">++</span><span style=" color:#000000;">it</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">value</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&gt;=</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">8000</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//判断</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">8K</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">以上的</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">it</span><span style=" color:#000000;">.</span><span style=" color:#000000;">key</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">工资：%1\r\n"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">value</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//显示</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textBrowser</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre></div>
+          
+          我们定义只读迭代器 it ，定义信息字符串 strInfo；<br>然后循环遍历 m_salary 的每个元素，检查元素的 value() 是否达到 8000 以上，如果是 8000 以上，那么根据关键字和映射值构造字符串添加到 strInfo；<br>遍历结束后显示信息串到文本浏览框。<br><br>最后我们编辑“删除8K以上员工”按钮对应的槽函数：<br>
+    <div class="code"><span style=" color:#008000;">//删除</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">8K</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">以上员工</span>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonDel8K_clicked</span><span
+style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//读写迭代器</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QMultiHash</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#800080;">QString</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">double</span><span
+style=" color:#000000;">&gt;::</span><span style=" color:#800080;">iterator</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//信息字符串</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"删除8K以上工资的员工：\r\n"</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">for</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span
+style=" color:#000000;">=</span><span style=" color:#800000;">m_salary</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">begin</span><span
+style=" color:#000000;">();</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span
+style=" color:#000000;">!=</span><span style=" color:#800000;">m_salary</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">end</span><span style=" color:#000000;">();</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">NULL</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">value</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&gt;=</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">8000</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//判断</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">8K</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">以上的</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">it</span><span style=" color:#000000;">.</span><span style=" color:#000000;">key</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">工资：%1\r\n"</span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">value</span><span style=" color:#000000;">()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#008000;">//删除迭代器指向的元素，注意旧的</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">it</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">删除了不可用</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#008000;">//必须用</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">erase()</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">返回值作为后面元素的新迭代器</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#000000;">it</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">m_salary</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">erase</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">it</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">else</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//不删除，直接下一个</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#000000;">++</span><span
+style=" color:#000000;">it</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//更新列表控件</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">UpdateSalaryShow</span><span
+style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//显示信息字符串</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textBrowser</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre></div>
+          
+          我们定义读写的迭代器 it，定义信息字符串 strInfo；<br>然后从 m_salary.begin() 开始遍历，注意 for() 小括号里面第三段是 NULL，这里面不进行迭代器移动，因为删除元素操作特殊，不能简单在 for 小括号里移动迭代器；<br>我们判断超过 8000 工资的元素，构造字符串添加到 strInfo，然后调用 m_salary.erase( it ) 删除当前元素，并将 m_salary.erase( it ) 返回值作为新的迭代器存到 it，<br>因为删除元素后，旧的迭代器失效，不能再使用，必须用 erase() 返回的下一个元素迭代器赋值给 it，进行下一轮循环；<br>如果循环时 it 指向元素的工资不够 8000，那么我们才调用&nbsp; ++it&nbsp; 移动到下一个元素进行下一轮循环。<br>迭代完成之后，我们调用 UpdateSalaryShow() 更新列表控件，并显示信息字符串到文本浏览框。<br>
+          例子代码讲解到这，我们生成项目，运行例子，我们首先点击“查找工资最高3人”按钮，可以看到如下结果：<br>
+            <center> <img src="images/ch09/ch09-05-03.png" alt="run1"></center>    
+          查到了工资最高的三个人名单和工资金额，然后我们点击“删除8K以上员工”按钮，运行结果如下：<br>
+            <center> <img src="images/ch09/ch09-05-04.png" alt="run2"></center>   
+          在上半部分的列表框可以看到删除了 8000 以上工资的员工，信息显示到下半部分的文本浏览框了。其他按钮功能请读者自行测试。下面我们讲解 Java 风格迭代器内容。<br><br>
+    <div class="os2">9.5.2 Java 风格迭代器 </div>
+    <br>
+    <br>
+    <br>
+    <br>
+ 
+          QMultiMap，TCP链接管理例子<br>
+    新建，断开，枚举<br>
+    
+    <div class="code">q</div>
+    
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch09-04.htm"><img class="pic"
+style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch10-00.htm"><img class="pic"
+style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+</body></html>

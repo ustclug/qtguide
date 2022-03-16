@@ -2,10 +2,10 @@
 <html>
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
-    <title>ch10-01</title>    
-	<link href="css/style.css" rel="stylesheet" type="text/css" />
-	<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-	<script src="thumbnailviewer.js" type="text/javascript">
+    <title>ch10-01</title>
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -14,34 +14,178 @@
 ***********************************************/
 
 </script> </head>
-  
-  
-<div class="os1">10.1 简单控件容器</div>
-
-<br />
-本节介绍三种简单控件容器，Widget、Frame、Group Box，通常用于把多个控件分类显示，并不能直接扩展视图。<br />
-<br />
-<br />
-<div class="os2">10.1.1 Widget 部件</div>
-<br />
-<br />
-<div class="os2">10.1.2 Frame 框架</div>
-<br />
-<br />
-<div class="os2">10.1.3 Group Box 分组框</div>
-<br />
-<br />
-<br />
-<br />
-<br />
-
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch10-00.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch10-02.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+  <body>
+    <div class="os1">10.1 简单控件容器</div>
+    <br>
+    本节介绍三种简单控件容器，Widget、Frame、Group
+    Box，通常用于把多个控件分类显示，并不能直接扩展视图。这三个简单容器主要是用于子控件的分组排布，比如多种不同功能的单选框，使用这些容器包裹一下，就自动分成不同
+    的组别，单选框就不会全部是互斥的，而只是一个容器里单选框的互斥。下面我们逐个学习这三个简单控件容器。<br>
+    <br>
+    <div class="os2">10.1.1 Widget 部件</div>
+    <br>
+    本章所学的就是设计师界面的几个控件容器，如图所示：<br>
+    <center> <img src="images/ch10/ch10-01-01.png" alt="wid containers"></center>
+    Widget 容器就是 QWidget 类，与我们之前学习的窗口类是同一个类。QWidget
+    作为独立窗口时，有自己的标题栏和边框，但是作为窗口内部的控件容器时，没有边框，只是简单的一块背景板，里面放置一些子控件。在设计师界面能看到 Widget
+    容器的虚线边框，但是运行时，Widget 容器默认没有边框。<br>
+    Widget 容器的典型应用一是将不同功能的单选框分组，不同容器的单选框自动分在各自的组别；<br>
+    第二个应用举例，是放置在容器中的控件，子控件排布是跟随父级容器的，拖动父级容器，子控件总是与父级容器对齐，并且父级容器有自己独立的布局器。<br>
+    第三个应用举例，例如控件太多了，希望使用滚动区域时，QScrollArea 必须指定唯一的 widget 作为滚动对象，那么我们将一堆子控件塞到一个
+    widget 容器里面，然后将包裹好的大容器 widget 作为 QScrollArea 的唯一滚动对象。<br>
+    下面我们打开 Qt 设计师举例，选择 Widget 窗口模板：<br>
+    <center> <img src="images/ch10/ch10-01-02.png" alt="wid1" width="800"></center>
+    点击“创建”按钮，进入界面编辑，将窗口大小设置为 480*400：<br>
+    <center> <img src="images/ch10/ch10-01-03.png" alt="wid2" width="800"></center>
+    然后拖入三个单选按钮和一个 Widget 容器，三个单选按钮文本改为 “red”、“blue”、“green”，然后将 Widget 容器大小设置为
+    180*140，如下图所示：<br>
+    <center> <img src="images/ch10/ch10-01-04.png" alt="wid3" width="800"></center>
+    这是我们按住 Ctrl 键，选中红蓝绿三个单选按钮，然后将按钮往虚线框的 Widget 容器里面拖入，看到拖入子控件的效果：<br>
+    <center> <img src="images/ch10/ch10-01-05.png" alt="wid4"></center>
+    拖入子控件时，Widget 容器背景色变深，方格子点阵也临时隐藏，这时候松开鼠标，三个单选按钮就归属于 Widget 父级容器。如下图所示：<br>
+    <center> <img src="images/ch10/ch10-01-06.png" alt="wid5"></center>
+    这种操作方式是先新建三个单选按钮、Widget容器，将三个单选按钮拖入父级容器。<br>
+    下面我们再拖入一个 Widget 容器，大小也设置为 180*140，与上一个的容器放在不重叠位置：<br>
+    <center> <img src="images/ch10/ch10-01-07.png" alt="wid6"></center>
+    然后在 Qt 设计师左边控件栏依次拖入三个单选按钮到窗口下半部分的 Widget 容器中，并设置文本为
+    “small”、“middle”、“large”：<br>
+    <center> <img src="images/ch10/ch10-01-08.png" alt="wid7"></center>
+    从设计师左边栏目拖入控件进入下面容器之后，控件自动成为容器的子控件。我们点击容器的空白位置，然后可以拖动容器移动：<br>
+    <center> <img src="images/ch10/ch10-01-09.png" alt="wid8"></center>
+    可以看到子控件自动锚定父容器，跟随父容器移动而移动。下面我们学习一个操作，就是为容器指定内部布局，我们点击上面容器内部的空白位置，或者在设计师右上角
+    “对象查看器”直接点击选定该容器：<br>
+    <center> <img src="images/ch10/ch10-01-10.png" alt="wid9" width="800"></center>
+    选中容器对象后，点击设计师上面的垂直布局按钮，然后可以看到容器内部变成带布局器的情况：<br>
+    <center> <img src="images/ch10/ch10-01-11.png" alt="wid10"></center>
+    容器尺寸自动缩小了，因为布局器计算了子控件需要的最小长宽尺寸，父级容器自动缩小到最小的合适尺寸。<br>
+    然后我们再选中窗口下面的容器，然后也是点击垂直布局按钮，形成如下的界面：<br>
+    <center> <img src="images/ch10/ch10-01-12.png" alt="wid11" width="800"></center>
+    现在窗口就只有两个儿子控件，就是两个 Widget
+    容器，单选按钮就是孙子级的控件，孙子级控件由父级容器控制，而不需要主窗口管理布局。我们只需要对主窗口的两个儿子控件容器进行布局，我们选中根级的主窗口，然后再次点
+    击垂直布局按钮，就能完成窗口整体的布局：<br>
+    <center> <img src="images/ch10/ch10-01-13.png" alt="wid12" width="800"></center>
+    完成整体布局后，我们点击设计师菜单“窗体”--&gt;“预览”，或者按快捷键 Ctrl+R
+    ，弹出预览窗口，我们点击六个单选按钮，可以看到前三个单选按钮互斥，后面三个单选按钮互斥，不同容器内部的单选按钮自动分为不同的组别：<br>
+    <center> <img src="images/ch10/ch10-01-14.png" alt="wid13"></center>
+    Widget 容器的使用示范到这里，我们下面学习带边框 Frame 容器。<br>
+    <br>
+    <div class="os2">10.1.2 Frame 框架</div>
+    <br>
+    Frame 容器的类名是 QFrame，是 QWidget 派生类，Frame 容器比基类就多了一个特点：拥有丰富的边框。QFrame 最常用的 4
+    个属性 如下：<br>
+    （1）frameShape 边框类型<br>
+    总共有 7 种类型，如下面表格所示：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 180px;" align="center">常量</td>
+          <td style="width: 120px;" align="center">数值</td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>QFrame::NoFrame</td>
+          <td>&nbsp;0</td>
+          <td> QFrame 不绘制任何边框。</td>
+        </tr>
+        <tr class="d1">
+          <td style="height: 16px;">QFrame::Box</td>
+          <td>&nbsp;0x0001</td>
+          <td> QFrame 绘制盒子模型的边框。</td>
+        </tr>
+        <tr>
+          <td style="height: 16px;">QFrame::Panel</td>
+          <td>&nbsp;0x0002</td>
+          <td> QFrame 绘制一个面板，显示效果为凸起或者凹陷。</td>
+        </tr>
+        <tr class="d1">
+          <td>QFrame::StyledPanel</td>
+          <td>&nbsp;0x0006</td>
+          <td> 根据当前 GUI 风格绘制一个矩形面板，可能是凸起或凹陷效果。默认类型为 StyledPanel 。</td>
+        </tr>
+        <tr>
+          <td>QFrame::HLine</td>
+          <td>&nbsp;0x0004</td>
+          <td style="height: 16px;"> 在矩形区域中间绘制一条水平线条，常用于分割线。</td>
+        </tr>
+        <tr class="d1">
+          <td>QFrame::VLine</td>
+          <td style="height: 16px;">&nbsp;0x0003</td>
+          <td> 在矩形区域中间绘制一条垂直线条，常用于分割线。</td>
+        </tr>
+        <tr>
+          <td>QFrame::WinPanel</td>
+          <td>&nbsp;0x0003</td>
+          <td style="height: 16px;"> 绘制一个矩形面板，像Windows2000风格的边框，可能时凸起或凹陷效果。 line
+            width 固定为 2 像素。 WinPanel 用于兼容旧系统，正常情况下应该使用 StyledPanel 类型。</td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    （2）frameShadow 边框阴影类型<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 180px;" align="center">常量</td>
+          <td style="width: 120px;" align="center">数值</td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>QFrame::Plain</td>
+          <td>&nbsp;0x0010</td>
+          <td> 简单绘制矩形边框没有 3D 阴影效果，使用的调色板是 QPalette::WindowText 颜色。</td>
+        </tr>
+        <tr class="d1">
+          <td style="height: 16px;">QFrame::Raised</td>
+          <td>&nbsp;0x0020</td>
+          <td> 边框与中间内容呈现凸起效果，使用当前颜色组的亮色和暗色配色绘制 3D 凸起线条。</td>
+        </tr>
+        <tr>
+          <td style="height: 16px;">QFrame::Sunken</td>
+          <td>&nbsp;0x0030</td>
+          <td> 边框与中间内容呈现凹陷效果，使用当前颜色组的亮色和暗色配色绘制 3D 凹陷线条。</td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    （3）lineWidth 线条宽度<br>
+    绘制边框线条的宽度，默认值为&nbsp; 1，不同的边框类型、阴影类型效果不同。注意如果边框类型是&nbsp; HLine 和 VLine
+    分割线，那么分割线的宽度使用 frameWidth 来设置。<br>
+    <br>
+    （4）midLineWidth 中线宽度<br>
+    绘制边框条的中间线，默认值为 0 ，如果绘制边框条的中线，不同的边框类型、阴影类型效果不同。<br>
+    <br>
+    QFrame 绘制边框的效果主要根据上面几个属性来决定，多种属性决定绘制效果的多样性，绘制边框的示例图如下所示：<br>
+    <center> <img src="images/ch10/ch10-01-15.png" alt="draw"></center>
+    实际应用时，可以自行观察效果，然后决定这些属性怎样设置。<br>
+    QFrame 作为控件容器，功能和上面的 QWidget 容器差不多，只是多了边框绘图效果。<br>
+    下面我们通过一个简单示例程序，学习一下 QWidget 和 QFrame 两个容器用法。<br>
+    <br>
+    <br>
+    <br>
+    <div class="os2">10.1.3 Group Box 分组框</div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch10-00.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch10-02.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

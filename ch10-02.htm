@@ -2,10 +2,10 @@
 <html>
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
-    <title>ch10-02</title>    
-	<link href="css/style.css" rel="stylesheet" type="text/css" />
-	<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-	<script src="thumbnailviewer.js" type="text/javascript">
+    <title>ch10-02</title>
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -14,32 +14,250 @@
 ***********************************************/
 
 </script> </head>
-  
-  
-<div class="os1">10.2 滚动区域和工具箱</div>
-
-<br />
-本节介绍两种控件容器 Scroll Area、Tool Box，可以对窗口里面的控件视图扩展，容纳原本放不下的很多控件。<br />
-<br />
-<br />
-<div class="os2">10.2.1 Scroll Area 滚动区域</div>
-<br />
-<br />
-<div class="os2">10.2.2 Tool Box 工具箱</div>
-<br />
-<br />
-
-<br />
-<br />
-<br />
-
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch10-01.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch10-03.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+  <body>
+    <div class="os1">10.2 滚动区域和工具箱</div>
+    <br>
+    本节介绍两种控件容器 Scroll Area、Tool Box，可以对窗口里面的控件视图扩展，容纳原本放不下的很多控件。Scroll Area
+    滚动区域，就是指该容器具有水平和垂直的滚动条，当容器内控件尺寸超出容器矩形区域时，将显示滚动条，通过拖动滚动条切换显示内部控件的位置。<br>
+    Tool Box 工具箱是支持多个页面集合到一起，每次显示一个页面，点击页面标题可以切换各个页面。<br>
+    <br>
+    <div class="os2">10.2.1 Scroll Area 滚动区域</div>
+    <br>
+    滚动区域的类是 QScrollArea，该类可以设置唯一的子控件，通过滚动条切换内部尺寸较大的控件视口（viewport）。
+    在不涉及滚动式，视口与控件矩形一样大。当子控件实际尺寸超过视口时，如下图所示：<br>
+    <center> <img src="images/ch10/ch10-02-01.png" alt="viewport"></center>
+    黄色矩形是真实的子控件区域，比如一张很大的图片，而我们的 QScrollArea 矩形可能只有蓝色矩形那么大的尺寸，这时候 QScrollArea
+    就会显示水平和垂直的滚动条，滚动条往下移动时，对应的视口矩形就向下滑动，切换显示子控件的区域。视口就是一个可以实际看见的小窗口，通过不断地滑动，来轮流显示控件的
+    各个区域。<br>
+    QScrollArea 设置唯一子控件的函数为：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;setWidget(QWidget * widget)</div>
+    设置子控件之后，还可以设置子控件的对齐显示方式：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;setAlignment(Qt::Alignment)</div>
+    这个对齐是子控件尺寸小于视口尺寸时才能看到效果，就是视口很大，有空余地方，决定小尺寸的子控件摆在哪个位置合适。对齐方式分为水平和垂直：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 180px;" align="center">常量</td>
+          <td style="width: 120px;" align="center">数值</td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>Qt::AlignLeft</td>
+          <td>&nbsp;0x0001</td>
+          <td> 水平左对齐。</td>
+        </tr>
+        <tr class="d1">
+          <td style="height: 16px;">Qt::AlignRight</td>
+          <td>&nbsp;0x0002</td>
+          <td> 水平右对齐。</td>
+        </tr>
+        <tr>
+          <td style="height: 16px;">Qt::AlignHCenter</td>
+          <td>&nbsp;0x0004</td>
+          <td> 水平居中。</td>
+        </tr>
+        <tr class="d1">
+          <td>Qt::AlignTop</td>
+          <td>&nbsp;0x0020</td>
+          <td> 垂直顶部对齐。</td>
+        </tr>
+        <tr>
+          <td>Qt::AlignBottom</td>
+          <td>&nbsp;0x0040</td>
+          <td style="height: 16px;"> 垂直底部对齐。</td>
+        </tr>
+        <tr class="d1">
+          <td>Qt::AlignVCenter</td>
+          <td style="height: 16px;">&nbsp;0x0080</td>
+          <td> 垂直居中。</td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    水平和垂直的对齐方式可以用二进制或 | 同时设置，比如水平居中和垂直居中：&nbsp; <br>
+    Qt::AlignHCenter | Qt::AlignVCenter<br>
+    一般显示图片的应用程序通常图片水平和垂直都居中。<br>
+    QScrollArea 还可以设置 widgetResizable 属性：<br>
+    <div class="code">bool&nbsp;&nbsp; &nbsp;widgetResizable() const<br>
+      void&nbsp;&nbsp;&nbsp; setWidgetResizable(bool resizable)</div>
+    widgetResizable 属性默认是 false，代表 QScrollArea 尊重子控件原本的尺寸设置，程序员可以通过函数
+    widget()-&gt;resize() 调整子控件的尺寸， QScrollArea 自动根据调整后的子控件调整自己的滚动条显示。<br>
+    如果 widgetResizable 属性设置为 true，那么 QScrollArea
+    则可以自己做主调整子控件大小，尽量调整子控件尺寸，以避免使用到滚动条，从而有更多视口区域显示内部子控件。滚动条的绘制会占用一定的视口区
+    域，widgetResizable 为 true 时， QScrollArea 会尽量调整子控件尺寸避免绘制滚动条。<br>
+    <br>
+    QScrollArea 通常有两种用途，一种是显示很大的图片，比如：<br>
+    <div class="code">QLabel *imageLabel = new QLabel;<br>
+      QImage image("happyguy.png");<br>
+      imageLabel-&gt;setPixmap(QPixmap::fromImage(image));<br>
+      <br>
+      scrollArea = new QScrollArea;<br>
+      scrollArea-&gt;setBackgroundRole(QPalette::Dark);<br>
+      scrollArea-&gt;setWidget(imageLabel);</div>
+    如果图片太大，就用滚动条显示图片各个区域。<br>
+    第二种是显示很大的子控件容器，比如：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; //控件容器<br>
+      &nbsp;&nbsp;&nbsp; QWidget *widContainer = new QWidget();<br>
+      &nbsp;&nbsp;&nbsp; //垂直布局器<br>
+      &nbsp;&nbsp;&nbsp; QVBoxLayout *layout = new QVBoxLayout();<br>
+      <br>
+      &nbsp;&nbsp;&nbsp; QLabel *curLabel;<br>
+      &nbsp;&nbsp;&nbsp; //一百个文本标签举例<br>
+      &nbsp;&nbsp;&nbsp; for(int i=0; i&lt;100; i++)<br>
+      &nbsp;&nbsp;&nbsp; {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; QString strTemp = tr("Label
+      %1").arg( i );<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; curLabel = new QLabel( strTemp
+      );<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; layout-&gt;addWidget( curLabel
+      );<br>
+      &nbsp;&nbsp;&nbsp; }<br>
+      &nbsp;&nbsp;&nbsp; //容器布局<br>
+      &nbsp;&nbsp;&nbsp; widContainer-&gt;setLayout( layout );<br>
+      &nbsp;&nbsp;&nbsp; //将容器设置为滚动区域唯一子控件<br>
+      &nbsp;&nbsp;&nbsp; ui-&gt;scrollArea-&gt;setWidget( widContainer );</div>
+    我们将这 100 个标签控件放进布局器，然后布局器设置给容器对象，容器对象再设置给滚动区域，我们就通过滚动区域轮流显示100个标签控件。<br>
+    针对两种场景，QScrollArea 可以通过两个函数来移动视口位置：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;ensureVisible(int x, int y, int
+      xmargin = 50, int ymargin = 50)</div>
+    子控件的左上角为 x=0，顶部 y=0，ensureVisible() 默认显示 (x,y) 点位置及包含该点的50*50矩形区域。<br>
+    改变 x 和 y 数值，视口就会移动到能够显示该坐标点的位置。<br>
+    第二个函数是移动视口，确保某个子孙控件显示出来：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;ensureWidgetVisible(QWidget *
+      childWidget, int xmargin = 50, int ymargin = 50)</div>
+    QScrollArea 总是显示直接子控件的，上面函数通常是显示孙子级或更低级别的重孙、玄孙等内部控件。<br>
+    <br>
+    滚动条默认的显示策略是有必要时才显示，即子控件真实尺寸大于视口尺寸时才显示，这个策略可以设置：<br>
+    <div class="code">Qt::ScrollBarPolicy&nbsp;&nbsp;
+      &nbsp;horizontalScrollBarPolicy()
+      const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //获取水平滚动条的显示策略<br>
+      void&nbsp;&nbsp;&nbsp;
+      setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy)&nbsp;&nbsp;&nbsp;&nbsp;
+      //设置水平滚动条的显示策略<br>
+      Qt::ScrollBarPolicy&nbsp;&nbsp;&nbsp; verticalScrollBarPolicy()
+      const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //获取垂直滚动条的显示策略<br>
+      void&nbsp;&nbsp;&nbsp;
+      setVerticalScrollBarPolicy(Qt::ScrollBarPolicy)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //设置垂直滚动条的显示策略</div>
+    Qt::ScrollBarPolicy 枚举常量包括如下数值：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 180px;" align="center">常量</td>
+          <td style="width: 120px;" align="center">数值</td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>Qt::ScrollBarAsNeeded</td>
+          <td>&nbsp;0</td>
+          <td> 内容超出视口区域才显示滚动条，否则不显示，默认策略就是该数值。</td>
+        </tr>
+        <tr class="d1">
+          <td style="height: 16px;">Qt::ScrollBarAlwaysOff</td>
+          <td>&nbsp;1</td>
+          <td> 永远不显示滚动条，通过鼠标滚轮或键盘上下键盲滚动。</td>
+        </tr>
+        <tr>
+          <td style="height: 16px;">Qt::ScrollBarAlwaysOn</td>
+          <td>&nbsp;2</td>
+          <td> 不管内容区域多大，总是显示滚动条。对于Mac10.7以上系统，滚动条是瞬态显示的，就会忽略该数值。</td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    默认数值 Qt::ScrollBarAsNeeded 是比较合适的，有需要就显示，不需要就不显示。<br>
+    通常 ensureVisible() 和 ensureWidgetVisible()
+    两个函数能够应付大多数的需要滚动的场景，如果有额外需求，那么还可以直接获取水平滚动条和垂直滚动条来设置：<br>
+    <div class="code">QScrollBar * QAbstractScrollArea::​horizontalScrollBar()
+      const<br>
+      QScrollBar * QAbstractScrollArea::verticalScrollBar() const</div>
+    这两个函数是从基类 QAbstractScrollArea 继承的，滚动条的类型是 QScrollBar，可以使用滚动条自己的函数来设置滚动到的位置：<br>
+    <div class="code">void&nbsp;&nbsp;&nbsp;
+      QScrollBar::​setValue(int)&nbsp;&nbsp;&nbsp; &nbsp; &nbsp;
+      //设置滚动到参数值位置，只能介 于最小值和最大值之间<br>
+      int&nbsp;&nbsp;&nbsp; QScrollBar::value()
+      const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; //获取滚动条当前位置<br>
+      int&nbsp;&nbsp;&nbsp; QScrollBar::minimum() const&nbsp;&nbsp; //最小位置<br>
+      int&nbsp;&nbsp;&nbsp; QScrollBar::maximum() const&nbsp;&nbsp; //最大位置</div>
+    <br>
+    当 QScrollArea
+    包裹控件容器时，有可能对子孙控件的显示缩放不合适，子孙控件由于缩放被隐藏了，这时候通过调用子控件的QWidget::setMinimumSize()
+    函数，设置子孙控件的最小尺寸，这样保证子孙控件的绘图区域，从而避免被隐藏。<br>
+    使用布局器时，布局器的 sizeConstraint 属性也会影响子孙控件的缩放，该枚举常量数值如下表所示：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 180px;" align="center">常量</td>
+          <td style="width: 120px;" align="center">数值</td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>QLayout::SetDefaultConstraint</td>
+          <td>&nbsp;0</td>
+          <td> 控件的最小尺寸默认设置为 QLayout::​minimumSize() ，除非控件自己设置了最小尺寸。</td>
+        </tr>
+        <tr class="d1">
+          <td style="height: 16px;">QLayout::SetFixedSize</td>
+          <td>&nbsp;3</td>
+          <td> 控件尺寸设置为 QLayoutItem::​sizeHint()，尺寸固定不能变化。</td>
+        </tr>
+        <tr>
+          <td style="height: 16px;">QLayout::SetMinimumSize</td>
+          <td>&nbsp;2</td>
+          <td> 控件最小尺寸为 QLayout::​minimumSize()，不能更小。</td>
+        </tr>
+        <tr class="d1">
+          <td style="height: 16px;">QLayout::SetMaximumSize</td>
+          <td>&nbsp;4</td>
+          <td> 控件最大尺寸为 QLayout::​maximumSize()，不能更大。</td>
+        </tr>
+        <tr>
+          <td style="height: 16px;">QLayout::SetMinAndMaxSize</td>
+          <td>&nbsp;5</td>
+          <td> 控件尺寸位于 QLayout::​minimumSize() 和 QLayout::​maximumSize() 之间。</td>
+        </tr>
+        <tr class="d1">
+          <td style="height: 16px;">QLayout::SetNoConstraint</td>
+          <td>&nbsp;1</td>
+          <td> 控件尺寸没有任何限制。</td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    修改布局器的 sizeConstraint 属性，QScrollArea
+    也会根据这个属性变化改变子孙控件布局。布局器 sizeConstraint&nbsp; 属性的默认值为
+    QLayout::SetDefaultConstraint 。<br>
+    QScrollArea 的内容介绍到这，下面我们学习一个滚动区域的示例。<br>
+    <br>
+    <br>
+    <div class="os2">10.2.2 Tool Box 工具箱</div>
+    <br>
+    <br>
+    <br>
+    <div class="code">q</div>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch10-01.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch10-03.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

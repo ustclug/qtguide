@@ -3,7 +3,6 @@
 #include <QDebug>
 #include <QFile>
 
-
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Widget)
@@ -68,10 +67,6 @@ void Widget::InitControls()
     for(int i=0; i<nCount; i++)
     {
         curButton = new QRadioButton( m_listProvinces[i] );
-        if( 0 == i )
-        {
-            curButton->setChecked(true); //默认第 0 个选中
-        }
         //关联信号到信号映射对象
         connect(curButton, SIGNAL(clicked()),
                 m_pSigMapper, SLOT(map()) );
@@ -100,8 +95,12 @@ void Widget::InitControls()
     setLayout( pMainLayout );
     //窗口大小
     resize(800, 600);
-    //视口保证第 0 个点会显示
-    m_saLeftMap->ensureVisible( m_listPoints[0].x(), m_listPoints[0].y(), 200, 200 );
+    //最后一个单选按钮选中
+    curButton->setChecked( true );
+    //显示最后一个单选按钮
+    m_saRightButtons->ensureWidgetVisible( curButton );
+    //视口保证最后一个点会显示
+    m_saLeftMap->ensureVisible( m_listPoints[nCount-1].x(), m_listPoints[nCount-1].y(), 200, 200 );
 }
 
 //信号映射将所有按钮的信号都发给该槽函数

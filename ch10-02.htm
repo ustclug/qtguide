@@ -878,9 +878,32 @@ style=" color:#000000;">}</span></pre></div>
     <br>
     <div class="os2">10.2.2 Tool Box 工具箱</div>
     <br>
-    <br>
-    <br>
-    <div class="code">q</div>
+    工具箱容器 QToolBox 可以容纳多个标签页，每个标签页就像柜子的抽屉一样堆叠在一起，通过点击多个标签页标题栏切换页面显示，每次显示一个标签页。<br>多个标签页可以按照功能分类，将同类型控件放在一个标签页内，多个标签页切换显示，就可以实现很多的功能。QToolBox 如下图所示：<br>
+     <center> <img src="images/ch10/ch10-02-08.png" alt="toolbox1"></center>  
+          
+          Page1 是默认显示的标签页，标题栏是黄色背景的文本 "Page 1"，标签页的背景色是绿色的，当我们点击 "Page 2" 标题栏时，就会切换显示第二个标签页，多个标签页切换像是单选按钮，每次启用一个：<br>
+    <center> <img src="images/ch10/ch10-02-09.png" alt="toolbox2"></center>  
+          QToolBox 将每个页面当做一个 item，每个 item 都有 widget 页面，并且 item 可以带有标题文本、序号、图标、工具提示（ToolTip），比较接近列表控件的条目，列表控件的条目是文本图标为主，而 QToolBox 条目都是一个带标题的标签页 widget。<br>
+          QToolBox 添加标签页条目的函数如下：<br>
+   <div class="code">int&nbsp;&nbsp; &nbsp;addItem(QWidget * widget, const QIcon &amp; iconSet, const QString &amp; text)<br>int&nbsp;&nbsp;&nbsp; addItem(QWidget * w, const QString &amp; text)<br>int&nbsp;&nbsp;&nbsp; insertItem(int index, QWidget * widget, const QIcon &amp; icon, const QString &amp; text)<br>int&nbsp;&nbsp;&nbsp; insertItem(int index, QWidget * widget, const QString &amp; text)</div>
+          addItem() 函数将新标签页追加到所有标签页的末尾，是追加最后一个；insertItem() 是将新标签页插入到序号为 index 的位置，原来序号之后的标签页往后挪动一个。注意 widget 页面不能为空，文本一般不为空，表示该标签页的功能描述，图标可以没有。<br>
+      删除条目的函数如下：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;removeItem(int index)</div>
+          注意 removeItem() 仅是将指定序号的标签页卸载下来，该页面不会被 delete，删除的是工具箱条目信息，而不会删除标签页 widget 控件本身。<br><br>获取工具箱包含的标签页总数使用下面函数：<br>
+  <div class="code">int&nbsp;&nbsp; &nbsp;count() const</div>
+          
+          工具箱的标签页每次只能激活一个当前页面，获取当前页面的序号、标签页指针使用下面函数：<br>
+  <div class="code">int&nbsp;&nbsp; &nbsp;currentIndex() const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //获取当前页面的序号，如果工具箱没有任何标签页，返回 -1<br>QWidget *&nbsp;&nbsp;&nbsp; currentWidget() const&nbsp; ////获取当前页面的指针，如果工具箱没有任何标签页，返回 NULL</div>
+          设置当前激活的页面是两个槽函数：<br>
+  <div class="code">void&nbsp;&nbsp; &nbsp;setCurrentIndex(int index)&nbsp; //槽函数，根据序号设置新的当前页面<br>void&nbsp;&nbsp;&nbsp; setCurrentWidget(QWidget * widget)&nbsp; ////槽函数，根据页面指针设置新的当前页面</div>当前页面序号变化时，会触发序号变化的信号：<br>
+  <div class="code">void&nbsp;&nbsp; &nbsp;currentChanged(int index)&nbsp;&nbsp; //当前页面切换时触发的信号</div><br>根据标签页的序号，可以修改标题文本、图标以及工具提示：<br>
+  <div class="code">QIcon&nbsp;&nbsp; &nbsp;itemIcon(int index) const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //获取页面标题图标<br>QString&nbsp;&nbsp;&nbsp; itemText(int index) const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //获取页面标题文本<br>QString&nbsp;&nbsp;&nbsp; itemToolTip(int index) const&nbsp; //获取页面标题工具提示<br>void&nbsp;&nbsp;&nbsp; setItemIcon(int index, const QIcon &amp; icon)&nbsp;&nbsp;&nbsp; //设置页面标题图标<br>void&nbsp;&nbsp;&nbsp; setItemText(int index, const QString &amp; text)&nbsp; //设置页面标题文本<br>void&nbsp;&nbsp;&nbsp; setItemToolTip(int index, const QString &amp; toolTip)&nbsp; //设置页面标题工具提示</div>
+          <br>可以根据序号查页面指针，也可以根据页面指针反查序号，使用下面一对函数：<br>
+  <div class="code">QWidget *&nbsp;&nbsp; &nbsp;widget(int index) const&nbsp; //序号正确，返回正确的页面指针，如果序号错误或没有任何页面，返回 NULL<br>int&nbsp;&nbsp;&nbsp; indexOf(QWidget * widget) const&nbsp; //如果页面属于工具子页面，那么返回序号，如果不属于工具箱，返回 -1</div>
+          <b>使用工具箱的函数时，注意返回的序号数值可能是 -1，返回的指针可能是 NULL，要注意判断这些异常值，避免产生 bug。</b><br><br>每个标签页可以设置为启用状态或禁用状态，禁用的标签页里面子控件也都处于禁用状态：<br>
+  <div class="code">bool&nbsp;&nbsp; &nbsp;isItemEnabled(int index) const&nbsp;&nbsp; //根据序号查询标签页是否启用<br>void&nbsp;&nbsp;&nbsp; setItemEnabled(int index, bool enabled)&nbsp; //根据序号设置标签页的启用或禁用状态</div>
+          QToolBox 的基类是&nbsp; QFrame，继承了边框绘制功能，可以参照 “10.1.2 Frame 框架”小节设置定制的边框。<br>工具箱类的内容介绍到这，下面我们学习一个示例，通过工具箱内容设置一个 Label 控件。<br><br><br>
+    			<div class="code">q</div>
     <br>
     <br>
     <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">

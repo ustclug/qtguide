@@ -902,9 +902,497 @@ style=" color:#000000;">}</span></pre></div>
   <div class="code">QWidget *&nbsp;&nbsp; &nbsp;widget(int index) const&nbsp; //序号正确，返回正确的页面指针，如果序号错误或没有任何页面，返回 NULL<br>int&nbsp;&nbsp;&nbsp; indexOf(QWidget * widget) const&nbsp; //如果页面属于工具子页面，那么返回序号，如果不属于工具箱，返回 -1</div>
           <b>使用工具箱的函数时，注意返回的序号数值可能是 -1，返回的指针可能是 NULL，要注意判断这些异常值，避免产生 bug。</b><br><br>每个标签页可以设置为启用状态或禁用状态，禁用的标签页里面子控件也都处于禁用状态：<br>
   <div class="code">bool&nbsp;&nbsp; &nbsp;isItemEnabled(int index) const&nbsp;&nbsp; //根据序号查询标签页是否启用<br>void&nbsp;&nbsp;&nbsp; setItemEnabled(int index, bool enabled)&nbsp; //根据序号设置标签页的启用或禁用状态</div>
-          QToolBox 的基类是&nbsp; QFrame，继承了边框绘制功能，可以参照 “10.1.2 Frame 框架”小节设置定制的边框。<br>工具箱类的内容介绍到这，下面我们学习一个示例，通过工具箱内容设置一个 Label 控件。<br><br><br>
-    			<div class="code">q</div>
-    <br>
+          QToolBox 的基类是&nbsp; QFrame，继承了边框绘制功能，可以参照 “10.1.2 Frame 框架”小节设置定制的边框。<br>工具箱类的内容介绍到这，下面我们学习一个示例，通过工具箱内容设置一个 Label 控件。<br>我们打开 QtCreator，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>①项目名称 labeldesign，创建路径 D:\QtProjects\ch10，点击下一步；<br>②套件选择里面选择全部套件，点击下一步；<br>③基类选择 QWidget，点击下一步；<br>④项目管理不修改，点击完成。<br>我们打开 widget.ui 界面文件，向里面拖入一个标签 Label 和一个 Tool Box 容器：<br>
+  <center> <img src="images/ch10/ch10-02-10.png" alt="ui1" width="800"></center>  
+          我们将标签的对象名修改为 labelShow ，设置标签 sizePolicy 的水平和垂直策略都为 Expanding：<br>
+  <center> <img src="images/ch10/ch10-02-11.png" alt="ui2" width="800"></center>                
+          工具箱容器默认就有两个页面，将右边工具箱容器长宽调整拉大一些，方便后续拖入子控件。<br>点击右边工具箱的 Page 1 标题栏，修改 toolBox 当前页的属性，将 currentItemText 修改为“编辑文本”，将 currentItemName 修改为 pageText：<br>
+  <center> <img src="images/ch10/ch10-02-12.png" alt="ui3" width="800"></center>  
+          这样就修改了第 0 序号的页面标题和页面对象名。<br>我们点击“Page 2”标题栏，点击该标题后会展开第 1 序号页面，再修改 currentItemText 修改为“字体字号”，将 currentItemName 修改为 pageFont：<br>
+  <center> <img src="images/ch10/ch10-02-13.png" alt="ui4" width="800"></center> 
+          工具箱容器支持更多的页面，我们右击工具箱容器，在右键菜单选择“插入页”--&gt;“在当前页之后”：<br>
+  <center> <img src="images/ch10/ch10-02-14.png" alt="ui5" width="800"></center>    
+          点击在当前页之后插入页，工具箱容器就会新增一个页面，序号为 2：<br>
+  <center> <img src="images/ch10/ch10-02-15.png" alt="ui6" width="800"></center>  
+          点击“页”标题栏，我们再修改工具箱容器的 currentItemText 修改为“颜色设置”，将 currentItemName 修改为 pageColor：<br>
+  <center> <img src="images/ch10/ch10-02-16.png" alt="ui7" width="800"></center> 
+          这样我们设置了三个标签页，如果希望删除某个页面，先点击该页的标题展开页面，然后右击该页面，在右键菜单“N 的页N”--&gt;“删除页”即可，N代表该页面的序号数字。<br>如果希望调整页面排序，那么右击工具箱容器，点击右键菜单“改变页顺序...”，弹出对话框：<br>
+   <center> <img src="images/ch10/ch10-02-17.png" alt="ui8" width="800"></center> 
+          在该对话框可以用右边上下箭头按钮调整页面的排序，我们这里例子不需要修改排序，点击“Cancel”即可。<br>现在三个标签页是空的，未填充子控件，我们先点击“编辑文本”标题栏，展开第 0 序号标签，向其中拖入单行编辑器和一个按钮，<br>单行编辑器对象名修改为 lineEditText ，按钮对象名 pushButtonEditText，显示文本为“修改文本”：<br>
+   <center> <img src="images/ch10/ch10-02-18.png" alt="pageText" width="800"></center> 
+          工具箱内容的布局，总是以选中 toolBox 开始布局，而不是选中 pageText 子页面布局，子页面属于容器，在界面编辑时不算独立控件，不能以子页面操作布局器。<br>我们点击选中工具箱容器 toolBox，然后点击上方垂直布局按钮，对工具箱的当前页面实现布局操作：<br>
+   <center> <img src="images/ch10/ch10-02-19.png" alt="pageTextLayout"></center> 
+          无论是编辑工具箱页面标题还是布局器，都是以选中工具箱容器为基础，然后修改属性或进行布局，修改或布局操作会自动处理工具箱的当前页面。<br>我们再点击“字体字号”页面，展开该页面，我们拖入 Font Combo Box 和 Spin Box，字体组合框对象名 fontComboBox，字号的旋钮框对象名为 spinBoxSize：<br>
+   <center> <img src="images/ch10/ch10-02-20.png" alt="pageFont" width="800"></center> 
+          然后我们选中 toolBox 对象，点击上方垂直布局按钮，对当前的“字体字号”页面进行垂直布局：<br>
+   <center> <img src="images/ch10/ch10-02-21.png" alt="pageFontLayout"></center>  
+          接下来我们点击“颜色设置”标题栏，展开该页面，拖入两个标签和两个组合框，<br>第一行的标签文本“前景色”，组合框对象名为 comboBoxFGColor；第二行标签文本 “背景色”，组合框对象名 comboBoxBGColor：<br>
+   <center> <img src="images/ch10/ch10-02-22.png" alt="pageColor" width="800"></center>      
+          对于现在展开的“颜色设置”页面，我们选中工具箱 toolBox 对象，然后点击上方的栅格布局器按钮，进行网格布局：<br>
+    <center> <img src="images/ch10/ch10-02-23.png" alt="pageColorLayout"></center>  
+          这样我们完成了三个标签页的子控件拖入和布局。<br>对于主窗口，我们选中 Widget 根节点，点击水平布局按钮，将 labelShow 控件和工具箱容器按照水平布局：<br>
+    <center> <img src="images/ch10/ch10-02-24.png" alt="mainLayout"></center>  
+          主窗口大小修改为为 520*400，这样方便展示较宽的字体组合框。<br>下面我们为工具箱容器中的子控件添加槽函数：<br>点击“编辑文本”标题栏，展开该标签页，右击“修改文本”按钮，右键菜单选择“转到槽...”，为该按钮添加 clicked() 信号的槽函数：<br>
+   <center> <img src="images/slots/buttonclicked.png" alt="slot1"></center>  
+          点击“字体字号”标题栏，展开该标签页，右击字体组合框，右键菜单选择“转到槽...”，为该控件添加 currentIndexChanged(QString) 信号的槽函数：<br>
+  <center> <img src="images/slots/comboBoxIndexChangedQString.png" alt="slot2"></center>  
+          右击 spinBoxSize 旋钮编辑框，右键菜单选择“转到槽...”，为该控件添加 valueChanged(int) 信号的槽函数：<br>
+  <center> <img src="images/slots/valueChangedint.png" alt="slot3"></center>  
+          
+          然后我们点击“颜色设置”标题栏，展开该标签页，右击前景色组合框，为该控件添加  currentIndexChanged(QString) 信号的槽函数：<br>
+  <center> <img src="images/slots/comboBoxIndexChangedQString.png" alt="slot4"></center>  
+          我们再右击背景色组合框，为该控件添加  currentIndexChanged(QString) 信号的槽函数：<br>
+    <center> <img src="images/slots/comboBoxIndexChangedQString.png" alt="slot5"></center>  
+          添加好五个控件对应的槽函数之后，我们就可以保存并关闭 widget.ui 文件，开始编辑代码。<br>我们打开 widget.h 头文件，编辑如下：<br>
+   <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;"> </span>WIDGET_H
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">WIDGET_H</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Widget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">Widget</span><span
+style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//初始化控件</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">InitControls</span><span
+style=" color:#000000;">();</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonEditText_clicked</span><span
+style=" color:#000000;">();</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_fontComboBox_currentIndexChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span>arg1<span
+style=" color:#000000;">);</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_spinBoxSize_valueChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span>arg1<span
+style=" color:#000000;">);</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_comboBoxFGColor_currentIndexChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span>arg1<span
+style=" color:#000000;">);</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_comboBoxBGColor_currentIndexChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span>arg1<span
+style=" color:#000000;">);</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGET_H</span></pre></div>
+          
+          我们在窗口类里面添加一个初始化控件的函数 InitControls() ，其他代码都是自动生成的，包括我们添加的 5 个槽函数。<br>下面我们分段编辑源文件 widget.h ，首先是初始化部分：<br>
+<div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"widget.h"</span>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widget.h"</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QMessageBox&gt;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QFont&gt;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QColor&gt;</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">Widget</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//初始化控件</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">InitControls</span><span
+style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">Widget</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">Widget</span><span style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//初始化控件</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">InitControls</span><span
+style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//字号旋钮框的范围</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">spinBoxSize</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setRange</span><span
+style=" color:#000000;">(</span><span style=" color:#000080;">4</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000080;">100</span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">spinBoxSize</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setValue</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">9</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//颜色组合框的设置</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取常见颜色</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QStringList</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">colorNames</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QColor</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">colorNames</span><span style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置前景色组合框</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">comboBoxFGColor</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addItems</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">colorNames</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//默认前景色</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">黑色</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">comboBoxFGColor</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setCurrentText</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"black"</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置背景色组合框</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">comboBoxBGColor</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">addItems</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">colorNames</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//默认背景色，浅灰</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">comboBoxBGColor</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setCurrentText</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"lightgray"</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//修改工具箱本身的样式表</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strCSS</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"::tab{</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">background-color:</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">magenta;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">}"</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#008000;">"QWidget#pageText{</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">background-color:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">green;</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">}"</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#008000;">"QWidget#pageFont{</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">background-color:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">cyan;</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">}"</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#008000;">"QWidget#pageColor{</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">background-color:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">yellow;</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">}"</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">toolBox</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setStyleSheet</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strCSS</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre></div>
+          我们添加了 QFont、QColor 等类的头文件包含，在构造函数里调用 InitControls() 函数初始化控件。<br>InitControls() 函数首先设置字号旋钮框的取值范围 4~100，当前数值为 9 。<br>然后对两个颜色组合框进行设置，我们使用静态函数 QColor::colorNames() 获取常见颜色的字符串列表；<br>将颜色列表添加给前景色组合框，每个颜色名字符串都是一个组合框条目，设置默认的前景色为 "black" ；<br>然后同样地将颜色列表添加给背景色组合框，每个颜色名字符串都是一个组合框条目，设置默认的背景色为 "lightgray" 。<br>最后我们为工具箱容器定制样式表：<br>::tab 表示选中工具箱的所有标签页标题栏，设置背景色为 magenta；<br>QWidget#pageText 表示选中类名（基类名也生效）为 QWidget，井号代表同时选定对象名为 pageText&nbsp; 的控件对象，这样能确保我们选中唯一的对象，而不会对页面内部的以 QWidget 为基类的子控件生效，设置唯一匹配的 pageText&nbsp; 对象的背景色为 green；<br>后面两行同理，选中唯一对象 pageFont 页面，设置背景色 cyan；<br>选中唯一对象 pageColor 页面，设置背景色 yellow；最后将样式表字符串设置给 ui-&gt;toolBox 。<br><br>下面我们编辑修改文本按钮对应的槽函数：<br>
+   <div class="code"><span style=" color:#008000;">//修改左边标签控件的文本</span>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonEditText_clicked</span><span
+style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strText</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditText</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">labelShow</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strText</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre></div> 
+          我们直接获取单行编辑器的文本，设置给左边 ui-&gt;labelShow 标签即可。<br><br>接下来我们编辑字体和字号控件对应的槽函数：<br>
+ 	<div class="code">
+<style type="text/css">
+p, li { white-space: pre-wrap; }
+</style>
+
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//字体设置</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_fontComboBox_currentIndexChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#000000;">arg1</span><span style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QFont</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">txtFont</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">arg1</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">spinBoxSize</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">value</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">labelShow</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setFont</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">txtFont</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//字号设置</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_spinBoxSize_valueChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">arg1</span><span style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QFont</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">txtFont</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">fontComboBox</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">currentText</span><span
+style=" color:#000000;">(),</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">arg1</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">labelShow</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setFont</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">txtFont</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre></div>
+          
+          两个函数代码类似的，根据字体组合框的当前文本和字号旋钮框的当前值，构造字体对象 txtFont；然后设置给 ui-&gt;labelShow 标签。<br><br>最后我们编辑两个颜色组合框对应的槽函数：<br>
+    			<div class="code">
+<style type="text/css">
+p, li { white-space: pre-wrap; }
+</style>
+
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//前景色修改</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_comboBoxFGColor_currentIndexChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#000000;">arg1</span><span style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strFGColor</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">arg1</span><span style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//前景色</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strBGColor</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">comboBoxBGColor</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">currentText</span><span style=" color:#000000;">();</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//背景色</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//样式表</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strCSS</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QString</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"color:</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">%1;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">background-color:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%2;"</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strFGColor</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strBGColor</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">labelShow</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setStyleSheet</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strCSS</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//背景色修改</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Widget</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_comboBoxBGColor_currentIndexChanged</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">const</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#000000;">arg1</span><span style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strFGColor</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">comboBoxFGColor</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">currentText</span><span style=" color:#000000;">();</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//前景色</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strBGColor</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">arg1</span><span style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//背景色</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//样式表</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strCSS</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QString</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"color:</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">%1;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">background-color:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%2;"</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strFGColor</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">).</span><span style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strBGColor</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">labelShow</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setStyleSheet</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strCSS</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre></div>
+    我们从前景色组合框获取前景色文本，从背景色组合框获取背景色文本，然后构造样式表字符串，color 就是前景色，background-color 就是背景色，分别填充各自的颜色文本，设置样式表给 ui-&gt;labelShow 标签。<br>示例代码讲解到这，我们生成项目，运行该示例：<br>
+    <center> <img src="images/ch10/ch10-02-25.png" alt="run1"></center>
+          我们可以看到右边工具箱容器的标题和页面内部颜色都变了，说明设置的样式表生效了。<br>我们修改前景色。背景色，可以看到左边标签的变化：<br>
+    <center> <img src="images/ch10/ch10-02-26.png" alt="run2"></center>
+          我们点击“字体字号”标题栏，展开该页面，可以修改字体和字号，如下图所示：<br>
+    <center> <img src="images/ch10/ch10-02-27.png" alt="run3"></center>
+          其他功能请读者自行测试，本节示例内容到这，我们下一节学习功能更强大的容器。<br><br>
     <br>
     <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
       <tbody>

@@ -2,10 +2,10 @@
 <html>
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
-    <title>ch10-03</title>    
-	<link href="css/style.css" rel="stylesheet" type="text/css" />
-	<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-	<script src="thumbnailviewer.js" type="text/javascript">
+    <title>ch10-03</title>
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -14,32 +14,147 @@
 ***********************************************/
 
 </script> </head>
-  
-  
-<div class="os1">10.3 堆栈控件和标签控件</div>
-
-<br />
-本节介绍 Stacked Widget、Tab Widget ，实现多个标签页面轮流展示，非常方便地拓展功能页面。<br />
-<br />
-<br />
-<div class="os2">10.3.1 Stacked Widget 堆栈控件</div>
-<br />
-<br />
-<div class="os2">10.3.2 Tab Widget 标签控件</div>
-<br />
-<br />
-
-<br />
-<br />
-<br />
-
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch10-02.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch11-00.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+  <body>
+    <div class="os1">10.3 堆栈控件和标签控件</div>
+    <br>
+    本节介绍 Stacked Widget、Tab Widget ，这两个容器也支持多标签页轮流展示，Stacked
+    Widget不带标题栏，需要配合如组合框之类的控件来切换标签页；Tab Widget
+    功能最为丰富，自带了标题栏，可以通过点击标题栏自由切换各个页面显示。<br>
+    <br>
+    <div class="os2">10.3.1 Stacked Widget 堆栈控件</div>
+    <br>
+    堆栈控件类名为 QStackedWidget ，功能相对简单，没有标题栏，通常与组合框、列表控件或者一组单选按钮来使用，通过搭配的控件选中条目变化，切换
+    各个页面。<br>
+    在 Qt 设计师界面，堆栈控件显示如下图所示：<br>
+    <center> <img src="images/ch10/ch10-03-01.png" alt="stack1"></center>
+    堆栈控件在设计师界面显示时，右上角有两个左右箭头切换子页面，进行分别显示编辑，但是程序编译运行时，没有这两个切换按钮：<br>
+    <center> <img src="images/ch10/ch10-03-02.png" alt="stack2"></center>
+    因此程序运行时，堆栈控件需要依赖其他控件来切换页面。<br>
+    QStackedWidget 添加子页面的函数如下：<br>
+    <div class="code">int&nbsp;&nbsp; &nbsp;addWidget(QWidget * widget)</div>
+    将控件添加给堆栈容器后，返回值是该页面的序号。如果希望将页面插入到指定序号位置，使用下面函数：<br>
+    <div class="code">int&nbsp;&nbsp; &nbsp;insertWidget(int index, QWidget *
+      widget)</div>
+    insertWidget() 参数里的 index 如果超出序号范围，那么新页面放到最末尾，返回值总是真实的序号值。<br>
+    删除页面使用如下函数：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;removeWidget(QWidget * widget)</div>
+    注意该函数不会释放页面占用的内存，仅仅是从容器上卸载，卸载下的标签页仍存在，需要手动 delete 才会释放内存。<br>
+    堆栈控件的子页面计数使用如下函数：<br>
+    <div class="code">int&nbsp;&nbsp; &nbsp;count() const</div>
+    获取当前显示页面的序号或页面指针，使用下面两个函数：<br>
+    <div class="code">int&nbsp;&nbsp; &nbsp;currentIndex()
+      const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //当前页面序号<br>
+      QWidget *&nbsp;&nbsp;&nbsp; currentWidget() const&nbsp;&nbsp; //当前页面指针</div>
+    页面指针和页面序号可以互查：<br>
+    <div class="code">int&nbsp;&nbsp; &nbsp;indexOf(QWidget * widget)
+      const&nbsp;&nbsp; //根据页面指针查序号，如果页面不属于容器，返回值是 -1<br>
+      QWidget *&nbsp;&nbsp;&nbsp; widget(int index) const&nbsp;
+      //根据序号查页面指针，如果序号不合法，返回 NULL</div>
+    注意判断返回值内容，-1&nbsp; 和 NULL 需要单独判断来处理，避免产生程序 bug。<br>
+    <br>
+    堆栈控件有两个槽函数，均是设置当前页面函数：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;setCurrentIndex(int
+      index)&nbsp;&nbsp;&nbsp; //根据序号设置当前页面<br>
+      void&nbsp;&nbsp;&nbsp; setCurrentWidget(QWidget * widget)&nbsp;&nbsp;
+      //根据页面指针设置当前页面</div>
+    <br>
+    堆栈控件有两个信号，分别是当前页面序号变化和卸载操作的页面序号：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;currentChanged(int
+      index)&nbsp;&nbsp; //当前页面序号变化，参数是新页面序号<br>
+      void&nbsp;&nbsp;&nbsp; widgetRemoved(int index)&nbsp;&nbsp; //参数序号的页面被卸载掉</div>
+    这两个信号可以用于同步显示的序号类控件，比如堆栈控件卸载了一个页面，那么组合框条目也要删掉该页面对应的条目。<br>
+    除了堆栈控件 QStackedWidget ，还有一个功能类似的&nbsp; QStackedLayout
+    可以承载多个标签页，QStackedLayout 是布局器，必须要有宿主窗口或容器，而 QStackedWidget
+    就是打包好的容器控件，功能类似的，都是容纳子页面。<br>
+    下面我们通过图片信息的例子学习 QStackedWidget 使用。<br>
+    我们打开 QtCreator，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>
+    ①项目名称 imageinfo，创建路径 D:\QtProjects\ch10，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    pageView，pageInfo，pageConvert<br>
+    <br>
+    我们打开界面文件 widget.ui，将窗口尺寸拉大，设为 600*480，向其中拖入三个控件：<br>
+    <center> <img src="images/ch10/ch10-03-03.png" alt="ui1" width="800"></center>
+    左上角是按钮，对象名 pushButtonOpen，文本为“打开图片”；<br>
+    左边下部是列表控件对象名 listWidgetIndex，主要是配合右边的堆栈控件使用；<br>
+    右边是堆栈控件，对象名 stackedWidget 。<br>
+    stackedWidget 默认有两个子页面 page 和 page_2，我们选中 stackedWidget ，在右下角属性栏看见
+    currentIndex 为 0， currentPageName 为 page，我们修改当前页面的名称为 pageView，并向 pageView
+    页面拖入一个滚动区域控件 scrollArea：<br>
+    <center> <img src="images/ch10/ch10-03-04.png" alt="ui2" width="800"></center>
+    pageView 只存放一个滚动区域，后面我们用代码实现图片预览，现在我们选中 stackedWidget 堆栈控件，当前页面序号是 0，这时我们点击上
+    面的水平布局按钮，为堆栈控件当前的页面设置布局器：<br>
+    <center> <img src="images/ch10/ch10-03-05.png" alt="ui3" width="800"></center>
+    设置布局器之后，堆栈控件变得很小，我们重新将它尺寸拉大：<br>
+    <center> <img src="images/ch10/ch10-03-06.png" alt="ui4" width="800"></center>
+    序号 0 的页面就完成布局了。我们点击 stackedWidget 右上角很小的黑色向右箭头，切换到序号为 1 的新页面 page_2：<br>
+    <center> <img src="images/ch10/ch10-03-07.png" alt="ui5" width="800"></center>
+    我们修改当前页面名称为 pageInfo，并向其中拖入文本浏览框，对象名 textBrowserInfo，这个文本浏览框专门显示图片相关信息：<br>
+    <center> <img src="images/ch10/ch10-03-08.png" alt="ui6" width="800"></center>
+    我们对该页面布局，选中 stackedWidget 堆栈控件，然后点击上面的水平布局按钮，为堆栈控件的当前页面设置布局，然后将
+    stackedWidget 堆栈控件尺寸拉大：<br>
+    <center> <img src="images/ch10/ch10-03-09.png" alt="ui7" width="800"></center>
+    头两个子页面设置完成，我们在 stackedWidget 堆栈控件当前页面为 pageInfo 的时候，在右上角对象树视图，<br>
+    右击 stackedWidget 控件， 右键菜单选择“插入页”--&gt;“在当前页之后”，添加新的页面：<br>
+    <center> <img src="images/ch10/ch10-03-10.png" alt="ui8" width="800"></center>
+    （注：删除页面和调整页面顺序也在 stackedWidget 右键菜单实现，“N的页面N”子菜单里面可以删除页面，“改变页顺序”可以调整页面顺序。）<br>
+    添加的新页面名称默认为 page，页面序号为 2 ：<br>
+    <center> <img src="images/ch10/ch10-03-11.png" alt="ui9" width="800"></center>
+    我们修改新页面的对象名为 pageConvert，然后向其中拖入三个控件：<br>
+    <center> <img src="images/ch10/ch10-03-12.png" alt="ui10" width="800"></center>
+    三个控件分别为：标签文本“扩展名类型”；组合框 comboBoxExtFormat；pushButtonConvert 按钮，文本“转换格式”。<br>
+    然后同样地，我们选中 stackedWidget ，点击上面水平布局器按钮，对 stackedWidget 的当前页面布局，并将
+    stackedWidget 尺寸拉大：<br>
+    <center> <img src="images/ch10/ch10-03-13.png" alt="ui11" width="800"></center>
+    界面右边的堆栈控件布局就完成了，我们下面编辑界面的左边部分。<br>
+    右键点击列表控件，在右击菜单选择“编辑项目”，弹出列表控件的条目编辑界面：<br>
+    <center> <img src="images/ch10/ch10-03-14.png" alt="list"></center>
+    点击右下角绿色加号按钮，为列表控件添加三个条目：<br>
+    <center> <img src="images/ch10/ch10-03-15.png" alt="list2"></center>
+    添加好条目后，点击“OK”按钮，回到主窗口。我们选中“打开图片”按钮和列表控件，点击上面的垂直布局器，进行垂直布局：<br>
+    <center> <img src="images/ch10/ch10-03-16.png" alt="left" width="800"></center>
+    我们将左边的布局器尺寸调整一下，变得窄一些，让左边布局器和右边的堆栈控件不重叠：<br>
+    <center> <img src="images/ch10/ch10-03-17.png" alt="left2" width="800"></center>
+    最后我们选中主窗口 Widget ，点击上面的水平布局器按钮，为窗口设置水平的主布局器：<br>
+    <center> <img src="images/ch10/ch10-03-18.png" alt="main" width="800"></center>
+    默认的主界面布局器左右各半，左边的布局器显得太宽了，我们选中主窗口 Widget，然后在右下角的属性栏最底部，看到主布局器的参数，我们将
+    layoutStretch 比例修改为英文的&nbsp; 1,5 <br>
+    <center> <img src="images/ch10/ch10-03-19.png" alt="main" width="800"></center>
+    主窗口尺寸为 600*480 ， 这样我们的界面设置和布局就完成了。<br>
+    我们现在需要为界面里的两个按钮添加槽函数，分别右击 “打开图片”、“转换格式”两个按钮，在右键菜单选择“转到槽...”，为按钮添加 clicked
+    信号对应的槽函数：<br>
+    <center> <img src="images/slots/buttonclicked.png" alt="slot"></center>
+    添加好两个按钮槽函数之后，我们保存并关闭界面文件，下面开始代码的编写。<br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <div class="os2">10.3.2 Tab Widget 标签控件</div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <div class="code">q</div>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch10-02.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch11-00.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

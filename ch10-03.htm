@@ -653,7 +653,7 @@ style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
 <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
 style=" color:#000000;">}</span></pre></div>
           
-          该函数先获取转换后新的扩展名存到 strNewExt ；<br>判断新扩展名是否与旧的文件扩展名一致，如果一样的不需要转换，只有扩展名不一样才进行后续转换。<br>如果是新的不一样的扩展名，我们根据旧文件名定义文件信息对象 fi ；<br>然后根据旧文件的路径、文件基本名、新扩展名拼接生成新的转换后文件名，存到 strNewName 。<br>然后调用保存函数 m_image.save( strNewName )，该函数自动根据扩展名转换格式，如果转换成功，返回 true，我们弹出显示转换成功，并弹出显示新的文件名；如果保存失败，返回 false，弹出显示出错。<br>
+          该函数先获取转换后新的扩展名存到 strNewExt ；<br>判断新扩展名是否与旧的文件扩展名一致，如果一样的不需要转换，只有扩展名不一样才进行后续转换。<br>如果是新的不一样的扩展名，我们根据旧文件名定义文件信息对象 fi ；<br>然后根据旧文件的路径、文件基本名、新扩展名拼接生成新的转换后文件名，存到 strNewName 。<br>然后调用保存函数 m_image.save( strNewName )，该函数自动根据扩展名转换格式，如果转换成功，返回 true，我们弹窗显示转换成功，并显示新的文件名；如果保存失败，返回 false，弹窗显示出错。<br>
     <br>示例代码就介绍到这，我们生成项目，运行示例程序：<br>
     <center> <img src="images/ch10/ch10-03-20.png" alt="run1"></center>
           点击“打开图片”按钮，选中一个图片打开，如果图片较大，可以拖动滚轮，轮流显示大图各个部分：<br>
@@ -662,11 +662,126 @@ style=" color:#000000;">}</span></pre></div>
     <center> <img src="images/ch10/ch10-03-22.png" alt="run3"></center>  
           第二个页面显示了图片的文件名、尺寸和颜色深度。<br>我们点击列表第三个条目“图片转换”，页面再次切换：<br>
     <center> <img src="images/ch10/ch10-03-23.png" alt="run4"></center>  
-          可以看到 Qt 支持很多格式的图片格式写入，具体的转换格式功能请读者自行测试，我们下面学习功能最丰富的 Tab Widget 标签页控件。<br><br>
+          点开组合框的条目列表，可以看到 Qt 支持很多格式的图片格式写入，具体的转换格式功能请读者自行测试，我们下面学习功能最丰富的 Tab Widget 标签页控件。<br><br>
     <div class="os2">10.3.2 Tab Widget 标签页控件</div>
     <br>
+    标签页控件类型名为 QTabWidget，可以容纳多个标签页，并且自带页面标题栏，例如 Qt Assistant 文档浏览器的首选项对话框：<br>
+    <center> <img src="images/ch10/ch10-03-24.png" alt="tabwid"></center>  
+          通过点击标题栏按钮，标签页控件每次呈现一个对应的标签页。围绕标题栏和标签页的设置，QTabWidget 提供了很多的功能函数，下面分类介绍这些功能。<br>
+    （1）添加页面<br>主要是追加和插入页面函数：<br>
+     <div class="code">int&nbsp;&nbsp; &nbsp;addTab(QWidget * page, const QString &amp; label)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //根据页面指针、页面标题文本追加新页面到末尾<br>int&nbsp;&nbsp;&nbsp; addTab(QWidget * page, const QIcon &amp; icon, const QString &amp; label)&nbsp; //根据页面指针、页面标题图标和文本追加新页面到末尾<br>int&nbsp;&nbsp;&nbsp; insertTab(int index, QWidget * page, const QString &amp; label)&nbsp; //根据指定序号、页面指针和页面标题文本插入页面到该序号位置<br>int&nbsp;&nbsp;&nbsp; insertTab(int index, QWidget * page, const QIcon &amp; icon, const QString &amp; label)&nbsp; //根据指定序号、页面指针、页面标题图标和文本插入页面到该序号位置</div>
+          
+          addTab() 和 insertTab() 函数返回值都是添加新页面的真实序号位置。如果 insertTab() 参数指定序号不合法，超出正常范围，那么实际的新页面序号一定是返回值的数值，而不是参数里的非法数值。<br>（2）卸载页面<br>之所以叫卸载页面，是因为这些函数只是将页面从 QTabWidget 卸载下来，去掉对应的标题按钮，但不会删除该页面本身。<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;removeTab(int index)&nbsp;&nbsp; //卸载指定序号的页面<br>void&nbsp;&nbsp;&nbsp; clear()&nbsp; //卸载所有子页面，QTabWidget对象彻底为空</div>
+          卸载的页面可以重新添加或者用 delete 彻底删除，取决于实际场景用途。<br>（3）访问函数<br>获取子页面的数量，使用下面函数：<br>
+    <div class="code">int&nbsp;&nbsp; &nbsp;count() const</div>
+          根据序号查页面指针，或者根据页面指针查序号，使用下面一对函数：<br>
+    <div class="code">QWidget *&nbsp;&nbsp; &nbsp;widget(int index) const&nbsp; //根据序号查页面指针<br>int&nbsp;&nbsp;&nbsp; indexOf(QWidget * w) const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //根据页面指针查序号</div>
+          注意 widget() 函数如果参数序号超出合法范围，那么返回 NULL 指针；<br>&nbsp;indexOf() 函数参数指针如果非法或者不属于 QTabWidget 对象，那么返回序号 -1 。<br>一定要检查返回值是否正常，对应异常返回值要单独判断处理，避免出现 bug 。<br><br>获取当前显示的页面和页面序号，使用下面函数：<br>
+    <div class="code">int&nbsp;&nbsp; &nbsp;currentIndex() const&nbsp;&nbsp; //当前页面的序号<br>QWidget *&nbsp;&nbsp;&nbsp; currentWidget() const&nbsp; //当前页面的指针</div>
+          注意如果 QTabWidget 对象没有任何子页面，那么返回的当前页面指针为 NULL，序号是 -1 。<br>一定不要对没有子页面的 QTabWidget 对象调用这些函数。<br>（4）标题栏定制函数<br>QTabWidget 自己拥有标题栏，可以点击标题栏按钮切换各个子页面。标题栏具有很多的定制功能函数，下面介绍这些函数：<br>① 标题栏显示位置<br>
+    <div class="code">TabPosition&nbsp;&nbsp; &nbsp;tabPosition() const<br>void&nbsp;&nbsp;&nbsp; setTabPosition(TabPosition)</div>
+          
+          QTabWidget::TabPosition 枚举类型共有上下左右四个位置，英文习惯称为北南西东：<br>
+     <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 180px;" align="center">常量</td>
+          <td style="width: 120px;" align="center">数值</td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>QTabWidget::North</td>
+          <td style="text-align: center;">0</td>
+          <td> 标题栏绘制在页面上方。</td>
+        </tr>
+        <tr class="d1">
+          <td style="height: 16px;">QTabWidget::South</td>
+          <td style="text-align: center;">1</td>
+          <td> 标题栏绘制在页面下方。</td>
+        </tr>
+        <tr>
+          <td style="height: 16px;">QTabWidget::West</td>
+          <td style="text-align: center;">2</td>
+          <td> 标题栏绘制在页面左侧，并且标题文本图标向左旋转 90 度。</td>
+        </tr>
+        <tr class="d1">
+          <td style="height: 16px;">QTabWidget::East</td>
+          <td style="text-align: center;">3</td>
+          <td> 标题栏绘制在页面右侧，并且标题文本图标向右旋转 90 度。</td>
+        </tr>
+      </tbody>
+    </table>
     <br>
+          标题栏绘制在页面上方和下方，标题文本和图标都是正常的水平显示，标题文字和图标都是正的。<br>但是左右两侧的情况特殊，显示在左侧时，标题文本和图标做了向左 90 度旋转，序号 0 的标签页面在最上方，序号大的标签页面排在下面：<br>
+    <center> <img src="images/ch10/ch10-03-25.png" alt="left"></center>            
+          标题栏显示在右侧的时候，标题文本和图标做了向右90度旋转，序号 0 的标签在最上方，序号大的标签页面排在下面：<br>
+    <center> <img src="images/ch10/ch10-03-26.png" alt="right"></center> 
+          ②标题栏按钮的形状<br>
+    <div class="code">TabShape&nbsp;&nbsp; &nbsp;tabShape() const<br>void&nbsp;&nbsp;&nbsp; setTabShape(TabShape s)</div>
+          
+          QTabWidget::TabShape 形状共有两种，上面截图都是默认的圆角矩形按钮，还有三角形（其实是梯形）：<br>
+      <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 180px;" align="center">常量</td>
+          <td style="width: 120px;" align="center">数值</td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>QTabWidget::Rounded</td>
+          <td style="text-align: center;">0</td>
+          <td> 标题栏按钮绘制成圆角矩形。</td>
+        </tr>
+        <tr class="d1">
+          <td style="height: 16px;">QTabWidget::Triangular</td>
+          <td style="text-align: center;">1</td>
+          <td> 标题栏按钮绘制成三角形（其实是是梯形）。</td>
+        </tr>
+      </tbody>
+    </table>
+    <br>          
+          QTabWidget::Triangular 实际的按钮外观如下图所示：<br>
+    <center> <img src="images/ch10/ch10-03-27.png" alt="Triangular"></center> 
+          
+          ③标题栏的文本、图标、工具提示、帮助信息设置<br>这些内容比较像列表控件的条目，QTabWidget 的标题按钮也可以设置这些信息：<br>
+     <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 280px;" align="center">读取函数</td>
+          <td style="width: 400px;" align="center">设置函数</td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>QString tabText(int index) const</td>
+          <td>void setTabText(int index, const QString &amp; label)</td>
+          <td> 读取或设置指定序号标题按钮的文本。</td>
+        </tr>
+        <tr class="d1">
+          <td>QIcon tabIcon(int index) const</td>
+          <td>void setTabIcon(int index, const QIcon &amp; icon)</td>
+          <td> 读取或设置指定序号标题按钮的图标。</td>
+        </tr>
+        <tr>
+          <td>QString tabToolTip(int index) const</td>
+          <td>void setTabToolTip(int index, const QString &amp; tip)</td>
+          <td> 读取或设置指定序号标题按钮的工具提示。</td>
+        </tr>
+        <tr class="d1">
+          <td>QString tabWhatsThis(int index) const</td>
+          <td>void setTabWhatsThis(int index, const QString &amp; text)</td>
+          <td> 读取或设置指定序号标题按钮的帮助信息。</td>
+        </tr>
+      </tbody>
+    </table>
     <br>
+          
+          QTabWidget 可以指定图标的尺寸，使用下面函数：<br>
+   <div class="code">QSize&nbsp;&nbsp; &nbsp;iconSize() const&nbsp;&nbsp; //获取标题栏按钮图标的尺寸，各个按钮的图标都一样大<br>void&nbsp;&nbsp;&nbsp; setIconSize(const QSize &amp; size)&nbsp; //设置标题栏按钮图标的尺寸</div>
+          iconSize 默认情况下与外观风格 style 是相关的，这里设置的图标尺寸是指图标可以占据的最大尺寸，但是如果图片尺寸本身很小，那么不会放大图片，而只会增加图片周围的空白填充区域。<br><br><br><br>
     <br>
     <div class="code">q</div>
     <br>

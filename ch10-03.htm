@@ -679,7 +679,9 @@ style=" color:#000000;">}</span></pre></div>
     <div class="code">QWidget *&nbsp;&nbsp; &nbsp;widget(int index) const&nbsp; //根据序号查页面指针<br>int&nbsp;&nbsp;&nbsp; indexOf(QWidget * w) const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //根据页面指针查序号</div>
           注意 widget() 函数如果参数序号超出合法范围，那么返回 NULL 指针；<br>&nbsp;indexOf() 函数参数指针如果非法或者不属于 QTabWidget 对象，那么返回序号 -1 。<br>一定要检查返回值是否正常，对应异常返回值要单独判断处理，避免出现 bug 。<br><br>获取当前显示的页面和页面序号，使用下面函数：<br>
     <div class="code">int&nbsp;&nbsp; &nbsp;currentIndex() const&nbsp;&nbsp; //当前页面的序号<br>QWidget *&nbsp;&nbsp;&nbsp; currentWidget() const&nbsp; //当前页面的指针</div>
-          注意如果 QTabWidget 对象没有任何子页面，那么返回的当前页面指针为 NULL，序号是 -1 。<br>一定不要对没有子页面的 QTabWidget 对象调用这些函数。<br>（4）标题栏定制函数<br>QTabWidget 自己拥有标题栏，可以点击标题栏按钮切换各个子页面。标题栏具有很多的定制功能函数，下面介绍这些函数：<br>① 标题栏显示位置<br>
+          注意如果 QTabWidget 对象没有任何子页面，那么返回的当前页面指针为 NULL，序号是 -1 。<br>一定不要对没有子页面的 QTabWidget 对象调用这些函数。<br><br>每个子页面可以设置禁用或者启用，当禁用子页面时，该页面控件能显示，但是无法点击操作：<br>
+          <div class="code">void QTabWidget::​setTabEnabled(int index, bool enable)&nbsp; //设置指定序号页面是否启用<br>bool QTabWidget::​isTabEnabled(int index) const&nbsp;&nbsp;&nbsp; //判断指定序号页面是否处于启用状态</div>
+          <br>（4）标题栏定制函数<br>QTabWidget 自己拥有标题栏，可以点击标题栏按钮切换各个子页面。标题栏具有很多的定制功能函数，下面介绍这些函数：<br>① 标题栏显示位置<br>
     <div class="code">TabPosition&nbsp;&nbsp; &nbsp;tabPosition() const<br>void&nbsp;&nbsp;&nbsp; setTabPosition(TabPosition)</div>
           
           QTabWidget::TabPosition 枚举类型共有上下左右四个位置，英文习惯称为北南西东：<br>
@@ -738,7 +740,7 @@ style=" color:#000000;">}</span></pre></div>
         <tr class="d1">
           <td style="height: 16px;">QTabWidget::Triangular</td>
           <td style="text-align: center;">1</td>
-          <td> 标题栏按钮绘制成三角形（其实是是梯形）。</td>
+          <td> 标题栏按钮绘制成三角形（其实是梯形）。</td>
         </tr>
       </tbody>
     </table>
@@ -781,8 +783,106 @@ style=" color:#000000;">}</span></pre></div>
           
           QTabWidget 可以指定图标的尺寸，使用下面函数：<br>
    <div class="code">QSize&nbsp;&nbsp; &nbsp;iconSize() const&nbsp;&nbsp; //获取标题栏按钮图标的尺寸，各个按钮的图标都一样大<br>void&nbsp;&nbsp;&nbsp; setIconSize(const QSize &amp; size)&nbsp; //设置标题栏按钮图标的尺寸</div>
-          iconSize 默认情况下与外观风格 style 是相关的，这里设置的图标尺寸是指图标可以占据的最大尺寸，但是如果图片尺寸本身很小，那么不会放大图片，而只会增加图片周围的空白填充区域。<br><br><br><br>
-    <br>
+          iconSize 默认情况下与外观风格 style 是相关的，这里设置的图标尺寸是指图标可以占据的最大尺寸，但是如果图片尺寸本身很小，那么不会放大图片，而只会增加图片周围的空白填充区域。<br><br>标题栏中，如果标签页文本太长了，可以设置文本省略显示的模式：<br>
+     <div class="code">Qt::TextElideMode&nbsp;&nbsp; &nbsp;elideMode() const&nbsp;&nbsp;&nbsp;&nbsp; //获取标签长文本显示模式<br>void&nbsp;&nbsp;&nbsp; setElideMode(Qt::TextElideMode)&nbsp;&nbsp; //设置标签长文本显示模式</div>
+          
+          Qt::TextElideMode 枚举值如下：<br>
+           <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 180px;" align="center">常量</td>
+          <td style="width: 120px;" align="center">数值</td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>Qt::ElideLeft</td>
+          <td style="text-align: center;">0</td>
+          <td> 长文本的左边被省略，显示省略号到左边。</td>
+        </tr>
+        <tr class="d1">
+          <td>Qt::ElideRight</td>
+          <td style="text-align: center;">1</td>
+          <td style="height: 16px;"> 长文本的右边被省略，显示省略号到右边。</td>
+        </tr>
+           <tr>
+          <td>Qt::ElideMiddle</td>
+          <td style="text-align: center;">2</td>
+          <td> 长文本的中间被省略，显示省略号到中间。</td>
+        </tr>
+        <tr class="d1">
+          <td style="height: 16px;">Qt::ElideNone</td>
+          <td style="text-align: center;">3</td>
+          <td> 不省略，尽量显示完整的长文本。</td>
+        </tr>
+      </tbody>
+    </table>
+    <br> 
+          默认的 elideMode() 是与显示风格有关，可以不省略显示，或者用右边省略。<br><br>标题栏当标签按钮个数小于 2，就是只有 1 个子页面时可以设置自动隐藏：<br>
+   <div class="code">bool&nbsp;&nbsp; &nbsp;tabBarAutoHide() const&nbsp;&nbsp;&nbsp; //获取是否自动隐藏标题栏，只有一个子页面时有用<br>void&nbsp;&nbsp;&nbsp; setTabBarAutoHide(bool enabled)&nbsp;&nbsp; //设置标题栏是否自动隐藏，只有一个子页面时有用</div>
+          如果标题栏的标签按钮有 2 个或以上，那么 tabBarAutoHide 属性没有用，这个  tabBarAutoHide 属性与单词字面意义不一样，功能比较鸡肋。<br><br>④标题栏其他设置<br>标题栏可以设置拖动标签按钮移动各个标签页的显示顺序（内部子页面序号不会变，只是显示位置不同了）：<br>
+   <div class="code">bool&nbsp;&nbsp; &nbsp;isMovable() const<br>void&nbsp;&nbsp;&nbsp; setMovable(bool movable)</div>
+          <br>标题栏可以设置拖动标签页是否可以关闭：<br>
+    <div class="code">bool&nbsp;&nbsp; &nbsp;tabsClosable() const<br>void&nbsp;&nbsp;&nbsp; setTabsClosable(bool closeable)</div>
+    默认标签页是不关闭的，总是显示所有子标签；如果设置了标签页可以关闭，那么每个标签按钮文本旁边有 X 号，如果用户点击 X 号，那么触发信号：<br>
+    <div class="code">void QTabBar::​tabCloseRequested(int index)&nbsp;&nbsp; //触发信号，提示用户点击X号想关闭标签页</div>    
+          
+          用户点击 X 号之后，QTabWidget 不会自动关闭标签页，程序员需要为上面信号关联处理的槽函数，通过槽函数代码来进行标签页卸载或隐藏。<br><br>标题栏可以设置滚动按钮的显示，当标签页比较多的时候，显示滚动箭头控制标签按钮的切换和显示：<br>
+    <div class="code">bool&nbsp;&nbsp; &nbsp;usesScrollButtons() const<br>void&nbsp;&nbsp;&nbsp; setUsesScrollButtons(bool useButtons)</div>
+          <br>标题栏可以设置类似苹果系统的文档模式，不显示标签页的边框，方便更多地显示文档：<br>
+     <div class="code">bool&nbsp;&nbsp; &nbsp;documentMode() const<br>void&nbsp;&nbsp;&nbsp; setDocumentMode(bool set)</div>
+          <br>QTabWidget 的标题栏本质是一个 QTabBar 对象，标题栏功能是 QTabBar 实现的，很多关于标题栏的函数是将 QTabBar 相应的函数进行改造套壳。<br>可以直接获取 QTabWidget 内嵌的 QTabBar 对象：<br>
+    <div class="code">QTabBar *&nbsp;&nbsp; &nbsp;tabBar() const&nbsp;&nbsp;&nbsp; //获取标题栏的对象指针</div>
+          
+          QTabBar 有很多定制函数可以使用，常用的 QTabBar 函数 QTabWidget 都做了套壳封装，如果需要其他精细的定制可以调用 QTabBar 的函数来实现，例如 QTabBar 的每一个按钮都可以自定义。<br><br>QTabWidget 标题栏在水平显示的情况下，还可以自定义一个角落控件：<br>
+    <div class="code">QWidget *&nbsp;&nbsp; &nbsp;cornerWidget(Qt::Corner corner = Qt::TopRightCorner) const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //默认为 NULL<br>void&nbsp;&nbsp;&nbsp; setCornerWidget(QWidget * widget, Qt::Corner corner = Qt::TopRightCorner)&nbsp; //设置定义的角落控件</div>
+          
+          角落按钮只有标题栏水平显示时才能生效（ QTabWidget::North 、QTabWidget::South ），角落控件支持的显示位置有：<br>
+        <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 180px;" align="center">常量</td>
+          <td style="width: 120px;" align="center">数值</td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>Qt::TopLeftCorner</td>
+          <td style="text-align: center;">0</td>
+          <td> 角落控件显示到左上角。</td>
+        </tr>
+        <tr class="d1">
+          <td>Qt::TopRightCorner</td>
+          <td style="text-align: center;">1</td>
+          <td style="height: 16px;"> 角落控件显示到右上角。</td>
+        </tr>
+           <tr>
+          <td>Qt::BottomLeftCorner</td>
+          <td style="text-align: center;">2</td>
+          <td> 角落控件显示到左下角。</td>
+        </tr>
+        <tr class="d1">
+          <td style="height: 16px;">Qt::BottomRightCorner</td>
+          <td style="text-align: center;">3</td>
+          <td> 角落控件显示到右下角。</td>
+        </tr>
+      </tbody>
+    </table>
+    <br> 
+          
+          
+          QTabWidget 默认没有角落控件，如果需要显示 logo 图片之类的，可以新建一个标签控件，设置为角落控件。<br><br>
+          （5）信号和槽函数<br>QTabWidget 在当前页面序号变化时触发如下信号：<br>
+      <div class="code">void&nbsp;&nbsp; &nbsp;currentChanged(int index)</div>
+          
+          
+          注意参数可能是 -1，代表 QTabWidget 里面没有设置当前页面，或者还没有添加任何子页面。<br>当用户点击标题栏的标签按钮时，根据单击或双击触发下面信号：<br>
+     <div class="code">void&nbsp;&nbsp; &nbsp;tabBarClicked(int index)&nbsp;&nbsp; //指定序号标签按钮被单击<br>void&nbsp;&nbsp;&nbsp; tabBarDoubleClicked(int index)&nbsp; //指定序号标签按钮被双击</div>
+          <br>当程序里面设置 QTabWidget 标题栏属性 setTabsClosable( true ) 的时候，标题按钮显示 X 号，用户点击 X 号触发如下信号：<br>
+     <div class="code">void&nbsp;&nbsp; &nbsp;tabCloseRequested(int index)</div>
+           注意 QTabWidget 只发送上面信号，不会自动关闭标签页，如果需要关闭标签页，需要程序员自己写槽函数来关闭。<br><br>QTabWidget 有两个槽函数，都是设置当前显示页面：<br>
+     <div class="code">void&nbsp;&nbsp; &nbsp;setCurrentIndex(int index)&nbsp; //根据序号设置当前页<br>void&nbsp;&nbsp;&nbsp; setCurrentWidget(QWidget * widget)&nbsp; //根据页面指针设置当前页</div>
+          <br>QTabWidget 内容介绍到这，下面我们学习一个文件属性例子。<br><br>(Alt + 字母) 快捷键举例<br><br>
     <div class="code">q</div>
     <br>
     <br>

@@ -72,8 +72,6 @@
     ②套件选择里面选择全部套件，点击下一步；<br>
     ③基类选择 QWidget，点击下一步；<br>
     ④项目管理不修改，点击完成。<br>
-    pageView，pageInfo，pageConvert<br>
-    <br>
     我们打开界面文件 widget.ui，将窗口尺寸拉大，设为 600*480，向其中拖入三个控件：<br>
     <center> <img src="images/ch10/ch10-03-03.png" alt="ui1" width="800"></center>
     左上角是按钮，对象名 pushButtonOpen，文本为“打开图片”；<br>
@@ -882,7 +880,72 @@ style=" color:#000000;">}</span></pre></div>
      <div class="code">void&nbsp;&nbsp; &nbsp;tabCloseRequested(int index)</div>
            注意 QTabWidget 只发送上面信号，不会自动关闭标签页，如果需要关闭标签页，需要程序员自己写槽函数来关闭。<br><br>QTabWidget 有两个槽函数，都是设置当前显示页面：<br>
      <div class="code">void&nbsp;&nbsp; &nbsp;setCurrentIndex(int index)&nbsp; //根据序号设置当前页<br>void&nbsp;&nbsp;&nbsp; setCurrentWidget(QWidget * widget)&nbsp; //根据页面指针设置当前页</div>
-          <br>QTabWidget 内容介绍到这，下面我们学习一个文件属性例子。<br><br>(Alt + 字母) 快捷键举例<br><br>
+          <br>QTabWidget 内容介绍到这，下面我们学习一个文件属性例子。<br>我们打开 QtCreator，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>①项目名称 fileattribute，创建路径 D:\QtProjects\ch10，点击下一步；<br>②套件选择里面选择全部套件，点击下一步；<br>③基类选择 QWidget，点击下一步；<br>④项目管理不修改，点击完成。<br>我们打开界面文件 widget.ui，向其中拖入一个 Tab Widget 控件，稍微拉大该控件：<br>
+      <center> <img src="images/ch10/ch10-03-28.png" alt="ui1" width="800"></center>
+          我们点击标签页控件的“Tab 1” 页面，“Tab 1”成为当前页面，并且让 tabWidget 对象保持选中状态，我们在右下角属性栏编辑当前页面的属性，修改 currentTabText 设置为“文件名称”，currentTabName 设置为 tabFileName，如下图所示：<br>
+      <center> <img src="images/ch10/ch10-03-29.png" alt="ui2"></center>
+          然后向“文件名称”标签页拖入控件，如下图所示：<br>
+      <center> <img src="images/ch10/ch10-03-30.png" alt="ui3" width="800"></center>          
+          第一行是标签“文件全名”，单行编辑器 lineEditFullName，“选中文件”按钮 pushButtonSelectFile；<br>第二行是标签“文件短名”，单行编辑器 lineEditShortName；<br>第三行是标签“文件大小”，单行编辑器 lineEditFileSize。<br>将三行控件尽量在水平和垂直方向排列整齐，然后我们点击选中 tabWidget 容器对象，再点击上方的栅格布局按钮，实现当前页面的栅格布局，栅格布局自动调整了 tabWidget&nbsp; 尺寸，我们将它再拉大一些：<br>
+      <center> <img src="images/ch10/ch10-03-31.png" alt="ui4" width="800"></center>   
+          第一个标签页的控件和布局就完成了。下面我们点击“Tab 2”页面，然该页面成为新的当前页面，
+          修改当前页面的标签文本和标签对象名，即 currentTabText 设置为“文件时间”，currentTabName 设置为 tabFileTime，
+          如下图所示：<br>
+       <center> <img src="images/ch10/ch10-03-32.png" alt="ui5"></center>
+          
+          然后我们向“文件时间”标签页拖入三行控件，如下图所示：<br>
+      <center> <img src="images/ch10/ch10-03-33.png" alt="ui6" width="800"></center>   
+          
+          该标签页第一行是标签“创建时间”，单行编辑器 lineEditTimeCreated；<br>第二行是标签“访问时间”，单行编辑器 lineEditTimeRead；<br>第三行是标签“修改时间”，单行编辑器 lineEditTimeModified。<br>将三行控件水平和垂直方向尽量对齐，然后选中 tabWidget 对象，再点击上方的栅格布局按钮，实现栅格布局，并将容器对象尺寸拉大：<br>
+      <center> <img src="images/ch10/ch10-03-34.png" alt="ui7" width="800"></center>   
+          这样第二个标签页的布局器也设置完成。我们选中主窗口本身的 Widget 对象，点击上面的垂直布局器按钮实现主界面布局，虽然主界面只有一个直接儿子节点，就是容器对象 tabWidget，还是需要设置窗口的主布局器，以实现自动布局：<br>
+      <center> <img src="images/ch10/ch10-03-35.png" alt="ui8" width="800"></center>   
+          <br>完成以上控件编辑和布局之后，我们再点击“文件名称”标签页，右击“选择文件”按钮，为该按钮添加 clicked() 信号的槽函数。<br>按钮的槽函数添加完成后，我们就可以保存并关闭该 widget.ui 界面文件。<br><br> 关闭 widget.ui 界面文件之后，我们在左边项目管理页面，右击“fileattribute”项目根名称，
+          在右键菜单选择“添加新文件”：<br>
+      <center> <img src="images/ch10/ch10-03-36.png" alt="addnew1" width="800"></center>
+          弹出“新建文件”对话框，我们在该对话框的左边一栏选择“Qt”，中间一栏选择“Qt 设计师界面类”：<br>
+      <center> <img src="images/ch10/ch10-03-37.png" alt="addnew2"></center>
+          然后点击右下角“Choose...” 按钮，进入如下界面：<br>
+       <center> <img src="images/ch10/ch10-03-38.png" alt="addnew3"></center>
+          在中间界面模板里面，点击“Widget”，然后点击“下一步”按钮，进入如下界面：<br>
+      <center> <img src="images/ch10/ch10-03-39.png" alt="addnew4"></center>          
+          我们修改类名为 TabPreview，下面几行的信息会根据类名自动修改，修改后如下：<br>
+      <center> <img src="images/ch10/ch10-03-40.png" alt="addnew5"></center>  
+          点击“下一步”按钮，进入项目管理界面：<br>
+      <center> <img src="images/ch10/ch10-03-41.png" alt="addnew6"></center> 
+          点击“完成”按钮，这样就为项目新增了一个窗口类 TabPreview，这个窗口以后我们会将它设置为标签页控件的第三个子页面。<br>
+          打开 tabpreview.ui 界面文件，我们向其中拖入三个按钮和一个堆栈容器：<br>
+      <center> <img src="images/ch10/ch10-03-42.png" alt="newui1" width="800"></center> 
+          三个按钮是普通的 QPushButton，我们将按钮尺寸拉伸为水平窄、垂直长的竖条形状，然后注意设置文本：<br>第一个按钮 pushButtonTextPreview，文本为 "文\n本\n预\n览"，按钮文本支持使用 "\n" 换行显示；<br>第二个按钮 pushButtonImagePreview，文本为 "图\n像\n预\n览" ；<br>第三个按钮&nbsp; pushButtonBytePreview，文本为 "字\n节\n预\n览" 。<br>这样三个按钮就形成的竖直的排列。<br>这样设置 QPushButton 按钮文本，是因为 QTabWidget 标题栏如果显示在左侧或右侧时，会对文本进行 90 度旋转，旋转后的文本并不符合中文垂直阅读的习惯，因为汉字被旋转了 90度，并不好看。我们这里相当于使用普通按钮和堆栈控件组合了一个自定义的多标签页控件，按钮的文本垂直排列更符合中文垂直排版习惯。<br>下面我们选中堆栈控件 stackedWidget，对序号 0 的子页面进行修改，设置 currentPageName 为 pageTextPreview，<br>向其中拖入一个文本浏览框，对象名 textBrowserText，如下所示：<br>
+      <center> <img src="images/ch10/ch10-03-43.png" alt="newui2" width="800"></center> 
+          我们点击选中 stackedWidget 对象，然后点击上面的垂直布局按钮，为当前页面进行布局：<br>
+      <center> <img src="images/ch10/ch10-03-44.png" alt="newui3" width="800"></center>
+          对 0 号当前页面布局完成后，我们点击堆栈控件右上角的黑色向右箭头，切换到 1 号标签页面，将 1 号标签页面作为新的当前页面：<br>
+      <center> <img src="images/ch10/ch10-03-45.png" alt="newui4" width="800"></center>
+          在选中堆栈控件时，我们修改新的 1 号页面 currentPageName 为 pageImagePreview，并拖入一个 Label ：<br>
+      <center> <img src="images/ch10/ch10-03-46.png" alt="newui5" width="800"></center>
+          预览图像的标签对象名为 labelImagePreview，文本为 “图像预览区域”，并且修改属性 alignment 为水平的 AlignHCenter，垂直的 AlignVCenter，<br>使得标签对象的文本同时处于水平和垂直居中。<br>然后我们点击选中堆栈控件对象 stackedWidget，为新的当前页面设置布局，就是 1 号页面设置布局，点击上面垂直布局按钮，进行垂直布局：<br>
+      <center> <img src="images/ch10/ch10-03-47.png" alt="newui6" width="800"></center>
+          下面我们右击对象树的 stackedWidget 容器，在右键菜单选择“插入页”--&gt;“在当前页之后”，我们在序号 1 的页面后再加一个新页面：<br>
+      <center> <img src="images/ch10/ch10-03-48.png" alt="newui7" width="800"></center>
+          添加新的序号为 2 的页面之后，我们修改新的 2 号当前页面对象名为 pageBytePreview：<br>
+      <center> <img src="images/ch10/ch10-03-49.png" alt="newui8" width="800"></center>
+          然后我们为序号 2 的页面添加一个文本浏览框，对象名设置为 textBrowserByte：<br>
+       <center> <img src="images/ch10/ch10-03-50.png" alt="newui9" width="800"></center>
+          然后我们选中堆栈控件 stackedWidget，再次为序号 2 的当前页面设置布局，点击上面垂直布局按钮，进行垂直布局：<br>
+       <center> <img src="images/ch10/ch10-03-51.png" alt="newui10" width="800"></center>
+          这样就实现了堆栈控件三个子页面的控件编辑和布局。<br>下面我们对该窗口进行布局，先选中左边三个按钮，进行垂直布局：<br>
+       <center> <img src="images/ch10/ch10-03-52.png" alt="newui11" width="800"></center>
+          然后我们选中该窗口根名称 TabPreview，点击上面的水平布局按钮，对该窗口设置布局器为水平布局：<br>
+       <center> <img src="images/ch10/ch10-03-53.png" alt="newui12" width="800"></center>
+          该窗口布局器设置好之后，我们发现左边按钮比较矮胖，这时候可以对三个按钮的属性进行调整，我们按住 Ctrl 键，点击三个按钮，同时选中该三个按钮，然后在右下角属性栏设置 sizePolicy 的垂直策略为 Expanding，修改 maximumSize 的宽度为 52，如下图所示：<br>
+       <center> <img src="images/ch10/ch10-03-54.png" alt="newui13" width="800"></center>
+          这样我们的按钮看着比较正常一些，垂直方向自动拉伸，水平方向比较窄。目前我们看到按钮的上下边界要比右边编辑框的上下边界宽，<br>在垂直方向稍微有点偏差，上边线和下边线没有对齐，是堆栈控件内部子页面布局器的原因。<br>
+          我们在对象树点击第 0 号子页面，看到该页面属性栏的布局器参数：<br>
+       <center> <img src="images/ch10/ch10-03-55.png" alt="newui14" width="800"></center>
+          布局器有四个边界保留宽度，即 layoutLeftMargin、layoutTopMargin、layoutRightMargin、layoutBottomMargin，将它们设置为 0，我们的编辑器就可以扩展到最外面边界，不保留任何冗余。 我们把堆栈控件三个子页面依次选中，把四个布局边界都设置为 0 。<br>
+       <center> <img src="images/ch10/ch10-03-56.png" alt="newui15" width="800"></center>
+          现在左边三个按钮上下边界就和右边编辑器同样高度了。附带说明一下，layoutSpacing 是布局器里面各个子控件的布局间隙，比如上面三个按钮的间隙都是 6 。<br>完成布局调整后，我们保存 tabpreview.ui 界面文件，然后关闭该文件，开始编写代码。<br>&nbsp;<br><br><br><br><br><br><br>
     <div class="code">q</div>
     <br>
     <br>

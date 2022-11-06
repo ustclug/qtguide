@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta content="text/html; charset=UTF-8" http-equiv="content-type">
-    <title>ch11-01</title>    
-	<link href="css/style.css" rel="stylesheet" type="text/css" />
-	<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-	<script src="thumbnailviewer.js" type="text/javascript">
+    <meta  content="text/html; charset=UTF-8"  http-equiv="content-type">
+    <title>ch11-01</title>
+    <link  href="css/style.css"  rel="stylesheet"  type="text/css">
+    <link  rel="stylesheet"  href="thumbnailviewer.css"  type="text/css">
+    <script  src="thumbnailviewer.js"  type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -14,31 +14,312 @@
 ***********************************************/
 
 </script> </head>
-  
-  
-<div class="os1">11.1 QWidget 多窗口使用</div>
-<br />
-本节介绍基于 QWidget 自定义的多窗口程序，定制子窗口并弹窗显示，在多窗口之间使用信号和槽机制进行多窗口之间的数据传递。
-<br />
-
-<br />
-<div class="os2">11.1.1 QWidget</div>
-<br />
-
-
-
-
-<br />
-<br />
-<br />
-
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch11-00.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch11-02.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+  <body>
+    <div  class="os1">11.1 QWidget 多窗口使用</div>
+    <br>
+    本节介绍基于 QWidget
+    自定义的多窗口程序，定制子窗口并弹窗显示，在多窗口之间使用信号和槽机制进行多窗口之间的数据传递。多窗口程序可以采用新建子窗口的方式，也可以集成之前开发的窗口模块
+    作为子窗口，本节通过新建和集成两种方式展示子窗口的使用。 <br>
+    <br>
+    <div  class="os2">11.1.1 QWidget</div>
+    <br>
+    QWidget 是用户界面所有控件和窗口的基类，涵盖控件和窗口所有基本的功能，比如界面绘制显示、鼠标键盘事件处理等，本节仅介绍一部分窗口显示常用的功能函
+    数。<br>
+    （1）构造函数<br>
+    <div  class="code">QWidget(QWidget * parent = 0, Qt::WindowFlags f = 0)</div>
+    参数 parent 如果为默认值 0，也就是 NULL，那么新建的 QWidget 对象就是独立的窗口，独立窗口有自己的标题栏和边框；<br>
+    如果指定 parent 为已有的窗口或控件，那么新建的 QWidget 就是子控件，子控件的显示受制于父窗口或父控件。<br>
+    本节就是专门讲解 QWidget 独立窗口的工作模式，在新建窗口时，不设置 parent 指针或者显示设为 NULL。<br>
+    Qt::WindowFlags 可以控制 QWidget 对象的多种工作类型，比如作为窗口、对话框、控件、菜单显示等等，通常不需要修改窗口标志位，每个功
+    能控件都会自行设置合适的工作类型。<br>
+    <br>
+    （2）显示与隐藏函数<br>
+    我们通过 QtCreator 新建的窗口会有默认的标题栏文本和默认尺寸，可以直接在主窗口调用子窗口的显示函数：<br>
+    <div  class="code">void QWidget::show()&nbsp;&nbsp; //槽函数，显示窗口<br>
+      void QWidget::hide()&nbsp;&nbsp;&nbsp; //槽函数，隐藏窗口<br>
+      bool&nbsp;&nbsp;&nbsp; isVisible() const&nbsp; //是否处于显示状态<br>
+      virtual void&nbsp;&nbsp;&nbsp; setVisible(bool visible)&nbsp; //控制窗口显示或隐藏</div>
+    show() 是显示窗口槽函数，hide() 是隐藏窗口槽函数，可以通过信号和槽的关联方便控制窗口显示状态，setVisible(bool
+    visible) 一样可以控制窗口显示或隐藏，参数 true 代表显示， false 代表隐藏。<br>
+    通常新的子窗口会显示到主窗口的上层，多个窗口的显示可能出现区域重叠，上层的窗口会遮挡下层窗口显示，例如：<br>
+    <center> <img  src="images/ch11/ch11-01-01.png"  alt="multi01"></center>
+    窗口本身是二维显示的，横轴 X， 纵轴 Y，多个窗口的上下层叠加，属于 Z 轴排列，上层的显示会遮挡下层窗口。<br>
+    控制窗口在 Z 轴的叠加使用下面两个函数：<br>
+    <div  class="code">void QWidget::raise()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //槽函数，将本窗口置于顶层显示<br>
+      void QWidget::lower()&nbsp;&nbsp;&nbsp; //槽函数，将本窗口置于底层显示</div>
+    raise() 是将窗口放在本程序所有窗口的 Z 轴最上面显示，lower()&nbsp; 则是放到最底层显示。<br>
+    用户鼠标点击也会自动切换窗口的 Z 轴位置，鼠标最新点击的窗口通常优先在 Z 轴顶层显示。<br>
+    程序的多个窗口通常同一时刻只有一个窗口处于活跃状态，就是用户鼠标键盘输入的焦点，鼠标点击哪个窗口，哪个窗口自动显示到最顶层，使用下面函数可以激活窗口，获
+    取输入焦点：<br>
+    <div  class="code">void QWidget::​activateWindow()&nbsp;
+      //激活本窗口，注意本窗口必须处于显示状态才有用<br>
+      bool&nbsp;&nbsp;&nbsp; isActiveWindow() const&nbsp;&nbsp;&nbsp;
+      //判断是否为活跃状态</div>
+    也可以使用 raise() 激活窗口获取输入焦点，处于顶层显示。<br>
+    <br>
+    对于窗口，如果用户点击标题栏的关闭按钮 X，或者程序调用关闭函数：<br>
+    <div  class="code">bool QWidget::close()</div>
+    窗口就会被关闭，关闭窗口函数首先会隐藏窗口，然后会触发 QCloseEvent，在这个事件里面可以处理关闭窗口的事务。close()
+    函数默认情况下不会销毁窗口，当Qt 图形界面程序的所有窗口被关闭时，程序会自动结束，这时才会销毁所有窗口。子窗口调用 close()
+    函数之后，子窗口对象默认情况下仍保留内存空间，还是一直存在的，成员变量和成员函数可以照常使用，可以通过 show() 函数重新显示。<br>
+    <br>
+    QWidget 窗口标题栏默认有最小化、最大化和关闭按钮，用户点击这些按钮会控制窗口的显示形态，通过函数也可以控制窗口的最大化最小化显示：<br>
+    <div  class="code">void QWidget::​showMinimized()&nbsp; //槽函数，最小化显示<br>
+      void QWidget::​showMaximized() //槽函数，最大化显示，标题栏和窗口主体都显示，占据桌面最大显示区域<br>
+      void QWidget::​showNormal()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //槽函数，正常尺寸显示<br>
+      void QWidget::​showFullScreen()&nbsp; //槽函数，全屏显示，标题栏隐藏，将窗口主体铺满屏幕</div>
+    &nbsp;程序可以通过函数获取窗口的显示状态，如 isMinimized()、isMaximized()
+    、isFullScreen()、isVisible()、isHidden() 等。<br>
+    默认情况下，程序的多个窗口之间是显示优先级是平等的（非模态显示），有一种特殊的显示方式，叫模态显示，这种窗口会独占显示焦点，强制显示在最上
+    层，不关闭模态窗口，就无法操作底层其他窗口。QWidget 有个特殊属性 windowModality 控制窗口的模态显示：<br>
+    <div  class="code">Qt::WindowModality&nbsp;&nbsp; &nbsp;windowModality()
+      const&nbsp; //获取模态状态<br>
+      void&nbsp;&nbsp;&nbsp; setWindowModality(Qt::WindowModality
+      windowModality)&nbsp; //设置模态状态<br>
+      bool&nbsp;&nbsp;&nbsp; isModal() const&nbsp;&nbsp; //是否为模态窗口</div>
+    Qt::WindowModality 枚举类型有三种：<br>
+    <br>
+    <table  class="tabel">
+      <tbody>
+        <tr  class="d1">
+          <td  style="width: 220px;"  align="center"><b>Qt::WindowModality 枚举常量</b></td>
+          <td  style="width: 160px;"  align="center"><b>数值</b></td>
+          <td  align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>Qt::NonModal</td>
+          <td> 0 </td>
+          <td> 非模态窗口，不会阻塞其他窗口输入。 </td>
+        </tr>
+        <tr  class="d1">
+          <td>Qt::WindowModal</td>
+          <td> 1</td>
+          <td> 窗口级模态，在兄弟级别、父级窗口及祖父以上级别窗口中，阻塞其他窗口，独占输入焦 点。 </td>
+        </tr>
+        <tr>
+          <td>Qt::ApplicationModal</td>
+          <td> 2</td>
+          <td> 应用程序级模态，在本应用程序所有窗口中，阻塞其他窗口，独占输入焦点。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    模态窗口一般设置为 Qt::ApplicationModal 即可，就是独占本程序的输入焦点，模态窗口不关闭，其他窗口都不能使用。<br>
+    设置模态窗口时，要注意先设置模态属性，然后再显示窗口；<br>
+    如果窗口已经显示了，再设置模态不会即刻生效，需要调用 hide() 隐藏窗口，然后重新 show() 显示窗口。<br>
+    模态窗口显示举例：<br>
+    <div  class="code">&nbsp;&nbsp;&nbsp;
+      pModWnd-&gt;setWindowModality(Qt::ApplicationModal);&nbsp; //模态窗口，会阻塞其他窗口<br>
+      &nbsp;&nbsp;&nbsp; pModWnd-&gt;show(); //模态窗口总是显示在最顶层，并且独占输入焦点</div>
+    <br>
+    非模态窗口显示举例：
+    <div  class="code">&nbsp;&nbsp;&nbsp; pNormalWnd-&gt;show();&nbsp;
+      //普通窗口显示，多个窗口都能操作，不会阻塞其他窗口<br>
+      &nbsp;&nbsp;&nbsp; pNormalWnd-&gt;raise();&nbsp;&nbsp; //将窗口置于顶层显示，方便用户操作</div>
+    <br>
+    （3）标题栏设置函数<br>
+    窗口标题栏可以设置文本、图标，标题栏文本也就是窗口名称，方便直接说明窗口功能：<br>
+    <div  class="code">QString&nbsp;&nbsp; &nbsp;windowTitle()
+      const&nbsp;&nbsp;&nbsp; //获取标题栏文本<br>
+      void&nbsp;&nbsp;&nbsp; setWindowTitle(const QString &amp;) //设置标题栏文本<br>
+      QIcon&nbsp;&nbsp;&nbsp; windowIcon() const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //获取标题栏图标<br>
+      void&nbsp;&nbsp;&nbsp; setWindowIcon(const QIcon &amp; icon)&nbsp;
+      //设置标题栏图标<br>
+      QString&nbsp;&nbsp;&nbsp; windowIconText() const&nbsp;&nbsp; //获取图标的文本<br>
+      void&nbsp;&nbsp;&nbsp; setWindowIconText(const QString &amp;) //设置图标的文本</div>
+    <br>
+    （4）窗口尺寸位置设置函数<br>
+    用户使用鼠标拉动窗口边框可以改变窗口尺寸，拖动标题栏可以控制窗口位置，通过函数也可以获取或修改窗口尺寸位置，相关函数如下面两个表格所示：<br>
+    <br>
+    <table  class="tabel">
+      <tbody>
+        <tr  class="d1">
+          <td  style="width: 320px;"  align="center"><b>窗口尺寸函数</b></td>
+          <td  align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>QSize&nbsp;&nbsp; &nbsp;size() const</td>
+          <td> 获取窗口客户区尺寸。 </td>
+        </tr>
+        <tr  class="d1">
+          <td>void&nbsp;&nbsp; &nbsp;resize(int w, int h)</td>
+          <td> 根据宽度高度设置窗口尺寸。 </td>
+        </tr>
+        <tr>
+          <td>void&nbsp;&nbsp; &nbsp;resize(const QSize &amp;)</td>
+          <td> 设置窗口尺寸。 </td>
+        </tr>
+        <tr  class="d1">
+          <td>int&nbsp;&nbsp; &nbsp;width() const</td>
+          <td> 获取当前宽度。 </td>
+        </tr>
+        <tr>
+          <td>int&nbsp;&nbsp; &nbsp;height() const</td>
+          <td> 获取当前高度。 </td>
+        </tr>
+        <tr  class="d1">
+          <td>QSize&nbsp;&nbsp; &nbsp;minimumSize() const</td>
+          <td> 获取最小尺寸。 </td>
+        </tr>
+        <tr>
+          <td>void&nbsp;&nbsp; &nbsp;setMinimumSize(const QSize &amp;)</td>
+          <td> 设置最小尺寸。 </td>
+        </tr>
+        <tr  class="d1">
+          <td>void&nbsp;&nbsp; &nbsp;setMinimumSize(int minw, int minh)</td>
+          <td> 设置最小尺寸。 </td>
+        </tr>
+        <tr>
+          <td>int&nbsp;&nbsp;&nbsp; minimumWidth() const</td>
+          <td  style="height: 16px;"> 获取最小宽度。 </td>
+        </tr>
+        <tr  class="d1">
+          <td>void&nbsp;&nbsp;&nbsp; setMinimumWidth(int minw)</td>
+          <td> 设置最小宽度。 </td>
+        </tr>
+        <tr>
+          <td>int&nbsp;&nbsp;&nbsp; minimumHeight() const</td>
+          <td> 获取最小高度。 </td>
+        </tr>
+        <tr  class="d1">
+          <td>void&nbsp;&nbsp;&nbsp; setMinimumHeight(int minh)</td>
+          <td> 设置最小高度。 </td>
+        </tr>
+        <tr>
+          <td>QSize&nbsp;&nbsp;&nbsp; maximumSize() const<br>
+          </td>
+          <td> 获取最大尺寸。 </td>
+        </tr>
+        <tr  class="d1">
+          <td>void&nbsp;&nbsp; &nbsp;setMaximumSize(const QSize &amp;)</td>
+          <td> 设置最大尺寸。 </td>
+        </tr>
+        <tr>
+          <td>void&nbsp;&nbsp;&nbsp; setMaximumSize(int maxw, int maxh)<br>
+          </td>
+          <td> 设置最大尺寸。 </td>
+        </tr>
+        <tr  class="d1">
+          <td  style="height: 16px;">int&nbsp;&nbsp; &nbsp;maximumWidth() const</td>
+          <td> 获取最大宽度。 </td>
+        </tr>
+        <tr>
+          <td>void&nbsp;&nbsp;&nbsp; setMaximumWidth(int maxw)<br>
+          </td>
+          <td> 设置最大宽度。 </td>
+        </tr>
+        <tr  class="d1">
+          <td>int&nbsp;&nbsp;&nbsp; maximumHeight() const</td>
+          <td> 获取最大高度。 </td>
+        </tr>
+        <tr>
+          <td>void&nbsp;&nbsp;&nbsp; setMaximumHeight(int maxh)<br>
+          </td>
+          <td> 设置最大高度。 </td>
+        </tr>
+        <tr  class="d1">
+          <td>QRect&nbsp;&nbsp; &nbsp;rect() const</td>
+          <td> 获取窗口客户区矩形，等同于&nbsp; QRect(0, 0, width(), height()) 。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    QSize 包括两个数值：宽度 width() ，高度 height() 。<br>
+    QRect 矩形包括四个数值：左上角起点横坐标 x()，左上角起点纵坐标 y() ，矩形宽度 width() ，矩形高度 height() 。<br>
+    <br>
+    移动窗口或获取窗口位置的函数：<br>
+    <br>
+    <table  class="tabel">
+      <tbody>
+        <tr  class="d1">
+          <td  style="width: 320px;"  align="center"><b>窗口位置函数</b></td>
+          <td  align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>QPoint&nbsp;&nbsp;&nbsp; pos() const</td>
+          <td>获取窗口左上角起点位置坐标。</td>
+        </tr>
+        <tr  class="d1">
+          <td>void&nbsp;&nbsp;&nbsp; move(int x, int y)</td>
+          <td  style="height: 16px;">移动窗口位置，使左上角起点到指定坐标。</td>
+        </tr>
+        <tr>
+          <td>void&nbsp;&nbsp;&nbsp; move(const QPoint &amp;)</td>
+          <td>移动窗口位置，使左上角起点到指定坐标。</td>
+        </tr>
+        <tr  class="d1">
+          <td>int&nbsp;&nbsp;&nbsp; x() const</td>
+          <td>窗口左上角起点位置的横轴坐标。</td>
+        </tr>
+        <tr>
+          <td>int&nbsp;&nbsp;&nbsp; y() const</td>
+          <td  style="height: 16px;">窗口左上角起点位置的纵轴坐标。</td>
+        </tr>
+        <tr  class="d1">
+          <td>const QRect &amp;&nbsp;&nbsp;&nbsp; geometry() const</td>
+          <td>窗口客户区几何矩形（不含标题栏边框）。</td>
+        </tr>
+        <tr>
+          <td>void setGeometry(int x, int y, int w, int h)</td>
+          <td  style="height: 16px;">设置窗口客户区几何矩形，同时设置坐标和尺寸。</td>
+        </tr>
+        <tr  class="d1">
+          <td>void&nbsp;&nbsp;&nbsp; setGeometry(const QRect &amp;)</td>
+          <td>设置窗口客户区几何矩形。</td>
+        </tr>
+        <tr>
+          <td>QRect&nbsp;&nbsp;&nbsp; frameGeometry() const</td>
+          <td  style="height: 16px;">窗口包含标题栏边框的整体几何矩形。</td>
+        </tr>
+        <tr  class="d1">
+          <td>QSize&nbsp;&nbsp;&nbsp; frameSize() const</td>
+          <td>窗口包含标题栏边框的整体尺寸。</td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    <span  style="font-weight: bold;">窗口尺寸位置有些函数的计算包含标题和边框，例如：<br>
+      x(),&nbsp; y(),&nbsp; frameGeometry(),&nbsp; pos(),&nbsp; move() 。<br>
+      另一些函数计算不包括标题栏和边框，就是单指客户区尺寸位置：<br>
+      geometry(),&nbsp; width(),&nbsp; height(),&nbsp; rect(), size() 。</span><br>
+    <br>
+    通过下图直观说明尺寸位置计算：<br>
+    <center> <img  src="images/ch11/ch11-01-02.png"  alt="geo"></center>
+    绿色箭头包含标题栏边框，是完整的窗口矩形计算，紫色的箭头是窗口客户区矩形计算。<br>
+    一般来说，移动窗口位置时，我们按照窗口整体来计算；<br>
+    而缩放窗口尺寸时，按照窗口客户区来计算。<br>
+    <br>
+    <div  class="os2">11.1.2 新建窗口类方式</div>
+    <br>
+    下面我们通过一个例子，学习新建窗口类的方式，使用多个窗口。<br>
+    <br>
+    <div  class="os2">11.1.3 集成已有窗口类方式</div>
+    <br>
+    下面的例子，我们通过集成已有窗口类的方式，使用多个窗口。<br>
+    <br>
+    <div  class="code">q</div>
+    <br>
+    <br>
+    <table  style="text-align: left; width: 100%;"  border="0"  cellpadding="2"
+       cellspacing="2">
+      <tbody>
+        <tr>
+          <td  style="width: 40%;">
+            <div  style="text-align: center;"><a  href="ch11-00.htm"><img  class="pic"
+                   style="width: 32px; height: 32px;"  alt="prev"  src="images/pics/prev.png"></a></div>
+          </td>
+          <td  style="width: 20%;">
+            <div  style="text-align: center;"><a  href="contents.htm"><img  class="pic"
+                   style="width: 32px; height: 32px;"  alt="contents"  src="images/pics/contents.png"></a></div>
+          </td>
+          <td  style="width: 40%;">
+            <div  style="text-align: center;"><a  href="ch11-02.htm"><img  class="pic"
+                   style="width: 32px; height: 32px;"  alt="next"  src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

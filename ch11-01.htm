@@ -21,7 +21,7 @@
     自定义的多窗口程序，定制子窗口并弹窗显示，在多窗口之间使用信号和槽机制进行多窗口之间的数据传递。多窗口程序可以采用新建子窗口的方式，也可以集成之前开发的窗口模块
     作为子窗口，本节通过新建和集成两种方式展示子窗口的使用。 <br>
     <br>
-    <div  class="os2">11.1.1 QWidget</div>
+    <div  class="os2">11.1.1 QWidget 类</div>
     <br>
     QWidget 是用户界面所有控件和窗口的基类，涵盖控件和窗口所有基本的功能，比如界面绘制显示、鼠标键盘事件处理等，本节仅介绍一部分窗口显示常用的功能函
     数。<br>
@@ -50,8 +50,8 @@
       void QWidget::lower()&nbsp;&nbsp;&nbsp; //槽函数，将本窗口置于底层显示</div>
     raise() 是将窗口放在本程序所有窗口的 Z 轴最上面显示，lower()&nbsp; 则是放到最底层显示。<br>
     用户鼠标点击也会自动切换窗口的 Z 轴位置，鼠标最新点击的窗口通常优先在 Z 轴顶层显示。<br>
-    程序的多个窗口通常同一时刻只有一个窗口处于活跃状态，就是用户鼠标键盘输入的焦点，鼠标点击哪个窗口，哪个窗口自动显示到最顶层，使用下面函数可以激活窗口，获
-    取输入焦点：<br>
+    程序的多个窗口通常同一时刻只有一个窗口处于活跃状态，就是用户鼠标键盘输入的焦点，鼠标点击哪个窗口，哪个窗口自动显示到最顶层，使用下面函数可以
+    激活窗口，获 取输入焦点：<br>
     <div  class="code">void QWidget::​activateWindow()&nbsp;
       //激活本窗口，注意本窗口必须处于显示状态才有用<br>
       bool&nbsp;&nbsp;&nbsp; isActiveWindow() const&nbsp;&nbsp;&nbsp;
@@ -293,7 +293,1245 @@
     <br>
     <div  class="os2">11.1.2 新建窗口类方式</div>
     <br>
-    下面我们通过一个例子，学习新建窗口类的方式，使用多个窗口。<br>
+    下面我们通过一个密码管理工具例子，学习新建窗口类的方式，使用多个窗口。<br>
+    主窗口显示用户名和密码哈希值列表，通过新建的子窗口来完成修改用户密码的功能。<br>
+    我们打开 QtCreator，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>
+    ①项目名称 passwordtool，创建路径 D:\QtProjects\ch11，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，<span  style="font-weight: bold;">注意修改主窗口类名为 MainWidget，</span>这
+    样与后续的子窗口类名作区分，然后点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    主窗口类名为 MainWidget，对应的界面文件、头文件、源文件名就是
+    mainwidget.ui、mainwidget.h、mainwidget.cpp 。<br>
+    接下来我们在项目管理器右击项目根 passwordtool ，右键菜单选择“添加新文件...”，进入新建文件对话框：<br>
+    <center> <img  src="images/ch11/ch11-01-03.png"  alt="new1"></center>
+    在上面对话框左边一栏选择 “Qt”，然后在中间一栏选择“Qt设计师界面类”，然后点击右下角“Choose...”按钮，进入Qt设计师界面类的选择界面：<br>
+    <center> <img  src="images/ch11/ch11-01-04.png"  alt="new2"></center>
+    在中间上半区选择“Widget”，然后点击“下一步”按钮，进入类名编辑界面：<br>
+    <center> <img  src="images/ch11/ch11-01-05.png"  alt="new3"></center>
+    我们只需要把类名修改为 FormChangePassword ，下面的头文件、源文件、界面文件名自动修改，不需要手动调整，修改类名之后点击“下一步”，<br>
+    <center> <img  src="images/ch11/ch11-01-06.png"  alt="new4"></center>
+    项目管理界面不用动，直接点击“完成”按钮。这样项目就增加了新类的文件：<br>
+    formchangepassword.cpp，formchangepassword.h，formchangepassword.ui。<br>
+    现在我们有两套界面类，一套是 MainWidget 类主窗口的文件，另一套是 FormChangePassword 类子窗口的文件。<br>
+    我们从主窗口开始编辑，我们打开 mainwidget.ui 文件，然后拖入控件：<br>
+    <center> <img  src="images/ch11/ch11-01-07.png"  alt="mainui01"  width="800"></center>
+    第一行控件分别是标签“用户名”，单行编辑器 lineEditUser，标签“密码”，单行编辑器 lineEditPassword，“添加新用户”按钮
+    pushButtonAddUser 。<br>
+    第二行左边是列表控件 listWidgetShow ，右边是两个按钮，“修改用户密码”按钮
+    pushButtonChangePassword，“删除选定用户”按钮 pushButtonDelUser 。“修改用户密码”按钮就是负责弹出子窗口的功
+    能按钮。<br>
+    第一行控件按照水平布局；<br>
+    第二行先将 pushButtonChangePassword、pushButtonDelUser&nbsp; 两个按钮垂直布局，然后再与
+    listWidgetShow 进行水平布局，如下图所示：<br>
+    <center> <img  src="images/ch11/ch11-01-08.png"  alt="mainui02"  width="800"></center>
+    然后我们选中主窗口 MainWidget，点击上面垂直布局按钮，主窗口的主布局器是垂直布局：<br>
+    <center> <img  src="images/ch11/ch11-01-09.png"  alt="mainui03"  width="800"></center>
+    布局完成后，我们修改窗口的尺寸为 518* 300。<br>
+    然后我们依次右键点击三个按钮，在右键菜单为它们添加 clicked() 信号对应槽函数：<br>
+    <center> <img  src="images/slots/buttonclicked.png"  alt="slot"></center>
+    添加好主界面三个按钮的槽函数之后，我们保存并关闭 mainwidget.ui 文件。<br>
+    <br>
+    接下来我们打开子窗口的界面文件 formchangepassword.ui ，拖入如下控件：<br>
+    <center> <img  src="images/ch11/ch11-01-10.png"  alt="childui01"  width="800"></center>
+    第一行是标签“用户名”，单行编辑器 lineEditUser；<br>
+    第二行是标签“旧密码”，单行编辑器 lineEditOldPassword；<br>
+    第三行是标签“新密码”，单行编辑器 lineEditNewPassword；<br>
+    第四行是标签“新密码确认”，单行编辑器 lineEditNewPassword2；<br>
+    第五行是“修改密码”按钮 pushButtonChange，按钮尺寸拉宽，与上一行两个控件的累计宽度差不多 。<br>
+    在右边对象树，选中窗口 FormChangePassword ，然后点击上面的 网格布局器，该窗口使用一个网格布局即可，设置布局后把窗口大小设置为
+    280 * 240 ，如下图所示：<br>
+    <center> <img  src="images/ch11/ch11-01-11.png"  alt="childui02"  width="800"></center>
+    布局设置完成后，我们右击子窗口的 “修改密码”按钮，为该按钮也添加 clicked() 信号对应槽函数 。<br>
+    我们右击添加的槽函数自动归属于各自的窗口类，在主窗口右击添加的槽函数自动放到主窗口类，在子窗口右击添加的槽函数自动放到子窗口类。<br>
+    按钮的槽函数都添加完成后，我们保存 formchangepassword.ui 文件并关闭该文件。<br>
+    <br>
+    下面我们先从主窗口代码开始编辑，首先是 mainwidget.h 头文件：<br>
+    <div  class="code"><span  style=" color:#000080;">#ifndef</span><span  style=" color:#c0c0c0;">
+      </span>MAINWIDGET_H
+      <pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000080;">#define</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000080;">MAINWIDGET_H</span></pre>
+      <pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000080;">#include</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#008000;"><qwidget></qwidget></span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000080;">#include</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#008000;"><qcryptographichash></qcryptographichash></span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#008000;">//计算密码哈希值</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000080;">#include</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#008000;"><qmap></qmap></span><span  style=" color:#c0c0c0;">  </span><span
+ style=" color:#008000;">//保存用户名-密码映射</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000080;">#include</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#008000;">"formchangepassword.h"</span><span  style=" color:#c0c0c0;">  </span><span
+ style=" color:#008000;">//子窗口类</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000080;">#include</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#008000;"><qlistwidget></qlistwidget></span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000080;">#include</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#008000;"><qlistwidgetitem></qlistwidgetitem></span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#808000;">namespace</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800080;">Ui</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#808000;">class</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800080;">MainWidget</span><span  style=" color:#000000;">;</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">}</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#808000;">class</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800080;">MainWidget</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">:</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#808000;">public</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#800080;">QWidget</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000080;">Q_OBJECT</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#808000;">public</span><span  style=" color:#000000;">:</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">explicit</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#800080;">MainWidget</span><span
+ style=" color:#000000;">(</span><span  style=" color:#800080;">QWidget</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">*</span>parent<span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000080;">0</span><span  style=" color:#000000;">);</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">~</span><span
+ style=" font-style:italic; color:#000000;">MainWidget</span><span  style=" color:#000000;">();</span><span
+ style=" color:#c0c0c0;">    </span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//更新列表控件的显示</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">void</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">UpdateListShow</span><span
+ style=" color:#000000;">();</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#808000;">signals</span><span  style=" color:#000000;">:</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//发送旧的用户名密码哈希给子窗口，用于修改密码</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">void</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">SendOldUserPassword</span><span
+ style=" color:#000000;">(</span><span  style=" color:#800080;">QString</span><span
+ style=" color:#c0c0c0;"> </span>strUser<span  style=" color:#000000;">,</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#800080;">QByteArray</span><span
+ style=" color:#c0c0c0;"> </span>baOldHash<span  style=" color:#000000;">);</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#808000;">private</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#808000;">slots</span><span  style=" color:#000000;">:</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">void</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">on_pushButtonAddUser_clicked</span><span
+ style=" color:#000000;">();</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">void</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">on_pushButtonChangePassword_clicked</span><span
+ style=" color:#000000;">();</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">void</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">on_pushButtonDelUser_clicked</span><span
+ style=" color:#000000;">();</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//手动添加的槽函数，从子窗口接收新的密码哈希值</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">void</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">RecvNewUserPassword</span><span
+ style=" color:#000000;">(</span><span  style=" color:#800080;">QString</span><span
+ style=" color:#c0c0c0;"> </span>strUser<span  style=" color:#000000;">,</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#800080;">QByteArray</span><span
+ style=" color:#c0c0c0;"> </span>baNewHash<span  style=" color:#000000;">);</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#808000;">private</span><span  style=" color:#000000;">:</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800080;">Ui</span><span
+ style=" color:#000000;">::</span><span  style=" color:#800080;">MainWidget</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">*</span><span  style=" color:#800000;">ui</span><span
+ style=" color:#000000;">;</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//保存用户名和密码哈希值</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800080;">QMap</span><span
+ style=" color:#000000;"><</span><span  style=" color:#800080;">QString</span><span
+ style=" color:#000000;">,</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#800080;">QByteArray</span><span
+ style=" color:#000000;">></span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#800000;">m_mapUserAndHash</span><span
+ style=" color:#000000;">;</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//子窗口对象指针</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800080;">FormChangePassword</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">*</span><span  style=" color:#800000;">m_pFormChild</span><span
+ style=" color:#000000;">;</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//初始化设置</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">void</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">Init</span><span
+ style=" color:#000000;">();</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">};</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000080;">#endif</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#008000;">//</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#008000;">MAINWIDGET_H</span></pre></div>
+    我们添加了多个类的头文件包含，QCryptographicHash 类专门用于密码哈希值计算，涵盖常见的密码哈希算法，比如 MD5、SHA256 等，密码一般不建议明文直接存储，容易泄密，所以都是将密码通过哈希算法生成哈希值存储。哈希算法是单向计算函数，可以从明文推算哈希值密文，但是反过来难以计算，从而实现较为安全的密码存储方式。密码比对时，不需要比对明文密码，只需要验证两个密码的哈希值是否一致。<br>我们添加 QMap 模板类声明，用于保存用户名和密码哈希值的键值对；formchangepassword.h 是子窗口类的头文件；QListWidget 和 QListWidgetItem 是列表控件和列表条目的类。<br>
+    在 MainWidget 类声明中，我们手动添加更新列表控件显示的函数 UpdateListShow()。<br>手动添加信号 SendOldUserPassword(QString strUser, QByteArray baOldHash)，用于给修改密码子窗口发送用户名和旧密码哈希值。<br>三个按钮的槽函数是之前界面文件编辑时添加的，后面我们手动添加槽函数 RecvNewUserPassword(QString strUser, QByteArray baNewHash)，用于从子窗口接收用户名和修改后的新密码哈希值。<br>我们添加 m_mapUserAndHash 模板类对象，保存用户名和密码哈希值的键值对；<br>m_pFormChild 是子窗口的指针，用于弹窗修改用户的密码；<br>Init() 是用于窗口初始化的代码，在该函数里面新建子窗口。<br><br>
+    例子中主窗口和子窗口通过信号和槽函数交互数据，如下图所示：<br>
+    <center> <img  src="images/ch11/ch11-01-12.png"  alt="sig-slot"  width="600"></center>
+    需要发送数据时，通过 emit 触发信号即可。<br>下面我们分段编辑主窗口的源文件  mainwidget.cpp，首先是构造函数和初始化函数内容：<br>
+   <div  class="code"><span  style=" color:#000080;">#include</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#008000;">"mainwidget.h"</span>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000080;">#include</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#008000;">"ui_mainwidget.h"</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000080;">#include</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#008000;"><qmessagebox></qmessagebox></span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000080;">#include</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#008000;"><qdebug></qdebug></span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#800080;">MainWidget</span><span  style=" color:#000000;">::</span><span
+ style=" color:#000000;">MainWidget</span><span  style=" color:#000000;">(</span><span
+ style=" color:#800080;">QWidget</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">*</span><span  style=" color:#000000;">parent</span><span
+ style=" color:#000000;">)</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">:</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800080;">QWidget</span><span
+ style=" color:#000000;">(</span><span  style=" color:#000000;">parent</span><span
+ style=" color:#000000;">),</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800000;">ui</span><span
+ style=" color:#000000;">(</span><span  style=" color:#808000;">new</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#800080;">Ui</span><span  style=" color:#000000;">::</span><span
+ style=" color:#800080;">MainWidget</span><span  style=" color:#000000;">)</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800000;">ui</span><span
+ style=" color:#000000;">-></span><span  style=" color:#000000;">setupUi</span><span
+ style=" color:#000000;">(</span><span  style=" color:#808000;">this</span><span
+ style=" color:#000000;">);</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//初始化设置</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">Init</span><span
+ style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">}</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#800080;">MainWidget</span><span  style=" color:#000000;">::~</span><span
+ style=" font-style:italic; color:#000000;">MainWidget</span><span  style=" color:#000000;">()</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//删除子窗口</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">delete</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#800000;">m_pFormChild</span><span
+ style=" color:#000000;">;</span><span  style=" color:#c0c0c0;">    </span><span
+ style=" color:#800000;">m_pFormChild</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000080;">NULL</span><span
+ style=" color:#000000;">;</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">delete</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#800000;">ui</span><span  style=" color:#000000;">;</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">}</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#008000;">//初始化设置</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#808000;">void</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800080;">MainWidget</span><span  style=" color:#000000;">::</span><span
+ style=" color:#000000;">Init</span><span  style=" color:#000000;">()</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//设置窗口标题栏</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">setWindowTitle</span><span
+ style=" color:#000000;">(</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">tr</span><span
+ style=" color:#000000;">(</span><span  style=" color:#008000;">"用户名密码管理工具"</span><span
+ style=" color:#000000;">)</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">);</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//密码编辑框隐藏显示</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800000;">ui</span><span
+ style=" color:#000000;">-></span><span  style=" color:#800000;">lineEditPassword</span><span
+ style=" color:#000000;">-></span><span  style=" color:#000000;">setEchoMode</span><span
+ style=" color:#000000;">(</span><span  style=" color:#800080;">QLineEdit</span><span
+ style=" color:#000000;">::</span><span  style=" color:#800080;">Password</span><span
+ style=" color:#000000;">);</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800000;">m_pFormChild</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000080;">NULL</span><span  style=" color:#000000;">;</span><span
+ style=" color:#c0c0c0;">  </span><span  style=" color:#008000;">//初始化为</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#008000;">NULL</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//新建子窗口，窗口构造时参数里的</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#008000;">parent</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#008000;">必须是</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#008000;">0</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#008000;">或</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#008000;">NULL</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800000;">m_pFormChild</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#808000;">new</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800080;">FormChangePassword</span><span  style=" color:#000000;">(</span><span
+ style=" color:#000080;">NULL</span><span  style=" color:#000000;">);</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//关联信号和槽</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//主窗口发送旧的用户名密码哈希给子窗口</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">connect</span><span
+ style=" color:#000000;">(</span><span  style=" color:#808000;">this</span><span
+ style=" color:#000000;">,</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#808000;">SIGNAL</span><span
+ style=" color:#000000;">(</span>SendOldUserPassword<span  style=" color:#000000;">(</span><span
+ style=" color:#800080;">QString</span><span  style=" color:#000000;">,</span><span
+ style=" color:#800080;">QByteArray</span><span  style=" color:#000000;">)),</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">            </span><span  style=" color:#800000;">m_pFormChild</span><span
+ style=" color:#000000;">,</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#808000;">SLOT</span><span
+ style=" color:#000000;">(</span>RecvOldUserPassword<span  style=" color:#000000;">(</span><span
+ style=" color:#800080;">QString</span><span  style=" color:#000000;">,</span><span
+ style=" color:#800080;">QByteArray</span><span  style=" color:#000000;">))</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">);</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//子窗口发送新的用户名密码哈希给主窗口</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">connect</span><span
+ style=" color:#000000;">(</span><span  style=" color:#800000;">m_pFormChild</span><span
+ style=" color:#000000;">,</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#808000;">SIGNAL</span><span
+ style=" color:#000000;">(</span>SendNewUserPassword<span  style=" color:#000000;">(</span><span
+ style=" color:#800080;">QString</span><span  style=" color:#000000;">,</span><span
+ style=" color:#800080;">QByteArray</span><span  style=" color:#000000;">)),</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">            </span><span  style=" color:#808000;">this</span><span
+ style=" color:#000000;">,</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#808000;">SLOT</span><span
+ style=" color:#000000;">(</span>RecvNewUserPassword<span  style=" color:#000000;">(</span><span
+ style=" color:#800080;">QString</span><span  style=" color:#000000;">,</span><span
+ style=" color:#800080;">QByteArray</span><span  style=" color:#000000;">))</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">);</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">}</span></pre></div>
+    构造函数末尾添加了 Init() 函数调用，析构函数里面添加了一行删除子窗口对象的代码。<br> Init() 函数首先设置主窗口的标题栏文本为 "用户名密码管理工具" ；<br>将密码编辑框的回显模式修改为 QLineEdit::Password ，就是隐藏输入的字符，用星号或者黑圆点代替；<br>我们先将 m_pFormChild 初始化为 NULL 空指针，然后新建子窗口对象，保存到 m_pFormChild，新建窗口时，参数里的 parent 必须为 0 或 NULL；<br>然后我们将主窗口和子窗口的信号、槽函数进行关联，主窗口将用户名、旧密码传递给子窗口，子窗口修改密码后，再将用户名和新密码回传给主窗口。<br><br>接下来我们编辑更新列表控件显示的函数，当用户名密码列表变化时，调用这个函数更新显示：<br>  
+    <div  class="code"><span  style=" color:#008000;">//更新列表控件的显示</span>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#808000;">void</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800080;">MainWidget</span><span  style=" color:#000000;">::</span><span
+ style=" color:#000000;">UpdateListShow</span><span  style=" color:#000000;">()</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//清除旧列表</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800000;">ui</span><span
+ style=" color:#000000;">-></span><span  style=" color:#800000;">listWidgetShow</span><span
+ style=" color:#000000;">-></span><span  style=" color:#000000;">clear</span><span
+ style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//根据映射重新显示</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">int</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">nCount</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800000;">m_mapUserAndHash</span><span  style=" color:#000000;">.</span><span
+ style=" color:#000000;">count</span><span  style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//获取所有key，就是用户名</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800080;">QList</span><span
+ style=" color:#000000;"><</span><span  style=" color:#800080;">QString</span><span
+ style=" color:#000000;">></span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">listKeys</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800000;">m_mapUserAndHash</span><span  style=" color:#000000;">.</span><span
+ style=" color:#000000;">keys</span><span  style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">for</span><span
+ style=" color:#000000;">(</span><span  style=" color:#808000;">int</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">i</span><span  style=" color:#000000;">=</span><span
+ style=" color:#000080;">0</span><span  style=" color:#000000;">;</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">i</span><span  style=" color:#000000;"><</span><span  style=" color:#000000;">nCount</span><span
+ style=" color:#000000;">;</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">i</span><span
+ style=" color:#000000;">++)</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#800080;">QString</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">curKey</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">listKeys</span><span  style=" color:#000000;">[</span><span
+ style=" color:#000000;">i</span><span  style=" color:#000000;">];</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#800080;">QString</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">strTemp</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">curKey</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">+</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#800080;">QString</span><span
+ style=" color:#000000;">(</span><span  style=" color:#008000;">"\t"</span><span
+ style=" color:#000000;">)</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">+</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#800000;">m_mapUserAndHash</span><span
+ style=" color:#000000;">[</span><span  style=" color:#000000;">curKey</span><span
+ style=" color:#000000;">];</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#800000;">ui</span><span
+ style=" color:#000000;">-></span><span  style=" color:#800000;">listWidgetShow</span><span
+ style=" color:#000000;">-></span><span  style=" color:#000000;">addItem</span><span
+ style=" color:#000000;">(</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">strTemp</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">);</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">}</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">}</span></pre></div>
+    我们先清空列表控件旧的内容，然后获取用户密码键值对的计数，获取所有的键，也就是用户名列表；<br>然后循环处理映射对象中每个键值对，将用户名和密码哈希值通过 "\t" 拼接成一个字符串，添加为列表控件的一行。<br>循环结束之后，就完成了列表控件的更新。<br><br>
+    接下来我们编辑“添加新用户”按钮槽函数的代码：<br>
+    <div  class="code"><span  style=" color:#008000;">//添加新用户</span>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#808000;">void</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800080;">MainWidget</span><span  style=" color:#000000;">::</span><span
+ style=" color:#000000;">on_pushButtonAddUser_clicked</span><span  style=" color:#000000;">()</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//获取用户名和密码字符串</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800080;">QString</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">strNewUser</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800000;">ui</span><span  style=" color:#000000;">-></span><span
+ style=" color:#800000;">lineEditUser</span><span  style=" color:#000000;">-></span><span
+ style=" color:#000000;">text</span><span  style=" color:#000000;">().</span><span
+ style=" color:#000000;">trimmed</span><span  style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800080;">QString</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">strPassword</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800000;">ui</span><span  style=" color:#000000;">-></span><span
+ style=" color:#800000;">lineEditPassword</span><span  style=" color:#000000;">-></span><span
+ style=" color:#000000;">text</span><span  style=" color:#000000;">().</span><span
+ style=" color:#000000;">trimmed</span><span  style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">if</span><span
+ style=" color:#000000;">(</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">strNewUser</span><span
+ style=" color:#000000;">.</span><span  style=" color:#000000;">isEmpty</span><span
+ style=" color:#000000;">()</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">||</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">strPassword</span><span
+ style=" color:#000000;">.</span><span  style=" color:#000000;">isEmpty</span><span
+ style=" color:#000000;">()</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">)</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#800080;">QMessageBox</span><span
+ style=" color:#000000;">::</span><span  style=" color:#000000;">information</span><span
+ style=" color:#000000;">(</span><span  style=" color:#808000;">this</span><span
+ style=" color:#000000;">,</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">tr</span><span
+ style=" color:#000000;">(</span><span  style=" color:#008000;">"用户名密码检查"</span><span
+ style=" color:#000000;">),</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">tr</span><span
+ style=" color:#000000;">(</span><span  style=" color:#008000;">"用户名或密码为空，不能添加。"</span><span
+ style=" color:#000000;">));</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#808000;">return</span><span
+ style=" color:#000000;">;</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">}</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//判断是否已存在该用户</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">if</span><span
+ style=" color:#000000;">(</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#800000;">m_mapUserAndHash</span><span
+ style=" color:#000000;">.</span><span  style=" color:#000000;">contains</span><span
+ style=" color:#000000;">(</span><span  style=" color:#000000;">strNewUser</span><span
+ style=" color:#000000;">)</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">)</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#800080;">QMessageBox</span><span
+ style=" color:#000000;">::</span><span  style=" color:#000000;">information</span><span
+ style=" color:#000000;">(</span><span  style=" color:#808000;">this</span><span
+ style=" color:#000000;">,</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">tr</span><span
+ style=" color:#000000;">(</span><span  style=" color:#008000;">"用户名检查"</span><span
+ style=" color:#000000;">),</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">tr</span><span
+ style=" color:#000000;">(</span><span  style=" color:#008000;">"已存在该用户名，不能再新增同名。"</span><span
+ style=" color:#000000;">));</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#808000;">return</span><span
+ style=" color:#000000;">;</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">}</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//新的用户名，计算哈希</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800080;">QByteArray</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">baNewHash</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800080;">QCryptographicHash</span><span  style=" color:#000000;">::</span><span
+ style=" color:#000000;">hash</span><span  style=" color:#000000;">(</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">strPassword</span><span
+ style=" color:#000000;">.</span><span  style=" color:#000000;">toUtf8</span><span
+ style=" color:#000000;">(),</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">                                                     </span><span
+ style=" color:#800080;">QCryptographicHash</span><span  style=" color:#000000;">::</span><span
+ style=" color:#800080;">Sha256</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">);</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//二进制哈希转为Hex字符串</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">baNewHash</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">baNewHash</span><span  style=" color:#000000;">.</span><span
+ style=" color:#000000;">toHex</span><span  style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//新增用户名</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800000;">m_mapUserAndHash</span><span
+ style=" color:#000000;">.</span><span  style=" color:#000000;">insert</span><span
+ style=" color:#000000;">(</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">strNewUser</span><span
+ style=" color:#000000;">,</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">baNewHash</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">);</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//更新显示</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">UpdateListShow</span><span
+ style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">}</span></pre></div>
+    该函数先获取用户名和密码的字符串，字符串剔除两端的空白；<br>判断用户名 strNewUser 和密码 strPassword 字符串是否为空，如果有一个为空就弹出信息框提示，然后返回；<br>只有当用户名和密码字符串都不空时，进入后续的处理。<br>
+    判断 strNewUser 是否为映射对象已有的键，就是检查用户名是否重复，如果重复就弹出信息框提示，然后返回；<br>当没有重复用户名时，才进行后续的添加操作。<br>我们调用静态函数 QCryptographicHash::hash() 计算密码的 SHA256 哈希值，直接得到的字节数组是二进制格式，不便于显示，因此转为 Hex 十六进制字符串，存到 baNewHash，例如原本一字节 0xa1 的二进制转为两个字符 "a1" 。<br>SHA256 哈希值原本 256 比特（32 字节），转换后就是 64 个十六进制字符。<br>我们将用户名和新的哈希字符串存到映射对象 m_mapUserAndHash，并调用 UpdateListShow() 更新列表控件显示。<br><br>
+    接下来我们编辑“删除选定用户”按钮的槽函数：<br>
+    <div  class="code"><span  style=" color:#008000;">//删除选中行的用户</span>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#808000;">void</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800080;">MainWidget</span><span  style=" color:#000000;">::</span><span
+ style=" color:#000000;">on_pushButtonDelUser_clicked</span><span  style=" color:#000000;">()</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//列表当前行号</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">int</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">curIndex</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800000;">ui</span><span  style=" color:#000000;">-></span><span
+ style=" color:#800000;">listWidgetShow</span><span  style=" color:#000000;">-></span><span
+ style=" color:#000000;">currentRow</span><span  style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">if</span><span
+ style=" color:#000000;">(</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">curIndex</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;"><</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000080;">0</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">)</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#808000;">return</span><span
+ style=" color:#000000;">;</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">}</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//当前行号的条目</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800080;">QListWidgetItem</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">*</span><span  style=" color:#000000;">curItem</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800000;">ui</span><span  style=" color:#000000;">-></span><span
+ style=" color:#800000;">listWidgetShow</span><span  style=" color:#000000;">-></span><span
+ style=" color:#000000;">item</span><span  style=" color:#000000;">(</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">curIndex</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">);</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">if</span><span
+ style=" color:#000000;">(</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">curItem</span><span
+ style=" color:#000000;">-></span><span  style=" color:#000000;">isSelected</span><span
+ style=" color:#000000;">()</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">)</span><span
+ style=" color:#c0c0c0;">  </span><span  style=" color:#008000;">//处于选中状态，才删除该行</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#008000;">//该条目处于选中状态</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#800080;">QString</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">curLine</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">curItem</span><span  style=" color:#000000;">-></span><span
+ style=" color:#000000;">text</span><span  style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#800080;">QStringList</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">curKeyValue</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">curLine</span><span  style=" color:#000000;">.</span><span
+ style=" color:#000000;">split</span><span  style=" color:#000000;">(</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#008000;">'\t'</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">);</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#008000;">//删除键值对</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#800000;">m_mapUserAndHash</span><span
+ style=" color:#000000;">.</span><span  style=" color:#000000;">remove</span><span
+ style=" color:#000000;">(</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">curKeyValue</span><span
+ style=" color:#000000;">[</span><span  style=" color:#000080;">0</span><span  style=" color:#000000;">]</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">);</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#008000;">//卸下条目</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#800000;">ui</span><span
+ style=" color:#000000;">-></span><span  style=" color:#800000;">listWidgetShow</span><span
+ style=" color:#000000;">-></span><span  style=" color:#000000;">takeItem</span><span
+ style=" color:#000000;">(</span><span  style=" color:#000000;">curIndex</span><span
+ style=" color:#000000;">);</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#008000;">//删除条目</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#808000;">delete</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">curItem</span><span
+ style=" color:#000000;">;</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">curItem</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000080;">NULL</span><span  style=" color:#000000;">;</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">}</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">}</span></pre></div>
+    我们获取列表控件的当前行号，如果行号为 -1 就不处理；<br>行号合法时，我们获取该行的条目存到 curItem 指针；<br>判断该条目是否处于选中状态，只有选中该条目的情况才进行删除操作：<br>获取该行条目的文本，使用 '\t' 切分字符串，切分后形成两个字符串，第 0 段是用户名，第 1 段是密码哈希字符串；<br>我们根据用户名删除映射对象里匹配的键值对，就删除了该用户和哈希值；<br>从列表控件卸下该行条目，并手动删除卸下条目的内存，这样就完成了用户的删除和界面列表控件的更新。<br><br>
+    接下来我们编辑“修改用户密码”按钮的槽函数代码：<br>
+    <div  class="code"><span  style=" color:#008000;">//弹出子窗口，进行密码修改</span>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#808000;">void</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800080;">MainWidget</span><span  style=" color:#000000;">::</span><span
+ style=" color:#000000;">on_pushButtonChangePassword_clicked</span><span  style=" color:#000000;">()</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//列表当前行号</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">int</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">curIndex</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800000;">ui</span><span  style=" color:#000000;">-></span><span
+ style=" color:#800000;">listWidgetShow</span><span  style=" color:#000000;">-></span><span
+ style=" color:#000000;">currentRow</span><span  style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">if</span><span
+ style=" color:#000000;">(</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">curIndex</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;"><</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000080;">0</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">)</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#808000;">return</span><span
+ style=" color:#000000;">;</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">}</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//当前行号的条目</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800080;">QListWidgetItem</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">*</span><span  style=" color:#000000;">curItem</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800000;">ui</span><span  style=" color:#000000;">-></span><span
+ style=" color:#800000;">listWidgetShow</span><span  style=" color:#000000;">-></span><span
+ style=" color:#000000;">item</span><span  style=" color:#000000;">(</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">curIndex</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">);</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">if</span><span
+ style=" color:#000000;">(</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">curItem</span><span
+ style=" color:#000000;">-></span><span  style=" color:#000000;">isSelected</span><span
+ style=" color:#000000;">()</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">)</span><span
+ style=" color:#c0c0c0;">  </span><span  style=" color:#008000;">//处于选中状态，才会修改该行密码</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#008000;">//该条目处于选中状态</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#800080;">QString</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">curLine</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">curItem</span><span  style=" color:#000000;">-></span><span
+ style=" color:#000000;">text</span><span  style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#800080;">QStringList</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">curKeyValue</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">curLine</span><span  style=" color:#000000;">.</span><span
+ style=" color:#000000;">split</span><span  style=" color:#000000;">(</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#008000;">'\t'</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">);</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#800080;">QString</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">strUser</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">curKeyValue</span><span  style=" color:#000000;">[</span><span
+ style=" color:#000080;">0</span><span  style=" color:#000000;">];</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#800080;">QByteArray</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">baOldHash</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800000;">m_mapUserAndHash</span><span  style=" color:#000000;">[</span><span
+ style=" color:#000000;">strUser</span><span  style=" color:#000000;">];</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#008000;">//发送用户名和哈希给子窗口</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#808000;">emit</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">SendOldUserPassword</span><span
+ style=" color:#000000;">(</span><span  style=" color:#000000;">strUser</span><span
+ style=" color:#000000;">,</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">baOldHash</span><span
+ style=" color:#000000;">);</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#008000;">//显示修改密码的子窗口</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#800000;">m_pFormChild</span><span
+ style=" color:#000000;">-></span><span  style=" color:#000000;">show</span><span
+ style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#008000;">//如果子窗口被最小化，显示原本尺寸的窗口</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#808000;">if</span><span
+ style=" color:#000000;">(</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#800000;">m_pFormChild</span><span
+ style=" color:#000000;">-></span><span  style=" color:#000000;">isMinimized</span><span
+ style=" color:#000000;">()</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">)</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">            </span><span  style=" color:#800000;">m_pFormChild</span><span
+ style=" color:#000000;">-></span><span  style=" color:#000000;">showNormal</span><span
+ style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#000000;">}</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#800000;">m_pFormChild</span><span
+ style=" color:#000000;">-></span><span  style=" color:#000000;">raise</span><span
+ style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">}</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">}</span></pre></div>
+    该函数开头也是获取列表控件当前行序号 curIndex，并判断如果行号为 -1，直接返回不处理。<br>行号合法时才获取该行的条目 curItem，并判断条目处于选中状态时，才进行修改密码的操作：<br>我们获取该行条目的文本，并按照 '\t' 进行拆分，得到两段字符串，前半截 curKeyValue[0] 是用户名字符串 strUser， 后半截是密码哈希字符串，我们这里从映射对象读取哈希字符串，存到 baOldHash，这样得到的哈希数据类型是 QByteArray 。<br>
+    得到用户名和旧密码哈希之后，我们触发信号 SendOldUserPassword(strUser, baOldHash) ，将数据交给子窗口槽函数处理。<br>然后我们弹出子窗口 m_pFormChild 显示，如果子窗口之前被用户操作最小化了，那么使用 m_pFormChild->showNormal() 显示还原正常尺寸的子窗口；最后调用 m_pFormChild->raise() ，让子窗口显示到最前面，成为用户操作焦点。后续的密码修改操作由子窗口处理。<br>
+    <br>当子窗口的密码修改操作完成后，会发送用户名和新的密码哈希给主窗口，
+    我们在主窗口通过 RecvNewUserPassword() 槽函数接收这些数据，主窗口这个槽函数代码如下：<br>
+    <div  class="code"><span  style=" color:#008000;">//手动添加的槽函数，从子窗口接收新的密码哈希值</span>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#808000;">void</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800080;">MainWidget</span><span  style=" color:#000000;">::</span><span
+ style=" color:#000000;">RecvNewUserPassword</span><span  style=" color:#000000;">(</span><span
+ style=" color:#800080;">QString</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">strUser</span><span  style=" color:#000000;">,</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#800080;">QByteArray</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">baNewHash</span><span
+ style=" color:#000000;">)</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//修改用户的密码哈希值</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800000;">m_mapUserAndHash</span><span
+ style=" color:#000000;">[</span><span  style=" color:#000000;">strUser</span><span
+ style=" color:#000000;">]</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">baNewHash</span><span
+ style=" color:#000000;">;</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//更新显示</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">UpdateListShow</span><span
+ style=" color:#000000;">();</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//修改完成，隐藏子窗口</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800000;">m_pFormChild</span><span
+ style=" color:#000000;">-></span><span  style=" color:#000000;">hide</span><span
+ style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//提示修改完成</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800080;">QMessageBox</span><span
+ style=" color:#000000;">::</span><span  style=" color:#000000;">information</span><span
+ style=" color:#000000;">(</span><span  style=" color:#808000;">this</span><span
+ style=" color:#000000;">,</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">tr</span><span
+ style=" color:#000000;">(</span><span  style=" color:#008000;">"修改密码"</span><span
+ style=" color:#000000;">),</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">tr</span><span
+ style=" color:#000000;">(</span><span  style=" color:#008000;">"修改密码成功。"</span><span
+ style=" color:#000000;">));</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">}</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre></div>
+    我们根据收到的用户名和新密码哈希，修改映射对象的键值对，然后更新列表控件显示；<br>因为修改操作完成了，所以我们调用 m_pFormChild->hide() 隐藏子窗口；<br>最后弹窗提示，修改密码成功。<br>
+    <br>以上就是主窗口的代码，下面我们编辑子窗口的头文件 formchangepassword.h 代码：<br>
+    <div  class="code"><span  style=" color:#000080;">#ifndef</span><span  style=" color:#c0c0c0;"> </span>FORMCHANGEPASSWORD_H
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000080;">#define</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000080;">FORMCHANGEPASSWORD_H</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000080;">#include</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#008000;"><qwidget></qwidget></span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000080;">#include</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#008000;"><qcryptographichash></qcryptographichash></span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#008000;">//计算密码哈希值</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#808000;">namespace</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800080;">Ui</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#808000;">class</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800080;">FormChangePassword</span><span  style=" color:#000000;">;</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">}</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#808000;">class</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800080;">FormChangePassword</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">:</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#808000;">public</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#800080;">QWidget</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000080;">Q_OBJECT</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#808000;">public</span><span  style=" color:#000000;">:</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">explicit</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#800080;">FormChangePassword</span><span
+ style=" color:#000000;">(</span><span  style=" color:#800080;">QWidget</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">*</span>parent<span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000080;">0</span><span  style=" color:#000000;">);</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">~</span><span
+ style=" font-style:italic; color:#000000;">FormChangePassword</span><span  style=" color:#000000;">();</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#808000;">signals</span><span  style=" color:#000000;">:</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//发送新的密码哈希给主窗口</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">void</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">SendNewUserPassword</span><span
+ style=" color:#000000;">(</span><span  style=" color:#800080;">QString</span><span
+ style=" color:#c0c0c0;"> </span>strUser<span  style=" color:#000000;">,</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#800080;">QByteArray</span><span
+ style=" color:#c0c0c0;"> </span>baNewHash<span  style=" color:#000000;">);</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#808000;">private</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#808000;">slots</span><span  style=" color:#000000;">:</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">void</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">on_pushButtonChange_clicked</span><span
+ style=" color:#000000;">();</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//手动添加的槽函数，从主窗口接收旧的用户名和密码哈希</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">void</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">RecvOldUserPassword</span><span
+ style=" color:#000000;">(</span><span  style=" color:#800080;">QString</span><span
+ style=" color:#c0c0c0;"> </span>strUser<span  style=" color:#000000;">,</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#800080;">QByteArray</span><span
+ style=" color:#c0c0c0;"> </span>baOldHash<span  style=" color:#000000;">);</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#808000;">private</span><span  style=" color:#000000;">:</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800080;">Ui</span><span
+ style=" color:#000000;">::</span><span  style=" color:#800080;">FormChangePassword</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">*</span><span  style=" color:#800000;">ui</span><span
+ style=" color:#000000;">;</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//初始化设置</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">void</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">Init</span><span
+ style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//保存用户名和密码哈希值</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800080;">QString</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#800000;">m_strUser</span><span
+ style=" color:#000000;">;</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800080;">QByteArray</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#800000;">m_baOldHash</span><span
+ style=" color:#000000;">;</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">};</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000080;">#endif</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#008000;">//</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#008000;">FORMCHANGEPASSWORD_H</span></pre></div>
+    子窗口头文件也添加 QCryptographicHash 密码哈希计算类的包含，后面要计算密码哈希值。<br>子窗口类的声明里面，我们手动添加了信号 SendNewUserPassword(QString strUser, QByteArray baNewHash)，
+    用于回传用户名新密码哈希值给主窗口；<br>手动添加了槽函数 RecvOldUserPassword(QString strUser, QByteArray baOldHash)，用于从主窗口接收用户名和旧密码哈希值。<br>然后添加了子窗口初始化函数 Init()，以及两个成员变量 m_strUser、m_baOldHash，存储用户名和旧密码哈希值。<br>
+    <br>接下来我们分段编辑子窗口的源文件  formchangepassword.cpp 代码，首先是构造函数和初始化部分：<br>
+    <div  class="code"><span  style=" color:#000080;">#include</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#008000;">"formchangepassword.h"</span>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000080;">#include</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#008000;">"ui_formchangepassword.h"</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000080;">#include</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#008000;"><qmessagebox></qmessagebox></span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000080;">#include</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#008000;"><qdebug></qdebug></span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#800080;">FormChangePassword</span><span  style=" color:#000000;">::</span><span
+ style=" color:#000000;">FormChangePassword</span><span  style=" color:#000000;">(</span><span
+ style=" color:#800080;">QWidget</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">*</span><span  style=" color:#000000;">parent</span><span
+ style=" color:#000000;">)</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">:</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800080;">QWidget</span><span
+ style=" color:#000000;">(</span><span  style=" color:#000000;">parent</span><span
+ style=" color:#000000;">),</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800000;">ui</span><span
+ style=" color:#000000;">(</span><span  style=" color:#808000;">new</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#800080;">Ui</span><span  style=" color:#000000;">::</span><span
+ style=" color:#800080;">FormChangePassword</span><span  style=" color:#000000;">)</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800000;">ui</span><span
+ style=" color:#000000;">-></span><span  style=" color:#000000;">setupUi</span><span
+ style=" color:#000000;">(</span><span  style=" color:#808000;">this</span><span
+ style=" color:#000000;">);</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//初始化</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">Init</span><span
+ style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">}</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#800080;">FormChangePassword</span><span  style=" color:#000000;">::~</span><span
+ style=" font-style:italic; color:#000000;">FormChangePassword</span><span  style=" color:#000000;">()</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">delete</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#800000;">ui</span><span  style=" color:#000000;">;</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">}</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#008000;">//初始化设置</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#808000;">void</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800080;">FormChangePassword</span><span  style=" color:#000000;">::</span><span
+ style=" color:#000000;">Init</span><span  style=" color:#000000;">()</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//修改窗口标题栏</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">setWindowTitle</span><span
+ style=" color:#000000;">(</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">tr</span><span
+ style=" color:#000000;">(</span><span  style=" color:#008000;">"修改用户密码"</span><span
+ style=" color:#000000;">)</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">);</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//设置密码隐藏</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800000;">ui</span><span
+ style=" color:#000000;">-></span><span  style=" color:#800000;">lineEditOldPassword</span><span
+ style=" color:#000000;">-></span><span  style=" color:#000000;">setEchoMode</span><span
+ style=" color:#000000;">(</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#800080;">QLineEdit</span><span
+ style=" color:#000000;">::</span><span  style=" color:#800080;">Password</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">);</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800000;">ui</span><span
+ style=" color:#000000;">-></span><span  style=" color:#800000;">lineEditNewPassword</span><span
+ style=" color:#000000;">-></span><span  style=" color:#000000;">setEchoMode</span><span
+ style=" color:#000000;">(</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#800080;">QLineEdit</span><span
+ style=" color:#000000;">::</span><span  style=" color:#800080;">Password</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">);</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800000;">ui</span><span
+ style=" color:#000000;">-></span><span  style=" color:#800000;">lineEditNewPassword2</span><span
+ style=" color:#000000;">-></span><span  style=" color:#000000;">setEchoMode</span><span
+ style=" color:#000000;">(</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#800080;">QLineEdit</span><span
+ style=" color:#000000;">::</span><span  style=" color:#800080;">Password</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">);</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//用户名为只读</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800000;">ui</span><span
+ style=" color:#000000;">-></span><span  style=" color:#800000;">lineEditUser</span><span
+ style=" color:#000000;">-></span><span  style=" color:#000000;">setReadOnly</span><span
+ style=" color:#000000;">(</span><span  style=" color:#808000;">true</span><span
+ style=" color:#000000;">);</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800000;">ui</span><span
+ style=" color:#000000;">-></span><span  style=" color:#800000;">lineEditUser</span><span
+ style=" color:#000000;">-></span><span  style=" color:#000000;">setStyleSheet</span><span
+ style=" color:#000000;">(</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#008000;">"background-color:</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#008000;">rgb(200,200,255);"</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">);</span></pre>
+<pre  style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//工具提示</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800000;">ui</span><span
+ style=" color:#000000;">-></span><span  style=" color:#800000;">lineEditOldPassword</span><span
+ style=" color:#000000;">-></span><span  style=" color:#000000;">setToolTip</span><span
+ style=" color:#000000;">(</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">tr</span><span
+ style=" color:#000000;">(</span><span  style=" color:#008000;">"旧密码验证成功才能修改为新密码。"</span><span
+ style=" color:#000000;">)</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">);</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">}</span></pre></div>
+    构造函数末尾添加了初始化函数 Init() 调用。<br>
+     Init() 函数首先修改子窗口标题栏文本为 "修改用户密码"，直观说明这个子窗口的功能；<br>然后把三个密码编辑框的回显模式修改为密码模式，就是将输入字符用星号或黑圆点代替显示；<br>接着把用户名的编辑框设置为只读，并设置用户名编辑框的背景为浅蓝色，这个子窗口功能只是改密码，不能修改用户名。<br>通常用户名是唯一的，不能随便修改，所以这里设置用户名为只读的。<br>我们设置旧密码编辑框的工具提示信息，说明只有旧密码输入对了，才能修改新密码，加了一层验证，只有知道原先的密码才能改新密码。这个功能一般是防止非法用户偷偷使用别人电脑修改别人的密码。<br>
+    <br>接下来我们编辑从主窗口接收数据的槽函数：<br>
+    <div  class="code"><span  style=" color:#008000;">//手动添加的槽函数，从主窗口接收旧的用户名和密码哈希</span>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#808000;">void</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800080;">FormChangePassword</span><span  style=" color:#000000;">::</span><span
+ style=" color:#000000;">RecvOldUserPassword</span><span  style=" color:#000000;">(</span><span
+ style=" color:#800080;">QString</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">strUser</span><span  style=" color:#000000;">,</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#800080;">QByteArray</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">baOldHash</span><span
+ style=" color:#000000;">)</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//存到成员变量</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800000;">m_strUser</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">strUser</span><span  style=" color:#000000;">;</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800000;">m_baOldHash</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">baOldHash</span><span  style=" color:#000000;">;</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//设置用户名</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800000;">ui</span><span
+ style=" color:#000000;">-></span><span  style=" color:#800000;">lineEditUser</span><span
+ style=" color:#000000;">-></span><span  style=" color:#000000;">setText</span><span
+ style=" color:#000000;">(</span><span  style=" color:#800000;">m_strUser</span><span
+ style=" color:#000000;">);</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//清空密码编辑框</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800000;">ui</span><span
+ style=" color:#000000;">-></span><span  style=" color:#800000;">lineEditOldPassword</span><span
+ style=" color:#000000;">-></span><span  style=" color:#000000;">clear</span><span
+ style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800000;">ui</span><span
+ style=" color:#000000;">-></span><span  style=" color:#800000;">lineEditNewPassword</span><span
+ style=" color:#000000;">-></span><span  style=" color:#000000;">clear</span><span
+ style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800000;">ui</span><span
+ style=" color:#000000;">-></span><span  style=" color:#800000;">lineEditNewPassword2</span><span
+ style=" color:#000000;">-></span><span  style=" color:#000000;">clear</span><span
+ style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">}</span></pre></div>
+    从主窗口信号收到用户名和旧密码哈希值后，我们保存这些数据到成员变量 strUser 和 baOldHash ；<br>然后通过代码设置用户名编辑框的内容，编辑框的只读属性是指用户不能用鼠标键盘操作修改，程序员可以通过代码修改编辑框内容。<br>设置用户名之后，我们清空三个密码编辑框的内容，让用户输入这三个密码框内容。<br><br>
+    子窗口只有一个“修改密码”按钮，我们现在编辑这个按钮的槽函数：<br>
+    <div  class="code"><span  style=" color:#008000;">//修改密码操作</span>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#808000;">void</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800080;">FormChangePassword</span><span  style=" color:#000000;">::</span><span
+ style=" color:#000000;">on_pushButtonChange_clicked</span><span  style=" color:#000000;">()</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//先获取三个密码字符串</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800080;">QString</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">strOldPassword</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800000;">ui</span><span  style=" color:#000000;">-></span><span
+ style=" color:#800000;">lineEditOldPassword</span><span  style=" color:#000000;">-></span><span
+ style=" color:#000000;">text</span><span  style=" color:#000000;">().</span><span
+ style=" color:#000000;">trimmed</span><span  style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800080;">QString</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">strNewPassword</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800000;">ui</span><span  style=" color:#000000;">-></span><span
+ style=" color:#800000;">lineEditNewPassword</span><span  style=" color:#000000;">-></span><span
+ style=" color:#000000;">text</span><span  style=" color:#000000;">().</span><span
+ style=" color:#000000;">trimmed</span><span  style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800080;">QString</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">strNewPassword2</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800000;">ui</span><span  style=" color:#000000;">-></span><span
+ style=" color:#800000;">lineEditNewPassword2</span><span  style=" color:#000000;">-></span><span
+ style=" color:#000000;">text</span><span  style=" color:#000000;">().</span><span
+ style=" color:#000000;">trimmed</span><span  style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//判断密码字符串是否为空</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">if</span><span
+ style=" color:#000000;">(</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">strOldPassword</span><span
+ style=" color:#000000;">.</span><span  style=" color:#000000;">isEmpty</span><span
+ style=" color:#000000;">()</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">||</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">strNewPassword</span><span
+ style=" color:#000000;">.</span><span  style=" color:#000000;">isEmpty</span><span
+ style=" color:#000000;">()</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">            </span><span  style=" color:#000000;">||</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">strNewPassword2</span><span
+ style=" color:#000000;">.</span><span  style=" color:#000000;">isEmpty</span><span
+ style=" color:#000000;">()</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">)</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#800080;">QMessageBox</span><span
+ style=" color:#000000;">::</span><span  style=" color:#000000;">information</span><span
+ style=" color:#000000;">(</span><span  style=" color:#808000;">this</span><span
+ style=" color:#000000;">,</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">tr</span><span
+ style=" color:#000000;">(</span><span  style=" color:#008000;">"密码框检查"</span><span
+ style=" color:#000000;">),</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">tr</span><span
+ style=" color:#000000;">(</span><span  style=" color:#008000;">"三个密码都不能为空。"</span><span
+ style=" color:#000000;">));</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#808000;">return</span><span
+ style=" color:#000000;">;</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">}</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">if</span><span
+ style=" color:#000000;">(</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">strNewPassword</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">!=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">strNewPassword2</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">)</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#800080;">QMessageBox</span><span
+ style=" color:#000000;">::</span><span  style=" color:#000000;">information</span><span
+ style=" color:#000000;">(</span><span  style=" color:#808000;">this</span><span
+ style=" color:#000000;">,</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">tr</span><span
+ style=" color:#000000;">(</span><span  style=" color:#008000;">"新密码检查"</span><span
+ style=" color:#000000;">),</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">tr</span><span
+ style=" color:#000000;">(</span><span  style=" color:#008000;">"两个新密码不一致。"</span><span
+ style=" color:#000000;">));</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#808000;">return</span><span
+ style=" color:#000000;">;</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">}</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//根据旧密码计算旧的哈希值</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800080;">QByteArray</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">baOldHashCheck</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800080;">QCryptographicHash</span><span  style=" color:#000000;">::</span><span
+ style=" color:#000000;">hash</span><span  style=" color:#000000;">(</span><span
+ style=" color:#000000;">strOldPassword</span><span  style=" color:#000000;">.</span><span
+ style=" color:#000000;">toUtf8</span><span  style=" color:#000000;">(),</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">                                                    </span><span
+ style=" color:#800080;">QCryptographicHash</span><span  style=" color:#000000;">::</span><span
+ style=" color:#800080;">Sha256</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">);</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//转为</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#008000;">Hex</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#008000;">字符串</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">baOldHashCheck</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">baOldHashCheck</span><span  style=" color:#000000;">.</span><span
+ style=" color:#000000;">toHex</span><span  style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">if</span><span
+ style=" color:#000000;">(</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">baOldHashCheck</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">!=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800000;">m_baOldHash</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">)</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">{</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#800080;">QMessageBox</span><span
+ style=" color:#000000;">::</span><span  style=" color:#000000;">information</span><span
+ style=" color:#000000;">(</span><span  style=" color:#808000;">this</span><span
+ style=" color:#000000;">,</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">tr</span><span
+ style=" color:#000000;">(</span><span  style=" color:#008000;">"旧密码检查"</span><span
+ style=" color:#000000;">),</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">tr</span><span
+ style=" color:#000000;">(</span><span  style=" color:#008000;">"输入的旧密码不正确，不能修改密码。"</span><span
+ style=" color:#000000;">));</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">        </span><span  style=" color:#808000;">return</span><span
+ style=" color:#000000;">;</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">}</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//旧密码正确了</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#800080;">QByteArray</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">baNewHash</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#800080;">QCryptographicHash</span><span  style=" color:#000000;">::</span><span
+ style=" color:#000000;">hash</span><span  style=" color:#000000;">(</span><span
+ style=" color:#000000;">strNewPassword</span><span  style=" color:#000000;">.</span><span
+ style=" color:#000000;">toUtf8</span><span  style=" color:#000000;">(),</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">                                         </span><span  style=" color:#800080;">QCryptographicHash</span><span
+ style=" color:#000000;">::</span><span  style=" color:#800080;">Sha256</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">);</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//转为Hex字符串</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#000000;">baNewHash</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">=</span><span  style=" color:#c0c0c0;"> </span><span
+ style=" color:#000000;">baNewHash</span><span  style=" color:#000000;">.</span><span
+ style=" color:#000000;">toHex</span><span  style=" color:#000000;">();</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#008000;">//发送信号，后面交给主窗口处理</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#c0c0c0;">    </span><span  style=" color:#808000;">emit</span><span
+ style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">SendNewUserPassword</span><span
+ style=" color:#000000;">(</span><span  style=" color:#800000;">m_strUser</span><span
+ style=" color:#000000;">,</span><span  style=" color:#c0c0c0;"> </span><span  style=" color:#000000;">baNewHash</span><span
+ style=" color:#000000;">);</span></pre>
+<pre  style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+ style=" color:#000000;">}</span></pre></div>
+    该函数先获取三个密码框输入的字符串，剔除字符串两端的空白；<br>判断三个密码字符串是否有空的，如果有空的旧弹窗提示，直接返回；<br>三个密码字符串都是非空，才继续后面操作。<br>然后判断两个新密码字符串是否相等，如果不相等，说明输入有误，弹窗提示并返回；<br>只有两个新密码字符串相等，才进行后续操作。<br>我们根据用户输入的旧密码字符串计算哈希，并转为 Hex 字符串，存到 baOldHashCheck，将这个字符串与成员变量保存的旧密码哈希字符串对比，如果二者不相等，旧密码输入错误，直接弹窗提示并返回；<br>如果二者相等，说明用户输入的旧密码验证是对的，进入后面的修改密码操作：<br>根据新密码计算 SHA256 哈希值，并转为 Hex 字符串，就是新的密码哈希字符串；<br>触发信号SendNewUserPassword()，将用户名和新密码哈希字符串发送给主窗口，<br>主窗口槽函数 RecvNewUserPassword() 会进行后面的操作。<br><br>主窗口和子窗口通过两对信号-槽函数，完成了相互的数据传递。代码讲解到这，我们生成项目，运行这个例子，添加一个用户名 a，密码用简单的 123，
+    添加新用户：<br>
+    <center> <img  src="images/ch11/ch11-01-13.png"  alt="run01"></center>
+    密码 123 很简单，但是计算的哈希字符串很复杂，避免密码明文的泄露。<br>我们点击选中 a 用户的行，然后点击“修改用户密码”，弹出子窗口：<br>
+    <center> <img  src="images/ch11/ch11-01-14.png"  alt="run02"></center>
+    这时我们把三个密码框都输入 1 ，点击“修改密码”按钮，出现提示：<br>
+    <center> <img  src="images/ch11/ch11-01-15.png"  alt="run03"></center>
+    旧密码输入错误，不能修改密码。然后我们将旧密码修改为正确的 123 ，再点击“修改密码”按钮：<br>
+    <center> <img  src="images/ch11/ch11-01-16.png"  alt="run04"></center>
+    旧密码输入正确，就能修改为新密码了，并且修改密码的子窗口自动隐藏了，回到了主窗口的界面。<br>密码管理工具通常还需要加入复杂密码验证，比如需要字母、数字、标点符号、大小写、密码长度等检查，帮助用户设置更加复杂更安全的密码。本例子只是简单演示，现实中都应该使用安全性高的密码。<br>这个例子的内容介绍到这，下面我们学习将已有的窗口类集成到项目里，作为子窗口弹出显示。<br>
     <br>
     <div  class="os2">11.1.3 集成已有窗口类方式</div>
     <br>
@@ -303,23 +1541,22 @@
     <br>
     <br>
     <table  style="text-align: left; width: 100%;"  border="0"  cellpadding="2"
-       cellspacing="2">
+ cellspacing="2">
       <tbody>
         <tr>
           <td  style="width: 40%;">
             <div  style="text-align: center;"><a  href="ch11-00.htm"><img  class="pic"
-                   style="width: 32px; height: 32px;"  alt="prev"  src="images/pics/prev.png"></a></div>
+ style="width: 32px; height: 32px;"  alt="prev"  src="images/pics/prev.png"></a></div>
           </td>
           <td  style="width: 20%;">
             <div  style="text-align: center;"><a  href="contents.htm"><img  class="pic"
-                   style="width: 32px; height: 32px;"  alt="contents"  src="images/pics/contents.png"></a></div>
+ style="width: 32px; height: 32px;"  alt="contents"  src="images/pics/contents.png"></a></div>
           </td>
           <td  style="width: 40%;">
             <div  style="text-align: center;"><a  href="ch11-02.htm"><img  class="pic"
-                   style="width: 32px; height: 32px;"  alt="next"  src="images/pics/next.png"></a></div>
+ style="width: 32px; height: 32px;"  alt="next"  src="images/pics/next.png"></a></div>
           </td>
         </tr>
       </tbody>
     </table>
-  </body>
-</html>
+</body></html>

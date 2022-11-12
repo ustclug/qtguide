@@ -17,12 +17,82 @@
   <body>
     <div class="os1">11.2 QDialog 多窗口使用</div>
     <br>
-    本节介绍 QDialog 基类内容，并使用 QDialog 派生类实现多窗口使用，子窗口可以采用模态对话框和非模态对话框实现。 <br>
+    本节介绍 QDialog 类内容，并使用 QDialog 派生类实现多窗口使用，子窗口可以采用模态对话框显示，也可以使用非模态对话框显示。 <br>
     <br>
-    <div class="os2">11.2.1 QDialog</div>
+    <div class="os2">11.2.1 QDialog 类</div>
     <br>
-    <div class="code">q<br>
-        </div>
+    QDialog 是所有对话框（**Dialog）类的基类，之前章节使用的 QFileDialog 和 QMessageBox 都是 QDialog
+    派生类，本章后面会学习更多的 Qt 通用对话框。<br>
+    QDialog
+    及其派生类总是顶层窗口，而不会作为窗口内嵌子控件存在。对话框通常用于短期任务，并简要与用户进行交互信息。对话框可以是模态的，也可以是非模态的。对话框可以提供返回
+    值，也可以设置默认按钮（界面按 Enter 回车键，就等于点击默认按钮）。<br>
+    对话框与其父类 QWidget 窗口的标题栏外观不同， QWidget
+    窗口标题栏右上角是最小化、最大化和关闭三个按钮，而对话框标题栏右上角是帮助按钮和关闭按 钮，如下图所示：<br>
+    <center> <img src="images/ch11/ch11-02-01.png" alt="dialog"></center>
+    点击标题栏的帮助按钮，鼠标变成问号鼠标形式，再点击对话框子控件，就会显示子控件的 whatsThis 属性，就是子控件的帮助信息，例如 Haha
+    按钮的帮助信息：<br>
+    <center> <img src="images/ch11/ch11-02-02.png" alt="dialog2"></center>
+    对话框的标题栏没有最小化、最大化按钮，但是尺寸可以拉动边框改变。默认情况下，对话框右下角不会显示尺寸手柄（QSizeGrip，就是上图右下角的三角形图
+    案，6个小点构成），可以通过调用 setSizeGripEnabled(bool) 函数设置是否显示尺寸手柄。<br>
+    <br>
+    QDialog 类构造函数如下：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QDialog(QWidget * parent = 0,
+      Qt::WindowFlags f = 0)<br>
+    </div>
+    QDialog 对话框以及其他窗口类 flags 标志位包含 Qt::Dialog 标志的窗口，总是以顶层窗口显示，而不会作为子控件。QDialog
+    对话框的 parent 指针如果为 NULL，那么它以桌面为背景，以桌面中心为参考弹出显示；parent
+    指针为其他窗口，那么以父窗口为背景，以父窗口中心为参考弹出显示。使用 setParent() 函数可以更改对话框的归属父窗口。<br>
+    <br>
+    QDialog 作为模态对话框时，会强制占据前台焦点，不关闭模态对话框，就无法回到父窗口操作。模态对话框通常使用下面函数弹窗：<br>
+    <div class="code">int QDialog::​exec()&nbsp; &nbsp;&nbsp;
+      //槽函数，应用程序级的模态显示，带有返回值<br>
+      void QDialog::​open() &nbsp; // 槽函数，窗口级别的模态显示，这个函数没有返回值</div>
+    通常使用 exec() 函数的情况更多，exec() 弹窗关闭时，会返回一个数值供父窗口判断。常见的对话框返回值如下：<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp; QDialog::Accepted ，数值为 &nbsp; 1 ；<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; &nbsp; QDialog::Rejected&nbsp; ，数值为&nbsp; 0 。<br>
+    通常调用下面槽函数时，自动关闭模态对话框，并设置相应结果值：<br>
+    <div class="code">void QDialog::​accept()&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;
+      //槽函数，设置结果值为 1，exec() 返回该数值<br>
+      void QDialog::​reject()&nbsp;&nbsp;&nbsp; &nbsp; &nbsp;&nbsp; //槽函数，设置结果值为
+      0，exec() 返回该数值<br>
+      void QDialog::​done(int r)&nbsp;&nbsp; //槽函数，设置结果值为 r ，exec() 返回该数值</div>
+    除了 exec() 能够获取返回的结果值，对话框也可以用下面函数获取或者修改返回值：<br>
+    <div class="code">int QDialog::​result()&nbsp;&nbsp; //获取结果数值<br>
+      void QDialog::​setResult(int i)&nbsp;&nbsp;&nbsp; //设置结果数值</div>
+    对话框有三个信号，与关闭对话框的槽函数有关：<br>
+    <div class="code">void QDialog::​accepted()&nbsp;&nbsp;&nbsp; //当调用 accept()
+      或 done() 或用户有接受操作，并且结果值为 QDialog::Accepted 时触发该信号<br>
+      void QDialog::​rejected()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //当调用 reject() 或
+      done() 或用户有拒绝操作，并且结果值为 QDialog::Rejected 时触发该信号<br>
+      void QDialog::​finished(int result)&nbsp; //当调用 done(), accept(),&nbsp;
+      reject() 或用户有结束操作，结果值已设置时触发该信号</div>
+    上面三个信号主要根据对话框 done(), accept(),&nbsp; reject()
+    三个槽函数触发，如果按钮关联到这三个槽函数，用户点击了按钮，也会触发这些信号。但是函数&nbsp; hide() 和 setVisible(false)
+    不会触发上面信号。<br>
+    返回值一般用于模态对话框，模态对话框强制占据前台焦点，使得用户必须有反馈操作，操作关闭对话框之后，形成接受或拒绝的返回值，再回到父窗口。<br>
+    <br>
+    实际应用中，如果需要长时间处理某些任务，可以使用 QProgressDialog 进度对话框，进度对话框的模态显示与其他对话框不同，通常使用下面的函数：<br>
+    <div class="code">void&nbsp;&nbsp;&nbsp; setModal(bool modal)&nbsp;&nbsp;
+      //一般用于长时间进度对话框模态显示</div>
+    将 setModal( true ) 和 show() 函数配合使用，也是显示模态对话框。<br>
+    <br>
+    如果使用非模态的对话框，就不会强制占据前台焦点，非模态对话框和父窗口可以自由切换，非模态对话框显示直接使用 show() 或 setVisible()
+    函数：<br>
+    <div class="code">void QDialog::​setVisible(bool visible)<br>
+      void QWidget::​show()&nbsp;&nbsp; //基类显示函数</div>
+    <br>
+    QDialog 对话框有两个特殊按键，就是键盘上的 Enter 键和 Esc 键：<br>
+    ① 当使用 QPushButton::setDefault(), QPushButton::isDefault() 和
+    QPushButton::autoDefault() 设置默认按钮后， Enter 键会自动触发默认按钮的点击操作。<br>
+    ② 对话框界面 <b>Esc 按键总是触发 QDialog::reject() 槽函数</b>，这是内定的特性，在任何对话框界面按 Esc
+    键都会关闭对话框，并且设置 QDialog::Rejected 结果值。<br>
+    QDialog 类的内容介绍到这，下面我们通过一个示例，为一个主窗口新建两个子对话框。<br>
+    <br>
+    <div class="os2">11.2.2 QDialog 多窗口示例</div>
+    <br>
+    图片预览例子， 1、弹出非模态对话框进行图片缩放；2、弹出模态对话框进行图片旋转，返回值就是旋转度数。<br>
+    <br>
+    <div class="code">q</div>
     <br>
     <br>
     <br>
@@ -35,18 +105,15 @@
       <tbody>
         <tr>
           <td style="width: 40%;">
-            <div style="text-align: center;"><a href="ch11-01.htm"><img class="pic"
-
+            <div style="text-align: center;"><a href="ch11-01.htm"><img class="pic"
                   style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
           </td>
           <td style="width: 20%;">
-            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
-
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
                   style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
           </td>
           <td style="width: 40%;">
-            <div style="text-align: center;"><a href="ch11-03.htm"><img class="pic"
-
+            <div style="text-align: center;"><a href="ch11-03.htm"><img class="pic"
                   style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
           </td>
         </tr>

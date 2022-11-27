@@ -2,10 +2,10 @@
 <html>
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
-    <title>ch11-03</title>    
-	<link href="css/style.css" rel="stylesheet" type="text/css" />
-	<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-	<script src="thumbnailviewer.js" type="text/javascript">
+    <title>ch11-03</title>
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -14,40 +14,796 @@
 ***********************************************/
 
 </script> </head>
-  
-  
-<div class="os1">11.3 通用对话框：QColorDialog、QFontDialog、QInputDialog</div>
-<br />
-本节介绍通用对话框：QColorDialog、QFontDialog、QInputDialog，并通过示例程序展示这三种对话框的使用。
-<br />
-
-<br />
-<div class="os2">11.3.1 QColorDialog</div>
-<br />
-<br />
-<br />
-
-<div class="os2">11.3.2 QFontDialog</div>
-<br />
-<br />
-<br />
-
-<div class="os2">11.3.3 QInputDialog</div>
-<br />
-<br />
-<br />
-
-<br />
-<br />
-<br />
-
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch11-02.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch11-04.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+  <body>
+    <div class="os1">11.3 通用对话框：QColorDialog、QFontDialog、QInputDialog</div>
+    <br>
+    本节介绍通用对话框：QColorDialog、QFontDialog、QInputDialog，并通过示例程序展示这三种对话框的使用。 <br>
+    <br>
+    <div class="os2">11.3.1 QColorDialog</div>
+    <br>
+    在介绍 QColorDialog 之前，我们先简单介绍一下 QColor 类。QColor 类用于表示颜色，支持
+    RGB（红绿蓝）三颜色表示，也支持其他颜色模型表示，例如 HSV (hue 色调, saturation 饱和度, value
+    明亮度)，CMYK（cyan 青, magenta 紫或叫品红, yellow 黄,&nbsp; black 黑）。HSV
+    常用于描述人眼对颜色的感官，CMYK 常用于绘画或彩色印刷的颜料配置。计算机显示则更多地使用 RGB 三原色，下面我们主要介绍 RGB
+    的颜色模型相关函数内容。<br>
+    针对半透明显示的特效，颜色也可以使用第四个分量，Alpha 通道，表示半透明程度，与三原色一起就是 ARGB。QColor 对象的构造或修改如下：<br>
+    <div class="code">QColor(int r, int g, int b, int a = 255)&nbsp;
+      //根据红、绿、蓝、Alpha构造颜色对象<br>
+      void&nbsp;&nbsp;&nbsp; setRgb(int r, int g, int b, int a = 255)
+      //设置红、绿、蓝、Alpha 值<br>
+      int&nbsp;&nbsp;&nbsp; red() const&nbsp;&nbsp;&nbsp; &nbsp; //获取红色分量<br>
+      int&nbsp;&nbsp;&nbsp; green() const&nbsp; //获取绿色分量<br>
+      int&nbsp;&nbsp;&nbsp; blue() const&nbsp;&nbsp;&nbsp; //获取蓝色分量<br>
+      int&nbsp;&nbsp;&nbsp; alpha() const&nbsp; //获取Alpha分量<br>
+      void&nbsp;&nbsp;&nbsp; getRgb(int * r, int * g, int * b, int * a = 0)
+      const&nbsp; //一次性读取四个通道值到参数指针指向的变量</div>
+    <br>
+    颜色除了数值的表示方法，还可以仿照 HTML/CSS 网页中的颜色表述，比如 RGB 使用字符串表示 "#112233"
+    ，这里是十六进制字符串表示，ARGB 表示为&nbsp; "#ff112233" ，字符串表述的颜色设置和获取函数如下：<br>
+    <div class="code">QString QColor::​name() const&nbsp;&nbsp; //获取字符串表示的颜色，如
+      "#RRGGBB"<br>
+      void QColor::​setNamedColor(const QString &amp; name)&nbsp; //设置字符串表示的颜色，如
+      "#RRGGBB"</div>
+    <br>
+    QColor 对象如果初始化时没有设置任何颜色，那么处于不合法状态，可以使用下面函数判断：<br>
+    <div class="code">bool QColor::​isValid() const</div>
+    如果颜色合法，返回 true ，如果不合法，返回 false。<br>
+    <br>
+    下面介绍 QColorDialog 对话框，QColorDialog 用于获取颜色，比如标签控件的前景色、背景色等，都可以通过 QColorDialog
+    获取颜色，然后修改界面控件的配色。QColorDialog 获取的颜色使用 QColor 对象返回。QColorDialog 颜色对话框如下图所示：<br>
+    <center> <img src="images/ch11/ch11-03-01.png" alt="color1"></center>
+    对话框左上角是基本颜色的网格，点击颜色网格可以获取基本颜色，右边则是大片的渐变颜色区域，渐变颜色区域每一个点都是一种颜色。对话框左下角可以添加自定义的新
+    颜色到网格中，方便下次选取。右下角的 Red、Green、Blue 三色编辑框也可以修改颜色分量的值。HTML
+    编辑框内容就是当前颜色对应网页字符串的颜色描述方式。<br>
+    颜色对话框有两种使用方式，一种是自定义对话框对象进行弹窗，第二种是使用对话框的静态函数弹窗。第二种静态函数的使用方式更为便捷。<br>
+    （1）QColorDialog 普通成员函数<br>
+    颜色对话框继承基类 QDialog 所有的函数，可以模态显示，也可以非模态显示，exec()、show() 等函数与基类一样。<br>
+    颜色对话框的构造和析构函数如下：<br>
+    <div class="code">QColorDialog(QWidget * parent = 0)<br>
+      QColorDialog(const QColor &amp; initial, QWidget * parent = 0)<br>
+      ~QColorDialog()</div>
+    第一个构造函数参数只是设置父窗口指针，第二个构造函数可以指定一个初始颜色值，在弹窗时默认选中这个颜色。<br>
+    颜色对话框获取颜色的普通成员函数分两种场景，第一种是在对话框保持显示时，用户点击的颜色：<br>
+    <div class="code">QColor&nbsp;&nbsp; &nbsp;currentColor() const&nbsp;&nbsp;
+      //获取当前颜色<br>
+      void&nbsp;&nbsp;&nbsp; setCurrentColor(const QColor &amp;
+      color)&nbsp;&nbsp; //设置当前颜色<br>
+      void&nbsp;&nbsp;&nbsp; currentColorChanged(const QColor &amp; color)&nbsp;
+      //信号，当前颜色变化时触发该信号</div>
+    如果是非模态显示的自定义颜色对话框，那么使用上面函数可以随时获取用户点选颜色的变化。<br>
+    <br>
+    第二套获取颜色的普通函数，是需要用户点击“OK”按钮确认后，最终返回的颜色：<br>
+    <div class="code">QColor&nbsp;&nbsp; &nbsp;selectedColor() const&nbsp;&nbsp;
+      //用户选择颜色并且点击 “OK”确认后返回的颜色值<br>
+      void&nbsp;&nbsp;&nbsp; colorSelected(const QColor &amp; color)
+      //信号，用户选择颜色并且点击 “OK”确认后，触发该信号</div>
+    用户点击“OK”按钮后对话框就自动关闭了，selectedColor() 是最终选择的颜色，而前面的 currentColor() 可以一直变化选择。<br>
+    <br>
+    QColorDialog 重载了基类的打开函数：<br>
+    <div class="code">void QColorDialog::​open(QObject * receiver, const char *
+      member)</div>
+    这个打开函数参数里第一个 receiver 是接收 colorSelected() 信号的对象，第二个 member 就是槽函数名称。这个 open()
+    函数是一次性的，如果关闭了，那么 receiver 对象 member&nbsp; 槽函数会自动解绑。<br>
+    <br>
+    QColorDialog 还可以设置特殊的颜色对话框选项：<br>
+    <div class="code">ColorDialogOptions&nbsp;&nbsp; &nbsp;options() const&nbsp;
+      //获取颜色对话框选项<br>
+      void&nbsp;&nbsp;&nbsp; setOptions(ColorDialogOptions options)&nbsp;&nbsp;
+      //设置颜色对话框选项<br>
+      void&nbsp;&nbsp;&nbsp; setOption(ColorDialogOption option, bool on =
+      true)&nbsp; //开启或禁用一个选项标志位<br>
+      bool&nbsp;&nbsp;&nbsp; testOption(ColorDialogOption option) const&nbsp;
+      //测试一个选项标志位是否为 true</div>
+    具体的 ColorDialogOptions&nbsp; 枚举常量如下：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 360px;" align="center"><b>QColorDialog::ColorDialogOptions
+              枚举常量</b></td>
+          <td style="width: 140px;" align="center"><b>数值</b></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td style="height: 15px;">QColorDialog::ShowAlphaChannel</td>
+          <td> 0x00000001 </td>
+          <td> 允许用户选择颜色的 Alpha 分量。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QColorDialog::NoButtons</td>
+          <td> 0x00000002 </td>
+          <td> 不显示“OK”和“Cancel”按钮（用于长期显示的非模态对话框）。 </td>
+        </tr>
+        <tr>
+          <td>QColorDialog::DontUseNativeDialog </td>
+          <td> 0x00000004 </td>
+          <td> 使用 Qt 风格标准颜色对话框，而不是用操作系统本土风格颜色对话框。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    这些 ColorDialogOptions 都是二进制标志位，默认情况都是 0 ，除了有特殊需求情况，一般不使用这些标志位。<br>
+    以上普通成员函数都是自定义对话框对象使用，实际中使用下面的静态函数模态显示更为方便。<br>
+    <br>
+    （2）QColorDialog 静态成员函数<br>
+    颜色对话框的静态函数就是针对静态函数内部临时定义的对话框对象，每次都是模态弹出：<br>
+    <div class="code">QColor&nbsp;&nbsp; &nbsp;getColor(const QColor &amp;
+      initial = Qt::white, QWidget * parent = 0, const QString &amp; title =
+      QString(), ColorDialogOptions options = 0)&nbsp;&nbsp; //静态函数</div>
+    静态函数 getColor() 参数里，initial 是初始选中的颜色，parent 是父窗口指针，title 是颜色对话框的标题文本，options
+    就是上面表格中的 ColorDialogOptions 标志位设置。<br>
+    使用简单的一个函数就能获取一个颜色，这是非常方便使用的，例如：<br>
+    <div class="code">QColor clr = QColorDialog::getColor();</div>
+    这样一句简单代码就可以获取到颜色值。<br>
+    注意 QColorDialog::getColor() 对话框显示时，如果用户按下 Cancel 按钮或者 Esc
+    键，那么会返回非法值的颜色对象，所以要注意判断返回值是否合法。<br>
+    静态函数弹出的颜色对话框也可以进行一定的定制小操作，例如上面图片颜色对话框的左上角基本颜色网格，也叫 StandardColor ，可以进行修改：<br>
+    <div class="code">QColor&nbsp;&nbsp; &nbsp;standardColor(int
+      index)&nbsp;&nbsp; //静态函数，根据序号获取标准颜色（基本颜色）<br>
+      void&nbsp;&nbsp;&nbsp; setStandardColor(int index, QColor color)&nbsp;
+      //静态函数，根据序号设置标准颜色（基本颜色）</div>
+    标准颜色网格或叫基本颜色网格，根据序号可以获取对应网格的颜色，也能修改网格颜色。<br>
+    颜色对话框左下角的是 CustomColor ，就是用户定制颜色，初始时是空白的，用户选择某个颜色，点击“Add to Custom Colors
+    ”按钮，就会添加到左下角的用户定制颜色网格。程序员也可以通过代码提前定制几个颜色：<br>
+    <div class="code">int&nbsp;&nbsp; &nbsp;customCount()&nbsp;&nbsp;
+      //静态函数，可以设置的用户定制颜色总数<br>
+      QColor&nbsp;&nbsp;&nbsp; customColor(int index)&nbsp; //静态函数，根据序号获取用户定制颜色<br>
+      void&nbsp;&nbsp;&nbsp; setCustomColor(int index, QColor color)&nbsp;
+      //静态函数，根据序号设置用户定制颜色</div>
+    <br>
+    <div class="os2">11.3.2 QFontDialog</div>
+    <br>
+    在介绍 QFontDialog 对话框之前，我们先简单介绍一下 QFont 字体类。QFont 主要用于控制文本显示的字体，字体主要有四大属性：<br>
+    ①字体家族 family 决定字体外观家族，比如宋体、楷体等；<br>
+    ②字号 pointSize （磅数）决定字显示的尺寸大小，字号 1 磅等于 1/72 英寸；<br>
+    ③字重 weight 决定字笔画的粗细；<br>
+    ④斜体 italic 决定是否倾斜显示文字。<br>
+    QFont 构造函数如下：<br>
+    <div class="code">QFont()<br>
+      QFont(const QString &amp; family, int pointSize = -1, int weight = -1,
+      bool italic = false)<br>
+      QFont(const QFont &amp; font, QPaintDevice * pd)<br>
+      QFont(const QFont &amp; font)</div>
+    第一个默认构造函数不是构造空白的字体对象，而是根据应用程序默认字体构造新对象，比如宋体9号字体对象。<br>
+    第二个构造函数四个参数就是字体对象的四大属性。<br>
+    第三个构造函数是根据 QPaintDevice 对象内部使用的字体复制一个相同的字体对象。<br>
+    第四个构造函数是复制构造参数里的字体对象。<br>
+    四大属性相对应的函数如下表所示：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 180px;" align="center"><b>读取函数</b></td>
+          <td style="width: 240px;" align="center"><b>设置函数</b></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>QString family() const</td>
+          <td> void setFamily(const QString &amp; family) </td>
+          <td> 读取和设置字体家族名称，如果字体名不存在，就设置一个相近的字体家族。 </td>
+        </tr>
+        <tr class="d1">
+          <td>int pixelSize() const</td>
+          <td> void setPixelSize(int pixelSize)</td>
+          <td> 字体的像素尺寸，以占据屏幕像素点为参考，与屏幕点阵间距相关，不同屏幕的像素间距不一样。 </td>
+        </tr>
+        <tr>
+          <td>int pointSize() const </td>
+          <td> void setPointSize(int pointSize)</td>
+          <td> PointSize 是真实尺子上的一磅刻度，1/72英寸距离，72磅就是1英寸。在不同屏幕一磅尺寸一样大。</td>
+        </tr>
+        <tr class="d1">
+          <td>int weight() const</td>
+          <td> void setWeight(int weight)</td>
+          <td style="height: 15px;"> 字体重量，取值0-99，正常是50，数字越大笔画越粗。 </td>
+        </tr>
+        <tr>
+          <td>bool italic() const</td>
+          <td> void setItalic(bool enable)</td>
+          <td> 斜体设置，如果为 true 是倾斜显示文字，false 就是正常显示。</td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    针对字体重量，QFont 预设了几个档次的枚举值：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 200px;" align="center"><b>QFont::​Weight枚举常量</b></td>
+          <td style="width: 100px;" align="center"><b>数值</b></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>QFont::Light</td>
+          <td> 25</td>
+          <td> 轻体笔画。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QFont::Normal</td>
+          <td> 50</td>
+          <td> 正常笔画。 </td>
+        </tr>
+        <tr>
+          <td>QFont::DemiBold</td>
+          <td> 63</td>
+          <td> 略粗笔画。</td>
+        </tr>
+        <tr class="d1">
+          <td>QFont::Bold</td>
+          <td> 75</td>
+          <td style="height: 15px;"> 粗体笔画。 </td>
+        </tr>
+        <tr>
+          <td>QFont::Black</td>
+          <td> 87</td>
+          <td> 黑重笔画。</td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    针对字体重量，还有两个函数，可以判断和设置粗体：<br>
+    <div class="code">bool&nbsp;&nbsp; &nbsp;bold() const&nbsp;&nbsp; //
+      凡是字体重量大于 QFont::Normal 都返回 true，小于等于 QFont::Normal 返回 false<br>
+      void&nbsp;&nbsp;&nbsp; setBold(bool enable)&nbsp;&nbsp; //当参数为 true
+      时，设置字体为 QFont::Bold，如果参数 false 就设置为 QFont::Normal </div>
+    字体类常用的函数介绍到这。下面我们介绍获取字体的 QFontDialog&nbsp; 对话框。<br>
+    <br>
+    QFontDialog 继承了基类对话框的所有函数，可以进行模态和非模态显示，如 exec() 、show()
+    函数直接继承自基类。字体对话框外观如下图所示：<br>
+    <center> <img src="images/ch11/ch11-03-02.png" alt="font1"></center>
+    对话框中左上角位置是字体家族名称，上部中间是字体风格，包含粗体斜体设置，右上角是字号磅数。对话框左下角是字体效果删除线、下划线，以及书写系统习惯，比如简
+    体中文 Simplified Chinese。右下角是当前选中字体显示样例。<br>
+    QFontDialog 也有两种使用方式，第一种是自定义字体对话框，使用普通成员函数获取字体；第二种是使用静态函数，模态弹窗获取字体。<br>
+    （1）QFontDialog 普通成员函数<br>
+    QFontDialog 构造函数如下：<br>
+    <div class="code">QFontDialog(QWidget * parent = 0)<br>
+      QFontDialog(const QFont &amp; initial, QWidget * parent = 0)</div>
+    参数 parent&nbsp; 是父窗口指针，第二个构造函数可以指定初始显示的字体 initial 。<br>
+    QFontDialog 获取颜色的普通函数也分两种场景，一种场景是对话框持续显示时，用户点击选择的字体：<br>
+    <div class="code">QFont&nbsp;&nbsp; &nbsp;currentFont()
+      const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //获取当前选中的字体<br>
+      void&nbsp;&nbsp;&nbsp; setCurrentFont(const QFont &amp; font)&nbsp;
+      //设置当前字体<br>
+      void&nbsp;&nbsp;&nbsp; currentFontChanged(const QFont &amp; font)&nbsp;
+      //信号，当前字体变化时触发该信号</div>
+    对于非模态显示的自定义字体对话框，关联 currentFontChanged()
+    信号可以实时获取用户点选的字体，并进行同步字体设置。用户只要不停地换字体，currentFontChanged()
+    就不停地触发，该信号与字体对话框显示都是持续的。<br>
+    另一种场景是点击“OK”按钮后最终选择的字体：<br>
+    <div class="code">QFont&nbsp;&nbsp; &nbsp;selectedFont()
+      const&nbsp;&nbsp;&nbsp; //点击“OK”按钮后最终选择的字体<br>
+      void&nbsp;&nbsp;&nbsp; fontSelected(const QFont &amp; font)&nbsp;
+      //信号，点击“OK”按钮后触发该信号，参数是最终选择字体</div>
+    点击“OK”按钮之后，字体对话框会关闭，因此是最终选择的字体。fontSelected() 随着对话框关闭触发，是一次性的。<br>
+    <br>
+    QFontDialog 重载了基类的打开函数：<br>
+    <div class="code">void QFontDialog::​open(QObject * receiver, const char *
+      member)</div>
+    这个打开函数是一次性的，将信号 fontSelected() 关联到 receiver 对象的 member
+    槽函数上，方便传递最终选择的字体，对话框关闭后，自动解除信号和槽函数绑定，只有一次触发。<br>
+    <br>
+    QFontDialog 也有对话框选项 FontDialogOption 的设置：<br>
+    <div class="code">FontDialogOptions&nbsp;&nbsp; &nbsp;options() const&nbsp;
+      //获取字体对话框选项<br>
+      void&nbsp;&nbsp;&nbsp; setOptions(FontDialogOptions options)&nbsp;
+      //设置字体对话框选项<br>
+      void&nbsp;&nbsp;&nbsp; setOption(FontDialogOption option, bool on =
+      true)&nbsp; //启用或禁用一个选项标志位<br>
+      bool&nbsp;&nbsp;&nbsp; testOption(FontDialogOption option) const&nbsp;
+      //测试一个选项标志位是否为 true</div>
+    QFontDialog::​FontDialogOptions 标志位枚举常量如下表所示：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 360px;" align="center"><b>QFontDialog::​
+              FontDialogOptions 枚举常量</b></td>
+          <td style="width: 140px;" align="center"><b>数值</b></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td style="height: 15px;">QFontDialog::NoButtons</td>
+          <td> 0x00000001 </td>
+          <td> 不显示“OK”和“Cancel”按钮（用于长期显示的非模态对话框）。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QFontDialog::DontUseNativeDialog</td>
+          <td> 0x00000002 </td>
+          <td> 使用 Qt 标准风格字体对话框，不使用操作系统本土风格字体对话框。 </td>
+        </tr>
+        <tr>
+          <td>QFontDialog::ScalableFonts </td>
+          <td> 0x00000004 </td>
+          <td> 显示可缩放字体（字号任意可调）。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QFontDialog::NonScalableFonts</td>
+          <td> 0x00000008 </td>
+          <td> 显示不可缩放字体（限定一个或几个字号）。 </td>
+        </tr>
+        <tr>
+          <td>QFontDialog::MonospacedFonts </td>
+          <td> 0x00000010 </td>
+          <td> 显示等宽字体。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QFontDialog::ProportionalFonts</td>
+          <td> 0x00000020 </td>
+          <td> 显示比例字体（非等宽字体）。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    通常都是使用默认的标志位数值 0，有定制需求时才设置上面的标志位。<br>
+    <br>
+    （2）QFontDialog 静态成员函数<br>
+    字体对话框提供了两个便捷的获取字体静态函数，模态显示临时的对话框对象：<br>
+    <div class="code">QFont&nbsp;&nbsp; &nbsp;getFont(bool * ok, QWidget *
+      parent = 0)<br>
+      QFont&nbsp;&nbsp;&nbsp; getFont(bool * ok, const QFont &amp; initial,
+      QWidget * parent = 0, const QString &amp; title = QString(),
+      FontDialogOptions options = 0)</div>
+    &nbsp;ok 指针指向表示用户点击对话框“OK”按钮（true）或“Cancel”按钮（false）的状态值；parent 是父窗口指针。<br>
+    第二个 getFont() 还带有其他参数：初始化的字体 initial，对话框标题 title ，对话框标志位选项 options 。<br>
+    两个 getFont() 在用户点击“OK”按钮后，返回最终选择的字体；如果用户点击“Cancel”按钮或按 Esc 键，那么第一个 getFont()
+    返回应用程序默认字体，第二个 getFont() 返回参数里的 initial 字体。<br>
+    getFont() 返回的字体对象本身总是有效的，用户点击 OK”按钮或“Cancel”按钮的状态就靠 * ok
+    变量的真假状态来区分。getFont() 静态函数使用示例：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; bool bOK = false;<br>
+      &nbsp;&nbsp;&nbsp; QFont font = QFontDialog::getFont( &amp;bOK );<br>
+      &nbsp;&nbsp;&nbsp; if( bOK )<br>
+      &nbsp;&nbsp;&nbsp; {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      ui-&gt;pushButtonFont-&gt;setFont(font);<br>
+      &nbsp;&nbsp;&nbsp; }<br>
+      &nbsp;&nbsp;&nbsp; else<br>
+      &nbsp;&nbsp;&nbsp; {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;"Use the old
+      font.";<br>
+      &nbsp;&nbsp;&nbsp; }</div>
+    <br>
+    Qt 应用程序的默认字体可以进行读取或修改：<br>
+    <div class="code">QFont QApplication::​font()&nbsp;&nbsp; //静态函数，获取应用程序默认的字体<br>
+      void QApplication::​setFont(const QFont &amp; font, const char * className
+      = 0)&nbsp; //静态函数，设置应用程序默认字体</div>
+    参数 className&nbsp; 默认是空的，表示字体对程序所有界面类的对象生效；<br>
+    如果设置了 className&nbsp; 字符串，那么字体仅对 className&nbsp; 类及其派生类对象生效。<br>
+    <br>
+    <div class="os2">11.3.3 QInputDialog</div>
+    <br>
+    QInputDialog 用于方便快捷地获取一个用户输入数据，支持整数 int、浮点数 double、文本 QString 三种数据。按照
+    QInputDialog 内部的输入控件，又可以分为整数输入控件 QSpinBox、浮点数输入控件 QDoubleSpinBox、单行文本输入控件
+    QLineEdit、多行文本输入控件 QPlainTextEdit、组合框输入控件 QComboBox 等。QInputDialog
+    将这些常见输入控件包装成输入对话框形式，方便获取用户输入。<br>
+    QInputDialog 可以作为自定义对话框对象使用，也可以使用静态函数直接弹窗获取输入。<br>
+    QInputDialog 构造函数比较简单：<br>
+    <div class="code">QInputDialog(QWidget * parent = 0, Qt::WindowFlags flags =
+      0)</div>
+    参数里可以指定父窗口指针和窗口标志位。<br>
+    构建输入对话框之后，可以设置其输入模式：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;setInputMode(InputMode mode)&nbsp;
+      //设置整数、浮点数或文本输入模式<br>
+      InputMode&nbsp;&nbsp;&nbsp; inputMode() const&nbsp; //获取当前输入模式</div>
+    输入模式枚举常量如下表所示：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 280px;" align="center"><b>QInputDialog::​InputMode
+              枚举常量</b></td>
+          <td style="width: 140px;" align="center"><b>数值</b></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td style="height: 15px;">QInputDialog::TextInput</td>
+          <td> 0</td>
+          <td> 用于输入文本字符串。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QInputDialog::IntInput</td>
+          <td> 1</td>
+          <td> 用于输入整数。 </td>
+        </tr>
+        <tr>
+          <td>QInputDialog::DoubleInput</td>
+          <td> 2</td>
+          <td> 用于输入双精度浮点数。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    我们下面按照输入控件的类型分别介绍 QInputDialog 功能，先介绍输入对话框的普通成员函数最后介绍常用的静态成员函数。<br>
+    （1）整数输入<br>
+    QInputDialog 整数输入对话框如下图所示：<br>
+    <center> <img src="images/ch11/ch11-03-03.png" alt="int"></center>
+    上图标题栏文本 title 为“设置整数”，对话框带的提示标签 label&nbsp;
+    为“请输入整数值”，两个按钮显示默认的“OK”和“Cancel”文本。整数使用 QSpinBox 获取整数，可以定制整数取值范围和旋钮步进，相关函数如下
+    表所示：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 280px;" align="center"><b>整数输入相关函数</b></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td style="height: 15px;">int intValue() const</td>
+          <td> 获取整数值。 </td>
+        </tr>
+        <tr class="d1">
+          <td>int intMinimum() const</td>
+          <td> 获取整数值范围下限。 </td>
+        </tr>
+        <tr>
+          <td>int intMaximum() const</td>
+          <td> 获取整数值范围上限。 </td>
+        </tr>
+        <tr class="d1">
+          <td>int intStep() const</td>
+          <td> 获取旋钮框整数步进。 </td>
+        </tr>
+        <tr>
+          <td>void setIntValue(int value)</td>
+          <td style="height: 15px;"> 设置整数值。 </td>
+        </tr>
+        <tr class="d1">
+          <td>void setIntMinimum(int min)</td>
+          <td> 设置整数值范围下限。 </td>
+        </tr>
+        <tr>
+          <td>void setIntMaximum(int max)</td>
+          <td style="height: 15px;"> 设置整数值范围上限。 </td>
+        </tr>
+        <tr class="d1">
+          <td>void setIntStep(int step)</td>
+          <td> 设置旋钮框整数步进。 </td>
+        </tr>
+        <tr>
+          <td>void setIntRange(int min, int max)</td>
+          <td style="height: 15px;"> 设置整数值范围。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    对话框处于显示状态，整数值变化时，触发信号：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;intValueChanged(int value)</div>
+    如果用户点击了“OK”按钮，对话框关闭，触发最终选择整数值的信号：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;intValueSelected(int value)</div>
+    <br>
+    （2）浮点数输入<br>
+    QInputDialog 浮点数输入对话框如下图所示：<br>
+    <center> <img src="images/ch11/ch11-03-04.png" alt="double"></center>
+    上图标题栏文本 title 为“设置浮点数”，提示标签 label
+    的文本为“请输入浮点数值：”，浮点数旋钮框的小数点后面只显示了一位。详细的浮点数输入定 制函数如下表所示：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 320px;" align="center"><b>浮点数输入相关函数</b></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td style="height: 15px;">double doubleValue() const</td>
+          <td> 获取浮点数值。 </td>
+        </tr>
+        <tr class="d1">
+          <td>double doubleMinimum() const</td>
+          <td> 获取浮点数范围下限。 </td>
+        </tr>
+        <tr>
+          <td>double doubleMaximum() const</td>
+          <td> 获取浮点数范围上限。 </td>
+        </tr>
+        <tr class="d1">
+          <td>int doubleDecimals() const</td>
+          <td> 获取浮点数小数点后的位数。 </td>
+        </tr>
+        <tr>
+          <td>void setDoubleValue(double value)</td>
+          <td style="height: 15px;"> 设置浮点数值。 </td>
+        </tr>
+        <tr class="d1">
+          <td style="height: 15px;">void setDoubleMinimum(double min)</td>
+          <td> 设置浮点数范围下限。 </td>
+        </tr>
+        <tr>
+          <td>void setDoubleMaximum(double max)</td>
+          <td style="height: 15px;"> 设置浮点数范围上限。 </td>
+        </tr>
+        <tr class="d1">
+          <td>void setDoubleDecimals(int decimals)</td>
+          <td> 设置浮点数小数点后的位数。 </td>
+        </tr>
+        <tr>
+          <td>void setDoubleRange(double min, double max)</td>
+          <td style="height: 15px;"> 设置浮点数范围。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    对话框处于显示状态，浮点数变化时，触发信号：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;doubleValueChanged(double value)</div>
+    如果用户点击了“OK”按钮，对话框关闭，触发最终选择浮点数值的信号：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;doubleValueSelected(double value)</div>
+    <br>
+    （3）单行文本输入<br>
+    QInputDialog 单行文本输入对话框如下图所示：
+    <center> <img src="images/ch11/ch11-03-05.png" alt="lineedit"></center>
+    用户输入文本后点击“OK”按钮或者按 Enter 键就会返回一行文本 QString；如果用户点击“Cancel”按钮或者按 Esc
+    键，返回空字符串。单行文本输入相关函数如下：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 350px;" align="center"><b>单行文本输入相关函数</b></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td style="height: 15px;">QString textValue() const</td>
+          <td> 获取文本字符串。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QLineEdit::EchoMode textEchoMode() const</td>
+          <td> 获取文本回显模式。 </td>
+        </tr>
+        <tr>
+          <td>void setTextValue(const QString &amp; text)</td>
+          <td> 设置文本字符串。 </td>
+        </tr>
+        <tr class="d1">
+          <td>void setTextEchoMode(QLineEdit::EchoMode mode)</td>
+          <td> 设置文本回显模式。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    文本回显模式就是 QLineEdit::EchoMode 单行编辑器的枚举常量，如下表所示：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 280px;" align="center"><b>QLineEdit::EchoMode 枚举常量</b></td>
+          <td style="width: 140px;" align="center"><b>数值</b></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td style="height: 15px;">QLineEdit::Normal</td>
+          <td> 0</td>
+          <td> 正常模式，输入什么就显示什么。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QLineEdit::NoEcho</td>
+          <td> 1</td>
+          <td> 无回显模式，用户输入时字符保存在内存中，但是编辑框不显示任何东西，常用于密码输入。 </td>
+        </tr>
+        <tr>
+          <td>QLineEdit::Password</td>
+          <td> 2</td>
+          <td> 密码回显模式，用 * 或者·代替字符显示。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QLineEdit::PasswordEchoOnEdit</td>
+          <td> 3</td>
+          <td> 密码编辑回显模式，用户输入字符时显示正常字符，其他不输入的时间都用 * 或者·代替字符显示。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    对话框处于显示状态，文本变化时，触发信号：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;textValueChanged(const QString
+      &amp; text)</div>
+    如果用户点击了“OK”按钮，对话框关闭，触发最终输入文本的信号：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;textValueSelected(const QString
+      &amp; text)</div>
+    <br>
+    （4）组合框条目输入<br>
+    QInputDialog 组合框条目输入对话框如下图所示：<br>
+    <center> <img src="images/ch11/ch11-03-06.png" alt="combo"></center>
+    组合框右边可以点击三角形图标，展开条目列表。默认情况组合框内嵌的编辑框是可以直接编辑文本的。组合框条目输入相关函数如下：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 360px;" align="center"><b>整数输入相关函数</b></td>
+          <td style="height: 15px;" align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td style="height: 15px;">QStringList comboBoxItems() const</td>
+          <td> 获取组合框条目列表。 </td>
+        </tr>
+        <tr class="d1">
+          <td>bool isComboBoxEditable() const</td>
+          <td> 判断组合框内嵌编辑框是否可以编辑。 </td>
+        </tr>
+        <tr>
+          <td>void setComboBoxItems(const QStringList &amp; items)</td>
+          <td> 设置组合框条目列表。 </td>
+        </tr>
+        <tr class="d1">
+          <td>void setComboBoxEditable(bool editable)</td>
+          <td> 设置组合框内嵌编辑框是否可以编辑。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    组合框获取的也是文本，所以其触发的信号与单行文本输入时的情况一样，也是 textValueChanged() 和 textValueSelected()
+    。<br>
+    <br>
+    （5）其他普通成员函数<br>
+    输入对话框可以定制提示标签和两个按钮的文本，相关函数如下：<br>
+    <div class="code">QString&nbsp;&nbsp; &nbsp;labelText() const&nbsp;&nbsp;
+      //获取提示标签文本<br>
+      QString&nbsp;&nbsp;&nbsp; okButtonText() const&nbsp;&nbsp; //获取“OK”按钮文本<br>
+      QString&nbsp;&nbsp;&nbsp; cancelButtonText() const&nbsp;&nbsp;
+      //获取“Cancel”按钮文本<br>
+      void&nbsp;&nbsp;&nbsp; setLabelText(const QString &amp; text)&nbsp;&nbsp;
+      //设置提示标签文本<br>
+      void&nbsp;&nbsp;&nbsp; setOkButtonText(const QString &amp;
+      text)&nbsp;&nbsp; //设置“OK”按钮文本<br>
+      void&nbsp;&nbsp;&nbsp; setCancelButtonText(const QString &amp;
+      text)&nbsp;&nbsp; //设置“Cancel”按钮文本</div>
+    <br>
+    输入对话框也重载了基类的打开函数：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;open(QObject * receiver, const char
+      * member)</div>
+    该函数会一次性绑定信号到参数 receiver 对象的 member 槽函数，关联槽函数时，根据槽函数的参数自动判断使用输入对话框对应的信号：<br>
+    ①如果 member 槽函数第一个参数是 QString，将&nbsp; textValueSelected()&nbsp; 信号关联到槽函数。<br>
+    ②如果 member 槽函数第一个参数是 int，将 intValueSelected() 信号关联到槽函数。<br>
+    ③如果 member 槽函数第一个参数是 double，将 doubleValueSelected() 信号关联到槽函数。<br>
+    ④如果 member 槽函数没有参数，将 accepted() 信号关联到槽函数。<br>
+    对话框关闭时，自动解除上述信号和槽函数的关联。<br>
+    <br>
+    输入对话框也有几个选项标志位，相关函数如下：<br>
+    <div class="code">InputDialogOptions&nbsp;&nbsp; &nbsp;options() const&nbsp;
+      //获取对话框选项<br>
+      void&nbsp;&nbsp;&nbsp; setOptions(InputDialogOptions options)&nbsp;
+      //设置对话框选项<br>
+      void&nbsp;&nbsp;&nbsp; setOption(InputDialogOption option, bool on =
+      true)&nbsp; //设置一个选项标志位<br>
+      bool&nbsp;&nbsp;&nbsp; testOption(InputDialogOption option)
+      const&nbsp;&nbsp; //测试一个选项标志位是否为 true</div>
+    QInputDialog::​InputDialogOptions 标志位枚举常量如下表所示：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 360px;" align="center"><b>QInputDialog::​
+              InputDialogOptions 枚举常量</b></td>
+          <td style="width: 140px;" align="center"><b>数值</b></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td style="height: 15px;">QInputDialog::NoButtons</td>
+          <td> 0x00000001</td>
+          <td> 不显示“OK”和“Cancel”按钮（用于长期显示的非模态对话框）。。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QInputDialog::UseListViewForComboBoxItems</td>
+          <td> 0x00000002</td>
+          <td> 使用QListView取代QComboBox进行条目列表的显示。 </td>
+        </tr>
+        <tr>
+          <td>QInputDialog::UsePlainTextEditForTextInput</td>
+          <td> 0x00000004</td>
+          <td> 使用QPlainTextEdit取代默认单行编辑器实现多行文本输入。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    对于 QInputDialog 自定义对话框，如果设置 QInputDialog::TextInput
+    文本输入模式，那么默认采用单行编辑器输入文本，如果希望输入多行文本，那么还需要将选项标志位
+    QInputDialog::UsePlainTextEditForTextInput 设为 true，这样才会启用多行编辑器。<br>
+    静态函数 getMultiLineText() 也会自动设置 QInputDialog::UsePlainTextEditForTextInput
+    标志位为 true ，启用多行编辑。多行编辑输入对话框如下图所示：<br>
+    <center> <img src="images/ch11/ch11-03-07.png" alt="multiline"></center>
+    <br>
+    （6）静态成员函数<br>
+    QInputDialog 五种输入控件对应五个静态函数：<br>
+    ①获取整数值<br>
+    <div class="code">int&nbsp;&nbsp; &nbsp;getInt(QWidget * parent, const
+      QString &amp; title, const QString &amp; label, int value = 0, int min =
+      -2147483647, int max = 2147483647, int step = 1, bool * ok = 0,
+      Qt::WindowFlags flags = 0)</div>
+    参数里 parent 是父窗口指针，title 为对话框标题栏文本，label 是提示标签的文本，value 是初始值，min 为整数范围下限，max
+    是整数范围上限，step 是旋钮框的步进，ok 指针用于指向表示点击“OK”或“Cancel”的状态变量，flags 是窗口标志位。<br>
+    <br>
+    ②获取浮点数值<br>
+    <div class="code">double&nbsp;&nbsp; &nbsp;getDouble(QWidget * parent, const
+      QString &amp; title, const QString &amp; label, double value = 0, double
+      min = -2147483647, double max = 2147483647, int decimals = 1, bool * ok =
+      0, Qt::WindowFlags flags = 0)</div>
+    getDouble() 与 getInt() 类似，只是把步进变量换成了小数点后的位数变量。<br>
+    <br>
+    ③获取单行文本<br>
+    <div class="code">QString&nbsp;&nbsp; &nbsp;getText(QWidget * parent, const
+      QString &amp; title, const QString &amp; label, QLineEdit::EchoMode mode =
+      QLineEdit::Normal, const QString &amp; text = QString(), bool * ok = 0,
+      Qt::WindowFlags flags = 0, Qt::InputMethodHints inputMethodHints =
+      Qt::ImhNone)</div>
+    getText() 参数里 mode 是字符回显模式，text 是初始的文本，ok 指针用于指向表示点击“OK”或“Cancel”的状态变量，flags
+    是窗口标志位变量，inputMethodHints 是输入方式提示，比如密码、时间、数字等输入类型提示。inputMethodHints 特性是从基类
+    QWidget 继承的，仅仅是提示功能，不会限制任何输入，一般可以忽略。<br>
+    <br>
+    ④获取多行文本<br>
+    <div class="code">QString&nbsp;&nbsp; &nbsp;getMultiLineText(QWidget *
+      parent, const QString &amp; title, const QString &amp; label, const
+      QString &amp; text = QString(), bool * ok = 0, Qt::WindowFlags flags = 0,
+      Qt::InputMethodHints inputMethodHints = Qt::ImhNone)</div>
+    多行文本使用 QPlainTextEdit 输入多行文本，没有 QLineEdit 控件的回显模式设置，其他参数与 getText() 参数类似。 <br>
+    <br>
+    ⑤获取组合框条目文本<br>
+    <div class="code">QString&nbsp;&nbsp; &nbsp;getItem(QWidget * parent, const
+      QString &amp; title, const QString &amp; label, const QStringList &amp;
+      items, int current = 0, bool editable = true, bool * ok = 0,
+      Qt::WindowFlags flags = 0, Qt::InputMethodHints inputMethodHints =
+      Qt::ImhNone)</div>
+    getItem() 也是获取文本，只是用组合框保存多个文本条目，供用户选择或编辑。参数 items 是条目文本列表，current
+    是默认选中的条目序号，editable 表示组合框内嵌编辑器是否可以编辑文本，其他参数与 getText() 参数类似。<br>
+    <br>
+    静态函数与自定义对话框使用过程是类似的，只是静态函数更为简洁，以 getMultiLineText() 函数源代码为例：<br>
+    <div class="code">QString QInputDialog::getMultiLineText(QWidget *parent,
+      const QString &amp;title, const QString &amp;label,<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      const QString &amp;text, bool *ok, Qt::WindowFlags flags,<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      Qt::InputMethodHints inputMethodHints)<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp; QInputDialog dialog(parent, flags);<br>
+      &nbsp;&nbsp;&nbsp;
+      dialog.setOptions(QInputDialog::UsePlainTextEditForTextInput);<br>
+      &nbsp;&nbsp;&nbsp; dialog.setWindowTitle(title);<br>
+      &nbsp;&nbsp;&nbsp; dialog.setLabelText(label);<br>
+      &nbsp;&nbsp;&nbsp; dialog.setTextValue(text);<br>
+      &nbsp;&nbsp;&nbsp; dialog.setInputMethodHints(inputMethodHints);<br>
+      <br>
+      &nbsp;&nbsp;&nbsp; int ret = dialog.exec();<br>
+      &nbsp;&nbsp;&nbsp; if (ok)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *ok = !!ret;<br>
+      &nbsp;&nbsp;&nbsp; if (ret) {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return dialog.textValue();<br>
+      &nbsp;&nbsp;&nbsp; } else {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return QString();<br>
+      &nbsp;&nbsp;&nbsp; }<br>
+      }</div>
+    getMultiLineText() 函数里面定义了临时的输入对话框 dialog；<br>
+    设置选项标志位QInputDialog::UsePlainTextEditForTextInput，表示使用多行编辑器 QPlainTextEdit ；<br>
+    设置窗口标题栏、提示标签文本、编辑器初始文本以及窗口输入提示等；<br>
+    使用 dialog.exec() 模态显示对话框，返回值存到 ret；<br>
+    根据 ret 设置 ok 指向的变量值，连续两个取反 ! 感叹号，其实就和 ret 真假判断一致，只是把 int 类型转成了 bool 类型；<br>
+    ret 如果为 true，说明点击了“OK”按钮，返回文本字符串；<br>
+    ret 如果为 false，说明点击了“Cancel”按钮，返回空字符串。<br>
+    我们使用自定义的对话框对象，可以参考上面代码编写，当然也可以改用持续的非模态对话框。<br>
+    <br>
+    <div class="os2">11.3.4 对话框使用示例 CustomizeLabel</div>
+    <br>
+    下面我们学习一个 CustomizeLabel 示例，使用本节的三种对话框定制修改标签的显示外观。<br>
+    <br>
+    <br>
+    <div class="code">q</div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch11-02.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch11-04.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

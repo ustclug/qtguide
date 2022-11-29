@@ -22,7 +22,7 @@
     <div class="os2">11.3.1 QColorDialog</div>
     <br>
     在介绍 QColorDialog 之前，我们先简单介绍一下 QColor 类。QColor 类用于表示颜色，支持
-    RGB（红绿蓝）三颜色表示，也支持其他颜色模型表示，例如 HSV (hue 色调, saturation 饱和度, value
+    RGB（红绿蓝）三原色表示，也支持其他颜色模型表示，例如 HSV (hue 色调, saturation 饱和度, value
     明亮度)，CMYK（cyan 青, magenta 紫或叫品红, yellow 黄,&nbsp; black 黑）。HSV
     常用于描述人眼对颜色的感官，CMYK 常用于绘画或彩色印刷的颜料配置。计算机显示则更多地使用 RGB 三原色，下面我们主要介绍 RGB
     的颜色模型相关函数内容。<br>
@@ -52,8 +52,8 @@
     下面介绍 QColorDialog 对话框，QColorDialog 用于获取颜色，比如标签控件的前景色、背景色等，都可以通过 QColorDialog
     获取颜色，然后修改界面控件的配色。QColorDialog 获取的颜色使用 QColor 对象返回。QColorDialog 颜色对话框如下图所示：<br>
     <center> <img src="images/ch11/ch11-03-01.png" alt="color1"></center>
-    对话框左上角是基本颜色的网格，点击颜色网格可以获取基本颜色，右边则是大片的渐变颜色区域，渐变颜色区域每一个点都是一种颜色。对话框左下角可以添加自定义的新
-    颜色到网格中，方便下次选取。右下角的 Red、Green、Blue 三色编辑框也可以修改颜色分量的值。HTML
+    对话框左上角是基本颜色的网格，点击颜色网格可以获取基本颜色，右边则是大片的渐变颜色区域，渐变颜色区域每一个点都是一种颜色。对话框左下角可以添
+    加自定义的新 颜色到网格中，方便下次选取。右下角的 Red、Green、Blue 三色编辑框也可以修改颜色分量的值。HTML
     编辑框内容就是当前颜色对应网页字符串的颜色描述方式。<br>
     颜色对话框有两种使用方式，一种是自定义对话框对象进行弹窗，第二种是使用对话框的静态函数弹窗。第二种静态函数的使用方式更为便捷。<br>
     （1）QColorDialog 普通成员函数<br>
@@ -63,7 +63,7 @@
       QColorDialog(const QColor &amp; initial, QWidget * parent = 0)<br>
       ~QColorDialog()</div>
     第一个构造函数参数只是设置父窗口指针，第二个构造函数可以指定一个初始颜色值，在弹窗时默认选中这个颜色。<br>
-    颜色对话框获取颜色的普通成员函数分两种场景，第一种是在对话框保持显示时，用户点击的颜色：<br>
+    颜色对话框获取颜色的普通成员函数分两种场景，第一种场景是在对话框保持显示时，用户点击的颜色：<br>
     <div class="code">QColor&nbsp;&nbsp; &nbsp;currentColor() const&nbsp;&nbsp;
       //获取当前颜色<br>
       void&nbsp;&nbsp;&nbsp; setCurrentColor(const QColor &amp;
@@ -72,7 +72,7 @@
       //信号，当前颜色变化时触发该信号</div>
     如果是非模态显示的自定义颜色对话框，那么使用上面函数可以随时获取用户点选颜色的变化。<br>
     <br>
-    第二套获取颜色的普通函数，是需要用户点击“OK”按钮确认后，最终返回的颜色：<br>
+    第二种场景获取颜色的普通函数，是需要用户点击“OK”按钮确认后，最终返回的颜色：<br>
     <div class="code">QColor&nbsp;&nbsp; &nbsp;selectedColor() const&nbsp;&nbsp;
       //用户选择颜色并且点击 “OK”确认后返回的颜色值<br>
       void&nbsp;&nbsp;&nbsp; colorSelected(const QColor &amp; color)
@@ -82,8 +82,8 @@
     QColorDialog 重载了基类的打开函数：<br>
     <div class="code">void QColorDialog::​open(QObject * receiver, const char *
       member)</div>
-    这个打开函数参数里第一个 receiver 是接收 colorSelected() 信号的对象，第二个 member 就是槽函数名称。这个 open()
-    函数是一次性的，如果关闭了，那么 receiver 对象 member&nbsp; 槽函数会自动解绑。<br>
+    这个打开函数参数里第一个 receiver 是接收 colorSelected() 信号的对象，第二个 member 就是一次性关联的槽函数名称。这个
+    open() 函数是一次性的，如果关闭了，那么 receiver 对象 member&nbsp; 槽函数会自动解绑。<br>
     <br>
     QColorDialog 还可以设置特殊的颜色对话框选项：<br>
     <div class="code">ColorDialogOptions&nbsp;&nbsp; &nbsp;options() const&nbsp;
@@ -117,7 +117,7 @@
         <tr>
           <td>QColorDialog::DontUseNativeDialog </td>
           <td> 0x00000004 </td>
-          <td> 使用 Qt 风格标准颜色对话框，而不是用操作系统本土风格颜色对话框。 </td>
+          <td> 使用 Qt 风格标准颜色对话框，而不使用操作系统本土风格颜色对话框。 </td>
         </tr>
       </tbody>
     </table>
@@ -252,15 +252,15 @@
     QFontDialog 继承了基类对话框的所有函数，可以进行模态和非模态显示，如 exec() 、show()
     函数直接继承自基类。字体对话框外观如下图所示：<br>
     <center> <img src="images/ch11/ch11-03-02.png" alt="font1"></center>
-    对话框中左上角位置是字体家族名称，上部中间是字体风格，包含粗体斜体设置，右上角是字号磅数。对话框左下角是字体效果删除线、下划线，以及书写系统习惯，比如简
-    体中文 Simplified Chinese。右下角是当前选中字体显示样例。<br>
+    对话框中左上角位置是字体家族名称，上部中间是字体风格，包含粗体斜体设置，右上角是字号磅数。对话框左下角是字体效果删除线、下划线，以及书写系统
+    习惯，比如简 体中文 Simplified Chinese。右下角是当前选中字体显示样例。<br>
     QFontDialog 也有两种使用方式，第一种是自定义字体对话框，使用普通成员函数获取字体；第二种是使用静态函数，模态弹窗获取字体。<br>
     （1）QFontDialog 普通成员函数<br>
     QFontDialog 构造函数如下：<br>
     <div class="code">QFontDialog(QWidget * parent = 0)<br>
       QFontDialog(const QFont &amp; initial, QWidget * parent = 0)</div>
     参数 parent&nbsp; 是父窗口指针，第二个构造函数可以指定初始显示的字体 initial 。<br>
-    QFontDialog 获取颜色的普通函数也分两种场景，一种场景是对话框持续显示时，用户点击选择的字体：<br>
+    QFontDialog 获取字体的普通函数也分两种场景，一种场景是对话框持续显示时，用户点击选择的字体：<br>
     <div class="code">QFont&nbsp;&nbsp; &nbsp;currentFont()
       const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //获取当前选中的字体<br>
       void&nbsp;&nbsp;&nbsp; setCurrentFont(const QFont &amp; font)&nbsp;
@@ -390,7 +390,7 @@
     <table class="tabel">
       <tbody>
         <tr class="d1">
-          <td style="width: 280px;" align="center"><b>QInputDialog::​InputMode
+          <td style="width: 280px;" align="center"><b>QInputDialog::​ InputMode
               枚举常量</b></td>
           <td style="width: 140px;" align="center"><b>数值</b></td>
           <td align="center"><b> 描述</b></td>
@@ -413,7 +413,7 @@
       </tbody>
     </table>
     <br>
-    我们下面按照输入控件的类型分别介绍 QInputDialog 功能，先介绍输入对话框的普通成员函数最后介绍常用的静态成员函数。<br>
+    我们下面按照输入控件的类型分别介绍 QInputDialog 功能，先介绍输入对话框的普通成员函数，最后介绍常用的静态成员函数。<br>
     （1）整数输入<br>
     QInputDialog 整数输入对话框如下图所示：<br>
     <center> <img src="images/ch11/ch11-03-03.png" alt="int"></center>
@@ -771,20 +771,512 @@
     设置窗口标题栏、提示标签文本、编辑器初始文本以及窗口输入提示等；<br>
     使用 dialog.exec() 模态显示对话框，返回值存到 ret；<br>
     根据 ret 设置 ok 指向的变量值，连续两个取反 ! 感叹号，其实就和 ret 真假判断一致，只是把 int 类型转成了 bool 类型；<br>
-    ret 如果为 true，说明点击了“OK”按钮，返回文本字符串；<br>
+    ret 如果为 true，说明点击了“OK”按钮，返回编辑框文本字符串；<br>
     ret 如果为 false，说明点击了“Cancel”按钮，返回空字符串。<br>
     我们使用自定义的对话框对象，可以参考上面代码编写，当然也可以改用持续的非模态对话框。<br>
     <br>
     <div class="os2">11.3.4 对话框使用示例 CustomizeLabel</div>
     <br>
     下面我们学习一个 CustomizeLabel 示例，使用本节的三种对话框定制修改标签的显示外观。<br>
+    我们打开 QtCreator，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>
+    ①项目名称 customizelabel，创建路径 D:\QtProjects\ch11，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，注意修改主窗口类名为 WidgetCustomizeLabel，然后点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    由于使用 Qt 通用对话框，就不再需要额外新建自己的子窗口类和UI文件。<br>
+    我们打开 widgetcustomizelabel.ui 界面文件，拖入控件：<br>
+    <center> <img src="images/ch11/ch11-03-08.png" alt="ui1" width="800"></center>
+    窗口左边是标签“显示样例”，标签对象名为 labelSample，将标签 sizePolicy 属性的水平策略和垂直策略都修改为的 Expanding；<br>
+    右边是四个按钮：“设置前景色”按钮 pushButtonForeground，“设置背景色”按钮
+    pushButtonBackground，“设置字体”按钮 pushButtonFont，“设置文本”按钮 pushButtonText。<br>
+    右边四个按钮先按照垂直布局器排列，然后选中窗口根 WidgetCustomizeLabel，对窗口整体使用水平布局器排列。窗口尺寸是默认的
+    400*300 。<br>
+    然后我们依次右击四个按钮，为每个按钮都添加 clicked() 信号对应的槽函数。<br>
+    四个按钮槽函数添加完成后，我们保存并关闭&nbsp; widgetcustomizelabel.ui 界面文件。<br>
     <br>
+    下面我们编辑头文件 widgetcustomizelabel.h 内容：<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>WIDGETCUSTOMIZELABEL_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">WIDGETCUSTOMIZELABEL_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QColorDialog&gt;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QFontDialog&gt;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QInputDialog&gt;</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">WidgetCustomizeLabel</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">WidgetCustomizeLabel</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">WidgetCustomizeLabel</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">WidgetCustomizeLabel</span><span
+style=" color:#000000;">();</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonForeground_clicked</span><span
+style=" color:#000000;">();</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonBackground_clicked</span><span
+style=" color:#000000;">();</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonFont_clicked</span><span
+style=" color:#000000;">();</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonText_clicked</span><span
+style=" color:#000000;">();</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//手动添加槽函数，动态更新前景色</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">RecvAndSetForegroundColor</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QColor</span><span
+style=" color:#c0c0c0;"> </span>color<span style=" color:#000000;">);</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">WidgetCustomizeLabel</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//保存前景色、背景色、字体、输入文本</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QColor</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_clrForeground</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QColor</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_clrBackground</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QFont</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_font</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_strText</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//单独定制一个前景色对话框</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QColorDialog</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">m_pDlgForeground</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//初始化</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">Init</span><span style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGETCUSTOMIZELABEL_H</span></pre>
+</div>
+    我们添加了颜色对话框、字体对话框和输入对话框的头文件包含；<br>类声明里面，在四个按钮槽函数之后，手动添加了槽函数&nbsp; RecvAndSetForegroundColor() 用于接收实时的前景色变化信号，用户在前景色对话框修改颜色时，主界面会实时更新标签前景色。<br>类里面还添加了保存前景色、背景色、字体和文本的成员，并添加初始化函数 Init() 。<br><br>
+    下面我们分段编辑 widgetcustomizelabel.cpp 源文件内容，首先是构造函数和初始化部分：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"widgetcustomizelabel.h"</span>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widgetcustomizelabel.h"</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QDebug&gt;</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">WidgetCustomizeLabel</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">WidgetCustomizeLabel</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">WidgetCustomizeLabel</span><span
+style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//初始化</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">Init</span><span
+style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//初始化</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">WidgetCustomizeLabel</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">Init</span><span
+style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//背景色浅灰，前景色黑色</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_clrBackground</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QColor</span><span style=" color:#000000;">(</span><span
+style=" color:#000080;">240</span><span style=" color:#000000;">,</span><span style=" color:#000080;">240</span><span
+style=" color:#000000;">,</span><span style=" color:#000080;">240</span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_clrForeground</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QColor</span><span style=" color:#000000;">(</span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">,</span><span style=" color:#000080;">0</span><span
+style=" color:#000000;">,</span><span style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_strText</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"显示样例"</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//新建前景色对话框</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_pDlgForeground</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QColorDialog</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//隐藏按钮，非模态对话框，保持持续显示</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_pDlgForeground</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setOptions</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QColorDialog</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">NoButtons</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//关联信号和槽</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">connect</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">m_pDlgForeground</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SIGNAL</span><span
+style=" color:#000000;">(</span>currentColorChanged<span style=" color:#000000;">(</span><span
+style=" color:#800080;">QColor</span><span style=" color:#000000;">)),</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#808000;">this</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">SLOT</span><span
+style=" color:#000000;">(</span>RecvAndSetForegroundColor<span style=" color:#000000;">(</span><span
+style=" color:#800080;">QColor</span><span style=" color:#000000;">))</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">WidgetCustomizeLabel</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">WidgetCustomizeLabel</span><span style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_pDlgForeground</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_pDlgForeground</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">NULL</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre></div>      
+          
+          构造函数里添加了 Init() 函数调用。 <br>Init() 函数里面先设置了默认的背景色、前景色和文本字符串；<br>新建了前景色对话框存到 m_pDlgForeground，<br>设置前景色对话框的选项 QColorDialog::NoButtons，这样对话框没有“OK”和“Cancel”按钮，会作为非模态窗口持续显示。最后将前景色对话框的 currentColorChanged() 信号关联到主窗口槽函数 RecvAndSetForegroundColor() ，当用户在非模态的前景色对话框点选颜色时，主界面的标签前景色自动同步更新。 <br>析构函数里删除了前景色对话框，并将指针置空。<br><br>下面我们编辑“设置前景色”按钮槽函数和动态更新前景色槽函数的内容：<br>
+    <div class="code"><span style=" color:#008000;">//设置前景色按钮</span>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">WidgetCustomizeLabel</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonForeground_clicked</span><span
+style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_pDlgForeground</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">show</span><span
+style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_pDlgForeground</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">raise</span><span
+style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#008000;">//槽函数，动态更新前景色</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">WidgetCustomizeLabel</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">RecvAndSetForegroundColor</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QColor</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">color</span><span
+style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">color</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isValid</span><span
+style=" color:#000000;">())</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;">  </span><span style=" color:#008000;">//颜色不合法</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//颜色值合法</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_clrForeground</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">color</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strQSS</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"color:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%1;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">background-color:</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">%2;"</span><span style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#800000;">m_clrForeground</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">name</span><span style=" color:#000000;">()).</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#800000;">m_clrBackground</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">name</span><span style=" color:#000000;">());</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">labelSample</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setStyleSheet</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strQSS</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre></div>
+          
+          “设置前景色”按钮槽函数里面，将前景色对话框按照非模态显示，并显示到前端，方便用户操作。<br>当用户在前景色对话框修改颜色时，发出 currentColorChanged() 信号，调用 RecvAndSetForegroundColor() 槽函数，这个槽函数先判断参数的颜色是否合法，如果颜色值不合法就返回。<br>对于合法颜色，保存颜色到成员变量 m_clrForeground；<br>根据新的前景色和已有背景色，构造样式表字符串，设置给 ui-&gt;labelSample，这样就完成前景色同步更新。<br>前景色是通过自定义颜色对话框获取，并采用非模态对话框持续显示的方式实现。<br><br>实际中通用对话框的静态函数使用方式更为方便快捷，我们下面三个按钮槽函数都是使用静态函数，显示模态对话框获取数据。<br>我们编辑“设置背景色”按钮内容如下：<br>
+     <div class="code"><span style=" color:#008000;">//设置背景色按钮</span>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">WidgetCustomizeLabel</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonBackground_clicked</span><span
+style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取颜色</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QColor</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">clr</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QColorDialog</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">getColor</span><span
+style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">clr</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">isValid</span><span style=" color:#000000;">())</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//合法颜色</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_clrBackground</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">clr</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strQSS</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"color:</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">%1;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">background-color:</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">%2;"</span><span style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#800000;">m_clrForeground</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">name</span><span style=" color:#000000;">()).</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#800000;">m_clrBackground</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">name</span><span style=" color:#000000;">());</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">labelSample</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setStyleSheet</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strQSS</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre></div>
+          对于背景色，我们直接调用 QColorDialog::getColor() 获取颜色存到 clr ；<br>判断 clr 颜色是否合法，如果不合法直接返回，这种情况是用户点击“Cancel”按钮或按了 Esc 键，取消了颜色选取操作。<br>如果颜色合法，将颜色存到成员变量 m_clrBackground；<br>根据前景色和背景色成员变量，构造样式表字符串，设置给标签 ui-&gt;labelSample，完成背景色的一次性设置。<br>使用静态函数，就不需要单独编写对话框对象构造、信号槽函数关联等代码，一步到位就拿到了输入值，比较方便快捷。<br><br>“设置字体”按钮槽函数代码如下：<br>
+    <div class="code"><span style=" color:#008000;">//设置字体按钮</span>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">WidgetCustomizeLabel</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonFont_clicked</span><span
+style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取字体</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">bool</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">bOK</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">false</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QFont</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">ft</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QFontDialog</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">getFont</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#000000;">bOK</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">m_font</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">bOK</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//取消了</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_font</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">ft</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置新字体</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">labelSample</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setFont</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_font</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre></div>
+    该函数里我们定义了 bOK 变量，用于保存对话框的“OK”或“Cancel”按钮点击状态；<br>使用 QFontDialog::getFont( &amp;bOK, m_font ) 获取字体，字体对话框的默认初始字体就是上次设置的 m_font；<br>判断对话框结束状态 bOK ，如果是点击“Cancel”按钮，bOK 是 false 就直接返回；<br>如果点击了“OK”按钮，bOK&nbsp; 是 true，那么正确获取了新字体，保存字体到成员变量 m_font；<br>将 m_font 设置给 ui-&gt;labelSample，这样就完成了字体修改。<br>
     <br>
-    <div class="code">q</div>
-    <br>
-    <br>
-    <br>
-    <br>
+    “设置文本”按钮槽函数代码如下：<br>
+          <div class="code"><span style=" color:#008000;">//设置文本按钮</span>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">WidgetCustomizeLabel</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonText_clicked</span><span
+style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//获取输入文本</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">bool</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">bOK</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">false</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strText</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QInputDialog</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">getMultiLineText</span><span style=" color:#000000;">(</span><span
+style=" color:#808000;">this</span><span style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"设置文本"</span><span
+style=" color:#000000;">),</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"请输入文本："</span><span style=" color:#000000;">),</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                                                     </span><span
+style=" color:#800000;">m_strText</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#000000;">bOK</span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">bOK</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//取消了</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_strText</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strText</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">labelSample</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">m_strText</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre></div>
+    该函数里我们定义了 bOK 变量，用于保存对话框的“OK”或“Cancel”按钮点击状态；<br>
+    使用 QInputDialog::getMultiLineText() 获取多行文本，对话框默认文本就是上次设置的旧文本内容m_strText；<br>判断对话框结束状态 bOK ，如果是点击“Cancel”按钮，bOK 是 false 就直接返回；<br>
+如果点击了“OK”按钮，bOK&nbsp; 是 true，那么正确获取了新文本，将新文本存到 m_strText，<br>并将新文本 m_strText 设置给 ui-&gt;labelSample，这样就完成了文本修改。<br><br>代码编辑完成，我们构建项目并运行示例，
+          测试各个按钮功能：<br>
+     <center> <img src="images/ch11/ch11-03-09.png" alt="run1" width="800"></center>
+          前景色对话框是非模态的，可以持续显示，与主窗口可以自由切换输入焦点，用户点击颜色，主窗口标签前景色同步更新。<br>其他三个按钮对应的对话框是模态显示，必须点击“OK”按钮关闭模态对话框，获取的数据才会传递给主窗口，进行更新操作。读者可以自行测试例子的功能。<br>
+    <br>通过示例代码，我们可以发现使用 Qt 通用对话框的优点：<br>① 使用 Qt 通用对话框非常方便快捷，不需要额外创建对话框类文件、界面文件，减少项目内的文件数量；<br>② 使用通用对话框的静态函数获取数据，就不需要定义对话框对象，也不用关联信号和槽函数，节约编写代码工作量。<br>
+    本节内容介绍到这，下一节我们继续学习 Qt  通用对话框。<br><br>
     <br>
     <br>
     <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
@@ -792,18 +1284,17 @@
         <tr>
           <td style="width: 40%;">
             <div style="text-align: center;"><a href="ch11-02.htm"><img class="pic"
-                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
           </td>
           <td style="width: 20%;">
             <div style="text-align: center;"><a href="contents.htm"><img class="pic"
-                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
           </td>
           <td style="width: 40%;">
             <div style="text-align: center;"><a href="ch11-04.htm"><img class="pic"
-                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
           </td>
         </tr>
       </tbody>
     </table>
-  </body>
-</html>
+</body></html>

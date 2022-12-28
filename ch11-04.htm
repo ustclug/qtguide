@@ -2,10 +2,10 @@
 <html>
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
-    <title>ch11-04</title>    
-	<link href="css/style.css" rel="stylesheet" type="text/css" />
-	<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-	<script src="thumbnailviewer.js" type="text/javascript">
+    <title>ch11-04</title>
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -14,40 +14,609 @@
 ***********************************************/
 
 </script> </head>
-  
-  
-<div class="os1">11.4 通用对话框：QErrorMessage、QFileDialog、QProgressDialog</div>
-<br />
-本节介绍通用对话框：QErrorMessage、QFileDialog、QProgressDialog，并通过示例程序展示这三种对话框的使用。
-<br />
-
-<br />
-<div class="os2">11.4.1 QErrorMessage</div>
-<br />
-<br />
-<br />
-
-<div class="os2">11.4.2 QFileDialog</div>
-<br />
-<br />
-<br />
-
-<div class="os2">11.4.3 QProgressDialog</div>
-<br />
-<br />
-<br />
-
-<br />
-<br />
-<br />
-
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch11-03.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch11-05.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+  <body>
+    <div class="os1">11.4 通用对话框：QErrorMessage、QFileDialog、QProgressDialog</div>
+    <br>
+    本节介绍通用对话框：QErrorMessage、QFileDialog、QProgressDialog，并通过示例程序展示这三种对话框的使用。 <br>
+    <br>
+    <div class="os2">11.4.1 QErrorMessage</div>
+    <br>
+    QErrorMessage 提供用于显示错误提示消息的对话框。QErrorMessage 对话框由一个文本显示框和一个复选框组成：<br>
+    <center> <img src="images/ch11/ch11-04-01.png" alt="errmsg"></center>
+    文本显示框展示错误消息字符串，复选框选中时，下次调用 showMessage() 就继续显示相同的错误消息；如果复选框处于非选中状态，那么下次调用
+    showMessage() ，就不显示相同的错误消息。<br>
+    QErrorMessage 构造函数比较简单，只有指定父窗口指针的参数：<br>
+    <div class="code">QErrorMessage(QWidget * parent = 0)</div>
+    使用 QErrorMessage 对话框，可以直接调用 showMessage() 槽函数，或者将带 QString
+    参数的信号关联到该槽函数，都可以弹窗显示错误消息。<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;showMessage(const QString &amp;
+      message)&nbsp; //公有槽函数，按消息内容区分<br>
+      void&nbsp;&nbsp;&nbsp; showMessage(const QString &amp; message, const
+      QString &amp; type)&nbsp; //公有槽函数，按 type 类型区分</div>
+    第二个 showMessage() 槽函数参数就是消息字符串，如果弹窗后，用户取消复选框选中状态，那么相同字符串的消息不在弹窗显示。<br>
+    第二个 showMessage() 槽函数带有消息字符串和消息类型两个参数，消息类型是自己定义的任意字符串，方便作区分。在指定 type
+    类型后，用户如果取消复选框选中状态，那么会判定该类型消息都不需要在显示，隐藏匹配 type 类型的所有消息。<br>
+    对于 showMessage() 函数，正常情况消息会立即显示，但是如果 showMessage()
+    连续调用多次，排队的消息太多，就会按照先后顺序依次弹窗显示。<br>
+    <br>
+    QErrorMessage 除了 showMessage() 函数显示消息，还有另一种用途，它的静态函数 qtHandler() 可以接管
+    qDebug(), qWarning() 和 qFatal() 消息显示：<br>
+    <div class="code">QErrorMessage *&nbsp;&nbsp; &nbsp;qtHandler()&nbsp;&nbsp;
+      //静态函数</div>
+    qtHandler() 函数内部调用 qInstallMessageHandler() 函数，专门创建一个 QErrorMessage 对话框，用于显示
+    qDebug(), qWarning() 和 qFatal() 输出的消息。这对于图形化程序很有用，如果没有命令行终端，调用 qtHandler()
+    保存对话框指针，那么所有 qDebug(), qWarning() 和 qFatal() 输出的消息都会自动通过对话框显示。<br>
+    <br>
+    QErrorMessage 默认都是非模态的对话框，对于连续多次的 showMessage() 或者是接管了多次 qDebug(),
+    qWarning() 和 qFatal()
+    输出的消息，这些消息都会按顺序排队显示。对于取消复选框选中状态的消息，下次就会自动忽略重复的消息，不同的消息（不同 type 类型）总会至少显示一次。<br>
+    <br>
+    <div class="os2">11.4.2 QFileDialog</div>
+    <br>
+    QFileDialog 用于获取打开或保存文件、文件夹、URL路径，之前章节多次使用过&nbsp;
+    QFileDialog::getOpenFileName() 静态函数获取打开的文件名。本小节详细介绍文件对话框，QFileDialog
+    对话框外观如下图所示：<br>
+    <center> <img src="images/ch11/ch11-04-02.png" alt="filedlg"></center>
+    文件对话框可以设置文件名 filter 过滤器（或叫筛选器），上图设置了过滤器，仅显示 *.h 和 *.cpp 文件，用户点选文件，然后点击“打开”按
+    钮，对话框就会关闭，并可以通过函数获取用户选择的文件名。<br>
+    QFileDialog 也有两种使用方式，第一种是使用自定义对象方式，第二种是使用静态函数弹出获取文件名。下面我们先介绍第一种自定义对象使用的
+    QFileDialog 普通成员函数，然后再介绍静态函数。<br>
+    （1）QFileDialog 普通成员函数<br>
+    QFileDialog 构造函数如下：<br>
+    <div class="code">QFileDialog(QWidget * parent, Qt::WindowFlags flags)<br>
+      QFileDialog(QWidget * parent = 0, const QString &amp; caption = QString(),
+      const QString &amp; directory = QString(), const QString &amp; filter =
+      QString())</div>
+    第一个构造函数参数比较简化，只有父指针和对话框标志位。<br>
+    第二个构造函数除了父指针，还可以指定窗口标题文本 caption 、默认打开路径 directory 和文件名过滤器 filter 。<br>
+    定义对话框对象之后，需要设置对话框的文件模式、文件名过滤器、视图模式等属性，然后再用 exec() 或 show()
+    显示对话框，文件对话框通常用模态显示。<br>
+    QFileDialog 有五个主要的属性，控制对话框的工作和显示：<br>
+    ①接受模式 acceptMode<br>
+    接受模式是指接受文件打开或文件保存两种模式，默认为 AcceptOpen，读写函数如下：<br>
+    <div class="code">AcceptMode&nbsp;&nbsp; &nbsp;acceptMode() const<br>
+      void&nbsp;&nbsp; &nbsp;setAcceptMode(AcceptMode mode)</div>
+    文件打开模式总是打开已经存在的文件，而文件保存模式可以设置不存在文件名作为新文件写入。<br>
+    AcceptMode 枚举值如下所示：<br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 280px;" align="center"><b>QFileDialog::​AcceptMode
+              枚举常量</b></td>
+          <td style="width: 140px;" align="center"><b>数值</b></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>QFileDialog::AcceptOpen</td>
+          <td>&nbsp;0</td>
+          <td> 接受文件打开，获取已存在文件名。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QFileDialog::AcceptSave</td>
+          <td>&nbsp;1 </td>
+          <td> 接受文件保存，可以设置不存在的文件名（新建文件），如果是已存在的文件名，就是覆盖写入。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    ②文件模式 fileMode<br>
+    文件模式是允许用户选择文件或文件夹的范围，就是对话框返回的文件名限定，默认为 AnyFile，读写函数如下：<br>
+    <div class="code">FileMode&nbsp;&nbsp; &nbsp;fileMode() const<br>
+      void&nbsp;&nbsp; &nbsp;setFileMode(FileMode mode)</div>
+    FileMode 枚举值如下：<br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 280px;" align="center"><b>QFileDialog::FileMode 枚举常量</b></td>
+          <td style="width: 140px;" align="center"><b>数值</b></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td style="height: 15px;">QFileDialog::AnyFile</td>
+          <td>&nbsp;0</td>
+          <td> 一个任意的文件名，无论该文件否存在。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QFileDialog::ExistingFile</td>
+          <td>&nbsp;1 </td>
+          <td> 一个已存在的文件名。 </td>
+        </tr>
+        <tr>
+          <td>QFileDialog::Directory</td>
+          <td>&nbsp;2</td>
+          <td> 一个文件夹名称，这时文件和文件夹都会显示。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QFileDialog::ExistingFiles</td>
+          <td>&nbsp;3 </td>
+          <td>多个已存在文件名。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    ③文件名默认后缀 defaultSuffix 以及后缀名筛选<br>
+    defaultSuffix 是获取文件名的默认后缀，如果用户输入文件名时没有写后缀， 那么对话框给返回的文件名自动添加该默认后缀，读写函数为：<br>
+    <div class="code">QString&nbsp;&nbsp; &nbsp;defaultSuffix() const<br>
+      void&nbsp;&nbsp; &nbsp;setDefaultSuffix(const QString &amp; suffix)</div>
+    在文件对话框浏览时，可以设置后缀名过滤器，帮助筛选文件类型：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;setNameFilter(const QString &amp;
+      filter)<br>
+      void&nbsp;&nbsp; &nbsp;setNameFilters(const QStringList &amp; filters)<br>
+      QStringList&nbsp;&nbsp;&nbsp; nameFilters() const &nbsp; //获取后缀名过滤器列表</div>
+    第一个设置后缀名过滤器的函数，参数是一个字符串，字符串可以是多种类型多种后缀名，例如：<br>
+    <div class="code">"Images (*.png *.xpm *.jpg);;Text files (*.txt);;XML files
+      (*.xml)"</div>
+    两个英文分号区分文件类型，英文括号前面是文件类型描述，英文括号里面是空格分隔的多种后缀名。<br>
+    如果希望匹配所有文件，设置过滤器为 "All files (*)"&nbsp; 。<br>
+    第二个设置后缀名过滤器的函数，其参数为 QStringList&nbsp; 字符串列表，不需要双分号分隔类型，例如：<br>
+    <div class="code">QStringList filters;<br>
+      filters &lt;&lt; "Image files (*.png *.xpm *.jpg)"<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;&lt; "Text files (*.txt)"<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;&lt; "Any files (*)";<br>
+      <br>
+      QFileDialog dialog(this);<br>
+      dialog.setNameFilters(filters);<br>
+      dialog.exec();</div>
+    对于多种类型过滤器，可以选择一个作为当前显示的过滤器：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;selectNameFilter(const QString
+      &amp; filter)&nbsp; //设置参数里的过滤器为当前显示的过滤器<br>
+      QString&nbsp;&nbsp;&nbsp; selectedNameFilter() const&nbsp; //获取当前选中的后缀名过滤器</div>
+    <br>
+    ④显示模式 viewMode<br>
+    文件对话框浏览文件目录时主要有列表显示和详情显示，默认是详情模式，读写函数为：<br>
+    <div class="code">ViewMode&nbsp;&nbsp; &nbsp;viewMode() const<br>
+      void&nbsp;&nbsp; &nbsp;setViewMode(ViewMode mode)</div>
+    ViewMode 枚举值如下：<br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 280px;" align="center"><b>QFileDialog::ViewMode 枚举常量</b></td>
+          <td style="width: 140px;" align="center"><b>数值</b></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>QFileDialog::Detail</td>
+          <td>&nbsp;0</td>
+          <td> 详情模式，显示文件或文件夹条目的图标、名称和详情。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QFileDialog::List</td>
+          <td>&nbsp;1 </td>
+          <td> 列表模式，只显示文件夹或文件夹的图标和名称。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    ⑤对话框选项 options <br>
+    options 选项控制对话框的多种外观和文件筛选特性，默认不设置任何选项，读写函数如下：<br>
+    <div class="code">Options&nbsp;&nbsp; &nbsp;options() const&nbsp; //获取多个选项<br>
+      void&nbsp;&nbsp; &nbsp;setOptions(Options options)&nbsp; //设置多个选项<br>
+      bool&nbsp;&nbsp;&nbsp; testOption(Option option) const&nbsp; //测试单个选项<br>
+      void&nbsp;&nbsp;&nbsp; setOption(Option option, bool on = true)&nbsp;
+      //设置单个选项</div>
+    Options 枚举标志位如下：<br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 280px;" align="center"><b>QFileDialog::Options 标志位</b></td>
+          <td style="width: 140px;" align="center"><b>数值</b></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td style="height: 15px;">QFileDialog::ShowDirsOnly</td>
+          <td>&nbsp;0x00000001</td>
+          <td> 该标志位为 1，对话框只显示目录（仅在文件模式为 Directory 时生效）。默认标志位 0 显示所有文件和目录。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QFileDialog::DontResolveSymlinks</td>
+          <td>&nbsp;0x00000002</td>
+          <td> 标志位为 1 时解析符号链接（快捷方式）。默认标志位 0 解析符号链接。</td>
+        </tr>
+        <tr>
+          <td>QFileDialog::DontConfirmOverwrite</td>
+          <td>&nbsp;0x00000004</td>
+          <td> 标志位为 1 时不提示覆盖文件。默认标志位 0 会提示用户将要覆盖文件。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QFileDialog::DontUseNativeDialog</td>
+          <td>&nbsp;0x00000010 </td>
+          <td>不使用本地文件对话框。默认都是使用操作系统本地的文件对话框。如果要用非本土对话框，需要子类化QFileDialog并包含
+            Q_OBJECT 宏。 </td>
+        </tr>
+        <tr>
+          <td>QFileDialog::ReadOnly</td>
+          <td>&nbsp;0x00000020</td>
+          <td style="height: 15px;"> 指示显示模型为只读。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QFileDialog::HideNameFilterDetails</td>
+          <td>&nbsp;0x00000040 </td>
+          <td>指示后缀名详情隐藏或显示。 </td>
+        </tr>
+        <tr>
+          <td>QFileDialog::DontUseSheet</td>
+          <td>&nbsp;0x00000008</td>
+          <td> 不使用工作表，兼容老版本Qt代码，在 Qt 4.5 之后已经没有用处了。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QFileDialog::DontUseCustomDirectoryIcons</td>
+          <td>&nbsp;0x00000080 </td>
+          <td>不使用定制文件夹图标，总是使用默认的文件夹图标。有些系统默认可以显示定制的文件夹图标，这个选项自从 Qt 5.2 开始生效。</td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    这些选项需要在对话框显示之前设置完毕，如果对话框已经显示了，设置选项只能在对话框关闭后下次显示才能生效。<br>
+    <br>
+    除了属性读写函数，文件对话框还有其他功能函数。<br>
+    文件对话框界面的按钮和标签文本支持自定义内容，其读写函数为：<br>
+    <div class="code">QString&nbsp;&nbsp; &nbsp;labelText(DialogLabel label)
+      const<br>
+      void&nbsp;&nbsp;&nbsp; setLabelText(DialogLabel label, const QString &amp;
+      text)</div>
+    DialogLabel 指示读写的标签对象类型，如下列表所示：<br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 280px;" align="center"><b>QFileDialog::DialogLabel
+              枚举常量</b></td>
+          <td style="width: 140px;" align="center"><b>数值</b></td>
+          <td style="height: 15px;" align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>QFileDialog::LookIn</td>
+          <td>&nbsp;0</td>
+          <td style="height: 15px;"> LookIn 标签。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QFileDialog::FileName</td>
+          <td>&nbsp;1 </td>
+          <td style="height: 15px;"> 文件名标签。 </td>
+        </tr>
+        <tr>
+          <td>QFileDialog::FileType</td>
+          <td>&nbsp;2</td>
+          <td> 文件类型标签。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QFileDialog::Accept</td>
+          <td>&nbsp;3 </td>
+          <td>接受按钮标签，就是打开或保存按钮文本。 </td>
+        </tr>
+        <tr>
+          <td>QFileDialog::Reject</td>
+          <td>&nbsp;4</td>
+          <td> 拒绝按钮标签。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    Windows 7 系统实际测试时 QFileDialog::FileName、QFileDialog::Accept
+    设置有效，修改的是“文件名”标签，“打开”按钮的文本，其他的未发现效果，可能其他操作系统有效果。<br>
+    <br>
+    文件对话框默认工作路径可以通过下面函数设置：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;setDirectory(const QString &amp;
+      directory)&nbsp; //设置当前路径<br>
+      void&nbsp;&nbsp; &nbsp;setDirectory(const QDir &amp; directory)&nbsp;
+      //设置当前路径<br>
+      QDir&nbsp;&nbsp;&nbsp; directory() const&nbsp; //获取当前路径</div>
+    文件对话框支持模态显示和非模态显示，都是从基类继承，如 exec() 、show() 函数。<br>
+    文件对话框也有一次性关联接收信号对象的打开函数：<br>
+    <div class="code">void QFileDialog::​open(QObject * receiver, const char *
+      member)</div>
+    QFileDialog 根据文件模式决定关联到槽函数的信号：<br>
+    文件模式为 ExistingFiles 时，将&nbsp; filesSelected() 信号关联到槽函数；<br>
+    文件模式为其他数值时，将 fileSelected() 信号关联到槽函数。<br>
+    这个关联是一次性的，当对话框关闭时，解除信号和槽函数关联。<br>
+    <br>
+    文件可以通过函数提前设置默认选中的文件，帮助用户简化点选默认文件的操作：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;selectFile(const QString &amp;
+      filename)&nbsp; //通过代码选定默认的文件名</div>
+    正常情况下，在对话框关闭后，获取用户最终选定的文件列表，使用下面函数：<br>
+    <div class="code">QStringList&nbsp;&nbsp; &nbsp;selectedFiles() const</div>
+    注意 selectedFiles() 返回的总是 QStringList 列表，如果打开或保存一个文件，那么文件名就是列表的第 0 号字符串。<br>
+    <br>
+    对于非模态文件对话框，可以接收文件对话框的信号实时监测用户在对话框的点选动态：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;currentChanged(const QString &amp;
+      path)&nbsp; //当前选中文件变化<br>
+      void&nbsp;&nbsp;&nbsp; directoryEntered(const QString &amp;
+      directory)&nbsp; //进入新的文件夹<br>
+      void&nbsp;&nbsp;&nbsp; fileSelected(const QString &amp; file)&nbsp; //选中的单
+      个文件<br>
+      void&nbsp;&nbsp;&nbsp; filesSelected(const QStringList &amp;
+      selected)&nbsp; //选中的多个文件，参数是列表<br>
+      void&nbsp;&nbsp;&nbsp; filterSelected(const QString &amp; filter)&nbsp;
+      //选中的后缀名过滤器</div>
+    <br>
+    以上内容都是常规的获取系统文件路径形式，比如 <br>
+    "D:/QtProjects/ch10/stackedwidget.ui"<br>
+    文件对话框还有一套针对 URL 形式路径的函数和信号，函数和信号名全都带 Url 字样，例如：<br>
+    <div class="code">QList&lt;QUrl&gt;&nbsp;&nbsp; &nbsp;selectedUrls()
+      const&nbsp; //选择的多个URL<br>
+      void&nbsp;&nbsp;&nbsp; urlsSelected(const QList&lt;QUrl&gt; &amp;
+      urls)&nbsp; //信号，选择的多个URL</div>
+    URL 路径格式举例：<br>
+    "file:///D:/QtProjects/ch10/stackedwidget.ui"<br>
+    就是加了前缀字符串 "file:///" ，URL 通常在网页浏览器里使用，在网页浏览器输入 URL 可以访问对应的系统文件。<br>
+    <br>
+    系统文件路径与 URL 路径可以互相转换：<br>
+    <div class="code">QString QUrl::​toLocalFile() const&nbsp;&nbsp; //普通成员函数，将
+      QUrl 对象内容转为本地系统文件路径<br>
+      QUrl QUrl::​fromLocalFile(const QString &amp; localFile)&nbsp;&nbsp;
+      //静态函数，根据本地系统文件路径转为 QUrl 对象</div>
+    <br>
+    文件对话框的普通成员函数运用例子代码如下，针对保存一个文件，获取文件名：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QFileDialog dlg;<br>
+      &nbsp;&nbsp;&nbsp; dlg.setAcceptMode(QFileDialog::AcceptSave);&nbsp;
+      //保存模式<br>
+      &nbsp;&nbsp;&nbsp; dlg.setFileMode(QFileDialog::AnyFile); //选择任意一个文件<br>
+      &nbsp;&nbsp;&nbsp; dlg.setNameFilter("Source files(*.h *.cpp);;All
+      files(*)"); //后缀名过滤器<br>
+      &nbsp;&nbsp;&nbsp; dlg.setViewMode(QFileDialog::Detail); //详情显示<br>
+      &nbsp;&nbsp;&nbsp; QString oneFileName;<br>
+      &nbsp;&nbsp;&nbsp; if( dlg.exec() )<br>
+      &nbsp;&nbsp;&nbsp; {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; oneFileName =
+      dlg.selectedFiles()[0]; //确定只有一个文件名<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;oneFileName;<br>
+      &nbsp;&nbsp;&nbsp; }</div>
+    <br>
+    针对打开多个文件名，示例代码：
+    <div class="code">&nbsp;&nbsp;&nbsp; QFileDialog dlg;<br>
+      &nbsp;&nbsp;&nbsp; dlg.setAcceptMode(QFileDialog::AcceptOpen);&nbsp;
+      //打开模式<br>
+      &nbsp;&nbsp;&nbsp; dlg.setFileMode(QFileDialog::ExistingFiles); //选择多个文件<br>
+      &nbsp;&nbsp;&nbsp; dlg.setNameFilter("Source files(*.h *.cpp);;All
+      files(*)"); //后缀名过滤器<br>
+      &nbsp;&nbsp;&nbsp; dlg.setViewMode(QFileDialog::Detail); //详情显示<br>
+      &nbsp;&nbsp;&nbsp; QStringList listFileName;<br>
+      &nbsp;&nbsp;&nbsp; if( dlg.exec() )<br>
+      &nbsp;&nbsp;&nbsp; {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; listFileName =
+      dlg.selectedFiles();<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;listFileName;<br>
+      &nbsp;&nbsp;&nbsp; }</div>
+    <br>
+    （2）QFileDialog 静态成员函数<br>
+    静态函数使用比较方便快捷，上面自定义对话框代码需要使用多个函数，逐一设置各种参数，而静态函数只需要一个函数搞定。<br>
+    ①获取一个打开的文件名<br>
+    <div class="code">QString&nbsp;&nbsp; &nbsp;getOpenFileName(QWidget * parent
+      = 0, const QString &amp; caption = QString(), const QString &amp; dir =
+      QString(), const QString &amp; filter = QString(), QString *
+      selectedFilter = 0, Options options = 0)<br>
+      <br>
+      QUrl&nbsp;&nbsp;&nbsp; getOpenFileUrl(QWidget * parent = 0, const QString
+      &amp; caption = QString(), const QUrl &amp; dir = QUrl(), const QString
+      &amp; filter = QString(), QString * selectedFilter = 0, Options options =
+      0, const QStringList &amp; supportedSchemes = QStringList())</div>
+    参数 parent&nbsp; 是父窗口指针，caption 是对话框标题文本，dir 是当前路径，filter
+    是后缀名过滤器，selectedFilter 是指向选中过滤器的指针，默认为 0，options 是对话框选项。<br>
+    第一个函数获取的是系统文件名形式，第二个是 URL 路径形式。URL 函数最后的参数 supportedSchemes 用于限定用户允许选择的 URL
+    类型，文件对话框中一般默认就是选择本地系统文件。<br>
+    <br>
+    ②获取多个打开的文件名<br>
+    <div class="code">QStringList&nbsp;&nbsp; &nbsp;getOpenFileNames(QWidget *
+      parent = 0, const QString &amp; caption = QString(), const QString &amp;
+      dir = QString(), const QString &amp; filter = QString(), QString *
+      selectedFilter = 0, Options options = 0)<br>
+      <br>
+      QList&lt;QUrl&gt;&nbsp;&nbsp;&nbsp; getOpenFileUrls(QWidget * parent = 0,
+      const QString &amp; caption = QString(), const QUrl &amp; dir = QUrl(),
+      const QString &amp; filter = QString(), QString * selectedFilter = 0,
+      Options options = 0, const QStringList &amp; supportedSchemes =
+      QStringList())</div>
+    这两个函数参数与上面 ① 中两个函数一样，只是返回值为文件名列表、URL列表。 <br>
+    <br>
+    ③获取一个保存的文件名<br>
+    <div class="code">QString&nbsp;&nbsp; &nbsp;getSaveFileName(QWidget * parent
+      = 0, const QString &amp; caption = QString(), const QString &amp; dir =
+      QString(), const QString &amp; filter = QString(), QString *
+      selectedFilter = 0, Options options = 0)<br>
+      <br>
+      QUrl&nbsp;&nbsp;&nbsp; getSaveFileUrl(QWidget * parent = 0, const QString
+      &amp; caption = QString(), const QUrl &amp; dir = QUrl(), const QString
+      &amp; filter = QString(), QString * selectedFilter = 0, Options options =
+      0, const QStringList &amp; supportedSchemes = QStringList())</div>
+    这两个函数参数与上面 ① 中两个函数一样，返回的文件名如果不存在就是新建文件保存，如果文件名已存在就是覆盖文件保存。<br>
+    <br>
+    ④获取一个存在的文件夹路径<br>
+    <div class="code">QString&nbsp;&nbsp;&nbsp; getExistingDirectory(QWidget *
+      parent = 0, const QString &amp; caption = QString(), const QString &amp;
+      dir = QString(), Options options = ShowDirsOnly)<br>
+      <br>
+      QUrl&nbsp;&nbsp;&nbsp; getExistingDirectoryUrl(QWidget * parent = 0, const
+      QString &amp; caption = QString(), const QUrl &amp; dir = QUrl(), Options
+      options = ShowDirsOnly, const QStringList &amp; supportedSchemes =
+      QStringList())</div>
+    这两个函数获取的是文件夹路径，参数 parent 是父窗口指针，caption 是窗口标题文本，dir 是当前路径，options
+    默认只显示文件夹，不显示文件，supportedSchemes 一般不用设置，默认是选择系统里的文件夹路径。<br>
+    <br>
+    使用静态函数获取文件名就非常简单，例如：<br>
+    <div class="code">fileName = QFileDialog::getOpenFileName(this,<br>
+      &nbsp;&nbsp;&nbsp; tr("Open Image"), "/home/jana", tr("Image Files (*.png
+      *.jpg *.bmp)"));</div>
+    一般填写前几个常用的参数即可，后面的参数和选项不用设置。<br>
+    <br>
+    <div class="os2">11.4.3 QProgressDialog</div>
+    <br>
+    QProgressDialog 进度对话框用于程序长时间执行某个操作时，弹出显示长时间任务的进度，例如复制大文件，或者计算大文件的 MD5
+    校验值，这些操作耗时长，可以使用进度条 QProgressBar 或者进度对话框 QProgressDialog
+    显示这些长时间任务进度。QProgressDialog 外观如下图所示：<br>
+    <center> <img src="images/ch11/ch11-04-03.png" alt="progress"></center>
+    进度对话框主要由描述标签、进度条、中断按钮（或叫取消按钮）等构成，任务执行时，点击中断按钮可以中断任务。<br>
+    QProgressDialog 构造函数如下：<br>
+    <div class="code">QProgressDialog(QWidget * parent = 0, Qt::WindowFlags f =
+      0)<br>
+      QProgressDialog(const QString &amp; labelText, const QString &amp;
+      cancelButtonText, int minimum, int maximum, QWidget * parent = 0,
+      Qt::WindowFlags f = 0)</div>
+    第一个是简化的构造函数，参数只有父窗口指针和窗口标志位。<br>
+    第二个构造函数参数 labelText 是对话框上面的描述标签文本，cancelButtonText 是中断任务按钮的文本，<br>
+    minimum 是进度 0% 对应的初始值，maximum 是进度 100% 完成时对应的结束值，parent 是父窗口指针，f 是窗口标志位。<br>
+    <br>
+    QProgressDialog 有 8 个属性，分别介绍如下：<br>
+    ① labelText 描述标签文本以及中止按钮设置<br>
+    就是进度对话框上面的描述文本，读写函数为：<br>
+    <div class="code">QString&nbsp;&nbsp; &nbsp;labelText() const&nbsp;
+      //获取描述标签文本<br>
+      void&nbsp;&nbsp;&nbsp; setLabelText(const QString &amp; text)&nbsp;
+      //槽函数，设置描述标签文本</div>
+    对话框不仅能使用默认的标签对象，还可以自定义描述标签对象：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;setLabel(QLabel * label)&nbsp;
+      //设置自定义的标签对象</div>
+    对话框取消任务的按钮文本可以修改，并可以自定义取消按钮和进度条控件：<br>
+    <div class="code">void&nbsp;&nbsp;&nbsp; setCancelButtonText(const QString
+      &amp; cancelButtonText) //槽函数，设置取消按钮文本<br>
+      void&nbsp;&nbsp; &nbsp;setCancelButton(QPushButton * cancelButton)
+      //自定义取消按钮<br>
+      void&nbsp;&nbsp;&nbsp; setBar(QProgressBar * bar)&nbsp; //自定义进度条控件</div>
+    <br>
+    ②minimum 最小值<br>
+    最小值就是进度 0% 对应的值，默认值就是 0，读写函数为：<br>
+    <div class="code">int&nbsp;&nbsp; &nbsp;minimum() const<br>
+      void&nbsp;&nbsp; &nbsp;setMinimum(int minimum)&nbsp; //槽函数</div>
+    ③maximum 最大值<br>
+    最大值就是进度 100% 对应的值，默认是100，读写函数为：<br>
+    <div class="code">int&nbsp;&nbsp; &nbsp;maximum() const<br>
+      void&nbsp;&nbsp; &nbsp;setMaximum(int maximum) //槽函数</div>
+    可以同时设置最小值和最大值的区间：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;setRange(int minimum, int maximum)
+      //槽函数，设置区间</div>
+    <br>
+    ④minimumDuration 持续时间下限（单位毫秒）<br>
+    持续时间下限是指当任务预期的持续时间低于该值时，不显示进度对话框；<br>
+    只有任务预期的持续时间达到 minimumDuration 以上，才会显示进度对话框。这是针对时间较短任务做的优化，短时间任务没必要弹出进度条。默认的
+    minimumDuration 数值为 4000 毫秒，即 4 秒。<br>
+    如果把 minimumDuration 修改为 0 毫秒，那么进度对话框就总是显示。minimumDuration 读写函数为：<br>
+    <div class="code">int&nbsp;&nbsp; &nbsp;minimumDuration() const&nbsp; //单位毫秒<br>
+      void&nbsp;&nbsp; &nbsp;setMinimumDuration(int ms)&nbsp; //槽函数，单位毫秒</div>
+    <br>
+    ⑤value 当前进度数值<br>
+    value 就是位于 minimum 和 maximum 之前的数值，进度对话框自动把 value 计算为百分比的形式显示，例如 [0,100]
+    的区间，value 为 100 就是 100% 进度，但如果区间为 [0,1000] ，那么 100 的数值就只有 10% 进度。<br>
+    value 读写函数为：<br>
+    <div class="code">int&nbsp;&nbsp; &nbsp;value() const<br>
+      void&nbsp;&nbsp; &nbsp;setValue(int progress)&nbsp;&nbsp; //槽函数</div>
+    &nbsp;setValue() 槽函数会自动显示进度对话框，而不需要调用 show() 函数。<br>
+    <br>
+    ⑥ wasCanceled 是否取消任务<br>
+    当用户点击取消按钮时，wasCanceled 被设置为 true，这个属性只有读取函数：<br>
+    <div class="code">bool&nbsp;&nbsp; &nbsp;wasCanceled() const</div>
+    在长时间任务执行过程中，每隔一段时间检查 wasCanceled()，如果为 true ，那么说明用户希望中止操作，不愿意继续等待，就可以执行中止任务的
+    代码，实现用户的意图。<br>
+    <br>
+    ⑦ autoClose 进度完成时自动关闭<br>
+    autoClose 属性为 true 时， reset() 函数会自动关闭对话框。autoClose 默认值就是 true 。读写函数为：<br>
+    <div class="code">bool&nbsp;&nbsp; &nbsp;autoClose() const<br>
+      void&nbsp;&nbsp; &nbsp;setAutoClose(bool close)</div>
+    ⑧ autoReset 进度完成后自动重置<br>
+    autoReset 是指当进度值达到 maximum 之后，自动调用 reset() 函数，隐藏对话框，并重置进度数值。autoReset 默认值也是
+    true。读写函数为：<br>
+    <div class="code">bool&nbsp;&nbsp; &nbsp;autoReset() const<br>
+      void&nbsp;&nbsp; &nbsp;setAutoReset(bool reset)</div>
+    <br>
+    进度对话框还有两个槽函数和一个信号：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;cancel()&nbsp; //槽函数，取消任务<br>
+      void&nbsp;&nbsp; &nbsp;reset()&nbsp; //槽函数，重置进度对话框<br>
+      void&nbsp;&nbsp;&nbsp; canceled()&nbsp; //信号，用户点击取消按钮触发，该信号总是触发cancel()
+      槽函数</div>
+    cancel() 槽函数是通过代码设置 wasCanceled() 为 true，进度对话框会隐藏，表示取消任务，并重置对话框。<br>
+    reset() 槽函数重置进度对话框，如果 autoClose() 为 true 就自动隐藏对话框。<br>
+    canceled() 信号由用户点击取消按钮触发，并且该信号默认关联到 cancel() 槽函数。<br>
+    默认情况下，autoClose 和 autoReset 都是 true，当进度值设置为 maximum 后，自动重置进度对话框，并关闭该进度对话框。<br>
+    <br>
+    进度对话框也可以使用 open() 打开对话框函数实现一次性的信号和槽关联：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;open(QObject * receiver, const char
+      * member)</div>
+    注意进度对话框是将 canceled() 信号关联到接收对象的 member 槽函数。这个信号和槽函数关联是一次性的，触发一次后自动解除关联。<br>
+    <br>
+    QProgressDialog 有两种使用方式，模态使用和非模态使用。模态使用的过程比较简单：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QProgressDialog progress("Copying
+      files...", "Abort Copy", 0, numFiles, this);<br>
+      &nbsp;&nbsp;&nbsp; progress.setWindowModality(Qt::WindowModal);<br>
+      <br>
+      &nbsp;&nbsp;&nbsp; for (int i = 0; i &lt; numFiles; i++) {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; progress.setValue(i);<br>
+      <br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (progress.wasCanceled())<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; break;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //... copy one file<br>
+      &nbsp;&nbsp;&nbsp; }<br>
+      &nbsp;&nbsp;&nbsp; progress.setValue(numFiles);</div>
+    定义 progress 对话框，描述标签文本为 "Copying files..." ，取消按钮文本为 "Abort Copy" ，区间就是 0 到
+    numFiles；<br>
+    进度对话框使用 progress.setWindowModality(Qt::WindowModal)
+    模态设置，这样使得用户能够与进度对话框继续交互，方 便用户点击取消按钮，中止任务执行。<br>
+    循环体用于处理长时间任务，在每轮循环里调用 progress.setValue(i) 更新进度，并检查用户是否取消任务；<br>
+    循环结束后，调用 progress.setValue(numFiles) ，进度完成 100%，自动重置并关闭进度对话框。<br>
+    <br>
+    QProgressDialog
+    非模态使用稍微复杂一些，常用于后台任务的处理，用户持续与前台窗口交互，后台进度用非模态进度对话框显示。后台操作常基于定时器&nbsp;
+    QTimer（或定时事件 QObject::timerEvent()）、套接字通知 QSocketNotifier 、 QUrlOperator
+    ，或者使用单独线程处理后台数据。<br>
+    对于这些后台应用场景，在主窗口状态栏设置 QProgressBar 也能起到相同效果。 <br>
+    对于非模态进度对话框，需要有事件循环（event loop）持续运行，并将进度对话框的 canceled()
+    关联到取消任务操作的槽函数上，并可以定期调用 setValue() 更新进度。例如：<br>
+    <div class="code">// Operation constructor<br>
+      Operation::Operation(QObject *parent)<br>
+      &nbsp;&nbsp;&nbsp; : QObject(parent), steps(0)<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp; pd = new QProgressDialog("Operation in progress.",
+      "Cancel", 0, 100);<br>
+      &nbsp;&nbsp;&nbsp; connect(pd, SIGNAL(canceled()), this, SLOT(cancel()));<br>
+      &nbsp;&nbsp;&nbsp; t = new QTimer(this);<br>
+      &nbsp;&nbsp;&nbsp; connect(t, SIGNAL(timeout()), this, SLOT(perform()));<br>
+      &nbsp;&nbsp;&nbsp; t-&gt;start(0);<br>
+      }<br>
+      <br>
+      void Operation::perform()<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp; pd-&gt;setValue(steps);<br>
+      &nbsp;&nbsp;&nbsp; //... perform one percent of the operation<br>
+      &nbsp;&nbsp;&nbsp; steps++;<br>
+      &nbsp;&nbsp;&nbsp; if (steps &gt; pd-&gt;maximum())<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t-&gt;stop();<br>
+      }<br>
+      <br>
+      void Operation::cancel()<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp; t-&gt;stop();<br>
+      &nbsp;&nbsp;&nbsp; //... cleanup<br>
+      }</div>
+    Operation 是持续任务的操作类，构造函数定义了进度对话框，并将进度对话框的 canceled() 信号关联到操作类对象的 cancel()
+    槽函数；然后新建了定时器 QTimer 对象，将定时器周期触发的信号 timeout() 关联到槽函数 perform() ，然后启动了定时器。<br>
+    定时器的周期信号触发 perform() 槽函数，在该函数里面进行分批次的任务工作，并调用 pd-&gt;setValue(steps)
+    更新进度；当进度达到最大值 pd-&gt;maximum()，完成进度，停止定时器。<br>
+    如果用户点击了进度对话框取消按钮，那么 canceled() 信号触发 Operation::cancel() 槽函数，在该函数里执行中止任务的代码。<br>
+    进度对话框的内容介绍到这，下面我们通过一个示例展示本节三种对话框的使用。<br>
+    <br>
+    <br>
+    <div class="os2">11.4.4 CalcMD5 示例</div>
+    <br>
+    我们学习一个计算文件 MD5 校验值的示例，展示 QErrorMessage、QFileDialog、QProgressDialog 三种对话框的使用。<br>
+    <br>
+    <div class="code">q</div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch11-03.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch11-05.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

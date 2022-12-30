@@ -17,7 +17,7 @@
   <body>
     <div class="os1">11.4 通用对话框：QErrorMessage、QFileDialog、QProgressDialog</div>
     <br>
-    本节介绍通用对话框：QErrorMessage、QFileDialog、QProgressDialog，并通过示例程序展示这三种对话框的使用。 <br>
+    本节介绍通用对话框：QErrorMessage、QFileDialog、QProgressDialog，并通过示例程序展示这三种对话框的使 用。 <br>
     <br>
     <div class="os2">11.4.1 QErrorMessage</div>
     <br>
@@ -59,7 +59,7 @@
     <center> <img src="images/ch11/ch11-04-02.png" alt="filedlg"></center>
     文件对话框可以设置文件名 filter 过滤器（或叫筛选器），上图设置了过滤器，仅显示 *.h 和 *.cpp 文件，用户点选文件，然后点击“打开”按
     钮，对话框就会关闭，并可以通过函数获取用户选择的文件名。<br>
-    QFileDialog 也有两种使用方式，第一种是使用自定义对象方式，第二种是使用静态函数弹出获取文件名。下面我们先介绍第一种自定义对象使用的
+    QFileDialog 也有两种使用方式，第一种是使用自定义对象方式，第二种是使用静态函数弹窗获取文件名。下面我们先介绍第一种自定义对象使用的
     QFileDialog 普通成员函数，然后再介绍静态函数。<br>
     （1）QFileDialog 普通成员函数<br>
     QFileDialog 构造函数如下：<br>
@@ -81,7 +81,7 @@
     <table class="tabel">
       <tbody>
         <tr class="d1">
-          <td style="width: 280px;" align="center"><b>QFileDialog::​AcceptMode
+          <td style="width: 280px;" align="center"><b>QFileDialog::​ AcceptMode
               枚举常量</b></td>
           <td style="width: 140px;" align="center"><b>数值</b></td>
           <td align="center"><b> 描述</b></td>
@@ -138,6 +138,8 @@
     defaultSuffix 是获取文件名的默认后缀，如果用户输入文件名时没有写后缀， 那么对话框给返回的文件名自动添加该默认后缀，读写函数为：<br>
     <div class="code">QString&nbsp;&nbsp; &nbsp;defaultSuffix() const<br>
       void&nbsp;&nbsp; &nbsp;setDefaultSuffix(const QString &amp; suffix)</div>
+    setDefaultSuffix() 参数的 suffix 字符串不需要以点号 . 打头，如果以点号打头，会自动删除点号，只存字母等后缀名，例如
+    "txt" 。<br>
     在文件对话框浏览时，可以设置后缀名过滤器，帮助筛选文件类型：<br>
     <div class="code">void&nbsp;&nbsp; &nbsp;setNameFilter(const QString &amp;
       filter)<br>
@@ -148,7 +150,7 @@
       (*.xml)"</div>
     两个英文分号区分文件类型，英文括号前面是文件类型描述，英文括号里面是空格分隔的多种后缀名。<br>
     如果希望匹配所有文件，设置过滤器为 "All files (*)"&nbsp; 。<br>
-    第二个设置后缀名过滤器的函数，其参数为 QStringList&nbsp; 字符串列表，不需要双分号分隔类型，例如：<br>
+    第二个设置后缀名过滤器的函数，其参数为 QStringList&nbsp; 字符串列表，不需要双分号分隔文件类型，例如：<br>
     <div class="code">QStringList filters;<br>
       filters &lt;&lt; "Image files (*.png *.xpm *.jpg)"<br>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;&lt; "Text files (*.txt)"<br>
@@ -555,8 +557,8 @@
     QTimer（或定时事件 QObject::timerEvent()）、套接字通知 QSocketNotifier 、 QUrlOperator
     ，或者使用单独线程处理后台数据。<br>
     对于这些后台应用场景，在主窗口状态栏设置 QProgressBar 也能起到相同效果。 <br>
-    对于非模态进度对话框，需要有事件循环（event loop）持续运行，并将进度对话框的 canceled()
-    关联到取消任务操作的槽函数上，并可以定期调用 setValue() 更新进度。例如：<br>
+    对于非模态进度对话框，需要有事件循环（event loop）持续运行，将进度对话框的 canceled() 关联到取消任务操作的槽函数上，并定期调用
+    setValue() 更新进度。例如：<br>
     <div class="code">// Operation constructor<br>
       Operation::Operation(QObject *parent)<br>
       &nbsp;&nbsp;&nbsp; : QObject(parent), steps(0)<br>
@@ -590,14 +592,622 @@
     如果用户点击了进度对话框取消按钮，那么 canceled() 信号触发 Operation::cancel() 槽函数，在该函数里执行中止任务的代码。<br>
     进度对话框的内容介绍到这，下面我们通过一个示例展示本节三种对话框的使用。<br>
     <br>
-    <br>
     <div class="os2">11.4.4 CalcMD5 示例</div>
     <br>
     我们学习一个计算文件 MD5 校验值的示例，展示 QErrorMessage、QFileDialog、QProgressDialog 三种对话框的使用。<br>
+    我们打开 QtCreator，新建一个 Qt Widgets Application 项目，在新建项目的向导里填写：<br>
+    ①项目名称 calcmd5，创建路径 D:\QtProjects\ch11，点击下一步；<br>
+    ②套件选择里面选择全部套件，点击下一步；<br>
+    ③基类选择 QWidget，注意修改主窗口类名为 WidgetCalcMD5，然后点击下一步；<br>
+    ④项目管理不修改，点击完成。<br>
+    由于使用 Qt 通用对话框，就不再需要额外新建自己的子窗口类和UI文件。<br>
+    我们打开 widgetcalcmd5.ui 界面文件，拖入控件：<br>
+    <center> <img src="images/ch11/ch11-04-04.png" alt="ui1" width="800"></center>
+    第一行控件是“文件名”标签，单行编辑器 lineEditFileName，“浏览”按钮 pushButtonBrowser，“计算MD5”按钮
+    pushButtonCalcMD5。<br>
+    第二行是文本浏览框 textBrowserInfo 。<br>
+    第一行控件按照水平布局器排列，然后在右边对象树选中根节点 WidgetCalcMD5，点击垂直布局按钮，窗口整体按照垂直布局排列。窗口尺寸为默认的
+    400 * 300 。<br>
     <br>
-    <div class="code">q</div>
+    完成布局后我们依次右击两个按钮，为按钮添加 clicked() 信号的槽函数。<br>
+    添加两个槽函数之后，我们保存并关闭 ui 文件，回到代码编辑界面。<br>
+    我们首先编辑头文件 widgetcalcmd5.h 内容：<br>
+    <div class="code"><span style=" color:#000080;">#ifndef</span><span style=" color:#c0c0c0;">
+      </span>WIDGETCALCMD5_H
+      <pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#define</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">WIDGETCALCMD5_H</span></pre>
+      <pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QWidget&gt;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QErrorMessage&gt;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QFileDialog&gt;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QProgressDialog&gt;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QFile&gt;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">&lt;QCryptographicHash&gt;</span><span style=" color:#c0c0c0;">  </span><span
+style=" color:#008000;">//计算MD5</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">namespace</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">WidgetCalcMD5</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">class</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">WidgetCalcMD5</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">:</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">public</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QWidget</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000080;">Q_OBJECT</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">public</span><span style=" color:#000000;">:</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">explicit</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">WidgetCalcMD5</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QWidget</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span>parent<span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">0</span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">~</span><span style=" font-style:italic; color:#000000;">WidgetCalcMD5</span><span
+style=" color:#000000;">();</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#808000;">slots</span><span style=" color:#000000;">:</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonBrowser_clicked</span><span
+style=" color:#000000;">();</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">void</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">on_pushButtonCalcMD5_clicked</span><span
+style=" color:#000000;">();</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">private</span><span style=" color:#000000;">:</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">Ui</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">WidgetCalcMD5</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">*</span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//错误消息框</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QErrorMessage</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_dlgErrorMsg</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//文件名</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_strFileName</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//计算文件对象</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">MD5</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">值</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QByteArray</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">CalcFileMD5</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QFile</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span>fileIn<span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">qint64</span><span
+style=" color:#c0c0c0;"> </span>nFileSize<span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">);</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">};</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#endif</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">WIDGETCALCMD5_H</span></pre>
+</div>
+    我们添加了 本节三个对话框的头文件包含，以及 QFile 和 QCryptographicHash 头文件包含。<br>QFile 、QCryptographicHash 用于读取文件内容和计算文件的 MD5 校验和。<br>
+    WidgetCalcMD5 类内部自动添加了两个按钮槽函数声明，然后我们自定义了成员变量，<br>m_dlgErrorMsg 对话框用于显示错误消息，m_strFileName 保存文件名，<br>CalcFileMD5() 函数根据打开后的文件对象计算 MD5 校验和。<br>
     <br>
-    <br>
+    接下来我们分段编辑源文件 widgetcalcmd5.cpp 内容，首先是头文件包含和构造函数部分：<br>
+    <div class="code"><span style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"widgetcalcmd5.h"</span>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000080;">#include</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">"ui_widgetcalcmd5.h"</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">WidgetCalcMD5</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">WidgetCalcMD5</span><span style=" color:#000000;">(</span><span
+style=" color:#800080;">QWidget</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">*</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">:</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QWidget</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">parent</span><span
+style=" color:#000000;">),</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">new</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">Ui</span><span style=" color:#000000;">::</span><span style=" color:#800080;">WidgetCalcMD5</span><span
+style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setupUi</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">this</span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">WidgetCalcMD5</span><span style=" color:#000000;">::~</span><span
+style=" font-style:italic; color:#000000;">WidgetCalcMD5</span><span style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">delete</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">ui</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre></div>
+    头文件包含和构造函数、析构函数都是自动生成的内容，没有修改。<br>
+    <br>接下来我们编辑“浏览”按钮对应的槽函数：<br>
+    <div class="code"><span style=" color:#008000;">//浏览要打开的文件</span>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">WidgetCalcMD5</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonBrowser_clicked</span><span
+style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strFileName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">QFileDialog</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">getOpenFileName</span><span style=" color:#000000;">(</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                </span><span style=" color:#808000;">this</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"选择文件"</span><span
+style=" color:#000000;">),</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">""</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">"All</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">files</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">(*)"</span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strFileName</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">m_dlgErrorMsg</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">showMessage</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"文件名为空，未选择文件！"</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//文件名非空</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_strFileName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strFileName</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">lineEditFileName</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_strFileName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//清空旧的文本框</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textBrowserInfo</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">clear</span><span
+style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre></div>
+    我们调用 QFileDialog::getOpenFileName() 静态函数获取要打开的文件名，文件对话框标题为 "选择文件"，后缀名过滤器是所有文件，<br>然后判断文件名 strFileName 是否为空，空字符串就弹出消息框说明文件名为空，没有选择文件，直接返回；<br>strFileName 非空时，将文件名存到成员变量 m_strFileName，并将文件名字符串显示到 单行编辑器 ui-&gt;lineEditFileName ，最后将信息显示文本框清空，以便后续显示新打开文件的 MD5 信息。<br>
+    <br>接下来我们编辑“计算MD5”按钮槽函数内容：<br>
+    <div class="code"><span style=" color:#008000;">//槽函数，计算文件</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">MD5</span>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#808000;">void</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">WidgetCalcMD5</span><span
+style=" color:#000000;">::</span><span style=" color:#000000;">on_pushButtonCalcMD5_clicked</span><span
+style=" color:#000000;">()</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//先从编辑框获取文件名</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strFileName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800000;">ui</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#800000;">lineEditFileName</span><span style=" color:#000000;">-&gt;</span><span
+style=" color:#000000;">text</span><span style=" color:#000000;">().</span><span
+style=" color:#000000;">trimmed</span><span style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strFileName</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">isEmpty</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">m_dlgErrorMsg</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">showMessage</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"文件名编辑框内容为空！"</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//文件名非空</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">m_strFileName</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">strFileName</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//文件对象</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QFile</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">fileIn</span><span
+style=" color:#000000;">(</span><span style=" color:#800000;">m_strFileName</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//尝试打开</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">fileIn</span><span
+style=" color:#000000;">.</span><span style=" font-style:italic; color:#000000;">open</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QIODevice</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">ReadOnly</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">m_dlgErrorMsg</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">showMessage</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"打开指定文件失败！"</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//正常打开文件，检查文件大小</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">qint64</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nFileSize</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">fileIn</span><span style=" color:#000000;">.</span><span
+style=" font-style:italic; color:#000000;">size</span><span style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nFileSize</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&lt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">1</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#800000;">m_dlgErrorMsg</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">showMessage</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span
+style=" color:#000000;">(</span><span style=" color:#008000;">"文件大小为</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">0，没有数据！"</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">fileIn</span><span
+style=" color:#000000;">.</span><span style=" font-style:italic; color:#000000;">close</span><span
+style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//计算MD5值</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QByteArray</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">baMD5</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">CalcFileMD5</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">fileIn</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nFileSize</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//构造信息字符串</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QString</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"文件名："</span><span
+style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800000;">m_strFileName</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"\n文件大小：%1</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">字节"</span><span style=" color:#000000;">).</span><span
+style=" color:#000000;">arg</span><span style=" color:#000000;">(</span><span style=" color:#000000;">nFileSize</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span style=" color:#008000;">"\nMD5校验值：\n"</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">strInfo</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">baMD5</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">toHex</span><span style=" color:#000000;">().</span><span
+style=" color:#000000;">toUpper</span><span style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//设置给文本框</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800000;">ui</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#800000;">textBrowserInfo</span><span
+style=" color:#000000;">-&gt;</span><span style=" color:#000000;">setText</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">strInfo</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//关闭文件</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">fileIn</span><span
+style=" color:#000000;">.</span><span style=" font-style:italic; color:#000000;">close</span><span
+style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre></div>
+    我们先从单行编辑器获取文件名 strFileName，判断文件名是否为空，如果为空就弹窗显示错误消息，返回；<br>如果文件名非空，存到成员变量 m_strFileName，根据该文件名定义文件对象 fileIn，<br>以只读模式打开该文件，判断是否打开失败，如果失败就弹出错误消息框并返回，文件打开成功就继续后面的代码。<br>
+    获取 fileIn 文件的大小，存到 nFileSize，如果文件大小 nFileSize 小于 1，说明是空的文件，<br>空文件就弹出显示没有数据的消息框，并关闭文件，返回。<br>对于正常有内容的文件，调用函数 CalcFileMD5() 计算得到 MD5 字节数组，存到&nbsp; baMD5。<br>然后构造信息字符串 strInfo，将文件名、文件大小、文件 MD5 的十六进制字符串等内容都添加到信息字符串，<br>将 strInfo 显示到 ui-&gt;textBrowserInfo 文本框，最后关闭文件。<br><br>
+    最后我们编辑 CalcFileMD5() 函数的内容：<br>
+    <div class="code"><span style=" color:#008000;">//计算文件对象</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">MD5</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">值</span>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#800080;">QByteArray</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#800080;">WidgetCalcMD5</span><span style=" color:#000000;">::</span><span
+style=" color:#000000;">CalcFileMD5</span><span style=" color:#000000;">(</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">QFile</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&amp;</span><span
+style=" color:#000000;">fileIn</span><span style=" color:#000000;">,</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#800080;">qint64</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nFileSize</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//返回的MD5字节数组</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QByteArray</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">baRet</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//定义算法对象</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QCryptographicHash</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">algMD5</span><span
+style=" color:#000000;">(</span><span style=" color:#800080;">QCryptographicHash</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">Md5</span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//数据块</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QByteArray</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">baCurData</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//判断</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nFileSize</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">&lt;</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">100</span><span style=" color:#000000;">*</span><span style=" color:#000080;">1000</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//小于</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">100K</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//一次读取全部数据计算MD5</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">baCurData</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">fileIn</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">readAll</span><span style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">algMD5</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">addData</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">baCurData</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">baRet</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">algMD5</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">result</span><span style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">return</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">baRet</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//如果是大于</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#008000;">100K，分块读取数据</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">qint64</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">oneBlockSize</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">nFileSize</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">/</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">100</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#008000;">//可能有余数</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">int</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nBlocksCount</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">100</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nFileSize</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">%</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">oneBlockSize</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">!=</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//存在余数除不尽</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">nBlocksCount</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">+=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000080;">1</span><span style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//先设置进度对话框，然后开始循环读取文件内容</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#800080;">QProgressDialog</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">dlgProgress</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"正在计算MD5</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">..."</span><span style=" color:#000000;">),</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">tr</span><span style=" color:#000000;">(</span><span
+style=" color:#008000;">"取消计算"</span><span style=" color:#000000;">),</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">                    </span><span style=" color:#000080;">0</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nBlocksCount</span><span
+style=" color:#000000;">,</span><span style=" color:#c0c0c0;"> </span><span style=" color:#808000;">this</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">dlgProgress</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setWindowModality</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#800080;">Qt</span><span
+style=" color:#000000;">::</span><span style=" color:#800080;">WindowModal</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">dlgProgress</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setMinimumDuration</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000080;">0</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#008000;">//总是显示对话框</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//循环处理</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">for</span><span
+style=" color:#000000;">(</span><span style=" color:#808000;">int</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">i</span><span style=" color:#000000;">=</span><span style=" color:#000080;">0</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span
+style=" color:#000000;">&lt;</span><span style=" color:#000000;">nBlocksCount</span><span
+style=" color:#000000;">;</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">i</span><span
+style=" color:#000000;">++)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//设置进度，自动显示对话框</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">dlgProgress</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setValue</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">i</span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//判断是否取消</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">dlgProgress</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">wasCanceled</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">            </span><span style=" color:#808000;">break</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#008000;">//正常读取数据块，计算MD5</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">baCurData</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">fileIn</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">read</span><span style=" color:#000000;">(</span><span style=" color:#000000;">oneBlockSize</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">algMD5</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">addData</span><span
+style=" color:#000000;">(</span><span style=" color:#000000;">baCurData</span><span
+style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//进度没有取消，获取正常MD5结果</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">if</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">!</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">dlgProgress</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">wasCanceled</span><span
+style=" color:#000000;">()</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">)</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">{</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">        </span><span style=" color:#000000;">baRet</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">=</span><span style=" color:#c0c0c0;"> </span><span
+style=" color:#000000;">algMD5</span><span style=" color:#000000;">.</span><span
+style=" color:#000000;">result</span><span style=" color:#000000;">();</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">}</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//结束进度</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#000000;">dlgProgress</span><span
+style=" color:#000000;">.</span><span style=" color:#000000;">setValue</span><span
+style=" color:#000000;">(</span><span style=" color:#c0c0c0;"> </span><span style=" color:#000000;">nBlocksCount</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">);</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#008000;">//返回MD5字节数组</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#c0c0c0;">    </span><span style=" color:#808000;">return</span><span
+style=" color:#c0c0c0;"> </span><span style=" color:#000000;">baRet</span><span
+style=" color:#000000;">;</span></pre>
+<pre style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span
+style=" color:#000000;">}</span></pre>
+</div>
+    函数开头定义字节数组 baRet，用于保存 MD5 数据，定义算法对象 algMD5，用于计算文件内容的 MD5 数据，<br>定义 baCurData 保存读取的文件内容。<br>然后判断文件大小 nFileSize，如果小于 100K，那么一次性读取文件所有内容，添加到算法对象 algMD5，<br>从算法对象 algMD5 获取计算的 MD5 结果存到 baRet，返回该数组。<br><br>如果文件达到了 100K 和以上，我们分块读取文件内容，并用进度对话框展示实时的进度。<br>我们计划分 100 次（文件大小是100的倍数）或 101 次（非100整除的情况）完成文件读取。<br>计算 nFileSize / 100，得到一个块的大小 oneBlockSize ，<br>计算 nFileSize 模 oneBlockSize 的余数，如果为 0 就是整除，nBlocksCount 数值为 100 块，<br>如果余数非零，那么 nBlocksCount 数值为 101 块。<br>然后定义进度对话框 dlgProgress，对话框标签为 "正在计算MD5 ..." ，取消按钮文本 "取消计算"，取值区间 0 到 nBlocksCount 。<br>设置 dlgProgress 为模态显示，处理过程中占据前台显示，并设置显示的最短持续时间为 0 毫秒，就是一直显示进度对话框。<br><br>
+    然后开始循环处理文件分块，在循环体内部先调用 dlgProgress.setValue(i) 更新进度，并显示进度对话框，<br>调用 dlgProgress.wasCanceled()，判断是否取消计算任务，如果用户取消了就中断循环，<br>如果任务没有取消，正常读取 oneBlockSize 大小的文件分片，返回的数据块存到 baCurData，<br>将数据块 baCurData 添加到算法对象 algMD5 。<br>完成全部文件分块读取并添加给算法对象后，结束循环。<br>我们判断 dlgProgress.wasCanceled() ，如果没有取消任务，那么从算法对象获取 MD5 结果存到 baRet；<br>如果任务是被用户取消的，那么&nbsp; baRet 是空数组。<br>接着我们调用&nbsp; dlgProgress.setValue( nBlocksCount ) 结束进度，进度对话框自动重置并关闭，<br>最后返回 baRet 数组。<br><br>对于函数调用 fileIn.read(oneBlockSize) ，如果文件剩余部分有 oneBlockSize 大小，那么读取 oneBlockSize 大小的块数据返回，如果剩余部分不够 oneBlockSize 大小，那么读取剩余所有内容返回数据，这时候 baCurData 的数据长度是实际的数据块长度，而不会填充额外数据。<br>无论是 100 个数据分块，还是 101 个数据分块，上面循环体代码都能正确地分批次读取文件数据，并计算 MD5 校验值。<br>对于返回值，用户取消任务时，返回的数组是空的；用户没有取消任务，那么返回正确的 MD5 字节数组。<br><br>例子代码介绍到这，我们生成项目，运行程序，
+          文件名为空的情况下，直接点击“计算MD5”按钮，会弹出错误消息框：<br>
+  <center> <img src="images/ch11/ch11-04-05.png" alt="run1"></center>          
+          关闭消息框，我们点击“浏览”按钮，弹出文件对话框，选择文件名：<br>
+  <center> <img src="images/ch11/ch11-04-06.png" alt="run2"></center>
+          我们在硬盘里选择一个几百兆或 1 GB 以上的文件名，然后点击“打开”按钮，选择的文件名会显示到单行编辑器，<br>我们再点击“计算MD5”按钮，可以看到进度对话框：<br>
+  <center> <img src="images/ch11/ch11-04-07.png" alt="run3"></center>
+          当全部任务完成后，进度对话框自动关闭，文本浏览框显示出信息：<br>
+  <center> <img src="images/ch11/ch11-04-08.png" alt="run4"></center>
+          文本浏览框显示了文件名、文件大小和 MD5 校验值。<br>本节内容就到这，下一节我们继续学习 Qt 通用对话框。<br><br>
     <br>
     <br>
     <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
@@ -605,18 +1215,17 @@
         <tr>
           <td style="width: 40%;">
             <div style="text-align: center;"><a href="ch11-03.htm"><img class="pic"
-                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
           </td>
           <td style="width: 20%;">
             <div style="text-align: center;"><a href="contents.htm"><img class="pic"
-                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
           </td>
           <td style="width: 40%;">
             <div style="text-align: center;"><a href="ch11-05.htm"><img class="pic"
-                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
           </td>
         </tr>
       </tbody>
     </table>
-  </body>
-</html>
+</body></html>

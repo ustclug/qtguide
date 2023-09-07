@@ -291,7 +291,26 @@
     类型 type 一般用于派生类的自定义条目类型，基本用不到。第二个构造函数字符串列表 strings
     就是条目内多列的文本，类似把表格控件一整行的多列文本塞到一个条目内部了。第三个是复制构造函数，复制时除了
     type()、treeWidget()、parent()，其他的都复制。<br>
-    克隆函数：<br>
+    接下来是直接以树形控件为父对象的构造函数：<br>
+    <div class="code">QTreeWidgetItem(QTreeWidget * parent, int type = Type)</div>
+    <div class="code">QTreeWidgetItem(QTreeWidget * parent, const QStringList
+      &amp; strings, int type = Type)</div>
+    <div class="code">QTreeWidgetItem(QTreeWidget * parent, QTreeWidgetItem *
+      preceding, int type = Type)</div>
+    以树形控件为父对象，代表是顶级条目，自动添加到指定的树形控件；type 参数是自定义条目类型；strings 是条目内的多列文本；<br>
+    preceding 条目是指排序上的前一个顶级条目，紧贴着 preceding 条目之后插入新构造的顶级条目。<br>
+    构造函数没有指定 preceding 条目时，自动添加到父对象现有子节点的末尾。<br>
+    最后是以树形条目为父对象的构造函数：<br>
+    <div class="code">QTreeWidgetItem(QTreeWidgetItem * parent, int type = Type)</div>
+    <div class="code">QTreeWidgetItem(QTreeWidgetItem * parent, const
+      QStringList &amp; strings, int type = Type)</div>
+    <div class="code">QTreeWidgetItem(QTreeWidgetItem * parent, QTreeWidgetItem
+      * preceding, int type = Type)</div>
+    以树形条目为父对象，新构造的条目自动添加给 parent 作为子节点；type 参数是自定义条目类型；strings 是条目内的多列文本；<br>
+    preceding 条目是指排序上的前一个兄弟条目，紧贴着 preceding 条目之后插入新构造的条目。<br>
+    构造函数没有指定 preceding 条目时，自动添加到父对象现有子节点的末尾。<br>
+    <br>
+    树形条目还以使用克隆函数生成：<br>
     <div class="code">QTreeWidgetItem * QTreeWidgetItem::​clone() const</div>
     &nbsp;​clone()是按照本条目一模一样造出一个新的条目，是深拷贝，与本条目（包括子孙节点）不共享内存，函数返回的新条目也没有复制
     type()、treeWidget()、​parent() ，新条目是自由的，没归属。<span style="font-weight: bold;">​

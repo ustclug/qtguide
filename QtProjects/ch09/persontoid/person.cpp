@@ -1,4 +1,4 @@
-#include "person.h"
+﻿#include "person.h"
 
 //带参数的构造函数
 Person::Person(QString strName, QString strGender, QDate birthDay)
@@ -54,7 +54,7 @@ uint qHash(const Person &key, uint seed)
     uint nRet;
     nRet = qHash(key.name(), seed)
             ^ qHash(key.gender(), seed)
-            ^ qHash(key.gender(), seed);
+            ^ qHash(key.birthday(), seed);
     return nRet;
 }
 

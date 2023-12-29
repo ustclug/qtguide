@@ -28,10 +28,10 @@
     <br>
     QHash 是基于哈希表实现的字典结构，存储 key-value
     数据对。哈希表可以将任意长度的数据根据特定算法计算固定长度的“精简版”数值，就是数据条目的哈希值。简要来说，对于 key-value 数据对，我们根据
-    key 的数值计算得到哈希值作为数据存储空间的序号，在该序号位置保存 value，那么我们就可以快速地根据 key 访问到 value
-    数值。实际中的哈希表结构更复杂，因为要考虑哈希值碰撞的问题，本节就不讨论了。上一节 QMap 利用红黑树实现，读取一个元素的平均效率是 O(logN)
-    ，N 是元素总数。而通过 QHash 读取一个元素，只需要计算 key 对应的哈希值，不需要遍历查找树形结构或数组结构，哈希表的访问效率平均为 O(1)
-    。<br>
+    key 的数值计算得到哈希值作为数据存储空间的序号，在该序号位置保存 key-value数据对，那么我们就可以快速地根据 key 计算序号访问到
+    value 数值。实际中的哈希表结构更复杂，因为要考虑哈希值碰撞的问题，本节就不讨论了。上一节 QMap 利用红黑树实现，读取一个元素的平均效率是
+    O(logN) ，N 是元素总数。而通过 QHash 读取一个元素，只需要计算 key
+    对应的哈希值，不需要遍历查找树形结构或数组结构，哈希表的访问效率平均为 O(1) 。<br>
     QHash
     的优点是通常情况下访问元素效率极高，但是也有缺点，元素排列是无序的，元素排列不按照数值大小或字典序，是按照哈希算法计算的值进行排列，这些哈希值都是杂乱无章的数
     值。如果需要有序的数据结构，那么 QMap 就更实用。<br>
@@ -2038,7 +2038,7 @@ style=" color:#000000;">}</span></pre> </div>
           包含关系 contains：<br>
            <div class="code">bool&nbsp;&nbsp; &nbsp;contains(const QSet&lt;T&gt; &amp; other) const </div>
           
-          计算 *this 对象是否包含 other 集合对象中的所有元素，如果包含所有  other 内部元素，那么返回 ture，否则返回 false。<br>举例如下：<br>
+          计算 *this 对象是否包含 other 集合对象中的所有元素，如果包含所有  other 内部元素，那么返回 true，否则返回 false。<br>举例如下：<br>
           <div class="code">&nbsp;&nbsp;&nbsp; QSet&lt;int&gt; s1{1,2,3};<br>&nbsp;&nbsp;&nbsp; QSet&lt;int&gt; s2{3,4,5};<br>&nbsp;&nbsp;&nbsp; s1.unite( s2 );<br>&nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;s1;<br><br>&nbsp;&nbsp;&nbsp; QSet&lt;int&gt; s3{1,2,3};<br>&nbsp;&nbsp;&nbsp; s3.intersect( s2 );<br>&nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;s3;<br><br>&nbsp;&nbsp;&nbsp; QSet&lt;int&gt; s4{1,2,3};<br>&nbsp;&nbsp;&nbsp; s4.subtract( s2 );<br>&nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;s4;<br><br>&nbsp;&nbsp;&nbsp; QSet&lt;int&gt; s5{1,2,3,4,5};<br>&nbsp;&nbsp;&nbsp; qDebug()&lt;&lt;s5.contains( s2 ); </div>
           其输出如下：<br>
           <div class="output">QSet(1, 4, 5, 2, 3)<br>QSet(3)<br>QSet(1, 2)<br>true </div>

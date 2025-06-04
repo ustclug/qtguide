@@ -14,7 +14,7 @@ https://qtguide.ustclug.org/
 所用的开发环境可以去Qt官网下载:      
 http://download.qt.io/archive/qt/5.4/5.4.0/       
 也可以从百度网盘下载:       
-http://pan.baidu.com/s/1nuk5Lbz     
+https://pan.baidu.com/s/1V7n1s8gA9MS0WKSbXw7UIg?pwd=udgj ，提取码:udgj 。
 
 ### 
 默认采用Qt 5.4.0版本开发环境，读者使用最新的Qt版本也可以，安装和配置教程上面百度网盘链接里面有，

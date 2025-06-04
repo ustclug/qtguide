@@ -2,10 +2,10 @@
 <html>
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
-    <title>ch11-05</title>    
-	<link href="css/style.css" rel="stylesheet" type="text/css" />
-	<link rel="stylesheet" href="thumbnailviewer.css" type="text/css" />
-	<script src="thumbnailviewer.js" type="text/javascript">
+    <title>ch11-05</title>
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="thumbnailviewer.css" type="text/css">
+    <script src="thumbnailviewer.js" type="text/javascript">
 
 /***********************************************
 * Image Thumbnail Viewer Script- © Dynamic Drive (www.dynamicdrive.com)
@@ -14,36 +14,290 @@
 ***********************************************/
 
 </script> </head>
-  
-  
-<div class="os1">11.5 通用对话框：QMessageBox、QWizard</div>
-<br />
-本节介绍通用对话框：QMessageBox、QWizard，并通过示例程序展示消息对话框和向导对话框的各自使用方法。
-<br />
-
-<br />
-<div class="os2">11.5.1 QMessageBox</div>
-<br />
-<br />
-<br />
-
-<div class="os2">11.5.2 QWizard</div>
-<br />
-<br />
-<br />
-
-
-<br />
-<br />
-<br />
-
-<table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
-	<tbody>
-	<tr>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch11-04.htm"><img class="pic" style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png" /></a></div></td>
-		<td style="width: 20%;"><div style="text-align: center;"><a href="contents.htm"><img class="pic" style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png" /></a></div></td>
-		<td style="width: 40%;"><div style="text-align: center;"><a href="ch12-00.htm"><img class="pic" style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png" /></a></div></td>
-	</tr>
-</tbody>
-</table>
+  <body>
+    <div class="os1">11.5 通用对话框：QMessageBox、QWizard</div>
+    <br>
+    本节介绍通用对话框：QMessageBox、QWizard，并通过示例程序展示消息对话框和向导对话框的各自使用方法。 <br>
+    <br>
+    <div class="os2">11.5.1 QMessageBox</div>
+    <br>
+    QMessageBox 消息框一般作为模态对话框，告知用户信息、提供选项并接收用户反馈。消息框同时提供三种文本显示：primary
+    text（基本文本，必须有的，显示情况信息）、informative text（信息文本，向用户解释更多情况或提出问题）、detailed
+    text（详细文本，可选的，根据用户需要显示更多数据信息），这些文本都是用于提供信息给用户理解消息框提出的问题，用户理解后作出相应的选择。消息框还提供图标和一系
+    列标准按钮，程序员根据需要设置图标和按
+    钮，用户点击按钮后，消息框返回用户点击的按钮数值。消息框可以使用自定义对象的方式，也可以直接调用定制好的静态函数弹窗。我们先介绍消息框的普通成员函数和其
+    主要属性，然后介绍静态函数。<br>
+    （1）普通成员函数<br>
+    QMessageBox 基类是 QDialog 对话框类，QMessageBox 构造函数如下：<br>
+    <div class="code">QMessageBox(QWidget * parent = 0)<br>
+      QMessageBox(Icon icon, const QString &amp; title, const QString &amp;
+      text, StandardButtons buttons = NoButton, QWidget * parent = 0,
+      Qt::WindowFlags f = Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint)</div>
+    第一个是默认构造函数，只有 parent&nbsp; 父窗口参数。第二个是带有详细参数的构造函数，参数 icon 是消息框显示的图标；title
+    是标题栏文本；text 是基本文本，显示展示给用户的信息内容；buttons 是消息框显示的按钮，可以通过 |
+    位或操作指定多个按钮，构造函数里的NoButton 是指不设置按钮，默认用 Ok 按钮；parent 是父窗口参数； f
+    是窗口标志位，Qt::Dialog 代表是对话框标志，窗口右上角没有最大化、最小化按钮，Qt::MSWindowsFixedSizeDialogHint
+    是指 Windows 的固定尺寸对话框的边框风格。<br>
+    <br>
+    针对消息框的按钮使用，有多种添加、设置和访问函数。<br>
+    首先是添加按钮函数：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;addButton(QAbstractButton * button,
+      ButtonRole role)<br>
+      QPushButton *&nbsp;&nbsp;&nbsp; addButton(const QString &amp; text,
+      ButtonRole role)<br>
+      QPushButton *&nbsp;&nbsp;&nbsp; addButton(StandardButton button)</div>
+    第一个添加按钮函数，参数为自定义的按钮对象指针，role 是按钮的角色类型。<br>
+    第二个添加按钮函数，根据文本新建按钮添加到消息框，并返回新建的按钮对象指针。<br>
+    第三个添加按钮函数，根据标志位数值，添加标准按钮，并返回新建的按钮对象指针。<br>
+    按钮角色是枚举类型，具体如下表：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 220px;" align="center"><b>QMessageBox::ButtonRole</b></td>
+          <td style="width: 100px;" align="center"><b>数值</b></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>QMessageBox::InvalidRole</td>
+          <td> -1</td>
+          <td> 不可用角色，该按钮不可用。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QMessageBox::AcceptRole</td>
+          <td> 0</td>
+          <td> 接收角色，点击该按钮导致对话框被接受，例如 OK 按钮。 </td>
+        </tr>
+        <tr>
+          <td>QMessageBox::RejectRole</td>
+          <td> 1 </td>
+          <td> 拒绝角色，点击该按钮导致对话框被拒绝，例如 Cancel 按钮。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QMessageBox::DestructiveRole</td>
+          <td> 2 </td>
+          <td> 放弃角色，点击该按钮导致放弃变更并关闭对话框，例如 放弃变更、不保存就退出。 </td>
+        </tr>
+        <tr>
+          <td>QMessageBox::ActionRole</td>
+          <td> 3 </td>
+          <td> 动作角色，点击该按钮导致对话框元素做变动动作。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QMessageBox::HelpRole</td>
+          <td> 4</td>
+          <td> 帮助角色，点击该按钮请求帮助。 </td>
+        </tr>
+        <tr>
+          <td>QMessageBox::YesRole</td>
+          <td> 5</td>
+          <td> 同意角色，表示 Yes 意思的按钮。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QMessageBox::NoRole</td>
+          <td> 6</td>
+          <td> 否定角色，表示 No 意思的按钮。 </td>
+        </tr>
+        <tr>
+          <td>QMessageBox::ApplyRole</td>
+          <td> 8</td>
+          <td> 应用角色，应用当前的变更操作。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QMessageBox::ResetRole</td>
+          <td> 7</td>
+          <td> 重置角色，将对话框元素重置为默认值。 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    点击不同角色的按钮，对话框的动作不同，并且影响对话框返回值，要根据实际需要配置按钮角色。<br>
+    消息框定义了很多标准按钮，可以通过 | 位或运算符设置多个标准按钮，标准按钮的标志位如下表所示：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 220px;" align="center"><b>QMessageBox::StandardButtons</b></td>
+          <td style="width: 100px;" align="center"><b>数值</b></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>QMessageBox::Ok</td>
+          <td> 0x00000400 </td>
+          <td> OK 按钮，定义为 AcceptRole 角色。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QMessageBox::Open</td>
+          <td> 0x00002000 </td>
+          <td> Open 按钮，定义为 AcceptRole 角色。 </td>
+        </tr>
+        <tr>
+          <td>QMessageBox::Save</td>
+          <td> 0x00000800 </td>
+          <td> Save 按钮，定义为 AcceptRole 角色。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QMessageBox::Cancel</td>
+          <td> 0x00400000 </td>
+          <td> Cancel 按钮，定义为 RejectRole 角色。 </td>
+        </tr>
+        <tr>
+          <td>QMessageBox::Close</td>
+          <td> 0x00200000 </td>
+          <td> Close 按钮，定义为 RejectRole 角色。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QMessageBox::Discard</td>
+          <td> 0x00800000 </td>
+          <td> Discard 或 Don't Save 按钮，依赖系统平台，定义为 DestructiveRole 角色。 </td>
+        </tr>
+        <tr>
+          <td>QMessageBox::Apply</td>
+          <td> 0x02000000 </td>
+          <td> Apply 按钮，定义为 ApplyRole 角色。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QMessageBox::Reset</td>
+          <td> 0x04000000 </td>
+          <td> Reset 按钮，定义为 ResetRole 角色。 </td>
+        </tr>
+        <tr>
+          <td>QMessageBox::RestoreDefaults</td>
+          <td> 0x08000000 </td>
+          <td> Restore Defaults 按钮，定义为 ResetRole 角色。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QMessageBox::Help</td>
+          <td> 0x01000000 </td>
+          <td> Help 按钮，定义为 HelpRole 角色。</td>
+        </tr>
+        <tr>
+          <td>QMessageBox::SaveAll</td>
+          <td> 0x00001000 </td>
+          <td> Save All 按钮，定义为 AcceptRole 角色。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QMessageBox::Yes</td>
+          <td> 0x00004000 </td>
+          <td> Yes 按钮，定义为 YesRole 角色。 </td>
+        </tr>
+        <tr>
+          <td>QMessageBox::YesToAll</td>
+          <td> 0x00008000 </td>
+          <td> Yes to All 按钮，定义为 YesRole 角色。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QMessageBox::No</td>
+          <td> 0x00010000 </td>
+          <td> No 按钮，定义为 NoRole 角色。 </td>
+        </tr>
+        <tr>
+          <td>QMessageBox::NoToAll</td>
+          <td> 0x00020000 </td>
+          <td> No to All 按钮，定义为 NoRole 角色。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QMessageBox::Abort</td>
+          <td> 0x00040000 </td>
+          <td> Abort 按钮，定义为 RejectRole 角色。 </td>
+        </tr>
+        <tr>
+          <td>QMessageBox::Retry</td>
+          <td> 0x00080000 </td>
+          <td> Retry 按钮，定义为 AcceptRole 角色。 </td>
+        </tr>
+        <tr class="d1">
+          <td>QMessageBox::Ignore</td>
+          <td> 0x00100000 </td>
+          <td> Ignore 按钮，定义为 AcceptRole 角色。 </td>
+        </tr>
+        <tr>
+          <td>QMessageBox::NoButton</td>
+          <td> 0x00000000 </td>
+          <td> 不可用按钮 </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    根据标志位，可以一次设置多个标准按钮，如下函数：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;setStandardButtons(StandardButtons
+      buttons)&nbsp;&nbsp; //设置标准按钮<br>
+      StandardButtons&nbsp;&nbsp;&nbsp; standardButtons()
+      const&nbsp;&nbsp;&nbsp; //获取设置好的标准按钮标志位<br>
+      StandardButton&nbsp;&nbsp;&nbsp; standardButton(QAbstractButton * button)
+      const&nbsp; //根据按钮对象指针获取按钮对应的标准按钮标志位</div>
+    setStandardButtons() 函数根据参数里标志位一次设置多个按钮，standardButtons() 则返回设置好的按钮标志位。<br>
+    standardButton() 是根据参数里的按钮对象指针，返回该按钮对应的标准按钮标志位，如果对象不是标准按钮，返回
+    QMessageBox::NoButton&nbsp; 。<br>
+    注意不要调用 msgBox.setStandardButtons(QMessageBox::NoButton) ，消息框显示时会没有任何按钮，消息框可能
+    出现关不掉的情况，程序界面会卡住无法操作，一般默认用 QMessageBox::Ok 按钮即可。<br>
+    <br>
+    按钮角色可以读取，如下函数：<br>
+    <div class="code">ButtonRole&nbsp;&nbsp;&nbsp; buttonRole(QAbstractButton *
+      button) const<br>
+    </div>
+    按钮角色得在添加按钮 addButton() 时指定，目前没有直接修改按钮角色的函数。<br>
+    从消息框卸载按钮使用如下函数：<br>
+    <div class="code">void&nbsp;&nbsp;&nbsp; removeButton(QAbstractButton *
+      button)<br>
+    </div>
+    注意 removeButton() 函数只是将消息框的按钮卸下，并不会删除该按钮对象。<br>
+    如果需要修改按钮角色，可以先卸载按钮，再用新的角色添加给消息框。<br>
+    获取消息框已设置的所有按钮对象列表，使用如下函数：<br>
+    <div class="code">QList&lt;QAbstractButton *&gt;&nbsp;&nbsp;&nbsp; buttons()
+      const</div>
+    <br>
+    当消息框有多个按钮时，可以指定默认按钮（默认对应 Enter 键）、退出按钮（对应 Esc/Escape 键），如下函数：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;setDefaultButton(QPushButton *
+      button)&nbsp;&nbsp; //根据按钮指针设置默认按钮<br>
+      void&nbsp;&nbsp;&nbsp; setDefaultButton(StandardButton button)
+      //根据标准按钮标志位设 置默认按钮<br>
+      QPushButton *&nbsp;&nbsp;&nbsp; defaultButton() const &nbsp; &nbsp; &nbsp;
+      &nbsp; &nbsp; &nbsp; &nbsp; //获取默认按钮对象指针<br>
+      void&nbsp;&nbsp;&nbsp; setEscapeButton(QAbstractButton *
+      button)&nbsp;&nbsp; //根据按钮指针设置退出按钮<br>
+      void&nbsp;&nbsp;&nbsp; setEscapeButton(StandardButton
+      button)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //根据标准按钮标志位设置退出按钮<br>
+      QAbstractButton *&nbsp;&nbsp;&nbsp; escapeButton()
+      const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //获取退出按钮对象指针</div>
+    注意检查参数和返回值的有效性，避免操作空指针。<br>
+    <br>
+    根据用户的操作，可以获取用户点击的按钮对象，或者按下 Esc 键效果：<br>
+    <div class="code">QAbstractButton *&nbsp;&nbsp;&nbsp; clickedButton() const<br>
+    </div>
+    用户如果点击了按钮，就返回点击的按钮对象；如果没有设置退出键时用户按下键盘 Esc 键，返回 0 。<br>
+    在未调用 exec() 显示消息框时， clickedButton() 也返回 0 。<br>
+    <br>
+    （2）静态成员函数<br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <div class="os2">11.5.2 QWizard</div>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch11-04.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="prev" src="images/pics/prev.png"></a></div>
+          </td>
+          <td style="width: 20%;">
+            <div style="text-align: center;"><a href="contents.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="contents" src="images/pics/contents.png"></a></div>
+          </td>
+          <td style="width: 40%;">
+            <div style="text-align: center;"><a href="ch12-00.htm"><img class="pic"
+                  style="width: 32px; height: 32px;" alt="next" src="images/pics/next.png"></a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>

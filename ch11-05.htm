@@ -263,11 +263,173 @@
       //获取退出按钮对象指针</div>
     注意检查参数和返回值的有效性，避免操作空指针。<br>
     <br>
-    根据用户的操作，可以获取用户点击的按钮对象，或者按下 Esc 键效果：<br>
+    根据用户的操作，可以获取用户点击的按钮对象，或者返回 0 （NULL）：<br>
     <div class="code">QAbstractButton *&nbsp;&nbsp;&nbsp; clickedButton() const<br>
     </div>
     用户如果点击了按钮，就返回点击的按钮对象；如果没有设置退出键时用户按下键盘 Esc 键，返回 0 。<br>
     在未调用 exec() 显示消息框时， clickedButton() 也返回 0 。<br>
+    消息框还可以添加一个复选框，比如用于设置是否在文件关闭前自动保存修改内容，注意复选框对象要自己新建，消息框默认并没有复选框。设置和获取复选框对象函数如
+    下：<br>
+    <div class="code">QCheckBox *&nbsp;&nbsp;&nbsp; checkBox()
+      const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //获取复选框对象指针，默认为 NULL<br>
+      void&nbsp;&nbsp;&nbsp; setCheckBox(QCheckBox * cb)&nbsp;&nbsp; //手动新建复选框对象
+      cb，添加给消息框<br>
+    </div>
+    &nbsp; checkBox() 默认是 NULL，消息框自己不会创建复选框，必须自己手动新建一个复选框对象，用setCheckBox( cb )
+    函数设置复选框对象。<br>
+    一个典型的消息框对象使用如下代码示例：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QMessageBox msgBox;<br>
+      &nbsp;&nbsp;&nbsp; msgBox.setText(tr("文本已经修改。"));&nbsp;&nbsp; //基本文本设置<br>
+      &nbsp;&nbsp;&nbsp; msgBox.setInformativeText(tr("是否保存修改后的文本？"));&nbsp;
+      //信息文本设置<br>
+      &nbsp;&nbsp;&nbsp;
+      msgBox.setDetailedText(tr("勾选上面复选框，设置总是自动保存修改的文本。"));&nbsp; //详细文本设置<br>
+      &nbsp;&nbsp;&nbsp; msgBox.setStandardButtons(QMessageBox::Save |
+      QMessageBox::Discard | QMessageBox::Cancel);<br>
+      &nbsp;&nbsp;&nbsp; msgBox.setDefaultButton(QMessageBox::Save);<br>
+      &nbsp;&nbsp;&nbsp; //补充复选框<br>
+      &nbsp;&nbsp;&nbsp; QCheckBox *pCheckBox = new
+      QCheckBox(tr("关闭前总是自动保存修改文本。"));<br>
+      &nbsp;&nbsp;&nbsp; msgBox.setCheckBox(pCheckBox);<br>
+      &nbsp;&nbsp;&nbsp; int ret = msgBox.exec();<br>
+      &nbsp;&nbsp;&nbsp; if(NULL != msgBox.checkBox())<br>
+      &nbsp;&nbsp;&nbsp; {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; bool bAlwaysSave =
+      msgBox.checkBox()-&gt;isChecked();<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(bAlwaysSave)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      qDebug()&lt;&lt;tr("关闭前总是自动保存修改文本。");<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      qDebug()&lt;&lt;tr("关闭前不自动保存修改文本。");<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+      &nbsp;&nbsp;&nbsp; }<br>
+    </div>
+    显示效果如下图所示：<br>
+    <center> <img src="images/ch11/ch11-05-01.png" alt="msgboxshow1"></center>
+    消息框第一行显示的是基本文本，第二行是信息文本，当设置了详细文本后，消息框自动添加“Show Details”按钮，点击该按钮就会展开下方的文本框显示详
+    细文本。<br>
+    添加复选框之后，复选框显示在第三行，可以访问复选框对象，获取用户是否选中了复选框，以进行后续操作。<br>
+    消息框的三种文本访问和设置函数如下：<br>
+    <div class="code">QString&nbsp;&nbsp;&nbsp; text() const&nbsp;&nbsp; //获取基本文
+      本<br>
+      void&nbsp;&nbsp;&nbsp; setText(const QString &amp; text)&nbsp; //设置基本文本<br>
+      QString&nbsp;&nbsp;&nbsp; informativeText() const&nbsp;&nbsp; //获取信息文本<br>
+      void&nbsp;&nbsp;&nbsp; setInformativeText(const QString &amp;
+      text)&nbsp;&nbsp;&nbsp; //设置信息文本<br>
+      QString&nbsp;&nbsp;&nbsp; detailedText() const&nbsp; &nbsp; &nbsp;&nbsp;
+      //获取详细文本<br>
+      void&nbsp;&nbsp;&nbsp; setDetailedText(const QString &amp;
+      text)&nbsp;&nbsp;&nbsp; //设置详细文本<br>
+    </div>
+    设置详细文本后，消息框自动添加“Show Details”按钮，如果没有设置详细文本，消息框就没有“Show Details”按钮。<br>
+    消息框文本可以设置文本格式，如下函数：<br>
+    <div class="code">Qt::TextFormat&nbsp;&nbsp;&nbsp; textFormat()
+      const&nbsp;&nbsp;&nbsp; //获取文本格式<br>
+      void&nbsp;&nbsp;&nbsp; setTextFormat(Qt::TextFormat format)&nbsp;&nbsp;
+      //设置文本格式<br>
+    </div>
+    Qt::TextFormat 枚举类型内容比较简单，三种取值如下表所示：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 220px;" align="center"><b>Qt::TextFormat 枚举常量</b></td>
+          <td style="width: 140px;" align="center"><b>数值</b></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>Qt::PlainText</td>
+          <td>&nbsp;0</td>
+          <td> 设置的文本理解为纯文本，不解析 HTML 语法。 </td>
+        </tr>
+        <tr class="d1">
+          <td>Qt::RichText</td>
+          <td>&nbsp;1 </td>
+          <td> 设置的文本理解为丰富文本，按照 HTML 语法解析呈现内容。 </td>
+        </tr>
+        <tr>
+          <td>Qt::AutoText</td>
+          <td>&nbsp;2</td>
+          <td> 自动判断文本类型，如果 Qt::mightBeRichText() 函数返回 true，当做丰富文本呈现，否则都当成纯文本。</td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    默认文本格式为 Qt::AutoText ，自动判断设置文本类型。<br>
+    注意 setTextFormat() 函数只影响基本文本，不影响信息文本和详细文本。<br>
+    信息文本默认总是自动文本格式 Qt::AutoText，详细文本默认总是纯文本格式 Qt::PlainText。<br>
+    <br>
+    消息框的文本还可以设置文本交互操作的标志位，如下函数：<br>
+    <div class="code">Qt::TextInteractionFlags&nbsp;&nbsp;&nbsp;
+      textInteractionFlags() const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      //获取文本交互标志位，默认值依赖 style 风格<br>
+      void&nbsp;&nbsp;&nbsp; setTextInteractionFlags(Qt::TextInteractionFlags
+      flags)&nbsp; //设置文本交互标志位<br>
+    </div>
+    &nbsp; Qt::TextInteractionFlags 标志位定义文本的交互性，比如是否可以复制，是否可以编辑，如下表所示：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 220px;" align="center"><b>Qt::TextInteractionFlags
+              标志位</b></td>
+          <td style="width: 220px;" align="center"><b>数值</b></td>
+          <td align="center"><b> 描述</b></td>
+        </tr>
+        <tr>
+          <td>Qt::NoTextInteraction</td>
+          <td>&nbsp;0</td>
+          <td> 文本没有任何交互性，文本只能显示，没有任何操作。 </td>
+        </tr>
+        <tr class="d1">
+          <td>Qt::TextSelectableByMouse</td>
+          <td>&nbsp;1 </td>
+          <td> 文本可以用鼠标选中，然后用右键菜单复制文本，或用键盘快捷键复制文本（Ctrl+C）。 </td>
+        </tr>
+        <tr>
+          <td>Qt::TextSelectableByKeyboard</td>
+          <td>&nbsp;2</td>
+          <td> 文本可以用键盘光标键选中，并自动显示文本光标， 比如 Ctrl+A 选中文本，Ctrl+C
+            复制文本，向左、向右的按键移动光标位置。</td>
+        </tr>
+        <tr class="d1">
+          <td>Qt::LinksAccessibleByMouse</td>
+          <td>&nbsp;4 </td>
+          <td> 可以用鼠标激活文本中的超链接，点击访问超链接网址。 </td>
+        </tr>
+        <tr>
+          <td>Qt::LinksAccessibleByKeyboard</td>
+          <td>&nbsp;8</td>
+          <td> 可以用键盘 Tab 键切换焦点到超链接上，然后用 Enter 键激活打开超链接网址。</td>
+        </tr>
+        <tr class="d1">
+          <td>Qt::TextEditable</td>
+          <td>&nbsp;16 </td>
+          <td> 文本可以完全编辑修改。 </td>
+        </tr>
+        <tr>
+          <td>Qt::TextEditorInteraction</td>
+          <td>&nbsp;TextSelectableByMouse <br>
+            &nbsp;| TextSelectableByKeyboard<br>
+            &nbsp;| TextEditable</td>
+          <td> 文本编辑器形式的交互，可以用鼠标、键盘选中文本并编辑修改。</td>
+        </tr>
+        <tr class="d1">
+          <td>Qt::TextBrowserInteraction</td>
+          <td>&nbsp;TextSelectableByMouse <br>
+            &nbsp;| LinksAccessibleByMouse<br>
+            &nbsp;| LinksAccessibleByKeyboard </td>
+          <td> 文本浏览器形式的交互，可以用鼠标选中文本、复制文本，可以用鼠标和键盘打开超链接。 就是 QTextBrowser 的默认交互格式。
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    setTextInteractionFlags() 只影响基本文本，不影响信息文本和详细文本。<br>
     <br>
     （2）静态成员函数<br>
     <br>

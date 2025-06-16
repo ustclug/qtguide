@@ -371,69 +371,142 @@
       flags)&nbsp; //设置文本交互标志位<br>
     </div>
     &nbsp; Qt::TextInteractionFlags 标志位定义文本的交互性，比如是否可以复制，是否可以编辑，如下表所示：<br>
+    - setTextInteractionFlags() 只影响基本文本，不影响信息文本和详细文本。<br>
+    消息框除了显示文本，还可以选择图标配合显示，表示消息的类别，比如普通消息、警告消息、严重错误消息等类型。<br>
+    图标支持使用 QMessageBox 自带图标或者自定义图标，如下函数：<br>
+    <div class="code">void&nbsp;&nbsp;&nbsp; setIcon(Icon)&nbsp;&nbsp;&nbsp;
+      //设置 QMessageBox 自带的图标<br>
+      Icon&nbsp;&nbsp;&nbsp; icon() const&nbsp;&nbsp;&nbsp;&nbsp; //获取所用的
+      QMessageBox 自带图标<br>
+      void&nbsp;&nbsp;&nbsp; setIconPixmap(const QPixmap &amp;
+      pixmap)&nbsp;&nbsp; //设置自定义图片作为图标<br>
+      QPixmap&nbsp;&nbsp;&nbsp; iconPixmap() const&nbsp;&nbsp; //获取设置的自定义图标的图片<br>
+    </div>
+    默认情况下， iconPixmap() 是空的 null ，没有自定义图片文件。如果需要用自定义图片，根据图片文件名构建 QPixmap
+    对象，设置给消息框即可。<br>
+    icon() 默认情况下返回 0，就是 QMessageBox::NoIcon ，QMessageBox 自带的图标如下表所示：<br>
     <br>
     <table class="tabel">
       <tbody>
         <tr class="d1">
-          <td style="width: 220px;" align="center"><b>Qt::TextInteractionFlags
-              标志位</b></td>
-          <td style="width: 220px;" align="center"><b>数值</b></td>
+          <td style="width: 220px;" align="center"><b>QMessageBox::​Icon 枚举类型</b></td>
+          <td style="width: 120px;" align="center"><b>数值</b></td>
           <td align="center"><b> 描述</b></td>
+          <td align="center"><b> 图标示例</b></td>
         </tr>
         <tr>
-          <td>Qt::NoTextInteraction</td>
+          <td>QMessageBox::NoIcon</td>
           <td>&nbsp;0</td>
-          <td> 文本没有任何交互性，文本只能显示，没有任何操作。 </td>
+          <td> 消息框没有任何图标。 </td>
+          <td> 无 </td>
         </tr>
         <tr class="d1">
-          <td>Qt::TextSelectableByMouse</td>
-          <td>&nbsp;1 </td>
-          <td> 文本可以用鼠标选中，然后用右键菜单复制文本，或用键盘快捷键复制文本（Ctrl+C）。 </td>
-        </tr>
-        <tr>
-          <td>Qt::TextSelectableByKeyboard</td>
-          <td>&nbsp;2</td>
-          <td> 文本可以用键盘光标键选中，并自动显示文本光标， 比如 Ctrl+A 选中文本，Ctrl+C
-            复制文本，向左、向右的按键移动光标位置。</td>
-        </tr>
-        <tr class="d1">
-          <td>Qt::LinksAccessibleByMouse</td>
+          <td> QMessageBox::Question</td>
           <td>&nbsp;4 </td>
-          <td> 可以用鼠标激活文本中的超链接，点击访问超链接网址。 </td>
+          <td> 询问图标，说明提示的消息是向用户询问。 </td>
+          <td> <img src="images/ch11/iconquestion.png" alt="iconquestion"> </td>
         </tr>
         <tr>
-          <td>Qt::LinksAccessibleByKeyboard</td>
-          <td>&nbsp;8</td>
-          <td> 可以用键盘 Tab 键切换焦点到超链接上，然后用 Enter 键激活打开超链接网址。</td>
-        </tr>
-        <tr class="d1">
-          <td>Qt::TextEditable</td>
-          <td>&nbsp;16 </td>
-          <td> 文本可以完全编辑修改。 </td>
-        </tr>
-        <tr>
-          <td>Qt::TextEditorInteraction</td>
-          <td>&nbsp;TextSelectableByMouse <br>
-            &nbsp;| TextSelectableByKeyboard<br>
-            &nbsp;| TextEditable</td>
-          <td> 文本编辑器形式的交互，可以用鼠标、键盘选中文本并编辑修改。</td>
-        </tr>
-        <tr class="d1">
-          <td>Qt::TextBrowserInteraction</td>
-          <td>&nbsp;TextSelectableByMouse <br>
-            &nbsp;| LinksAccessibleByMouse<br>
-            &nbsp;| LinksAccessibleByKeyboard </td>
-          <td> 文本浏览器形式的交互，可以用鼠标选中文本、复制文本，可以用鼠标和键盘打开超链接。 就是 QTextBrowser 的默认交互格式。
+          <td>QMessageBox::Information</td>
+          <td>&nbsp;1</td>
+          <td> 信息图标，说明提示的消息是告诉用户信息。</td>
+          <td> <img src="images/ch11/iconinformation.png" alt="iconinformation">
           </td>
+        </tr>
+        <tr class="d1">
+          <td>QMessageBox::Warning</td>
+          <td>&nbsp;2 </td>
+          <td> 警告图标，说明提示的消息是警告信息，但目前程序能够处理。 </td>
+          <td> <img src="images/ch11/iconwarning.png" alt="iconwarning"> </td>
+        </tr>
+        <tr>
+          <td>QMessageBox::Critical</td>
+          <td>&nbsp;3</td>
+          <td> 严重错误图标，说明程序发生了严重错误，很可能崩溃。</td>
+          <td> <img src="images/ch11/iconcritical.png" alt="iconcritical"> </td>
         </tr>
       </tbody>
     </table>
     <br>
-    setTextInteractionFlags() 只影响基本文本，不影响信息文本和详细文本。<br>
+    上表图标示例仅供参考，实际运行时图标依赖系统平台的风格，不同操作系统显示图标不一样。<br>
+    消息框还可以修改窗口标题栏文本，设置模态或非模态显示，如下函数设置：<br>
+    <div class="code">void&nbsp;&nbsp;&nbsp; setWindowTitle(const QString &amp;
+      title)&nbsp;&nbsp; //设置消息框标题栏文本<br>
+      QString&nbsp;&nbsp;&nbsp; windowTitle()
+      const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //获取消息框标题栏文本<br>
+      void&nbsp;&nbsp;&nbsp; setWindowModality(Qt::WindowModality
+      windowModality)&nbsp;&nbsp; //设置消息框显示模态类型<br>
+      Qt::WindowModality&nbsp;&nbsp;&nbsp; windowModality() const&nbsp;&nbsp;
+      //获取消息框的显示模态类型<br>
+    </div>
+    窗口的显示模态类型见 11.1.1 节QWidget 类的介绍，主要就是非模态 Qt::NonModal、Qt::WindowModal
+    窗口级模态、Qt::ApplicationModal 应用级模态三种。<br>
+    消息框还有一个特别的 open() 函数，可以指定接受信号的对象和槽函数：<br>
+    <div class="code">void&nbsp;&nbsp;&nbsp; open(QObject * receiver, const char
+      * member)<br>
+    </div>
+    该函数打开消息框，并将 finished() 或 buttonClicked() 信号关联到参数里对象槽函数，如果槽函数有一个指针参数，那么关联
+    buttonClicked() 信号，否则关联 finished() 信号到槽函数。<br>
+    注意消息窗口关闭后，自动解除信号和 open() 参数里对象的槽函数关联。<br>
+    <br>
+    消息框类本级的槽函数只有 1 个，如下函数：<br>
+    <div class="code">virtual int&nbsp;&nbsp;&nbsp; exec()&nbsp;&nbsp; //模态显示消息框<br>
+    </div>
+    消息框类本级的信号也只有 1 个，如下信号：<br>
+    <div class="code">void&nbsp;&nbsp;&nbsp; buttonClicked(QAbstractButton *
+      button)&nbsp; //点击按钮信号，参数里是被点击的按钮对象<br>
+    </div>
+    <br>
+    消息框主要从基类 QDialog 和 QWidget 继承各种信号和槽函数，详见 11.1 节和 11.2 节内容。<br>
     <br>
     （2）静态成员函数<br>
+    消息框可以通过定义对象、调用普通成员函数方式使用，也可以通过最简单的静态成员函数来使用。<br>
+    静态成员函数仅需一句代码即可完成调用，非常便捷。<br>
+    针对询问、信息、警告、严重错误四种情况，对应的静态成员函数如下：<br>
+    <div class="code">StandardButton&nbsp;&nbsp;&nbsp; question(QWidget *
+      parent, const QString &amp; title, const QString &amp; text,
+      StandardButtons buttons = StandardButtons( Yes | No ), StandardButton
+      defaultButton = NoButton)<br>
+      StandardButton&nbsp;&nbsp;&nbsp; information(QWidget * parent, const
+      QString &amp; title, const QString &amp; text, StandardButtons buttons =
+      Ok, StandardButton defaultButton = NoButton)<br>
+      StandardButton&nbsp;&nbsp;&nbsp; warning(QWidget * parent, const QString
+      &amp; title, const QString &amp; text, StandardButtons buttons = Ok,
+      StandardButton defaultButton = NoButton)<br>
+      StandardButton&nbsp;&nbsp;&nbsp; critical(QWidget * parent, const QString
+      &amp; title, const QString &amp; text, StandardButtons buttons = Ok,
+      StandardButton defaultButton = NoButton)<br>
+    </div>
+    上面静态函数的参数都很类似，title 是标题文本，text 是基本文本，buttons 是设置的标准按钮，询问时为 Yes 和 No
+    按钮，其他情况默认为 Ok 按钮，defaultButton 默认 NoButton；返回值就是用户点击的标准按钮数值。<br>
+    静态函数调用非常简单，如下示例：<br>
+    <div class="code">int ret = QMessageBox::warning(this, tr("My Application"),<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      tr("The document has been modified.\n"<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      "Do you want to save your changes?"),<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      QMessageBox::Save | QMessageBox::Discard<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      | QMessageBox::Cancel,<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      QMessageBox::Save);<br>
+    </div>
+    窗口标题文本 "My Application"，基本文本 "The document has been modified.\nDo you want
+    to save your changes?" ，显示三个按钮 Save 、Discard、Cancel，默认焦点是 Save 按钮。<br>
     <br>
+    另外，消息框还提供了两个用于显示本程序信息和 Qt 版本信息的静态函数：<br>
+    <div class="code">void&nbsp;&nbsp;&nbsp; about(QWidget * parent, const
+      QString &amp; title, const QString &amp; text)&nbsp; <br>
+      void&nbsp;&nbsp;&nbsp; aboutQt(QWidget * parent, const QString &amp; title
+      = QString())<br>
+    </div>
+    about() 函数用于显示本程序的信息，title 是标题栏文本，text 一般为自定义的本程序介绍文本，比如 "某某软件 1.0
+    版本，版权归某某所有。" <br>
+    aboutQt() 函数显示关于所用 Qt 版本的信息，title 是窗口标题文本，窗口内的消息文本是 Qt 自行设置的，包括 Qt
+    版本信息、许可证信息等等。<br>
     <br>
+    QMessageBox 类的内容介绍到这，下面我们通过一个简单文本编辑器示例熟悉消息框的使用。<br>
     <br>
     <br>
     <div class="os2">11.5.2 QWizard</div>

@@ -1353,11 +1353,470 @@ style=" color:#000000;">}</span></pre></div>
     <br>
     <div class="os2">11.5.2 QWizard</div>
     <br>
+    向导对话框通常由多个子页面按照一定顺序先后呈现，目的是方便引导用户逐步设置一些内容。对于复杂的或不常用的、不方便用户理解的功能内容，通常可以用向导对话框逐步引导用户设置。像常见的软件安装向导、输入法设置向导，QtCreator 新建项目、新建子窗口类等都是向导对话框的应用。<br>QWizard 是向导对话框主窗口类，其基类是 QDialog ；向导对话框内部的子页面类为 QWizardPage，子页面的基类则是 QWidget 。多个子页面可以按先后顺序逐一呈现，也可以有多个分支、非顺序呈现。 QWizard 向导对话框通过 addPage() 函数逐个添加子页面，默认是点击 Next 按钮逐个打开子页面，也可以通过子页面的重载 QWizardPage::​nextId() 函数改变后续页面的次序。<br><br>
+    QWizard 向导对话框支持 4 种外观风格，分别是 ClassicStyle、ModernStyle、MacStyle、AeroStyle，常用的是 ModernStyle。典型 ModernStyle 向导对话框如下图所示：<br>
+     <center> <img src="images/ch11/ch11-05-06.png" alt="ModernStyleWizard"></center>
+     典型向导对话框组成如下：<br>● title：子页面标题，代表子页面功能。<br>● subtitle：子页面副标题，可以详细介绍当前子页面的功能。<br>● Pixmap：多种图片设置，包括 watermark 水印图、banner 横幅图、logo 标志图；MacStyle 风格可以设置 background 背景图。图片可以用&nbsp; QWizard::​setPixmap() 设置全局通用的图（每页都显示），也可以给每个子页面设置单独的图 QWizardPage::​setPixmap()。<br>● Button：底部按钮，如 Back、Next、Cancel 等按钮，控制页面前后切换或退出对话框。<br>上面这些组成元素主要由 QWizard 负责显示和管理。<br>● QWizardPage 子页面控件区域就是除去上面内容的部分，如下图所示：<br>
+     <center> <img src="images/ch11/ch11-05-07.png" alt="subpage"></center>
+     上图子页面控件区由标签控件、单行编辑器、复选框、分组框、单选按钮等组成。<br>对于 MacStyle 风格向导对话框，显示效果完全不同，如下图所示：<br>
+     <center> <img src="images/ch11/ch11-05-08.png" alt="MacStyleWizard"></center>
+          
+    MacStyle 风格仅仅使用 background 背景图，其他图片没有用。上图 MacStyle 风格向导对话框的子页面控件只有三个标签控件和三个单行编辑器。<br><br>向导对话框为了方便多个页面之间共享控件数据，可以使用 QWizardPage::registerField()&nbsp; 将控件注册为 field 字段，例如：<br>
+    <div class="code">ClassInfoPage::ClassInfoPage(QWidget *parent)<br>&nbsp;&nbsp;&nbsp; : QWizardPage(parent)<br>{<br>&nbsp;&nbsp;&nbsp; ...<br>&nbsp;&nbsp;&nbsp; classNameLabel = new QLabel(tr("&amp;Class name:"));<br>&nbsp;&nbsp;&nbsp; classNameLineEdit = new QLineEdit;<br>&nbsp;&nbsp;&nbsp; classNameLabel-&gt;setBuddy(classNameLineEdit);<br><br>&nbsp;&nbsp;&nbsp; baseClassLabel = new QLabel(tr("B&amp;ase class:"));<br>&nbsp;&nbsp;&nbsp; baseClassLineEdit = new QLineEdit;<br>&nbsp;&nbsp;&nbsp; baseClassLabel-&gt;setBuddy(baseClassLineEdit);<br><br>&nbsp;&nbsp;&nbsp; qobjectMacroCheckBox = new QCheckBox(tr("Generate Q_OBJECT &amp;macro"));<br><br>&nbsp;&nbsp;&nbsp; registerField("className*", classNameLineEdit);<br>&nbsp;&nbsp;&nbsp; registerField("baseClass", baseClassLineEdit);<br>&nbsp;&nbsp;&nbsp; registerField("qobjectMacro", qobjectMacroCheckBox);<br>&nbsp;&nbsp;&nbsp; ...<br>}</div>   
+          上述代码创建了 classNameLineEdit 编辑器、baseClassLineEdit&nbsp; 编辑器、qobjectMacroCheckBox&nbsp; 复选框，并注册为公共 field 字段，后续页面可以访问这些字段数据。<br>classNameLineEdit 对应 className 字段， * 星号代表强制填充字段，如果用户不填写该字段，对话框就不能点击Next，“强制填充”指的就是用户进行了合法的编辑，没有非法数据（非法指不符合数据验证器等），并且用户填充值要与 initializePage() 调用前的原始值不同。<br>baseClassLineEdit 对应 baseClass 字段，没有要求强制填充，可以为空。<br>qobjectMacroCheckBox 对应 qobjectMacro 字段，也没有要求强制填充。<br>
+          在后续子页面，可以通过 field() 函数获取前面子页面的公共字段，例如：<br>
+    <div class="code">void OutputFilesPage::initializePage()<br>{<br>&nbsp;&nbsp;&nbsp; QString className = field("className").toString();<br>&nbsp;&nbsp;&nbsp; headerLineEdit-&gt;setText(className.toLower() + ".h");<br>&nbsp;&nbsp;&nbsp; implementationLineEdit-&gt;setText(className.toLower() + ".cpp");<br>&nbsp;&nbsp;&nbsp; outputDirLineEdit-&gt;setText(QDir::toNativeSeparators(QDir::tempPath()));<br>}</div>
+          
+          上述代码获取公共 className 字段，并转换为字符串类型，并用该字符串初始化 headerLineEdit、implementationLineEdit 两个编辑框。<br><br>除了使用 * 星号设置强制填充字段影响点击下一步 Next 按钮，另一种做法是重载 QWizardPage::isComplete() 函数，在 isComplete() 函数内部检查数据填充情况，如果符合条件就返回 true，其他未填充情况返回&nbsp; false。注意在子页面控件填充数据变动时，编写代码触发&nbsp; QWizardPage::completeChanged() 信号。<br>当触发 QWizardPage::completeChanged() 信号时，子页面会重新执行 isComplete() 函数检查，这样才可能允许进入下一步。<br><br>要启用或禁用页面的 Next 或 Finish 按钮，还可以重载 QWizard::​validateCurrentPage() 或者 QWizardPage::​validatePage() 函数，用于检查本页面内容是否完成，验证返回 true ，才允许进行下一步。<br><br>下面我们详细学习 QWizard 类的函数。<br>（1）构造函数：<br>
+    <div class="code">QWizard(QWidget * parent = 0, Qt::WindowFlags flags = 0)<br>~QWizard()</div> 
+          parent 是父窗口指针，如果是独立向导对话框，就是 NULL。flags 是窗口标志位，设置窗口功能样式，如 Qt::Widget、Qt::Window、Qt::Dialog等。<br><br>（2）子页面设置和访问函数：<br>
+    <div class="code">int&nbsp;&nbsp; &nbsp;addPage(QWizardPage * page)&nbsp;&nbsp; //增加<br>void&nbsp;&nbsp;&nbsp; removePage(int id)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //删除<br>void&nbsp;&nbsp;&nbsp; setPage(int id, QWizardPage * page)&nbsp; //设置 page 页面序号为 id 号</div>
+          addPage() 将 page 页面添加为末尾序号的页面，并返回序号数值（新序号大于之前添加所有页面的序号）。<br>removePage() 根据 id 序号删除子页面，删除子页面时，如果有必要就会调用QWizard::​cleanupPage(int id)函数清理子页面，<br>如果删除了开始页面，就会影响 startId 属性值。<br>setPage() 将 page 设置为指定序号 id 的页面，如果 id 序号之前有旧页面，旧页面会被删掉，替换为新的 page 页，该函数有可能隐蔽影响  startId 属性值。<br>可以根据序号 id 获取子页面指针：
+          <br>
+    <div class="code">QWizardPage *&nbsp;&nbsp; &nbsp;page(int id) const</div>
+          如果序号合法，返回子页面指针，如果序号不合法，返回 NULL。<br>由于可以删除、修改页面序号，向导对话框的页面不一定是连续序号，可以通过下面函数获取合法的序号列表：<br>
+    <div class="code">QList&lt;int&gt;&nbsp;&nbsp; &nbsp;pageIds() const</div>
+          获取当前页面序号、当前页面指针使用如下函数：<br>
+    <div class="code">int&nbsp;&nbsp; &nbsp;currentId() const<br>QWizardPage *&nbsp;&nbsp;&nbsp; currentPage() const</div>
+          
+          如果没有插入子页面，那么 currentId() 返回 -1，如果有子页面，currentId() 就是当前子页面的序号。<br>如果没有子页面，注意判断 currentPage()&nbsp; 返回值为 NULL。<br>在当前页，可以获取下一页的序号：<br>
+    <div class="code">virtual int&nbsp;&nbsp; &nbsp;nextId() const</div>
+          如果当前页没有下一页，nextId() 会返回 -1。QWizard::nextId()&nbsp; 默认会调用当前子页面的&nbsp; QWizardPage::nextId() 函数获取下一页 id 。<br><br>向导对话框开始页面的序号默认是从 0 开始（如果没有 0 号就从最小序号开始），也可以手动设置：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;setStartId(int id)&nbsp; //设置开始页面<br>int&nbsp;&nbsp;&nbsp; startId() const&nbsp; //获取开始子页面，注意没有子页面时返回 -1</div>
+          
+          对子页面序号进行增加、删除、修改时，都有可能隐蔽影响到开始序号 id，为了保险起见，可以在添加、删除、修改完页面后，手动设置一下开始页面的序号。<br>针对非顺序的子页面访问情况，有些页面可能被跳过去，这时可以通过如下函数确定 id 序号的页面是否已经访问过：<br>
+    <div class="code">bool&nbsp;&nbsp; &nbsp;hasVisitedPage(int id) const</div>
+          该函数返回 true 时代表 id 序号页面访问过，返回 false 代表页面没有访问过。<br>如果想要知道目前所有访问过的页面序号，可以使用下面函数：<br>
+    <div class="code">QList&lt;int&gt;&nbsp;&nbsp; &nbsp;visitedPages() const</div>
+          
+          <br>针对当前页面，如果需要检查内容是否填充完毕，可以重载下面函数进行检查：<br>
+          <div class="code">bool QWizard::​validateCurrentPage()</div>
+          
+          当用户点击 Next 或 Finish 按钮时，QWizard 调用该函数进行本页面的最后检查，如果 validateCurrentPage() 函数返回 true，就进入下一页（或完成整个向导对话框），如果 validateCurrentPage() 返回 false，就继续留在本页面，不切换。 默认情况下，validateCurrentPage() 调用当前子页面的 QWizardPage::validatePage() 进行验证，所以重载子页面的 QWizardPage::validatePage() 函数也是一样的效果。<br>一般更推荐使用星号 * 强制填充字段来实现数据字段的检查，或者重载 QWizardPage::isComplete() 函数检查当前页面数据。<br><br>（3）子页面标题和副标题格式设置<br>title 和 subtitle 文字内容由子页面 QWizardPage 设置，但是显示格式由 QWizard 设置。<br>
+    <div class="code">Qt::TextFormat&nbsp;&nbsp; &nbsp;titleFormat() const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //获取子页面标题格式<br>void&nbsp;&nbsp;&nbsp; setTitleFormat(Qt::TextFormat format)&nbsp; //设置子页面标题格式<br>Qt::TextFormat&nbsp;&nbsp;&nbsp; subTitleFormat() const&nbsp;&nbsp; //获取子页面副标题格式<br>void&nbsp;&nbsp;&nbsp; setSubTitleFormat(Qt::TextFormat format)&nbsp; //设置子页面副标题格式</div>
+          
+          Qt::TextFormat 主要由三种：Qt::PlainText（纯文本）、Qt::RichText（丰富文本，html文本）、Qt::AutoText（自动检测，如果有 html 内容片段就是丰富文本，没有 html 片段就是纯文本）。<br>子页面标题和副标题格式会影响所有子页面。<br><br>（4）底部按钮设置<br>
+          可以根据按钮枚举类型设置向导对话框的按钮文本：<br>
+    <div class="code">QString&nbsp;&nbsp; &nbsp;buttonText(WizardButton which) const&nbsp;&nbsp; //获取按钮文本<br>void&nbsp;&nbsp;&nbsp; setButtonText(WizardButton which, const QString &amp; text)&nbsp; //设置按钮文本</div>
+          QWizard::WizardButton 枚举类型数值如下：<br>
+           <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 200px;"><b>枚举常量</b></td>
+          <td style="width: 100px;"><b>数值</b></td>
+          <td><b>描述</b></td>
+        </tr>
+        <tr>
+          <td style="width: 200px;">QWizard::BackButton</td>
+          <td style="width: 100px;"> 0 </td>
+          <td> Back 后退按钮（Mac OS X 系统显示 Go Back）</td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 200px;">QWizard::NextButton</td>
+          <td style="width: 100px;"> 1 </td>
+          <td> Next 下一步按钮（Mac OS X 系统显示 Continue） </td>
+        </tr>
+        <tr>
+          <td style="width: 200px;">QWizard::CommitButton</td>
+          <td style="width: 100px;"> 2 </td>
+          <td> Commit 提交按钮（提交后不能倒回本页面） </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 200px;">QWizard::FinishButton</td>
+          <td style="width: 100px;"> 3 </td>
+          <td> Finish 完成按钮（Mac OS X 系统显示 Done） </td>
+        </tr>
+        <tr>
+          <td style="width: 200px;">QWizard::CancelButton</td>
+          <td style="width: 100px;"> 4 </td>
+          <td> Cancel 取消按钮（如果启用NoCancelButton选项就没有该按钮 ） </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 200px;">QWizard::HelpButton</td>
+          <td style="width: 100px;"> 5 </td>
+          <td> Help 帮助按钮（启用HaveHelpButton选项，才会显示该按钮）</td>
+        </tr>
+        <tr>
+          <td style="width: 200px;">QWizard::CustomButton1</td>
+          <td style="width: 100px;"> 6 </td>
+          <td> 自定义按钮1（启用HaveCustomButton1选项，才会显示该按钮） </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 200px;">QWizard::CustomButton2</td>
+          <td style="width: 100px;"> 7 </td>
+          <td> 自定义按钮2（启用HaveCustomButton2选项，才会显示该按钮） </td>
+        </tr>
+        <tr>
+          <td style="width: 200px;">QWizard::CustomButton3</td>
+          <td style="width: 100px;"> 8 </td>
+          <td> 自定义按钮3（启用HaveCustomButton3选项，才会显示该按钮） </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 200px;">QWizard::Stretch</td>
+          <td style="width: 100px;"> 9 </td>
+          <td> 特殊枚举值，没有按钮功能，只能用于按钮布局器里的空白占位 </td>
+        </tr>
+      </tbody>
+    </table>
     <br>
+          
+          setButtonText() 根据指定按钮枚举值，设置相应按钮的文本。HelpButton 和 三个自定义按钮需要手动调用 QWizard::​setOption(WizardOption option, bool on = true) 函数，设置启用才会显示。<br>稍后再介绍 WizardOption 向导对话框选项功能。<br>除了设置按钮文本，还可以获取按钮对象指针进行按钮的定制，
+          或者自行创建按钮设置为指定功能按钮：<br>
+    <div class="code">QAbstractButton *&nbsp;&nbsp; &nbsp;button(WizardButton which) const&nbsp; <br>void&nbsp;&nbsp;&nbsp; setButton(WizardButton which, QAbstractButton * button)</div>
+
+          button() 函数根据枚举值获取对应功能按钮对象指针，setButton() 则可以自己构建一个按钮，设置为指定功能的按钮。<br>
+          按钮的显示也可以定制布局顺序和空白占位：<br>
+   <div class="code">void&nbsp;&nbsp; &nbsp;setButtonLayout(const QList&lt;WizardButton&gt; &amp; layout)</div>
+          如果没有调用 setButtonLayout() 函数，按钮默认布局依赖 options() 选项取值，如果希望自己控制按钮的显示顺序，就可以调用  setButtonLayout() 函数实现，
+          例如：<br>
+   <div class="code">MyWizard::MyWizard(QWidget *parent)<br>&nbsp;&nbsp;&nbsp; : QWizard(parent)<br>{<br>&nbsp;&nbsp;&nbsp; ...<br>&nbsp;&nbsp;&nbsp; QList&lt;QWizard::WizardButton&gt; layout;<br>&nbsp;&nbsp;&nbsp; layout &lt;&lt; QWizard::Stretch &lt;&lt; QWizard::BackButton &lt;&lt; QWizard::CancelButton<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;&lt; QWizard::NextButton &lt;&lt; QWizard::FinishButton;<br>&nbsp;&nbsp;&nbsp; setButtonLayout(layout);<br>&nbsp;&nbsp;&nbsp; ...<br>}</div>
+          上述代码就是将底部左边设置为空白占位 QWizard::Stretch，然后靠右边依次显示 BackButton 、CancelButton、NextButton 、FinishButton。<br><br>（5）向导对话框选项设置<br>单个选项的读取和设置如下面函数：<br>
+   <div class="code">bool&nbsp;&nbsp; &nbsp;testOption(WizardOption option) const<br>void&nbsp;&nbsp;&nbsp; setOption(WizardOption option, bool on = true)</div>
+          testOption() 根据选项枚举值获取该选项是否启用，返回值就代表启用 true 或禁用 false。<br>setOption() 每次设置一个选项启用或禁用。<br>如果希望同时获取或设置所有选项值，那么使用下面函数：
+          <br>
+   <div class="code">WizardOptions&nbsp;&nbsp; &nbsp;options() const<br>void&nbsp;&nbsp;&nbsp; setOptions(WizardOptions options)</div>
+          多个选项标志位用 | 或运算符同时启用。详细的选项标志位如下表所示：<br>
     <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 200px;"><b>枚举常量</b></td>
+          <td style="width: 100px;"><b>数值</b></td>
+          <td><b>描述</b></td>
+        </tr>
+        <tr>
+          <td style="width: 200px;">QWizard::IndependentPages</td>
+          <td style="width: 100px;"> 0x00000001 </td>
+          <td> 多个子页面独立不继承数据，失去关联性，如果前进后退操作多次进入子页面，仅在第一次进入子页面执行 initializePage() 函数，而 cleanupPage() 函数则始终都不执行，<b><b>慎用</b>，可能造成前后页面数据不一致</b> </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 200px;">QWizard::IgnoreSubTitles</td>
+          <td style="width: 100px;"> 0x00000002 </td>
+          <td> 不显示副标题，即使设置了副标题文本也不显示 </td>
+        </tr>
+        <tr>
+          <td style="width: 200px;">QWizard::ExtendedWatermarkPixmap</td>
+          <td style="width: 100px;"> 0x00000004 </td>
+          <td> 将 WatermarkPixmap 图片填充满整个窗口，而不是仅显示在窗口左侧部分 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 200px;">QWizard::NoDefaultButton</td>
+          <td style="width: 100px;"> 0x00000008 </td>
+          <td> 不设置默认按钮，这样 Next 或 Finish 按钮就不会成为默认按钮 </td>
+        </tr>
+        <tr>
+          <td style="width: 200px;">QWizard::NoBackButtonOnStartPage</td>
+          <td style="width: 100px;"> 0x00000010 </td>
+          <td> 开始页面不显示 Back 按钮 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 200px;">QWizard::NoBackButtonOnLastPage</td>
+          <td style="width: 100px;"> 0x00000020 </td>
+          <td> 最终页面不显示 Back 按钮 </td>
+        </tr>
+        <tr>
+          <td style="width: 200px;">QWizard::DisabledBackButtonOnLastPage</td>
+          <td style="width: 100px;"> 0x00000040 </td>
+          <td> 将最终页面的  Back 按钮禁用 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 200px;">QWizard::HaveNextButtonOnLastPage</td>
+          <td style="width: 100px;"> 0x00000080 </td>
+          <td> 最终页面显示 Next 按钮，但该按钮默认是禁用的</td>
+        </tr>
+        <tr>
+          <td style="width: 200px;">QWizard::HaveFinishButtonOnEarlyPages</td>
+          <td style="width: 100px;"> 0x00000100 </td>
+          <td> 在非最终页面显示 Finish 按钮，但按钮默认是禁用的</td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 200px;">QWizard::NoCancelButton</td>
+          <td style="width: 100px;"> 0x00000200 </td>
+          <td> 不显示 Cancel 按钮 </td>
+        </tr>
+        <tr>
+          <td style="width: 200px;">QWizard::CancelButtonOnLeft</td>
+          <td style="width: 100px;"> 0x00000400 </td>
+          <td> Cancel 按钮放在左边，是指放在 Back 按钮左边，而不是默认的在 Next 或 Finish 按钮右边 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 200px;">QWizard::HaveHelpButton</td>
+          <td style="width: 100px;"> 0x00000800 </td>
+          <td> 显示 Help 按钮 </td>
+        </tr>
+        <tr>
+          <td style="width: 200px;">QWizard::HelpButtonOnRight</td>
+          <td style="width: 100px;"> 0x00001000 </td>
+          <td> Help 按钮放在最最右边，而不是默认的显示在最最左边 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 200px;">QWizard::HaveCustomButton1</td>
+          <td style="width: 100px;"> 0x00002000 </td>
+          <td> 显示定制按钮1 </td>
+        </tr>
+        <tr>
+          <td style="width: 200px;">QWizard::HaveCustomButton2</td>
+          <td style="width: 100px;"> 0x00004000 </td>
+          <td> 显示定制按钮2 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 200px;">QWizard::HaveCustomButton3</td>
+          <td style="width: 100px;"> 0x00008000 </td>
+          <td> 显示定制按钮3 </td>
+        </tr>
+        <tr>
+          <td style="width: 200px;">QWizard::NoCancelButtonOnLastPage</td>
+          <td style="width: 100px;"> 0x00010000 </td>
+          <td> 最终页面不显示 Cancel 按钮 </td>
+        </tr>
+        
+      </tbody>
+    </table>
+    <br>根据系统平台不同，向导对话框的默认选项不同：<br>
+          
+          
+          Windows 系统默认设置 HelpButtonOnRight 选项。<br>Mac OS X 系统默认设置 NoDefaultButton 和 NoCancelButton 选项。<br>X11 和 QWS (Qt for Embedded Linux) 系统默认选项为空。<br><br>我们可以自行设置需要的选项特性，例如，如果希望在最终页面禁用后退按钮、隐藏取消按钮，可以设置两个选项为 true：<br>
+    <div class="code">MyWizard::MyWizard(QWidget *parent)<br>&nbsp;&nbsp;&nbsp; : QWizard(parent)<br>{<br>&nbsp;&nbsp;&nbsp; ...<br>&nbsp;&nbsp;&nbsp; setOption(QWizard::DisabledBackButtonOnLastPage, true);<br>&nbsp;&nbsp;&nbsp; setOption(QWizard::NoCancelButtonOnLastPage, true);<br>&nbsp;&nbsp;&nbsp; ...<br>}</div>
+          <br>（6）公共 field 字段访问和设置<br>注册公共 field 只能用子页面的&nbsp; QWizardPage::registerField() 函数，QWizard 可以读取或修改字段：<br>
+    <div class="code">QVariant QWizard::​field(const QString &amp; name) const<br>void QWizard::​setField(const QString &amp; name, const QVariant &amp; value)</div>
+          QWizard 可以读取或设置所有子页面的字段数值，读取的字段都是 QVariant 类型，要注意转换为实际的数据类型。如果 name 不是合法注册的字段名称，那么要注意处理返回的空值。<br> 这里提前介绍一下子页面注册字段的函数：<br>
+    <div class="code">void QWizardPage::​registerField(const QString &amp; name, <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; QWidget * widget, const char * property = 0, const char * changedSignal = 0)</div>
+          name 是字段名称，widget 是字段输入的控件，property&nbsp; 如果为 0，就是注册默认属性为字段，changedSignal 如果为 0 就是默认属性的变动信号。向导对话框默认支持以下控件（包括派生类）和字段属性：<br>
+     <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 180px;"><b>控件</b></td>
+          <td style="width: 180px;"><b>属性</b></td>
+          <td><b>变动信号</b></td>
+        </tr>
+        <tr>
+          <td style="width: 180px;">QAbstractButton<br>（如复选框、单选按钮）</td>
+          <td style="width: 180px;"> bool checked </td>
+          <td> toggled() </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 180px;">QAbstractSlider</td>
+          <td style="width: 180px;"> int value </td>
+          <td> valueChanged() </td>
+        </tr>
+        <tr>
+          <td style="width: 180px;">QComboBox</td>
+          <td style="width: 180px;"> int currentIndex </td>
+          <td> currentIndexChanged() </td>
+        </tr>
+         <tr class="d1">
+          <td style="width: 180px;">QDateTimeEdit</td>
+          <td style="width: 180px;"> QDateTime dateTime </td>
+          <td> dateTimeChanged() </td>
+        </tr>
+        <tr>
+          <td style="width: 180px;">QLineEdit</td>
+          <td style="width: 180px;"> QString text </td>
+          <td> textChanged() </td>
+        </tr>
+         <tr class="d1">
+          <td style="width: 180px;">QListWidget</td>
+          <td style="width: 180px;"> int currentRow </td>
+          <td> currentRowChanged() </td>
+        </tr>
+        <tr>
+          <td style="width: 180px;">QSpinBox</td>
+          <td style="width: 180px;"> int value </td>
+          <td> valueChanged() </td>
+        </tr>
+         
+        
+        
+      </tbody>
+    </table>
+    <br> 
+          对于上面表格的控件、默认属性和默认变动信号，注册控件为公共字段时不需要填写 property 、changedSignal&nbsp; 这两个参数。<br><br>
+          如果希望修改向导对话框范围内某个控件类的默认注册字段属性和变动信号，使用如下函数：<br>
+    <div class="code">void QWizard::​setDefaultProperty(const char * className, const char * property, const char * changedSignal)</div>
+          className 是类名字符串，property 是新的默认注册字段属性，changedSignal 是字段属性的变动信号。<br>比如组合框 QComboBox 还有 currentText 属性和 currentTextChanged() 信号，如果希望修改向导对话框内所有子页面的组合框的默认注册字段属性，可以按照下面代码：
+          <br>
+          <div class="code">MyWizard::MyWizard(QWidget *parent)<br>&nbsp;&nbsp;&nbsp; : QWizard(parent)<br>{<br>&nbsp;&nbsp;&nbsp; ...<br>&nbsp;&nbsp;&nbsp; //注册默认属性<br>&nbsp;&nbsp;&nbsp; setDefaultProperty("QComboBox", "currentText", "currentTextChanged");<br>&nbsp;&nbsp;&nbsp; ...<br>}</div>
+          在 setDefaultProperty 函数调用之后，再注册 QComboBox 对象的属性字段，就会将 currentText 作为默认的字段内容。<br>如果只是在一个子页面内，设置 QComboBox 对象的注册属性，那么只在 QWizardPage 派生类代码中调用 QWizardPage::​registerField() 函数，例如：
+          <br>
+    <div class="code">FormPage0::FormPage0(QWidget *parent) :<br>&nbsp;&nbsp;&nbsp; QWizardPage(parent),<br>&nbsp;&nbsp;&nbsp; ui(new Ui::FormPage0)<br>{<br>&nbsp;&nbsp;&nbsp; ui-&gt;setupUi(this);<br>&nbsp;&nbsp;&nbsp; setTitle("Page0");<br>&nbsp;&nbsp;&nbsp; registerField("combox0", ui-&gt;comboBox, "currentText", "currentTextChanged");<br>}</div>
+          <br>（7）向导对话框外观风格<br>QWizard 有四种外观风格，用下面函数设置、获取外观风格：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;setWizardStyle(WizardStyle style)<br>WizardStyle&nbsp;&nbsp;&nbsp; wizardStyle() const</div>
+          
+          WizardStyle&nbsp; 枚举数值如下：<br>    
+ <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 200px;"><b>枚举常量</b></td>
+          <td style="width: 100px;"><b>数值</b></td>
+          <td><b>描述</b></td>
+        </tr>
+        <tr>
+          <td style="width: 200px;">QWizard::ClassicStyle</td>
+          <td style="width: 100px;"> 0 </td>
+          <td> 经典 Windows 外观风格 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 200px;">QWizard::ModernStyle</td>
+          <td style="width: 100px;"> 1 </td>
+          <td> 现代 Windows 外观风格 </td>
+        </tr>
+        <tr>
+          <td style="width: 200px;">QWizard::MacStyle</td>
+          <td style="width: 100px;"> 2 </td>
+          <td> Mac OS X 外观风格 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 200px;">QWizard::AeroStyle</td>
+          <td style="width: 100px;"> 3 </td>
+          <td> Windows Aero 外观风格 </td>
+        </tr>
+        
+      </tbody>
+    </table>
+    <br>      
+          
+          
+          
+          四种外观风格示例图如下：<br>
+          ● ClassicStyle<br>
+   <center><img src="images/ch11/ClassicStyle01.png" alt="ClassicStyle01">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="images/ch11/ClassicStyle02.png" alt="ClassicStyle02">
+          </center>
+          
+          ● ModernStyle<br>
+   <center><img src="images/ch11/ModernStyle01.png" alt="ModernStyle01">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="images/ch11/ModernStyle02.png" alt="ModernStyle02">
+          </center>
+          
+          ● MacStyle<br>
+   <center><img src="images/ch11/MacStyle01.png" alt="MacStyle01">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="images/ch11/MacStyle02.png" alt="MacStyle02">
+          </center>
+          
+          ● AeroStyle<br>
+   <center><img src="images/ch11/AeroStyle01.png" alt="AeroStyle01">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="images/ch11/AeroStyle02.png" alt="AeroStyle02">
+          </center>
+          
+          外观风格影响页面标题、副标题、图片、底部按钮和子页面控件显示位置和样式，可以根据实际需求设置外观风格。<br>AeroStyle 是 Windows Vista 及以上系统开启 Alpha 通道合成半透明效果的情况下使用，如果系统不支持就会倒退为 ModernStyle 风格。<br><br>（8）Pixmap图片设置<br>向导对话框根据不同的外观风格显示不同的图片元素，设置和获取图片函数如下：<br>
+   <div class="code">void&nbsp;&nbsp; &nbsp;setPixmap(WizardPixmap which, const QPixmap &amp; pixmap)<br>QPixmap&nbsp;&nbsp;&nbsp; pixmap(WizardPixmap which) const</div>
+          
+          WizardPixmap 枚举值如下：<br>
     <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 200px;"><b>枚举常量</b></td>
+          <td style="width: 100px;"><b>&nbsp;数值</b></td>
+          <td><b>描述</b></td>
+        </tr>
+        <tr>
+          <td style="width: 200px;">QWizard::WatermarkPixmap</td>
+          <td style="width: 100px;">&nbsp; 0 </td>
+          <td> 水印图片，ClassicStyle 和 ModernStyle 使用，显示在左边的竖条形图片 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 200px;">QWizard::LogoPixmap</td>
+          <td style="width: 100px;">&nbsp; 1 </td>
+          <td> 标志图片，ClassicStyle 和 ModernStyle 使用，显示在顶部标题右边的小标志图片 </td>
+        </tr>
+        <tr>
+          <td style="width: 200px;">QWizard::BannerPixmap</td>
+          <td style="width: 100px;">&nbsp; 2 </td>
+          <td> 横幅图片，ModernStyle 使用，显示在顶部标题的背景图片 </td>
+        </tr>
+        <tr class="d1">
+          <td style="width: 200px;">QWizard::BackgroundPixmap</td>
+          <td style="width: 100px;">&nbsp; 3 </td>
+          <td> 背景图片，MacStyle 使用，显示在向导对话框左边的背景图片。 </td>
+        </tr>
+        
+      </tbody>
+    </table>
     <br>
+          
+          
+          
+          我们根据上表可以归纳四种外观风格使用的图片：<br>
+          ● ClassicStyle：&nbsp; 使用 WatermarkPixmap、LogoPixmap 图片。<br>
+          ● ModernStyle：使用 WatermarkPixmap、LogoPixmap、BannerPixmap 图片。<br>
+          ● MacStyle：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 使用 BackgroundPixmap 图片。<br>
+          ● AeroStyle：&nbsp;&nbsp;&nbsp;&nbsp; 没有使用图片。 <br>
+          
+          <br>除了设置图片，ClassicStyle、ModernStyle 两种外观风格左边的水印图片上可以显示自定义的侧边控件，使用如下函数：<br><div
+class="code">void&nbsp;&nbsp; &nbsp;setSideWidget(QWidget * widget)<br>QWidget *&nbsp;&nbsp;&nbsp; sideWidget() const&nbsp;&nbsp; //如果没设置侧边控件，返回值是 NULL</div>
+          
+          
+          
+          侧边控件默认是 NULL。注意侧边控件仅在 ClassicStyle、ModernStyle 两种外观风格启用，其他风格没用。<br><br>（9）槽函数、信号和其他<br>
+          
+          除了从基类继承的，QWizard 本级有如下槽函数：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;back()&nbsp;&nbsp; //Back后退按钮对应槽函数<br>void&nbsp;&nbsp;&nbsp; next()&nbsp;&nbsp; //Next下一步按钮对应槽函数<br>void&nbsp;&nbsp;&nbsp; restart()&nbsp; //重新回到开始页面，向导对话框启动时自动调用</div>
+          这三个槽函数一般都是向导对话框自动调用，不需要处理。<br>除了从基类继承的，QWizard 本级有如下信号：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;currentIdChanged(int id)&nbsp; //当前页面变化触发信号，例如Back或Next按钮切换页面触发<br>void&nbsp;&nbsp;&nbsp; customButtonClicked(int which) //自定义按钮点击触发信号，which 指示是哪个按钮触发<br>void&nbsp;&nbsp;&nbsp; helpRequested()&nbsp; //Help帮助按钮点击触发信号<br>void&nbsp;&nbsp;&nbsp; pageAdded(int id)&nbsp; //新增页面时触发信号<br>void&nbsp;&nbsp;&nbsp; pageRemoved(int id)&nbsp; //删除页面时触发信号</div>
+          customButtonClicked() 信号里面参数 which 就是代表点击的自定义按钮，取值可能是 QWizard::CustomButton1、QWizard::CustomButton2、QWizard::CustomButton3，根据触发情况编写自定义按钮功能代码。<br>helpRequested() 信号就是 Help 帮助按钮点击触发，一般弹出帮助信息窗口，帮助用户理解页面功能。<br>注意自定义按钮和帮助按钮需要设置选项启动才能看到，见上面 setOption() 、setOptions() 函数。<br><br>QWizard 另外还有两个可以重载的虚函数，用于初始化子页面、清空子页面：<br>
+    <div class="code">virtual void&nbsp;&nbsp; &nbsp;cleanupPage(int id)<br>virtual void&nbsp;&nbsp;&nbsp; initializePage(int id)</div>
+          
+          initializePage() 根据 id 序号初始化子页面，比如点击 Next 按钮切换到该序号子页面时调用初始化页面函数，实际上该函数就是调用 id 序号子页面的 QWizardPage::initializePage()&nbsp; 函数。<br>cleanupPage() 根据 id 序号清空页面内容，点击 Back 按钮从该页面倒退，那么倒退前执行清空页面函数，实际上该函数就是调用 id 序号子页面的 QWizardPage::cleanupPage()&nbsp; 函数。<br><br>注意&nbsp; QWizard::IndependentPages 选项设置时，Back 按钮不触发 cleanupPage() 函数，initializePage()&nbsp; 仅在该页面第一次显示时调用，后续不再调用。比如多次前进后退经过该页面，除了第一次，后面几次的前进后退就不触发 initializePage() 函数，在多次前进后退过程中可以保留子页面用户编辑的旧数据，但要注意前后页面之间数据的关联性，避免造成前后页面数据不一致。 <br>QWizard::IndependentPages 选项设置时，如果  initializePage() 函数内部代码根据前面页面字段设置本页面数据，那么第一次进入本页面执行了 initializePage() 函数，而第二次、第三次等进入本页面时不触发 initializePage() 函数，没有调用 initializePage() 函数会导致前后页面数据失去关联性，就容易造成本页面数据与前面的对应数据不一致。<br>QWizard 除了自身的功能函数，还需要子页面 QWizardPage 类配合使用。下面介绍 QWizardPage 类的内容。<br>
+          
+          
     <br>
+    <div class="os2">11.5.3 QWizardPage</div>
+          
+    <br>QWizardPage 是向导对话框的子页面类，QWizardPage 的基类是 QWidget。向导对话框子页面可以直接用代码创建 QWizardPage 对象及其子控件，也可以使用 QWizardPage 派生类构建代码。<br>QWizardPage 默认有&nbsp; title、subTitle、Pixmaps 等内容特性，这些文字和图片由 QWizard 向导对话框负责渲染显示。 可以用 QWizard::addPage() 或&nbsp; QWizard::setPage() 将子页面添加给向导对话框。子页面的函数 wizard() 返回其所属的向导对话框指针。<br>对于 QWizardPage 派生类，可以使用下面五个重载虚函数实现定制的功能和行为：<br>
+    <ul>  
+    <li>initializePage() 函数，在初始化页面时调用，当用户点击 Next 按钮进入新页面，新页面自动调用该函数初始化页面。如果希望从之前的页面获取数据，并根据获取的前面页面数据定制本页面控件，那么就需要重载并实现 initializePage() 函数。</li>
+    <li>cleanupPage() 函数，点击 Back 按钮时，本页面使用该函数重置本页面内容，清空用户的修改，然后倒退回到前一页。这个函数会把页面字段数值重置到调用  initializePage() 函数之前的原始值。</li>
+    <li>validatePage() 函数，当用户点击 Next 或 Finish 按钮时，调用该函数进行本页面的数据验证。这个函数经常用于对不完整输入和错误输入的校验弹窗提示。</li>
+    <li>nextId() 函数，返回下一页的 id，用于创建非线性顺序的向导对话框，用户可以设置分支条件，根据页面不同输入情况跳转到不同的页面分支。</li>
+    <li>isComplete() 函数，这个函数用于决定 Next / Finish 按钮应该启用还是禁用，如果你重载了 isComplete() 函数，那么一定要在其他地方，比如输入控件的变动信号对应槽函数里面，手动触发 completeChanged()，这个信号会调用 isComplete() 函数重新检查是否启用  Next / Finish 按钮。</li></ul>通常 Next / Finish 按钮是互斥的，一个页面只能显示两者之一。如果 isFinalPage() 返回 true，那么显示 Finish 按钮，否则显示 Next 按钮。
+          默认情况下，只有当 nextId() 返回返回 -1 时， isFinalPage() 才会返回 true。如果你希望 Next 和 Finish 按钮都能在一个页面显示，比如处于“早结束”状态，可以在该页面调用 setFinalPage(true) 。对于适用早结束的页面，你可能需要设置 QWizard&nbsp; 向导对话框&nbsp; HaveNextButtonOnLastPage 和 HaveFinishButtonOnEarlyPages 两个选项启用状态。<br><br>在很多向导对话框中，前面页面的内容可能影响后续页面的默认显示内容。为方便前后页面的数据交互通信，QWizard 提供 “field”字段机制，可以在子页面 registerField()注册一个控件属性值为公共字段&nbsp; ，
+          后续页面可以访问该字段 field() 、setField()。<br><br>
+          下面我们详细介绍 QWizardPage 的函数内容。<br>
+          （1）构造函数<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; QWizardPage(QWidget * parent = 0)<br>&nbsp;&nbsp;&nbsp; ~QWizardPage()</div>
+          构造函数 parent 是父窗口，就是向导对话框的指针，当使用&nbsp; QWizard::addPage() 或 QWizard::setPage() 函数添加子页面时，父窗口指针自动修改为该 向导对话框指针。<br><br>（2）标题、副标题、图片、底部按钮等显示元素<br>
+          
+          这些显示元素在子页面可以设置内容，但是都靠父窗口向导对话框进行渲染。<br>标题、副标题函数：<br>
+    <div class="code">QString&nbsp;&nbsp; &nbsp;title() const<br>void&nbsp;&nbsp;&nbsp; setTitle(const QString &amp; title)<br>QString&nbsp;&nbsp;&nbsp; subTitle() const<br>void&nbsp;&nbsp;&nbsp; setSubTitle(const QString &amp; subTitle)</div>
+          标题是本页面主要功能的简要名称，副标题是对本页面功能的详细描述。标题和副标题可以是纯文本，也可以是 HTML 丰富文本，向导对话框可以设置文本格式 setTitleFormat()、 setSubTitleFormat()，默认都是 Qt::AutoText，如果文本有 HTML 语句就显示丰富文本，否则显示为纯文本。<br>图片设置和访问函数如下：<br>
+    <div class="code">QPixmap&nbsp;&nbsp; &nbsp;pixmap(QWizard::WizardPixmap which) const<br>void&nbsp;&nbsp;&nbsp; setPixmap(QWizard::WizardPixmap which, const QPixmap &amp; pixmap)</div>
+          QWizard 和 QWizardPage 都有这两个图片函数，参数是一样的意思，QWizard 图片函数是影响所有子页面的图片，QWizardPage 是针对本页面单独设置的显示图片。如果 QWizardPage 设置了图片，那么优先使用本页面的图片；如果 QWizardPage 没有设置图片，那么就用 QWizard 设置的全局图片。<br>关于底部按钮设置，QWizardPage 只能控制显示的文本内容：<br>
+    <div class="code">QString&nbsp;&nbsp; &nbsp;buttonText(QWizard::WizardButton which) const<br>void&nbsp;&nbsp;&nbsp; setButtonText(QWizard::WizardButton which, const QString &amp; text)</div>
+          QWizardPage 可以根据按钮枚举值设置按钮显示文本，但不能控制按钮个数。按钮的个数和哪些按钮显示由 QWizard 的按钮函数和选项决定，参考前面 QWizard 的内容。<br><br>（3）可重载定制功能的虚函数<br>初始化页面函数：<br>
+    <div class="code">virtual void&nbsp;&nbsp; &nbsp;initializePage()</div>
+          向导对话框 QWizard::initializePage() 会调用该函数进行该页面显示前的初始化功能，QWizard::restart() 函数和 Next 按钮切换新页面时会触发该初始化函数，但有例外，如果 QWizard::IndependentPages&nbsp; 选项设置时，初始化函数仅在页面第一次显示时调用，如果通过前进后退按钮再次进入该页面，则不会调用页面初始化函数。<br>QWizardPage::initializePage() 默认没有任何操作，如果需要根据之前页面字段数据初始化本页面的控件，那么重载 initializePage() 函数编写功能代码，就是最好的选择。例如：<br>
+    <div class="code">void OutputFilesPage::initializePage()<br>{<br>&nbsp;&nbsp;&nbsp; QString className = field("className").toString();<br>&nbsp;&nbsp;&nbsp; headerLineEdit-&gt;setText(className.toLower() + ".h");<br>&nbsp;&nbsp;&nbsp; implementationLineEdit-&gt;setText(className.toLower() + ".cpp");<br>&nbsp;&nbsp;&nbsp; outputDirLineEdit-&gt;setText(QDir::toNativeSeparators(QDir::tempPath()));<br>}</div> 
+          上面代码获取 "className" 类名字段数据，然后根据类名初始化两个编辑器控件。<br><br>与初始化对应的是清除页面函数：<br>
+   <div class="code">virtual void&nbsp;&nbsp; &nbsp;cleanupPage()</div>
+          当用户点击 Back 按钮时，在后退页面之前，在本页面调用该函数进行清空操作，清空本页面后，在退回到前一页，但有例外，QWizard::IndependentPages 选项设置时，清除函数就始终不调用。<br>QWizardPage::cleanupPage() 默认操作是将页面的字段数据重置为原始值，就是在 initializePage() 执行之前的原始值。<br><br>
+   <div class="code">virtual bool&nbsp;&nbsp; &nbsp;validatePage()</div>
+
+          验证页面函数是在用户点击 Next 或 Finish 按钮时，验证页面内容是否填充完整。如果该函数返回 true，进入下一页面，否则，仍停留在本页面。<br>默认的 validatePage() 函数实现就是返回 true。一般更推荐使用星号 * 强制填充字段或重载 isComplete() 进行页面内容校验。<br><br>星号 * 强制填充字段是自动检查输入控件的数据合法性，如果希望进行较为复杂的数据校验，可以通过重载下面函数，实现定制功能：<br>
+   <div class="code">virtual bool&nbsp;&nbsp; &nbsp;isComplete() const</div>&nbsp;QWizard 会调用这个函数，决定当前页面的 Next 或 Finish 按钮应该启用还是禁用。<br>默认的 isComplete() 实现是：如果 * 强制填充字段已经合法填充，就返回 true，否则返回 false。<br>重载该函数时要注意两点：<br>① 在其他函数代码位置手动触发 completeChanged() 信号，例如输入控件的变动信号对应槽函数里触发，这样 completeChanged() 信号会重新调用 isComplete() 函数，重新判断是否启用  Next 或 Finish 按钮。如果不手动触发 completeChanged() 信号，进入页面禁用的 Next 按钮可能一直禁用，无法进入后续页面。completeChanged() 信号声明如下：
+   <div class="code">void&nbsp;&nbsp; &nbsp;completeChanged()&nbsp; //页面填充完成情况变化信号，配合  isComplete() 重载函数使用</div>
+          ② 在新重载的  isComplete() 函数里面调用基类函数 QWizardPage::isComplete() 确认强制字段填充完成。<br><br>默认添加给向导对话框子页面是按序号线性顺序显示的，如果需要跳转页面功能，那么重载下面函数：<br>
+   <div class="code">virtual int&nbsp;&nbsp; &nbsp;nextId() const</div> 
+          向导对话框点击 Next 按钮时，QWizard::nextId() 会调用该函数获取下一页的 id，如果后续没有页面就返回 -1.<br>nextId() 函数默认返回比当前页面序号大的最小序号页面 id，没有就返回 -1。重载该函数，设置分支判断条件，就可以创建非线性顺序的页面切换，例如：<br>
+   <div class="code">int IntroPage::nextId() const<br>{<br>&nbsp;&nbsp;&nbsp; if (evaluateRadioButton-&gt;isChecked()) {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return LicenseWizard::Page_Evaluate;<br>&nbsp;&nbsp;&nbsp; } else {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return LicenseWizard::Page_Register;<br>&nbsp;&nbsp;&nbsp; }<br>}</div> 
+          上面代码判断，如果选中了评估版软件安装复选框，就进入评估版安装界面，否则进入注册页面。<br><br>（4）提交页面和最终页面设置<br>提交页面设置和访问函数如下：<br>
+   <div class="code">void&nbsp;&nbsp; &nbsp;setCommitPage(bool commitPage)<br>bool&nbsp;&nbsp;&nbsp; isCommitPage() const</div>  
+          Commit 提交的意思是，本页面完成提交，进入下一页后，无法再返回本页面，下一页的 Back 按钮是禁用的。Commit 就是不能反悔的意思，本页提交了就无法再修改了，比如向导对话框里软件已经安装完了，就不能再回头。设置本页面为提交页面后，本页面的 Next 按钮会替换为 Commit 按钮，点击功能类似，但是下一页的 Back 按钮会禁用。<br><br>最终页面的设置和访问函数如下：<br>
+   <div class="code">void&nbsp;&nbsp; &nbsp;setFinalPage(bool finalPage)<br>bool&nbsp;&nbsp;&nbsp; isFinalPage() const</div>
+          一般情况下最大序号的页面是最终页面。<br>如果调用了 setFinalPage(true) ，那么 isFinalPage() 会返回 true，当前页面会显示 Finish 按钮，当 isComplete() 返回 true，就会启用  Finish 按钮，否则禁用  Finish 按钮。<br>如果调用了&nbsp; setFinalPage(false)， isFinalPage() 函数会根据 nextId() 返回值确定自身的返回值：如果 nextId() 返回 -1，那么 isFinalPage() 函数返回 true，否则返回 false。例如，如果在序号最大的页面调用 setFinalPage(false)，这一页本来就是最终页面，nextId() 返回 -1， setFinalPage(false) 就不会生效。<br>一般不需要手动设置最终页面，如果涉及到早结束页面情况，设置 QWizard::HaveFinishButtonOnEarlyPages 选项，希望早点结束向导，才会主动设置最终页面。<br><br>（5）Protected 声明的保护继承函数<br>主要是获取隶属的向导对话框函数和字段操作函数：<br>
+   <div class="code">QWizard *&nbsp;&nbsp; &nbsp;wizard() const <br>QVariant&nbsp;&nbsp;&nbsp; field(const QString &amp; name) const&nbsp;&nbsp; //获取字段数据<br>void&nbsp;&nbsp;&nbsp; setField(const QString &amp; name, const QVariant &amp; value)&nbsp; //手动设置字段数据</div>
+          wizard() 返回本页面隶属的向导对话框指针，如果本页面还未添加给向导对话框，返回 NULL。<br>field() 根据字段名称获取字段数据，返回值是 QVariant ，要注意转化为需要的数据再使用。<br>setField() 函数是手动设置指定字段的数据，一般较少使用，都是注册字段控件的属性自动更新字段数据。<br>
+   <div class="code">void&nbsp;&nbsp;&nbsp; registerField(const QString &amp; name, QWidget * widget, const char * property = 0, const char * changedSignal = 0)</div>
+          registerField() 注册字段函数只有子页面有，将子页面控件注册为指定名称的字段（字段名称必须唯一），控件对应字段的默认属性详见上面 QWizard 字段函数内容。如果希望控件的其他属性作为注册字段，那么指定参数 property&nbsp; 属性字符串和 changedSignal&nbsp; 变动信号字符串，就可以用指定属性作为注册字段数据，例如：<br>
+   <div class="code">&nbsp;&nbsp;&nbsp; registerField("combox0", ui-&gt;comboBox, "currentText", "currentTextChanged");</div>
+          上面一行代码就是将 currentText 属性注册为字段数据，currentTextChanged 是属性变动信号的名字，使用变动信号名称即可，不用带信号的括号和参数。<br>注册字段时，字段名末尾带一个信号 * 代表强制填充字段，例如：<br>
+   <div class="code">&nbsp;&nbsp;&nbsp; registerField("className*", classNameLineEdit);</div>
+          星号 * 强制填充，完成填充的判断条件是，检查控件当前值与原始值（initializePage() 函数调用之前的属性值）是否一致，如果不一致就判定完成填充。对于 QLineEdit 等可以设置验证器、输入模板的输入类控件，强制填充会同样检查输入控件的 hasAcceptableInput() 返回值，只有通过了数据验证器或输入模板验证，输入数据合法，才会视为完成数据填充。强化填充完成后，才会启用页面的 Next 按钮或 Finish 按钮。<br>星号 * 强制填充字段的检查是在 QWizardPage::isComplete() 函数实现，如果重载了 isComplete() 函数，在新类的 isComplete() 函数如果不调用基类&nbsp;  QWizardPage::isComplete() 函数，那么会跳过强制属性检查。<br>QWizard 和 QWizardPage 类的内容介绍到这，下面通过一个软件安装向导的例子学习向导对话框的使用。<br><br><br>
+          
+          <br><br>
     <table style="text-align: left; width: 100%;" border="0" cellpadding="2" cellspacing="2">
       <tbody>
         <tr>

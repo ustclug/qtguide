@@ -448,17 +448,82 @@
     旧部件，但一定要给主窗口设置新的中央部件。<br>
     <br>
     （7）窗口状态保存和恢复函数<br>
+    窗口的尺寸状态可以保存为字节数据，用于窗口的状态保存恢复，使用如下函数：<br>
+    <div class="code">QByteArray&nbsp;&nbsp; &nbsp;saveGeometry() const<br>
+      bool&nbsp;&nbsp;&nbsp; restoreGeometry(const QByteArray &amp; geometry)</div>
+    字节数组可以存储到设置文件中，例如：<br>
+    <div class="code">void MyWidget::closeEvent(QCloseEvent *event)<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp; QSettings settings("MyCompany", "MyApp");<br>
+      &nbsp;&nbsp;&nbsp; settings.setValue("geometry", saveGeometry());<br>
+      &nbsp;&nbsp;&nbsp; QWidget::closeEvent(event);<br>
+      }</div>
+    利用保存的设置文件里面信息，可以恢复窗口状态：<br>
+    <div class="code">QSettings settings("MyCompany", "MyApp");<br>
+      myWidget-&gt;restoreGeometry(settings.value("geometry").toByteArray());</div>
+    对于 QWidget 及其派生类都可以用上面 saveGeometry()、restoreGeometry() 函数保存和恢复窗口尺寸状态。<br>
+    对于 QMainWindow ，有工具栏、停靠窗口的状态，以及四角归属信息，这些工具栏和停靠窗口状态也可以保存。但要注意 QToolBar 和
+    QDockWidget 对象的 objectName 属性用于关键字保存工具栏和停靠窗口的状态，每一个工具栏和停靠窗口的 objectName
+    必须是唯一的。<br>
+    QMainWindow 保存和恢复工具栏、停靠窗口的状态，使用下面函数：<br>
+    <div class="code">QByteArray&nbsp;&nbsp; &nbsp;saveState(int version = 0)
+      const<br>
+      bool&nbsp;&nbsp;&nbsp; restoreState(const QByteArray &amp; state, int
+      version = 0)</div>
+    saveState() 生成的字节数组可以存在设置文件中，version 参数也会作为数据存储在设置文件中。<br>
+    存储主窗口尺寸和工具栏、停靠窗口状态的示例：<br>
+    <div class="code">void MyMainWindow::closeEvent(QCloseEvent *event)<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp; QSettings settings("MyCompany", "MyApp");<br>
+      &nbsp;&nbsp;&nbsp; settings.setValue("geometry", saveGeometry());<br>
+      &nbsp;&nbsp;&nbsp; settings.setValue("windowState", saveState());<br>
+      &nbsp;&nbsp;&nbsp; QMainWindow::closeEvent(event);<br>
+      }</div>
+    恢复主窗口尺寸和工具栏、停靠窗口状态示例：<br>
+    <div class="code">void MyMainWindow::readSettings()<br>
+      {<br>
+      &nbsp;&nbsp;&nbsp; QSettings settings("MyCompany", "MyApp");<br>
+      &nbsp;&nbsp;&nbsp;
+      restoreGeometry(settings.value("geometry").toByteArray());<br>
+      &nbsp;&nbsp;&nbsp;
+      restoreState(settings.value("windowState").toByteArray());<br>
+      }</div>
+    QMainWindow 针对停靠窗口的状态恢复还有一个特别的函数：<br>
+    <div class="code">bool&nbsp;&nbsp; &nbsp;restoreDockWidget(QDockWidget *
+      dockwidget)</div>
+    restoreDockWidget() 用于在 restoreState() 函数执行后创建的 dockwidget 进行状态恢复，特殊情况可能先调用了
+    restoreState() ，后创建的 dockwidget ，这时候用 restoreDockWidget() 补充恢复一下新创建的停靠窗口状态。<br>
     <br>
+    （8）信号和其他函数<br>
+    除了从基类继承的，QMainWindow 本级只有两个信号：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;iconSizeChanged(const QSize &amp;
+      iconSize)<br>
+      void&nbsp;&nbsp;&nbsp; toolButtonStyleChanged(Qt::ToolButtonStyle
+      toolButtonStyle)</div>
+    第一个信号是工具栏图标尺寸变化信号，参数就是新的图标尺寸。<br>
+    第二个信号是工具按钮风格变化信号，参数是新的工具按钮风格，比如纯文本按钮、纯图标按钮或文本图标混合按钮等。<br>
     <br>
-    （8）信号<br>
-    <br>
-    <br>
-    （9）其他函数<br>
-    <br>
-    <br>
-    <br>
+    除了从基类继承的可重载保护类型函数，QMainWindow 本级有两个可以重载的事件处理函数：<br>
+    <div class="code">virtual void&nbsp;&nbsp;
+      &nbsp;contextMenuEvent(QContextMenuEvent * event)<br>
+      virtual bool&nbsp;&nbsp;&nbsp; event(QEvent * event)</div>
+    contextMenuEvent() 用于处理右键菜单事件，可以定制独特的右键菜单。<br>
+    event() 则是通用的事件处理函数，可以定制各类事件的处理过程。<br>
+    如果希望定制鼠标移动、鼠标键按下、松开、双击等事件函数，重载基类 QWidget 相应虚函数：<br>
+    <div class="code">virtual void&nbsp;&nbsp;
+      &nbsp;mouseDoubleClickEvent(QMouseEvent * event) //鼠标双击事件<br>
+      virtual void&nbsp;&nbsp; &nbsp;mouseMoveEvent(QMouseEvent * event)&nbsp;
+      //鼠标移动事件<br>
+      virtual void&nbsp;&nbsp; &nbsp;mousePressEvent(QMouseEvent * event)&nbsp;
+      //鼠标键按下事件<br>
+      virtual void&nbsp;&nbsp; &nbsp;mouseReleaseEvent(QMouseEvent *
+      event)&nbsp; //鼠标键松开事件</div>
+    QMouseEvent::​button() 函数可以判断鼠标的按键，例如鼠标左键 Qt::LeftButton、右键
+    Qt::RightButton、中键 Qt::MiddleButton等。对于鼠标移动事件，QMouseEvent 的按钮总是 Qt::NoButton
+    。<br>
     <br>
     <div class="os2">12.1.2 动作 QAction</div>
+    <br>
     <br>
     <br>
     <div class="os2">12.1.3 菜单 QMenu</div>

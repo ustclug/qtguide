@@ -524,7 +524,341 @@
     <br>
     <div class="os2">12.1.2 动作 QAction</div>
     <br>
+    QAction
+    类为窗口提供一个抽象的用户界面动作，可以用于菜单项、工具栏按钮和快捷键。用户在主界面程序通常可以使用菜单项、工具栏按钮和快捷键实现功能操作，这些功能操作
+    Qt 统一用 QAction 类表示，并且能够在菜单和工具栏上面同步显示。例如在文本编辑软件，工具栏按钮点击文本左对齐，那么对应菜单项也会选中左对齐的菜
+    单项。<br>
+    QAction 类对象通常以使用该功能的窗口为父节点，对于主窗口程序，通常以软件顶级的主窗口为父节点，这样方便在菜单栏和工具栏同步显示、操作。<br>
+    QAction 类对象可以使用其构造函数独立创建，也可以在创建 QMenu 菜单内容时，使用 QMenu 的函数顺路创建 QAction 对象。<br>
+    QAction 包含很多内容，例如动作的图标 icon、文本 text、shortcut 快捷键、statusTip 状态栏文本、"What's
+    This?" 帮助文本、tooltip 工具提示等等。对于菜单项，还可以设置动作的文本显示字体 font。<br>
+    QAction 对象必须在使用之前，添加给窗口（菜单、工具栏），添加后才能正常使用动作对象。如果设置快捷键适用环境为应用程序全局快捷键，如
+    setShortcutContext(Qt::ApplicationShortcut) ，那么同样要先添加动作对象给窗口，后使用快捷键。<br>
+    创建动作对象后，一般将其触发信号关联到槽函数，并添加给菜单、工具栏，然后使用，例如：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; openAct = new
+      QAction(QIcon(":/images/open.png"), tr("&amp;Open..."), this);<br>
+      &nbsp;&nbsp;&nbsp; openAct-&gt;setShortcuts(QKeySequence::Open);<br>
+      &nbsp;&nbsp;&nbsp; openAct-&gt;setStatusTip(tr("Open an existing file"));<br>
+      &nbsp;&nbsp;&nbsp; connect(openAct, SIGNAL(triggered()), this,
+      SLOT(open()));<br>
+      <br>
+      &nbsp;&nbsp;&nbsp; fileMenu-&gt;addAction(openAct);&nbsp; //添加给菜单<br>
+      &nbsp;&nbsp;&nbsp; fileToolBar-&gt;addAction(openAct);&nbsp; //添加给工具栏</div>
+    上面代码创建了打开动作 openAct ，设置了图标、文本和父节点 ，设置快捷键为标准的打开快捷键，设置状态栏提示，关联信号到槽函数，最后添加给文件菜单
+    fileMenu 和文件工具栏 fileToolBar 。<br>
+    下面我们分块介绍 QAction&nbsp; 内容。<br>
+    （1）构造函数<br>
+    <div class="code">QAction(QObject * parent)<br>
+      QAction(const QString &amp; text, QObject * parent)<br>
+      QAction(const QIcon &amp; icon, const QString &amp; text, QObject *
+      parent)<br>
+      ~QAction()</div>
+    第一个构造函数只设置了父节点指针。<br>
+    第二个构造函数设置了文本 text 和父节点指针。<br>
+    第三个构造函数设置了动作的图标 icon、文本 text 和父节点指针。<br>
+    图标通常就是显示在工具栏按钮的图标，文本通常显示在菜单项里面。<br>
+    动作文本&nbsp; tr("&amp;Open...") 在程序执行时会显示为 <u>O</u>pen... ，这个 &amp;O
+    是菜单栏访问的快捷键，在用户点击 Alt 按钮时，程序会进入菜单栏，再按下 O 键，就会触发该打开动作。<br>
     <br>
+    （2）属性函数<br>
+    QAction 有非常多的属性函数，这里列成表格来展示，我们把常用的几个列在表格前几行，后面按照字母排序列。<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 60px;"><b>属性</b></td>
+          <td style="width: 150px;"><b>读函数</b></td>
+          <td style="width: 300px;"><b>写函数</b></td>
+          <td><b>描述</b></td>
+        </tr>
+        <tr>
+          <td> icon </td>
+          <td> QIcon icon() const </td>
+          <td> void setIcon(const QIcon &amp; icon) </td>
+          <td style="height: 33.6px;"> 动作的图标，可以显示为工具栏按钮图标，动作菜单项文本的左边也可以显示图标。默认图标
+            为空。 </td>
+        </tr>
+        <tr class="d1">
+          <td> text</td>
+          <td> QString text() const </td>
+          <td> void setText(const QString &amp; text)</td>
+          <td> 动作的文本，显示为对应菜单项文本。默认文本为空。 </td>
+        </tr>
+        <tr>
+          <td> iconText </td>
+          <td> QString iconText() const </td>
+          <td> void setIconText(const QString &amp; text) </td>
+          <td> 动作的图标文本，设置工具栏 QToolBar::toolButtonStyle 为同时显示文本和按钮时，工具栏按钮显示这个
+            iconText。<br>
+            如果动作没有设置 text 和 toolTip 文本，那么 iconText 内容就会作为 text 和 toolTip
+            文本使用。当没有设置图标时，iconText 也显示为工具栏按钮文本。<br>
+            反过来，如果没有设置 iconText，那么 text 属性就顶替 iconText 内容。<br>
+            默认 iconText 文本为空。</td>
+        </tr>
+        <tr class="d1">
+          <td> toolTip </td>
+          <td> QString toolTip() const</td>
+          <td> void setToolTip(const QString &amp; tip)</td>
+          <td> 动作的工具提示文本，当鼠标悬停在菜单项或工具栏按钮几秒钟，鼠标指针旁边会显示该动作的工具提示文本。默认工具提示文本就是 text
+            文本。如果没有设置工具提示文本，那么 text 文本会作为工具提示文本显示。 </td>
+        </tr>
+        <tr>
+          <td> shortcut </td>
+          <td> QKeySequence shortcut() const </td>
+          <td> void setShortcut(const QKeySequence &amp; shortcut)</td>
+          <td>动作的主要快捷键，例如复制快捷键 Ctrl+C，快捷键通常由 Qt::​Key 按键枚举值和 Qt::​Modifier
+            辅助键枚举值组 成。默认快捷键是空的。</td>
+        </tr>
+        <tr class="d1">
+          <td> statusTip </td>
+          <td> QString statusTip() const </td>
+          <td> void setStatusTip(const QString &amp; statusTip) </td>
+          <td> 动作的状态栏文本，鼠标悬浮在动作的菜单项或工具栏按钮时，显示在主窗口状态栏的文本提示。默认为空。</td>
+        </tr>
+        <tr>
+          <td> whatsThis </td>
+          <td> QString whatsThis() const </td>
+          <td> void setWhatsThis(const QString &amp; what)</td>
+          <td> 动作的 "What's This?"
+            帮助文本，当对话框（窗口标志位启用Qt::WindowContextHelpButtonHint） 右上角有 ？
+            按钮时，点击该问号按钮再点击动作的工具栏按钮，会显示该帮助文本。默认为空。主窗口程序一般用不到这个文本。 </td>
+        </tr>
+        <tr class="d1">
+          <td> font </td>
+          <td> QFont font() const </td>
+          <td> void setFont(const QFont &amp; font)</td>
+          <td> 动作菜单项文本的显示字体，默认根据应用程序默认字体显示。实际显示的字体可能跟随程序风格变化，font
+            仅是建议的提示字体，不是强制生 效。 </td>
+        </tr>
+        <tr>
+          <td> autoRepeat </td>
+          <td> bool autoRepeat() const </td>
+          <td> void setAutoRepeat(bool) </td>
+          <td> 自动重复功能，当动作快捷键持续保持按下时，自动重复执行该动作。默认为 true。比如保持按下 Ctrl+V 键，就一直重复粘贴文
+            本。</td>
+        </tr>
+        <tr class="d1">
+          <td> checkable </td>
+          <td> bool isCheckable() const</td>
+          <td> void setCheckable(bool)</td>
+          <td> 可勾选功能，动作的菜单项或工具栏按钮可以有 on/off 开关状态，默认是 false，不可勾选。如果要设置多个动作互斥，需要加入
+            QActionGroup 动作组，并设置 QActionGroup::exclusive 互斥属性启用，就是类似单选框的功能。 </td>
+        </tr>
+        <tr>
+          <td> checked </td>
+          <td> bool isChecked() const</td>
+          <td> bool isChecked() const</td>
+          <td> 动作的开关状态（勾选状态），默认是false。要先启用可勾选功能，然后才能进行勾选。 </td>
+        </tr>
+        <tr class="d1">
+          <td> enabled </td>
+          <td> bool isEnabled() const</td>
+          <td> void setEnabled(bool)</td>
+          <td> 动作的启用状态，默认是 true。动作如果禁用，对应菜单项和工具栏按钮变灰色，不可点击，快捷键也禁用，该动作所有出现的位置和快捷键
+            都同步禁用。 </td>
+        </tr>
+        <tr>
+          <td> iconVisibleInMenu </td>
+          <td> bool isIconVisibleInMenu() const</td>
+          <td> void setIconVisibleInMenu(bool visible)</td>
+          <td> 动作图标是否显示在菜单项里面。该属性默认跟随应用程序的 Qt::AA_DontShowIconsInMenus
+            属性值。如果手动设置 iconVisibleInMenu 为 true，那么就图标会显示在菜单项文本左边。</td>
+        </tr>
+        <tr class="d1">
+          <td> menuRole </td>
+          <td style="height: 50.4px;"> MenuRole menuRole() const</td>
+          <td> void setMenuRole(MenuRole menuRole)</td>
+          <td> Mac OS X 系统中的菜单角色，一般用不到。默认角色是 QAction::TextHeuristicRole。 </td>
+        </tr>
+        <tr>
+          <td> priority </td>
+          <td> Priority priority() const </td>
+          <td> void setPriority(Priority priority)</td>
+          <td> 动作在工具栏按钮显示空间不足时的显示策略，决定 iconText
+            隐藏策略。工具栏设置Qt::ToolButtonTextBesideIcon 模式时，LowPriority的动作 iconText
+            会在显示空间不足时优先隐藏，HighPriority动作的 iconText 会尽量显示。默认都是 NormalPriority。 </td>
+        </tr>
+        <tr class="d1">
+          <td> shortcutContext </td>
+          <td> Qt::ShortcutContext shortcutContext() const </td>
+          <td> void setShortcutContext(Qt::ShortcutContext context)</td>
+          <td> 快捷键生效环境（快捷键上下文），默认是Qt::WindowShortcut，包含该动作的顶层窗口激活时，动作快捷键生效，无论焦点在
+            哪个子控件，动作快捷键都可以触发，适用于常规菜单动作。还有一个更大范围生效的枚举值
+            Qt::ApplicationShortcut，程序任意一个窗口激活时，快捷键都可以触发该动作，适用于保存文件、退出程序等全局操作。 </td>
+        </tr>
+        <tr>
+          <td> visible</td>
+          <td> bool isVisible() const </td>
+          <td> void setVisible(bool) </td>
+          <td> 动作是否显示，默认是 true 显示。如果设置为 false，那么该动作的菜单项、工具栏按钮 都不可见，快捷键也不生效。</td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    每个动作还可以保存定制的数据内容，使用下面函数读写数据：<br>
+    <div class="code">QVariant&nbsp;&nbsp; &nbsp;data() const<br>
+      void&nbsp;&nbsp;&nbsp; setData(const QVariant &amp; userData)</div>
+    数据是 QVariant&nbsp; 类型，可以保存 Qt 常用的各种数据类型，并实现转换。<br>
+    <br>
+    （3）动作组设置<br>
+    对于设置为可勾选的动作，默认类似复选框的勾选模式，如果多个可勾选动作作为单选框使用，那么使用 QActionGroup 动作组实现，将多个动作添加到一个
+    组里：<br>
+    <div class="code">QActionGroup *&nbsp;&nbsp; &nbsp;actionGroup() const&nbsp;
+      //获取动作所属的动作组，默认为空<br>
+      void&nbsp;&nbsp;&nbsp; setActionGroup(QActionGroup * group)&nbsp;
+      //设置动作归属的动作组</div>
+    除了 QAction::setActionGroup() 函数， QActionGroup 类自带添加函数：<br>
+    <div class="code">QAction *&nbsp;&nbsp;&nbsp;
+      QActionGroup::addAction(QAction * action)<br>
+      QAction *&nbsp;&nbsp;&nbsp; QActionGroup::addAction(const QString &amp;
+      text)<br>
+      QAction *&nbsp;&nbsp;&nbsp; QActionGroup::addAction(const QIcon &amp;
+      icon, const QString &amp; text)</div>
+    第一个添加动作函数是将建立好的动作加到动作组，后面两个则是快捷函数，根据文本和图标自动新建动作，并加到动作组，返回值是新建的动作对象指针。动作组默认就是
+    互斥的，同一个动作组只有一个动作能处于勾选状态。<br>
+    动作组的互斥状态可以由下面函数读取或设置：<br>
+    <div class="code">bool&nbsp;&nbsp;&nbsp; QActionGroup::isExclusive()
+      const&nbsp; //读取互斥状态<br>
+      void&nbsp;&nbsp;&nbsp; QActionGroup::setExclusive(bool)&nbsp; //设置互斥状态</div>
+    动作组的示例代码如下：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; alignmentGroup = new
+      QActionGroup(this); <br>
+      &nbsp;&nbsp;&nbsp; alignmentGroup-&gt;addAction(leftAlignAct);<br>
+      &nbsp;&nbsp;&nbsp; alignmentGroup-&gt;addAction(rightAlignAct);<br>
+      &nbsp;&nbsp;&nbsp; alignmentGroup-&gt;addAction(justifyAct);<br>
+      &nbsp;&nbsp;&nbsp; alignmentGroup-&gt;addAction(centerAct);<br>
+      &nbsp;&nbsp;&nbsp; leftAlignAct-&gt;setChecked(true);&nbsp; //默认左对齐</div>
+    上面代码就是文本编辑的对齐动作组，左对齐、右对齐、两端对齐和居中对齐，这四种对齐方式互斥，只能有一个被勾选。<br>
+    QActionGroup 不是控件（菜单和工具栏都是控件），只是内存中的管理对象，不负责显示，动作还是要正常添加给菜单或工具栏。互斥的动作既要添加给控件
+    （菜单、工具栏等），又要同时添加给动作组，这 样才能正常显示并拥有互斥功能。<br>
+    <br>
+    （4）父窗口和关联控件函数<br>
+    下面我们介绍 QAction 的关联控件函数，QAction 在构造函数可以指定父窗口，能通过下面函数读取父窗口指针：<br>
+    <div class="code">QWidget *&nbsp;&nbsp; &nbsp;parentWidget() const</div>
+    父窗口在构造函数指定，一般设置为主窗口，但没有直接修改归属父窗口的函数。<br>
+    <br>
+    动作可以添加给菜单、工具栏等控件，这些菜单、工具栏属于关联控件，使用下面函数获取关联控件：<br>
+    <div class="code">QList&lt;QWidget *&gt;&nbsp;&nbsp;
+      &nbsp;associatedWidgets() const&nbsp; //关联的控件列表<br>
+      QList&lt;QGraphicsWidget *&gt;&nbsp;&nbsp;&nbsp;
+      associatedGraphicsWidgets() const&nbsp; //关联的绘图控件列表</div>
+    QGraphicsWidget 在绘图章节再介绍，常用的就是普通的 QWidget 关联对象。<br>
+    QWidget::addAction() 函数就是在增加动作的关联控件，但是 QWidget::addAction() 并不会改变动作的归属父对象。<br>
+    <br>
+    （5）分割线和子菜单功能<br>
+    菜单项在按功能分块显示时，可以在每个功能分块之间增加分割线，分割线也是一种动作对象，分割线不需要文本、图标等功能，就只是显示一个横线，分割线动作使用下面
+    函数设置：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;setSeparator(bool b)&nbsp;
+      //设置动作为分割线<br>
+      bool&nbsp;&nbsp;&nbsp; isSeparator() const&nbsp;&nbsp; //判断动作是否是分割线</div>
+    <br>
+    菜单项可以设置带有子菜单，或者工具栏按钮点击后展开子菜单，这时用到动作的子菜单功能，使用下面函数设置动作包含的子菜单：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;setMenu(QMenu * menu)&nbsp;
+      //设置动作包含的子菜单<br>
+      QMenu *&nbsp;&nbsp;&nbsp; menu() const&nbsp; //获取动作的子菜单，默认为空</div>
+    <br>
+    （6）快捷键功能<br>
+    一个动作的快捷键可以有多组，设置快捷键列表使用下面函数：<br>
+    <div class="code">void&nbsp;&nbsp;&nbsp; setShortcuts(const
+      QList&lt;QKeySequence&gt; &amp; shortcuts)<br>
+      void&nbsp;&nbsp;&nbsp; setShortcuts(QKeySequence::StandardKey key)<br>
+      QList&lt;QKeySequence&gt;&nbsp;&nbsp;&nbsp; shortcuts() const</div>
+    参数 shortcuts 就是多组快捷键列表，一般较少用到多组快捷键。<br>
+    第二个 setShortcuts() 里面的 key 是标准按键枚举值，一个标准&nbsp; key 自动根据系统平台习惯设置快捷键列表。<br>
+    标准 key 具体对应的一组或多组快捷键使用下面函数获取：<br>
+    <div class="code">QList&lt;QKeySequence&gt;
+      QKeySequence::​keyBindings(StandardKey key)&nbsp;&nbsp; //静态函数，获取标准 key
+      对应的快捷键列表</div>
+    <br>
+    如果只要设置一组主要的快捷键，那么使用属性函数：<br>
+    <div class="code">QKeySequence&nbsp;&nbsp; &nbsp;shortcut() const<br>
+      void&nbsp;&nbsp;&nbsp; setShortcut(const QKeySequence &amp; shortcut)</div>
+    QKeySequence 按键序列类，专门用于设置快捷键，可以有多种创建方式，下面几种创建方式可以任选一种，例如：<br>
+    <div class="code">QKeySequence(QKeySequence::Print);<br>
+      QKeySequence(tr("Ctrl+P"));<br>
+      QKeySequence(tr("Ctrl+p"));<br>
+      QKeySequence(Qt::CTRL + Qt::Key_P);</div>
+    QKeySequence::Print 是枚举值，表示打印快捷键；<br>
+    "Ctrl+P"、"Ctrl+p" 是快捷键的字符串表示，不区分大小写；<br>
+    Qt::CTRL + Qt::Key_P 是两个 Qt 全局按钮枚举值相加，也是 Ctrl+P 两个按键。<br>
+    一般建议用 QKeySequence
+    的标准按键枚举值，这些标准按键会根据操作系统平台的不同，自动切换为本系统习惯的快捷键。QKeySequence::​StandardKey
+    枚举值非常多，详见 QKeySequence 帮助文档。<br>
+    注意必须先创建 QApplication 实例对象，然后再创建 QKeySequence 对象，如果不按顺序创建，程序可能会崩溃。<br>
+    <br>
+    （7）状态栏更新功能<br>
+    QAction 自带一个触发更新状态栏信息的函数：<br>
+    <div class="code">bool&nbsp;&nbsp; &nbsp;showStatusText(QWidget * widget =
+      0)</div>
+    更新指定控件 widget&nbsp; （例如菜单栏、工具栏）的状态信息，显示动作的状态栏文本，是通过向 widget 的父窗口（例如主窗口）发送一个
+    QStatusTipEvent 事件触发状态栏信息更新显示。如果事件成功发送，返回值为 true ，否则返回 false。如果 widget
+    参数为空值，那么事件发送给动作的父窗口对象（一般是主窗口）。<br>
+    <br>
+    （8）激活动作函数<br>
+    QAction 除了在界面通过用户鼠标操作激活信号，还可以用下面函数实现激活：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;activate(ActionEvent event)</div>
+    activate() 根据参数 event 触发对应的信号，如下表所示：<br>
+    <br>
+    <table class="tabel">
+      <tbody>
+        <tr class="d1">
+          <td style="width: 200px;"><b>枚举常量</b></td>
+          <td style="width: 100px;"><b>数值</b></td>
+          <td><b>描述</b></td>
+        </tr>
+        <tr>
+          <td> QAction::Trigger </td>
+          <td> 0 </td>
+          <td> 触发 QAction::triggered() 信号，相当于鼠标点击操作</td>
+        </tr>
+        <tr class="d1">
+          <td> QAction::Hover </td>
+          <td> 1 </td>
+          <td> 触发 QAction::hovered() 信号，相当于鼠标悬停操作&nbsp; </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    （9）信号<br>
+    QAction 本级的信号依次介绍如下：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;changed()</div>
+    changed() 是属性变更信号，在 QAction
+    对象的本身属性变化时触发，上面属性表格里的属性值变化几乎都会触发该信号，一般用不到，触发来源太广泛。<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;hovered()</div>
+    hovered() 是悬停信号，就是鼠标悬停在动作对应的菜单项、工具栏按钮时触发，动作快捷键按下也触发，activate(QAction::Hover)
+    函数也可以 触发该信号。<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;toggled(bool checked)</div>
+    toggled() 是勾选状态变化信号，当通过 用户点击改变 或者 setChecked() 、 toggle() 函数调用改变
+    勾选状态时触发，严格和勾选状态绑定。<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;triggered(bool checked = false)</div>
+    triggered()
+    是用户点击信号，用户点击动作菜单项、工具栏按钮，按下动作快捷键都会触发该信号，activate(QAction::Trigger) 函数和
+    trigger()&nbsp; 函数调用也触发。<br>
+    <b>但注意 setChecked() 和 toggle() 函数不会触发 triggered() 信号。</b><br>
+    <br>
+    triggered() 信号倾向于用户点击操作或模拟用户点击的函数触发，可以不带参数，用默认值触发，不启用勾选功能的动作通常用 triggered()
+    信号；<br>
+    toggled()&nbsp; 信号是严格绑定勾选状态属性的变化触发，必须包含勾选状态参数，注意二者的区别。<br>
+    根据实际动作的应用场景，选取动作的&nbsp; triggered() 信号或 toggled()&nbsp; 信号关联到槽函数。<br>
+    <br>
+    （10）槽函数<br>
+    下面依次介绍 QAction 本级的槽函数：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;hover()</div>
+    hover() 槽函数等价于 activate(QAction::Hover) 函数，触发悬停信号 hovered()。<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;toggle()</div>
+    toggle() 槽函数就是将勾选状态翻转，如果之前是 true 就改为 false，如果之前是 fasle，就改为 true。toggle()
+    函数会触发 toggled(bool checked) 信号。<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;trigger()</div>
+    trigger() 槽函数等价于 activate(QAction::Trigger) 函数，会触发 triggered() 信号，相当于一次用户点击。<br>
+    注意 trigger() 函数是模拟一次用户点击，而 toggle() 函数是进行一次勾选状态的翻转。<br>
+    <br>
+    下面几个槽函数也是属性的写函数，仅列举一下，不再赘述：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;setChecked(bool)&nbsp;&nbsp;
+      //设置动作是 否可以勾选<br>
+      void&nbsp;&nbsp;&nbsp; setDisabled(bool b)&nbsp; //设置动作是否禁用，与 setEnabled()
+      相反<br>
+      void&nbsp;&nbsp;&nbsp; setEnabled(bool)&nbsp;&nbsp; //设置动作是否启用<br>
+      void&nbsp;&nbsp;&nbsp; setVisible(bool) //设置动作是否可见</div>
     <br>
     <div class="os2">12.1.3 菜单 QMenu</div>
     <br>

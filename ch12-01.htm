@@ -32,7 +32,7 @@
     正中间的是中央部件，<b>主窗口程序必须有中央部件，并且是唯一的</b>。QMainWindow 默认是一个程序打开一个文档，就是 SDI
     单文档程序（Single Document Interface），如果希望支持一个程序内同时打开多个文档，即 MDI 多文档程序（Multiple
     Document Interface），需要将中央部件设置为 QMdiArea 对象。多文档程序下一章介绍，本章只介绍单文档程序。<br>
-    主窗口最底部的是状态栏，一般显示关于文档或操作的临时信息。<br>
+    主窗口最底部的是状态栏，一般显示关于文档或操作的临时状态信息。<br>
     以 Qt Assistant 为例：<br>
     <center> <img src="images/ch12/ch12-01-01.png" alt="assistant" width="800"></center>
     Qt Assistant 第一行是菜单栏。<br>
@@ -50,10 +50,11 @@
     构造函数第一个参数 parent 是父窗口，一般都是 0，代表是顶级窗口；flags 是窗口标志位，一般用默认的 0 即可。<br>
     <br>
     （2）菜单栏函数<br>
-    主窗口的最多只有一个菜单栏，一般获取和设置菜单栏的函数如下：<br>
+    主窗口最多只有一个菜单栏，一般获取和设置菜单栏的函数如下：<br>
     <div class="code">QMenuBar *&nbsp;&nbsp; &nbsp;menuBar() const<br>
       void&nbsp;&nbsp;&nbsp; setMenuBar(QMenuBar * menuBar)</div>
-    QMenuBar 类下面小节介绍，如果没有构造菜单栏，menuBar() 返回空值。<br>
+    QMenuBar 类下面小节介绍，如果没有构造菜单栏，menuBar() 会创建一个新的菜单栏并返回。<br>
+    setMenuBar() 将参数里的菜单栏设置给主窗口，该菜单栏归属于主窗口，并且由主窗口在合适的时候销毁（如程序结束时）。<br>
     如果希望定制自己的菜单栏，那么可以用下面函数设置定制的菜单栏控件：<br>
     <div class="code">QWidget *&nbsp;&nbsp; &nbsp;menuWidget() const<br>
       void&nbsp;&nbsp;&nbsp; setMenuWidget(QWidget * menuBar)</div>
@@ -145,8 +146,8 @@
     获取工具栏当前停靠位置，使用下面函数：<br>
     <div class="code">Qt::ToolBarArea&nbsp;&nbsp; &nbsp;toolBarArea(QToolBar *
       toolbar) const</div>
-    toolBarArea() 返回值与 Qt::ToolBarArea 枚举常量做比较或计算位与值，可以判断工具栏位置，如果工具栏目前没有添加给主窗口，那
-    么返回值是 Qt::NoToolBarArea。<br>
+    toolBarArea() 返回值与 Qt::ToolBarArea 枚举常量做比较，或者计算位与值，可以判断工具栏位置，如果工具栏目前没有添加给主窗
+    口，那 么返回值是 Qt::NoToolBarArea。<br>
     判断工具栏前面是否有换行符，可以用下面函数：<br>
     <div class="code">bool&nbsp;&nbsp; &nbsp;toolBarBreak(QToolBar * toolbar)
       const</div>
@@ -530,10 +531,10 @@
     单项。<br>
     QAction 类对象通常以使用该功能的窗口为父节点，对于主窗口程序，通常以软件顶级的主窗口为父节点，这样方便在菜单栏和工具栏同步显示、操作。<br>
     QAction 类对象可以使用其构造函数独立创建，也可以在创建 QMenu 菜单内容时，使用 QMenu 的函数顺路创建 QAction 对象。<br>
-    QAction 包含很多内容，例如动作的图标 icon、文本 text、shortcut 快捷键、statusTip 状态栏文本、"What's
+    QAction 包含很多内容，例如动作的 icon 图标、text 文本、shortcut 快捷键、statusTip 状态栏文本、"What's
     This?" 帮助文本、tooltip 工具提示等等。对于菜单项，还可以设置动作的文本显示字体 font。<br>
     QAction 对象必须在使用之前，添加给窗口（菜单、工具栏），添加后才能正常使用动作对象。如果设置快捷键适用环境为应用程序全局快捷键，如
-    setShortcutContext(Qt::ApplicationShortcut) ，那么同样要先添加动作对象给窗口，后使用快捷键。<br>
+    setShortcutContext(Qt::ApplicationShortcut) ，那么同样要先添加动作对象给窗口，然后使用快捷键。<br>
     创建动作对象后，一般将其触发信号关联到槽函数，并添加给菜单、工具栏，然后使用，例如：<br>
     <div class="code">&nbsp;&nbsp;&nbsp; openAct = new
       QAction(QIcon(":/images/open.png"), tr("&amp;Open..."), this);<br>
@@ -745,12 +746,12 @@
     QGraphicsWidget 在绘图章节再介绍，常用的就是普通的 QWidget 关联对象。<br>
     QWidget::addAction() 函数就是在增加动作的关联控件，但是 QWidget::addAction() 并不会改变动作的归属父对象。<br>
     <br>
-    （5）分割线和子菜单功能<br>
-    菜单项在按功能分块显示时，可以在每个功能分块之间增加分割线，分割线也是一种动作对象，分割线不需要文本、图标等功能，就只是显示一个横线，分割线动作使用下面
-    函数设置：<br>
+    （5）分隔符和子菜单功能<br>
+    菜单项在按功能分块显示时，可以在每个功能分块之间增加分隔符，分隔符也是一种动作对象，分隔符通常不需要文本、图标等内容，就只是显示一个横线，分隔符动作使用
+    下面 函数设置：<br>
     <div class="code">void&nbsp;&nbsp; &nbsp;setSeparator(bool b)&nbsp;
-      //设置动作为分割线<br>
-      bool&nbsp;&nbsp;&nbsp; isSeparator() const&nbsp;&nbsp; //判断动作是否是分割线</div>
+      //设置动作为分隔符<br>
+      bool&nbsp;&nbsp;&nbsp; isSeparator() const&nbsp;&nbsp; //判断动作是否是分隔符</div>
     <br>
     菜单项可以设置带有子菜单，或者工具栏按钮点击后展开子菜单，这时用到动作的子菜单功能，使用下面函数设置动作包含的子菜单：<br>
     <div class="code">void&nbsp;&nbsp; &nbsp;setMenu(QMenu * menu)&nbsp;
@@ -862,8 +863,443 @@
     <br>
     <div class="os2">12.1.3 菜单 QMenu</div>
     <br>
+    菜单 QMenu 的基类是通用部件 QWidget，是一个可显示的部件，上面 QAction 的基类是 QObject ，动作 QAction
+    是用户操作内容（菜单项点击、工具栏按钮点击、快捷键按下等）的抽象表示，而 QMenu 则是显示菜单项的集合。QMenu&nbsp; 一般由多个动作
+    QAction 对象组成，形成一个可视化菜单。<br>
+    QMenu&nbsp; 可以用于显示主窗口的菜单栏下拉菜单，也可以用于上下文菜单（右键菜单），以及其他弹出式菜单（如按压按钮附带菜单）。<br>
+    主窗口菜单栏 QMenuBar 可以拥有多列下拉菜单，每列下拉菜单对应 QMenu 菜单对象。使用 QMenuBar::addMenu() 可以将
+    QMenu 菜单对象添加给菜单栏。<br>
+    上下文菜单通常是用户鼠标右键点击触发，弹出右键菜单，笔记本电脑触摸板、部分键盘上也有右键按键，右键按键也可以触发右键菜单。右键菜单的弹出可以用
+    popup() 函数异步弹出（类似非模态对话框显示，弹出函数没有返回值），或者用 exec()
+    函数同步弹出（类似模态对话框弹出，弹出函数有返回值）。注意菜单的显示应当用 exec() 或 popup() 函数进行弹出，而不使用 show()
+    函数显示。<br>
+    按压按钮 QPushButton 也可以设置按钮专属的弹出菜单，使用 QPushButton::setMenu(QMenu * menu) 函数实现。如
+    下图所示：<br>
+    <center> <img src="images/ch12/pushbutton-menu.png" alt="pushbutton-menu"></center>
+    菜单通常由多个动作条目组成，动作条目可以用 addAction()、addActions()、insertAction()
+    等函数添加，动作条目垂直排列，动作条目拥有文本，如上图“First item”，也可以拥有可选的图标、快捷键，如下图所示：<br>
+    <center> <img src="images/ch12/ch12-01-05.png" alt="menu" width="600"></center>
+    “Zoom in”动作条目有文本，文本左侧是放大镜图标，文本右侧快捷键 Ctrl++，快捷键就是同时按下 Ctrl 和加号 + 按键。使用菜单
+    actions() 函数可以获取菜单对象所有动作条目列表。<br>
+    <br>
+    菜单和工具栏涉及四种类型的动作条目：普通动作条目、分隔符条目、子菜单条目和定制部件条目。<br>
+    ①普通动作条目，这类使用最多，例如上图中，“Zoom in、Zoom out、正常大小”，“内容、索引、书签、搜索、Open pages”，这些动作条目
+    都是点击执行对应功能，是普通动作条目。<br>
+    ②分隔符条目，在“正常大小”和“内容”条目中间有一个横线，这个横线就是分隔符条目，分隔符条目就是用来进行功能分段的切分显示，分隔符横线上面是缩放功能条
+    目，横线下面是子窗口显示的功能条目。<br>
+    “Open pages”和“工具栏”条目中间的横线也是分隔符条目。QMenu::​addSeparator() 函数可以为菜单添加分隔符条目。<br>
+    ③子菜单条目，“工具栏”条目就是带有子菜单的特殊动作条目，鼠标悬停在该条目上会弹出下级的子菜单，下级子菜单控制“过滤器工具栏、地址工具栏、
+    Bookmark Toolbar”三个工具栏是否显示。子菜单条目可以用&nbsp; QMenu::​addMenu(QMenu * menu)
+    函数进行添加。<br>
+    ④定制部件条目，部件条目使用单独的 QWidgetAction 类封装，在菜单中比较少见，更多见于工具栏 QToolBar
+    。例如上图地址工具栏，地址工具栏由标签“地址：”和单行编辑器组成，在单行编辑器里面显示帮助文档内部链接地址<br>
+    “qthelp://org.qt-project.qtwidgets.540/qtwidgets/qmenu.html#popup”。<br>
+    定制部件条目可以使用 QToolBar::​addWidget(QWidget * widget) 函数添加。<br>
+    如果要在菜单中使用部件条目，可以新建 QWidgetAction 对象，设置默认子部件&nbsp; setDefaultWidget(QWidget *
+    widget)，然后调用 addAction() 函数将部件动作对象添加给菜单。<br>
+    <br>
+    菜单添加多个条目后，每个普通动作条目被点击后，触发 QAction::​triggered() 信号，实现动作功能，就是把动作对象
+    triggered() 信号关联到接收对象的槽函数，在槽函数实现具体功能。<br>
+    菜单 QMenu 也提供触发信号 hovered(QAction * action) 、triggered(QAction * action)
+    信号，监测所属动作的悬停和触发情况。<br>
+    清空菜单内容，删除菜单内所有动作使用 clear() 函数，如果只删除单个动作，使用 removeAction(QAction * action)
+    函数。<br>
+    <br>
+    下面我们分块详细学习 QMenu 的功能函数。<br>
+    ①构造函数<br>
+    <div class="code">QMenu(QWidget * parent = 0)<br>
+      QMenu(const QString &amp; title, QWidget * parent = 0)<br>
+      ~QMenu()</div>
+    第一个是默认构造函数，仅有默认的父窗口指针参数。<br>
+    第二个构造函数带有标题文本，就是该菜单的标题，如“文件”菜单、“编辑”菜单等标题字样。<br>
+    第三个是析构函数。<br>
+    <br>
+    ②菜单访问函数<br>
+    每个菜单都有自己特殊的标题动作，例如前面截图的“文件”菜单，“文件”字样是菜单的标题，这个标题也是一个特殊动作对象，可以用下面函数获取菜单特殊的标题动
+    作：<br>
+    <div class="code">QAction *&nbsp;&nbsp; &nbsp;menuAction() const</div>
+    菜单标题动作也是 QAction 对象，QAction 类的功能都一样使用，可以设置文本、图标，可以控制显示或隐藏，如果设置菜单标题动作为隐藏，那么该菜
+    单就整个隐藏了。<br>
+    菜单类的设置文本、图标函数如下：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;setTitle(const QString &amp;
+      title)&nbsp; //设置菜单标题文本<br>
+      QString&nbsp;&nbsp;&nbsp; title() const&nbsp;&nbsp; //获取菜单标题文本<br>
+      void&nbsp;&nbsp;&nbsp; setIcon(const QIcon &amp; icon)&nbsp;&nbsp;
+      //设置菜单标题图标<br>
+      QIcon&nbsp;&nbsp;&nbsp; icon() const&nbsp;&nbsp;&nbsp; //获取菜单标题图标</div>
+    菜单类的文本、图标读写函数，本质就是调用 menuAction() 标题动作的读写函数。<br>
+    <br>
+    菜单可以控制所属动作的工具提示信息是否显示，使用下面函数：<br>
+    <div class="code">void&nbsp;&nbsp;&nbsp; setToolTipsVisible(bool visible)<br>
+      bool&nbsp;&nbsp; &nbsp;toolTipsVisible() const</div>
+    toolTipsVisible 属性默认是
+    false，不显示所属动作的工具提示，因为大部分动作的工具提示和动作文本内容一样，如果确实设置了详细的工具提示信息，可以设置开启动作工具提示信息的显示。
+    toolTipsVisible 属性是总控开关，菜单下属动作的工具提示信息要么全显示，要么全都隐藏。<br>
+    <br>
+    ③添加动作条目函数<br>
+    添加动作条目有多个重载函数，如下所示：<br>
+    <div class="code">QAction *&nbsp;&nbsp; &nbsp;addAction(const QString &amp;
+      text)<br>
+      QAction *&nbsp;&nbsp;&nbsp; addAction(const QIcon &amp; icon, const
+      QString &amp; text)<br>
+      QAction *&nbsp;&nbsp;&nbsp; addAction(const QString &amp; text, const
+      QObject * receiver, const char * member, const QKeySequence &amp; shortcut
+      = 0)<br>
+      QAction *&nbsp;&nbsp;&nbsp; addAction(const QIcon &amp; icon, const
+      QString &amp; text, const QObject * receiver, const char * member, const
+      QKeySequence &amp; shortcut = 0)<br>
+      void&nbsp;&nbsp;&nbsp; addAction(QAction * action)</div>
+    第一个 addAction() 函数根据文本 text
+    新建一个动作对象添加到菜单，并返回新建的动作对象，返回的动作对象可以后续设置动作的属性内容，如图标、文本，或者设置为分隔符动作等。<br>
+    第二个 addAction() 函数根据图标 icon 和文本&nbsp; text 新建一个动作对象添加到菜单，并返回新建的动作对象。<br>
+    第三个 addAction() 函数根据文本 text、触发信号的接收对象 receiver、槽函数 member、快捷键 shortcut
+    ，在新建动作对象给菜单的同时，设置动作快捷键，并关联动作的 triggered() 信号到接收对象的槽函数。 <br>
+    第四个 addAction() 函数与第三个类似，就是多设置一个动作图标。<br>
+    以上四个都属于快捷函数，由菜单去新建动作对象，设置关联到接收对象槽函数等，返回值是新建的动作对象，方便后续代码设置其他内容。<br>
+    第五个 addAction() 函数则是程序员自行新建动作对象，添加给菜单。参数里的 action 可以是 QAction 对象，也可以是部件动作
+    QWidgetAction 对象，为菜单添加部件动作也是可以的，只是比较少见。<br>
+    <br>
+    除了上面五个添加动作函数，QMenu 从基类 QWidget 继承了两个插入动作对象的函数：<br>
+    <div class="code">void QWidget::​insertAction(QAction * before, QAction *
+      action)<br>
+      void QWidget::​insertActions(QAction * before, QList&lt;QAction *&gt;
+      actions)</div>
+    ​insertAction() 函数在 before 动作之前，插入新的 action 动作，如果 before 对象为
+    空值或者不存在的错误值，那么新动作添加到菜单原有动作列表的末尾。<br>
+    insertActions() 函数是类似的，在 before 动作之前，可以一次插入多个动作的列表。如果 before 对象为
+    空值或者不存在的错误值，那么新动作列表添加到菜单原有动作列表的末尾。<br>
+    上述添加动作和插入动作函数，都会把新的动作归属权移交给菜单，由菜单管理。<br>
+    <br>
+    ④添加子菜单条目函数<br>
+    对于包含子菜单的动作条目，QMenu 也有快捷添加函数：<br>
+    <div class="code">QMenu *&nbsp;&nbsp; &nbsp;addMenu(const QString &amp;
+      title)<br>
+      QMenu *&nbsp;&nbsp;&nbsp; addMenu(const QIcon &amp; icon, const QString
+      &amp; title)<br>
+      QAction *&nbsp;&nbsp;&nbsp; addMenu(QMenu * menu)</div>
+    第一个 addMenu() 函数根据 title 标题新建一个子菜单，添加到本级菜单，并返回新建的子菜单对象，后续可以根据子菜单对象，进行后续子菜单的设
+    置。<br>
+    第二个 addMenu() 函数与第一个功能类似，就是多设置一个图标。<br>
+    第三个 addMenu() 函数将子菜单对象 menu 添加到本级菜单，并返回子菜单标题动作，子菜单标题动作可以设置图标、文本以及控制显示/隐藏。<br>
+    菜单类还有一个插入子菜单的函数：<br>
+    <div class="code">QAction * QMenu::​insertMenu(QAction * before, QMenu *
+      menu)</div>
+    该函数将新子菜单插入到 before 动作之前，并返回子菜单标题动作。如果 before 为空值或不存在的错误值，子菜单添加到菜单原有动作列表的末尾。<br>
+    上述添加菜单和插入菜单函数，都会把新的子菜单归属权移交给本级菜单，由本级菜单管理。<br>
+    <br>
+    ⑤添加分隔符条目函数<br>
+    <div class="code">QAction *&nbsp;&nbsp; &nbsp;addSeparator()<br>
+      QAction *&nbsp;&nbsp;&nbsp; insertSeparator(QAction * before)</div>
+    addSeparator() 函数是在菜单现有动作列表末尾添加分隔符动作，insertSeparator() 函数是在指定 before
+    动作之前新增一个分隔符动作。这两个是添加分隔符的快捷函数，实际上就是新建一个动作对象，设置 action-&gt;setSeparator(true)
+    ，然后把分隔符动作添加给菜单。上面两个函数返回值就是新建的分隔符动作对象。<br>
+    对于不带文本、图标的分隔符动作，菜单显示一条横线，对多个菜单动作进行分段显示。<br>
+    如果给分隔符动作设置文本、图标，那么就叫分段动作，分段动作就是带有文本、图标的分隔符动作。<br>
+    菜单有添加分段动作的快捷函数：<br>
+    <div class="code">QAction *&nbsp;&nbsp; &nbsp;addSection(const QString &amp;
+      text)<br>
+      QAction *&nbsp;&nbsp;&nbsp; addSection(const QIcon &amp; icon, const
+      QString &amp; text)<br>
+      QAction *&nbsp;&nbsp;&nbsp; insertSection(QAction * before, const QString
+      &amp; text)<br>
+      QAction *&nbsp;&nbsp;&nbsp; insertSection(QAction * before, const QIcon
+      &amp; icon, const QString &amp; text)</div>
+    上面 2 个 addSection() 是将分段动作添加到菜单现有动作列表末尾，2 个 insertSection() 将分段动作插入到 before
+    动作之前。<br>
+    分段动作的文本和图标的显示依赖系统平台和显示风格，在 Windows 系统测试分段动作，发现不显示分段动作的文本和图标，还是只有一道横线，与普通分隔符显
+    示一样。<br>
+    添加分隔符动作、分段动作到菜单后，这些动作的归属权都移交给菜单，由该菜单管理。<br>
+    <br>
+    菜单还有一个与分隔符相关的属性 separatorsCollapsible，就是折叠连续相邻的多个分隔符动作为一个：<br>
+    <div class="code">bool&nbsp;&nbsp; &nbsp;separatorsCollapsible() const<br>
+      void&nbsp;&nbsp;&nbsp; setSeparatorsCollapsible(bool collapse)</div>
+    separatorsCollapsible 属性默认为
+    true，会将连续相邻的多个分隔符折叠为一个分隔符显示，并且会自动隐藏菜单头部、尾部的空白分隔符动作。<br>
+    例如菜单头部就是一个分隔符，分隔符之前没有普通动作，那么头部的空白分隔符隐藏，类似地，菜单尾部是一个分隔符，分隔符后面没有普通动作，那么尾部空白分隔符也
+    隐藏。<br>
+    如果菜单两个分隔符中间有几个普通动作，把两个分隔符中间的普通动作都设置为隐藏，那么两个分隔符就相连了，这时候两个相邻分隔符也会折叠为一个。<br>
+    这种设计是为了界面美观，如果连着显示几条横线分隔符，不好看。<br>
+    <br>
+    ⑥条目访问和删除条目函数<br>
+    获取菜单下属的所有动作（直接下属，不包括子菜单内的孙子节点），使用下面函数：<br>
+    <div class="code">QList&lt;QAction *&gt; QWidget::​actions() const</div>
+    这个函数是从基类继承的，返回的列表可能为空，注意判断返回值。<br>
+    删除单个动作函数也是从基类继承：<br>
+    <div class="code">void QWidget::​removeAction(QAction * action)</div>
+    清空所有下属动作，使用下面函数：<br>
+    <div class="code">void QMenu::​clear()</div>
+    该函数会清空下属动作的列表，如果列表中原有的动作没有添加给其他控件（其他菜单、工具栏）显示，那么这些无用动作会被从内存彻底删除。<br>
+    <br>
+    菜单可以使用下面函数判断菜单是否为空：<br>
+    <div class="code">bool&nbsp;&nbsp; &nbsp;isEmpty() const</div>
+    如果菜单里没有任何可视的动作，那么返回值就是 true，否则返回 false。将菜单里的动作全部设置为隐藏，那么 isEmpty()&nbsp;
+    也是返回 true 的，空的意思是指视觉上的空，隐藏的动作还在菜单的动作列表里。<br>
+    如果一个菜单里只有分隔符动作设置为显示，其他普通动作都隐藏，那么菜单也不显示任何东西，也认为是空的菜单。<br>
+    <br>
+    获取指定坐标的动作使用下面函数：<br>
+    <div class="code">QAction *&nbsp;&nbsp; &nbsp;actionAt(const QPoint &amp;
+      pt) const</div>
+    该函数根据菜单控件内的坐标 pt 查询是否有对应的动作条目，如果没有就返回 NULL。<br>
+    这个函数要在菜单展开时，点击菜单项可以查询到指定坐标的动作对象。如果菜单是折叠的，那么调用该函数总是返回 NULL。<br>
+    获取指定动作在菜单图形上的位置尺寸信息，使用下面函数：<br>
+    <div class="code">QRect&nbsp;&nbsp; &nbsp;actionGeometry(QAction * act)
+      const</div>
+    无论菜单是展开还是折叠的，actionGeometry() 返回值是一样的，返回值为矩形对象，都是动作对象在菜单图形里面的位置和尺寸信息。<br>
+    <br>
+    获取菜单当前高亮显示（一般是鼠标指针指向的菜单项位置）动作，以及手动设置高亮显示动作，使用下面 2 个函数：<br>
+    <div class="code">QAction *&nbsp;&nbsp; &nbsp;activeAction() const&nbsp; //获
+      取当前高亮动作<br>
+      void&nbsp;&nbsp;&nbsp; setActiveAction(QAction * act)&nbsp;&nbsp; //设置高亮动作</div>
+    注意检查 activeAction() 返回值，如果菜单里没有高亮的动作，会返回 NULL。<br>
+    <br>
+    菜单可以设置一个 “默认动作”：<br>
+    <div class="code">QAction *&nbsp;&nbsp; &nbsp;defaultAction() const&nbsp;
+      //获取默认动作<br>
+      void&nbsp;&nbsp;&nbsp; setDefaultAction(QAction * act)&nbsp; //设置默认动作</div>
+    “默认动作”根据当前 QStyle 显示风格调整外观，可能有外观明显的提示（如字体加粗显示），也可能看不出来。按照 Qt 帮助文档说明，“默认动作”与拖
+    拽动作相关，拖入一个对象投递给菜单时，执行该菜单的默认动作。（注：实际测试时，默认动作就一个视觉外观的字体加粗，没发现其他功能。）<br>
+    <br>
+    ⑦可撕下菜单及其他特殊函数<br>
+    Qt
+    提供了一种可撕下菜单，可撕下菜单是一种顶级的窗口，该窗口是一个菜单副本，像工具栏一样可以常态显示和移动。对于需要经常操作的菜单项功能可以使用可撕下菜单，并长期显
+    示在程序界面。使用下面函数可以设置可撕下菜单的特性：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;setTearOffEnabled(bool)<br>
+      bool&nbsp;&nbsp;&nbsp; isTearOffEnabled() const</div>
+    setTearOffEnabled(true)
+    就是开启可撕下菜单特性。菜单栏的可撕下菜单弹出后，在该菜单显示一条虚线，就是撕开线，点击撕开线，弹出该菜单的副本窗口，原本的菜单和撕下的菜单同时存在，撕下的菜单
+    窗口可以持续存在。如下图所示：<br>
+    <center> <img src="images/ch12/tearoffmenu.png" alt="tearoffmenu" width="520"></center>
+    点击“help”菜单的撕下线之后，弹出新的小窗口包含“help1”"help2"两个菜单项，浮动窗口可以一直存在，类似工具栏窗口。可撕下菜单在
+    Windows 系统比较少见，这种功能更多的是使用工具栏或者停靠窗口实现，而不是可撕下菜单。<br>
+    对于可撕下菜单，使用下面函数可以查看撕下的菜单是否可见：<br>
+    <div class="code">bool&nbsp;&nbsp; &nbsp;isTearOffMenuVisible() const&nbsp;
+      //检查撕下的菜单窗口是否可见<br>
+      void&nbsp;&nbsp;&nbsp; hideTearOffMenu()&nbsp; //隐藏撕下的菜单窗口</div>
+    如上图的撕下菜单窗口是弹出显示的，那么 isTearOffMenuVisible() 返回 true，如果撕下的菜单隐藏了，那么返回 false。<br>
+    hideTearOffMenu()
+    函数是主动隐藏撕下后的菜单窗口，可撕下菜单窗口的弹出靠用户操作点击撕下线，该菜单窗口的隐藏可以用函数实现，也可由用户点击窗口关闭按钮实现。<br>
+    <br>
+    对于 Mac OS X 系统，菜单还有些特有函数，只在该系统生效：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;setAsDockMenu()<br>
+      NSMenu *&nbsp;&nbsp;&nbsp; toNSMenu()</div>
+    setAsDockMenu() 是将菜单设置为 Mac OS X 系统的停靠菜单，通过应用程序的停靠图标点击实现停靠。<br>
+    toNSMenu() 是返回菜单对应的 Mac OS X 系统本地化的 NSMenu&nbsp; 菜单指针。<br>
+    <br>
+    ⑧信号<br>
+    QMenu 本级有 4 个信号：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;aboutToHide()<br>
+      void&nbsp;&nbsp;&nbsp; aboutToShow()<br>
+      void&nbsp;&nbsp;&nbsp; hovered(QAction * action)<br>
+      void&nbsp;&nbsp;&nbsp; triggered(QAction * action)</div>
+    aboutToHide() 是菜单即将要隐藏的信号，可以根据该信号进行菜单条目的清理等操作。<br>
+    aboutToShow() 是菜单即将要显示的信号，在该菜单弹出前进行动态的调整，比如获取最近文件列表，显示动态的历史文件列表菜单。<br>
+    hovered(action) 是鼠标悬停在该动作条目上，悬停时该条目高亮显示，这个信号可以用于更新状态栏的信息显示。<br>
+    triggered(action) 是点击了该动作条目，通常都是关联动作对象本身的 triggered()
+    到槽函数，但是如果有一组动作，比如文字“居中”“左对齐”“右对齐”“两端对齐”等动作，可以将它们组团，用菜单triggered(action)
+    信号关联到 1 个槽函数处理，这样就不用编写 4 个动作对应的 4 个槽函数。<br>
+    对于包含子菜单的动作条目，点击子菜单标题动作，会展开子菜单，但不会触发 triggered(action)&nbsp; 信号。反而是子菜单里面的普通动作
+    条目点击，会触发父级菜单的&nbsp; triggered(action)&nbsp; 信号。<br>
+    关联菜单的 triggered(action) 信号要注意，一般只处理直接子节点的动作点击，孙子节点的动作点击要做好判断，子节点、孙子节点都触发
+    triggered(action) 信号，要区分开来，避免混淆。<br>
+    <br>
+    ⑨弹出菜单函数<br>
+    菜单有如下弹出显示的函数：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;popup(const QPoint &amp; p, QAction
+      * atAction = 0)<br>
+      QAction *&nbsp;&nbsp;&nbsp; exec()<br>
+      QAction *&nbsp;&nbsp;&nbsp; exec(const QPoint &amp; p, QAction * action =
+      0)</div>
+    popup() 函数是异步弹出显示菜单的函数，弹出时确保菜单里的 atAction 动作显示在全局的 pos
+    坐标位置。该函数需要将控件本地的相对坐标转为全局坐标，使用 QWidget::mapToGlobal()
+    函数实现坐标转换。异步弹出函数没有返回值，同步弹出有返回值，类似非模态对话框和模态对话框。<br>
+    ​exec() 函数是同步弹出，就是模态式弹出，返回值就是点击的菜单项动作或者子菜单下属的孙子节点菜单项动作等，exec()
+    不带参数时，就等价于带参数的&nbsp; exec( pos() ) 函数调用。<br>
+    带参数的&nbsp; exec(const QPoint &amp; p, QAction * action = 0) 函数，第一个参数是全局坐标
+    p，第二个是参数是保证该菜单项显示在全局坐标 p 位置。控件本地坐标转换为全局坐标是靠 QWidget::mapToGlobal()
+    函数实现。返回值是点击的菜单项或子孙节点的菜单项，如果用户没有点击菜单项，返回值是 NULL。&nbsp; <br>
+    无论是 popup() 还是 exec() ，菜单项动作的信号都正常触发，关联的槽函数都正常调用。但要注意， popup() 和 exec()
+    弹出菜单时，菜单的 size() 函数的尺寸不一定准确，菜单会根据实际显示需要随时调整尺寸，大多数情况下 size()
+    函数的尺寸都不准。建议根据菜单的内容，使用下面 sizeHint() 函数计算菜单的建议尺寸。<br>
+    <div class="code">virtual QSize&nbsp;&nbsp; &nbsp;sizeHint() const</div>
+    <br>
+    带参数的 exec() 常见的三种调用方式如下：<br>
+    <div class="code">exec(QCursor::pos());&nbsp;&nbsp;&nbsp; //在当前鼠标指针位置弹出菜单<br>
+      exec(somewidget.mapToGlobal(QPoint(0, 0)));&nbsp;&nbsp;&nbsp;
+      //对齐到某个控件的左上角位置弹出菜单<br>
+      exec(e-&gt;globalPos());&nbsp;&nbsp; //在 QMouseEvent *e
+      鼠标事件函数里面调用，在事件触发的位置弹出菜单</div>
+    菜单还有一个静态弹出函数，用于临时构建菜单弹出：<br>
+    <div class="code">QAction *&nbsp;&nbsp; &nbsp;exec(QList&lt;QAction *&gt;
+      actions, const QPoint &amp; pos, QAction * at = 0, QWidget * parent = 0)</div>
+    该静态函数根据动作列表 actions 构建一个临时菜单，在 pos 位置弹出，弹出位置保证 at 动作在 pos 位置，parent
+    是菜单的父窗口或父控件。一般不需要提供 parent，只有在仅使用 pos 不能准确定位的情况下，才需要提供 parent
+    对象，例如多重桌面的显示场景或者父控件嵌入在 QGraphicsView 里面等情况。返回值是用户点击的菜单项或子孙节点的菜单项，如果没有点击，那么返回
+    NULL。<br>
+    这个静态函数内部实现简化后等价的代码如下：<br>
+    <div class="code">QMenu menu;<br>
+      QAction *at = actions[0]; // 假定动作列表非空，并且参数 at、parent都为空的情况<br>
+      foreach (QAction *a, actions)<br>
+      &nbsp;&nbsp;&nbsp; menu.addAction(a);<br>
+      menu.exec(pos, at);</div>
+    菜单还有其他保护类型的成员函数，并不常用，这里就不再赘述了。<br>
     <br>
     <div class="os2">12.1.4 菜单栏 QMenuBar</div>
+    <br>
+    菜单栏 QMenuBar 基类是 QWidget，菜单栏是主窗口程序的必备功能，默认位于主窗口顶部，横向排列，自动布局，并自动根据窗口大小调整。菜单栏
+    QMenuBar 通常由多个菜单 QMenu 组成，每个菜单 QMenu 由多个 QAction 动作组成。为菜单栏添加菜单使用 addMenu()
+    函数，菜单栏也可以用 addAction() 函数添加普通动作、菜单标题动作以及 QWidgetAction 自定义部件动作。<br>
+    菜单标题动作设置文本时在字母前带个 &amp; 与号字符，就是设置菜单快捷键。例如 "&amp;File" 菜单标题文本，实际显示为 "<u>F</u>ile"，
+    下划线的字母 F 就代表该菜单的快捷键 Alt+F。Alt 就是菜单栏的功能按键，加上带下划线的字母，就是对应菜单的快捷键。如果要设置快捷键为
+    Alt+&amp;，那么对应菜单标题文本是 "&amp;&amp;"，显示为 "<u>&amp;</u>" 。<br>
+    在大多数主窗口程序中，直接调用 QMainWindow 类对象的 menuBar() 函数就可以获取菜单栏，如果菜单栏还没创建，那么 menuBar()
+    函数会自动创建一个菜单栏并返回。菜单栏一般是添加菜单，然后菜单里再添加动作，例如：<br>
+    <div class="code">&nbsp;&nbsp;&nbsp; fileMenu =
+      menuBar()-&gt;addMenu(tr("&amp;File"));<br>
+      &nbsp;&nbsp;&nbsp; fileMenu-&gt;addAction(newAct);</div>
+    上面两行代码，是在主窗口程序里面执行，为菜单栏添加 fileMenu 文件菜单，并为 fileMenu 添加了新建文件的 newAct
+    动作。从菜单栏删除某个菜单，使用 QWidget::​removeAction() 函数，删除该菜单的标题动作即可。例如：<br>
+    <div class="code">menuBar()-&gt;removeAction(
+      ui-&gt;menuFile-&gt;menuAction() );</div>
+    上面一行代码就是删除了菜单栏的 menuFile 菜单，删除菜单标题动作就是删除该菜单。<br>
+    <br>
+    菜单栏 QMenuBar 在不同的操作系统有不同的外观样式，比如 Windows 系统按下 Alt 键，才能看到菜单栏每个菜单的快捷键字母。<br>
+    <br>
+    对于 Mac OS X 系统，QMenuBar 是对系统范围菜单栏的封装。如果程序有多个菜单栏，那么最外层的菜单栏（通常是带有
+    Qt::Window标志的窗口菜单）会被用于系统范围菜单栏。<br>
+    对于 Mac OS X 系统，Qt 提供的菜单栏可以带有合并特性，使得 QMenuBar 更贴近 OS X 风格的菜单栏布局。合并功能特性基于
+    QMenu 标题文本内容的单词匹配，这些字符串会在 "QMenuBar" 上下文中进行翻译（ tr()
+    包裹的字符串）。菜单归属位置移动后（如从窗口菜单栏移动到系统菜单栏），还能在原来窗口位置触发。如果希望Mac OS X
+    应用程序的所有子窗口都用同一个菜单栏，那么必须创建一个没有父窗口的菜单栏，例如：<br>
+    <div class="code">QMenuBar *menuBar = new QMenuBar(0);</div>
+    但是注意不要调用 QMainWindow::menuBar()&nbsp; 函数，这个函数会自动创建归属于主窗口的菜单栏。<br>
+    <br>
+    QMenuBar 在 Windows CE 系统上，也是对系统范围菜单栏的封装，类似 Mac 系统。QMenuBar 在 Windows CE
+    系统上，集成了本土的软按键，左侧软按键可以用 QMenuBar::setDefaultAction()&nbsp;
+    设置默认动作，右侧软按键可以用于访问菜单栏。Windows CE 系统上不支持 hovered() 信号，其菜单标题也没有图标。<br>
+    Mac OS X 系统、 Windows CE 系统都是相对比较小众的，这些系统的独有菜单栏特性建议查询 Qt 帮助文档。下面我们介绍 QMenuBar
+    功能函数。<br>
+    ①构造函数<br>
+    <div class="code">QMenuBar(QWidget * parent = 0)<br>
+      ~QMenuBar()</div>
+    构造函数带有父窗口指针，除了使用构造函数创建，QMainWindow::​menuBar() 函数在没有菜单栏时也会自动创建自己的菜单栏。<br>
+    <br>
+    ②访问函数<br>
+    <div class="code">QAction *&nbsp;&nbsp; &nbsp;actionAt(const QPoint &amp;
+      pt) const</div>
+    actionAt() 函数根据菜单栏内部的坐标 pt 查询该位置的动作对象，如果查不到就返回 NULL。如果该位置是一个分隔符动作，那么也返回
+    NULL。<br>
+    <div class="code">QRect&nbsp;&nbsp; &nbsp;actionGeometry(QAction * act)
+      const</div>
+    actionGeometry() 根据所属的动作 act 查询该动作显示的位置和尺寸。<br>
+    <br>
+    获取和设置高亮选中的活跃动作，使用下面函数：<br>
+    <div class="code">QAction *&nbsp;&nbsp; &nbsp;activeAction()
+      const&nbsp;&nbsp; //获取高亮显示动作<br>
+      void&nbsp;&nbsp;&nbsp; setActiveAction(QAction * act)&nbsp; //设置高亮显示动作</div>
+    如果没有高亮显示的动作，那么 activeAction() 返回 NULL。<br>
+    <br>
+    ③添加和删除动作函数<br>
+    <div class="code">QAction *&nbsp;&nbsp; &nbsp;addAction(const QString &amp;
+      text)<br>
+      QAction *&nbsp;&nbsp;&nbsp; addAction(const QString &amp; text, const
+      QObject * receiver, const char * member)<br>
+      void&nbsp;&nbsp;&nbsp; addAction(QAction * action)</div>
+    第一个 addAction() 是快捷函数，根据参数标题文本创建新动作，添加给菜单栏并返回该动作。<br>
+    第二个 addAction() 类似地创建新动作添加到菜单栏，同时设置接收触发信号的接收对象和接收对象的槽函数。<br>
+    第三个 addAction() 是添加参数里的动作到菜单栏，这个函数可以添加普通动作、分隔符动作、菜单标题动作、自定义部件动作等。<br>
+    菜单栏也有添加分隔符动作的快捷函数：<br>
+    <div class="code">QAction *&nbsp;&nbsp; &nbsp;addSeparator()&nbsp;
+      //添加分隔符动作到末尾<br>
+      QAction *&nbsp;&nbsp;&nbsp; insertSeparator(QAction * before)&nbsp;
+      //插入分隔符到 before 动作之前</div>
+    在 Windows 系统实测，给菜单栏添加直属的分隔符动作，分隔符动作存储在内存中，但是没有显示效果，菜单栏不显示直属的分隔符动作。<br>
+    菜单栏要获取直属的所有动作（包括菜单标题动作、普通动作等），使用基类函数：<br>
+    <div class="code">QList&lt;QAction *&gt; QWidget::​actions() const</div>
+    删除单个动作，也使用基类函数：<br>
+    <div class="code">void QWidget::​removeAction(QAction * action)</div>
+    删除菜单栏所有内容，可以用本级的函数：<br>
+    <div class="code">void QMenuBar::​clear()</div>
+    注意对于 OS X 系统，合并给系统菜单栏的菜单条目不会被 clear()
+    函数删除，确有需要删除系统菜单栏条目的情况，自己手动删除归属于系统菜单栏的菜单条目。<br>
+    <br>
+    ④添加菜单函数<br>
+    菜单栏除了添加菜单的标题动作实现添加菜单对象，还有如下快捷函数实现添加菜单：<br>
+    <div class="code">QAction *&nbsp;&nbsp; &nbsp;addMenu(QMenu * menu)<br>
+      QMenu *&nbsp;&nbsp;&nbsp; addMenu(const QString &amp; title)<br>
+      QMenu *&nbsp;&nbsp;&nbsp; addMenu(const QIcon &amp; icon, const QString
+      &amp; title)</div>
+    第一个 addMenu() 函数将参数里的菜单 menu 添加到菜单栏，并返回该菜单的标题动作，菜单的标题动作可以控制菜单是否隐藏。<br>
+    第二个和第三个 addMenu() 功能类似，都是根据文本等参数新建一个菜单添加到菜单栏，并返回该菜单对象，第三个 addMenu()
+    就多个图标参数。新建的菜单都是归属于菜单栏，由菜单栏管理。 <br>
+    菜单栏还有一个插入菜单的函数：<br>
+    <div class="code">QAction *&nbsp;&nbsp; &nbsp;insertMenu(QAction * before,
+      QMenu * menu)</div>
+    insertMenu() 函数将菜单 menu 添加到动作 before 之前，并返回菜单的标题动作。before
+    动作一般是其他菜单的标题动作，这个函数可以调整多个菜单的前后顺序。<br>
+    <br>
+    菜单栏没有单独的删除菜单的函数，可以通过&nbsp; QWidget::​removeAction(QAction * action)
+    函数，将菜单的标题动作从菜单栏删除，自然就删除了该菜单。<br>
+    类似地，如果想知道菜单栏包含了多少个菜单，也没有直接的获取菜单列表函数，而是通过 QWidget::​actions()
+    获取所有动作列表，针对每个直属动作，调用 action-&gt;menu() 函数，获取标题动作对应的菜单。<br>
+    如果&nbsp; action-&gt;menu() 返回值非空，说明该动作包含菜单；如果返回值为 NULL，说明该动作不是带菜单的标题动作。<br>
+    <br>
+    ⑤Mac OS X 系统、Windows CE 系统特殊函数<br>
+    针对 Mac OS X 系统、Windows CE 系统，Qt 菜单是本地系统菜单栏的封装，可以用下面函数判断是不是本地化菜单栏：<br>
+    <div class="code">bool&nbsp;&nbsp; &nbsp;isNativeMenuBar() const&nbsp;
+      //判断是否为本地化菜单栏<br>
+      void&nbsp;&nbsp;&nbsp; setNativeMenuBar(bool nativeMenuBar)&nbsp;
+      //设置是否用本地化菜单栏</div>
+    nativeMenuBar 目前是针对 Mac OS X 系统、Windows CE 系统的特性，其他系统平台没用。对于这两个系统，如果
+    isNativeMenuBar() 为 true，说明菜单栏是系统范围菜单栏，不在窗口里面，而是在系统菜单栏显示，如果
+    isNativeMenuBar() 为 false，那么该菜单栏还隶属于窗口，不是归到系统菜单栏。 isNativeMenuBar()
+    的默认取值与应用程序的&nbsp; Qt::AA_DontUseNativeMenuBar 标志位有关，正好取反值。针对 Mac OS X
+    系统，菜单栏的动作归属可以用 QAction::setMenuRole(MenuRole menuRole)
+    函数控制，设置动作应该属于系统菜单还是其他位置。<br>
+    <br>
+    菜单栏在Mac OS X 系统，可以获取菜单栏对应的 NSMenu 对象指针：<br>
+    <div class="code">NSMenu *&nbsp;&nbsp; &nbsp;toNSMenu()</div>
+    <br>
+    菜单栏在Windows CE 系统有一个特殊的功能：<br>
+    <div class="code">QAction *&nbsp;&nbsp; &nbsp;defaultAction()
+      const&nbsp;&nbsp; //获取默认动作<br>
+      void&nbsp;&nbsp;&nbsp; setDefaultAction(QAction * act)&nbsp; //设置默认动作</div>
+    Windows CE 系统有两个软按键，左侧软按键对应默认动作，右侧软按键对应菜单，目前仅在该系统支持设置默认动作。<br>
+    <br>
+    ⑥信号和槽函数<br>
+    菜单栏本级由2个信号：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;hovered(QAction * action)&nbsp;
+      //鼠标悬停在动作上触发<br>
+      void&nbsp;&nbsp;&nbsp; triggered(QAction * action)&nbsp; //鼠标点击动作时触发</div>
+    hovered() 可以监测菜单栏所有直接下属动作和子孙菜单的动作的悬停情况，这个信号可以用于更新状态栏的实时信息；triggered()
+    则可以监测直接下属和子孙菜单的动作的触发情况，一般都是监测动作对象本身的触发信号，监测整个菜单栏的触发信号情况较少。<br>
+    菜单栏本级有1个槽函数：<br>
+    <div class="code">virtual void&nbsp;&nbsp; &nbsp;setVisible(bool visible)</div>
+    该函数控制整个菜单栏的显示或隐藏。<br>
+    <br>
+    ⑦其他功能函数<br>
+    菜单栏角落控件可以定制，按如下函数设置：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;setCornerWidget(QWidget * widget,
+      Qt::Corner corner = Qt::TopRightCorner)<br>
+      QWidget *&nbsp;&nbsp;&nbsp; cornerWidget(Qt::Corner corner =
+      Qt::TopRightCorner) const</div>
+    菜单栏支持左上角 Qt::TopLeftCorner 和右上角 Qt::TopRightCorner
+    定制控件，其他的角落不行。菜单栏左上角就是第一个菜单（动作）左侧位置，右上角就是最后一个菜单（动作）的右侧位置。默认情况下，菜单栏左上角和右上角都是空白。<br>
+    菜单栏的菜单一般都是下拉式弹出显示，在显示空间允许的情况下，可以设置菜单向上弹出：<br>
+    <div class="code">void&nbsp;&nbsp; &nbsp;setDefaultUp(bool)&nbsp;&nbsp;
+      //设置菜单是否向上弹出<br>
+      bool&nbsp;&nbsp;&nbsp; isDefaultUp() const&nbsp; //获取菜单是否向上弹出</div>
+    菜单实际弹出情况还是要依据显示空间的，如果菜单栏在屏幕顶部，设置了向上弹出，那么没空间显示菜单，实际效果就是顶着屏幕上边缘向下弹出。菜单栏默认都是向下弹
+    出菜单，向上弹出的情况比较少见。<br>
+    菜单栏重载了基类 QWidget 的三个公开函数，如下：<br>
+    <div class="code">virtual int&nbsp;&nbsp; &nbsp;heightForWidth(int)
+      const&nbsp; //根据菜单宽度计算建议的高度<br>
+      virtual QSize&nbsp;&nbsp;&nbsp; minimumSizeHint() const&nbsp; //获取建议的最小尺寸<br>
+      virtual QSize&nbsp;&nbsp;&nbsp; sizeHint() const&nbsp; //获取建议的尺寸</div>
+    这几个函数用于菜单栏显示布局，一般都由主窗口程序自动控制，不需要手动写代码去控制菜单栏显示布局。<br>
+    菜单栏还重载了基类 QWidget 的多个保护类型函数，很少用到，这里不再赘述。<br>
+    本节关于主窗口类、动作、菜单、菜单栏等类的内容介绍到这，下面我们学习一个基于主窗口类的看图软件示例。<br>
+    <br>
+    <br>
     <br>
     <br>
     <br>

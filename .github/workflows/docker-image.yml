@@ -13,8 +13,13 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
     - uses: actions/checkout@v2
+      with:
+        persist-credentials: false
     - name: Build the Docker image (PR only)
       if: github.ref != 'refs/heads/master'
       run: docker build . --file Dockerfile --tag ${{ env.IMAGE_NAME }}:$(date +%s)
